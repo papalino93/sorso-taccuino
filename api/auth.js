@@ -1,7 +1,6 @@
 const crypto = require("crypto");
 const { getRedis } = require("./_redis");
-
-const SESSION_TTL_SECONDS = 60 * 24 * 60 * 60; // 60 giorni
+const { createSession } = require("./_session");
 
 function hashPassword(password, salt) {
   return crypto.scryptSync(password, salt, 64).toString("hex");
@@ -9,10 +8,6 @@ function hashPassword(password, salt) {
 
 function normalizeUsername(raw) {
   return String(raw || "").trim().toLowerCase().slice(0, 40);
-}
-
-function makeToken() {
-  return crypto.randomBytes(24).toString("hex");
 }
 
 module.exports = async (req, res) => {
@@ -33,6 +28,10 @@ module.exports = async (req, res) => {
 
   if (!username || username.length < 2) {
     res.status(400).json({ error: "Il nome deve avere almeno 2 caratteri." });
+    return;
+  }
+  if (username.indexOf("google:") === 0) {
+    res.status(400).json({ error: "Questo nome non è disponibile." });
     return;
   }
   if (!password || password.length < 4) {
@@ -61,8 +60,7 @@ module.exports = async (req, res) => {
       const hash = hashPassword(password, salt);
       await redis.set(userKey, JSON.stringify({ salt, hash, createdAt: Date.now() }));
 
-      const token = makeToken();
-      await redis.set("session:" + token, username, { ex: SESSION_TTL_SECONDS });
+      const token = await createSession(redis, username);
       res.status(200).json({ token, username });
       return;
     }
@@ -82,8 +80,7 @@ module.exports = async (req, res) => {
         res.status(401).json({ error: "Nome o password non corretti." });
         return;
       }
-      const token = makeToken();
-      await redis.set("session:" + token, username, { ex: SESSION_TTL_SECONDS });
+      const token = await createSession(redis, username);
       res.status(200).json({ token, username });
       return;
     }

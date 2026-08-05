@@ -547,6 +547,13 @@
     font:400 11.5px/1.4 'Instrument Sans';text-decoration:underline;cursor:pointer;text-align:center;}
   .login-submit{width:100%;margin-top:4px;}
   .login-submit:disabled{opacity:.5;cursor:not-allowed;}
+  .login-divider{display:flex;align-items:center;gap:10px;margin:16px 0;color:var(--ink-4);
+    font:400 11px/1 'Instrument Sans';text-transform:uppercase;letter-spacing:.08em;}
+  .login-divider::before,.login-divider::after{content:'';flex:1;height:1px;background:var(--line-strong);}
+  .login-google{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;padding:12px;
+    border-radius:6px;border:1px solid var(--line-strong);background:var(--field);color:var(--ink);
+    font:500 12.5px/1 'Instrument Sans';cursor:pointer;}
+  .login-google:disabled{opacity:.5;cursor:not-allowed;}
 
   /* ---------- Donazione ---------- */
   .donate-link{display:flex;align-items:center;justify-content:center;gap:7px;width:100%;padding:11px;
@@ -573,6 +580,11 @@
       <input class="in-line" id="loginPassword" type="password" placeholder="almeno 4 caratteri" autocomplete="current-password"></label>
     <div class="login-error" id="loginError"></div>
     <button type="button" class="act-save login-submit" id="loginSubmit">Accedi</button>
+    <div class="login-divider"><span>oppure</span></div>
+    <button type="button" class="login-google" id="loginGoogleBtn">
+      <svg width="18" height="18" viewBox="0 0 48 48" aria-hidden="true"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.9 29.3 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.1 8 3l6-6C34.5 5.1 29.5 3 24 3 12.4 3 3 12.4 3 24s9.4 21 21 21 21-9.4 21-21c0-1.2-.1-2.4-.4-3.5z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.6 15.9 18.9 13 24 13c3.1 0 5.8 1.1 8 3l6-6C34.5 5.1 29.5 3 24 3 16.3 3 9.6 7.4 6.3 14.7z"/><path fill="#4CAF50" d="M24 45c5.3 0 10.2-2 13.9-5.4l-6.4-5.4C29.4 35.9 26.8 37 24 37c-5.3 0-9.7-3.5-11.3-8.2l-6.6 5.1C9.5 40.6 16.2 45 24 45z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.3-2.3 4.3-4.3 5.7l6.4 5.4C39.9 37.5 43 31.2 43 24c0-1.2-.1-2.4-.4-3.5z"/></svg>
+      Accedi con Google
+    </button>
     <button type="button" class="login-skip" id="loginSkip">Continua senza account, solo su questo dispositivo</button>
   </div>
 </div>
@@ -730,7 +742,7 @@
           <button type="button" class="pill-ghost hidden" id="logoutBtn">Esci dall'account</button>
           <button type="button" class="pill-solid hidden" id="loginPromptBtn">Accedi o crea un account</button>
         </div>
-        <a class="donate-link" id="donateLink" href="https://www.buymeacoffee.com/tuonome" target="_blank" rel="noopener noreferrer">☕ Offrimi un caffè</a>
+        <a class="donate-link" id="donateLink" href="https://buymeacoffee.com/papalino" target="_blank" rel="noopener noreferrer">☕ Offrimi un caffè</a>
       </div>
     </section>
 
@@ -1434,6 +1446,7 @@ const AUTH = (function(){
     get isLoggedIn(){ return !!token; },
     async register(nome, password){ const d = await call("register", nome, password); persist(d.token, d.username); return d; },
     async login(nome, password){ const d = await call("login", nome, password); persist(d.token, d.username); return d; },
+    acceptToken(t, u){ persist(t, u); },
     logout(){ persist(null, null); }
   };
 })();
@@ -3721,6 +3734,10 @@ $("loginSubmit").addEventListener("click", submitLogin);
 $("loginPassword").addEventListener("keydown", e => { if(e.key === "Enter") submitLogin(); });
 $("loginSkip").addEventListener("click", () => { setSkipped(true); closeGate(); avviaApp(); });
 $("loginPromptBtn").addEventListener("click", openGate);
+$("loginGoogleBtn").addEventListener("click", () => {
+  $("loginGoogleBtn").disabled = true;
+  location.href = "/api/auth-google-start";
+});
 $("logoutBtn").addEventListener("click", () => {
   if(!confirm("Uscire dall'account? Su questo dispositivo resterà comunque una copia locale delle schede già caricate.")) return;
   AUTH.logout();
@@ -3753,9 +3770,49 @@ async function avviaApp(){
   renderAccount();
 }
 
-(function init(){
+/* Al ritorno da Google, l'URL contiene "?g=<codice monouso>" (successo)
+   oppure "?gerr=<messaggio>" (annullato o fallito). Il codice si scambia
+   subito con il vero token via /api/auth-exchange, poi si ripulisce
+   l'URL: così il codice — già scaduto dopo il primo uso — non resta
+   comunque visibile nella cronologia del browser. */
+async function handleGoogleRedirect(){
+  const params = new URLSearchParams(location.search);
+  const code = params.get("g");
+  const err = params.get("gerr");
+  if(!code && !err) return false;
+
+  history.replaceState(null, "", location.pathname);
+
+  if(err){
+    renderLoginMode();
+    openGate();
+    $("loginError").textContent = err;
+    return true;
+  }
+
+  try{
+    const res = await fetch("/api/auth-exchange", {
+      method:"POST", headers:{"Content-Type":"application/json"},
+      body: JSON.stringify({code})
+    });
+    const data = await res.json();
+    if(!res.ok) throw new Error(data && data.error || "Accesso con Google non riuscito.");
+    AUTH.acceptToken(data.token, data.username);
+    setSkipped(false);
+    await avviaApp();
+  }catch(e){
+    renderLoginMode();
+    openGate();
+    $("loginError").textContent = e && e.message ? e.message : "Accesso con Google non riuscito.";
+  }
+  return true;
+}
+
+(async function init(){
   setTheme("light");
   AC.init();
+  const handled = await handleGoogleRedirect();
+  if(handled) return;
   if(AUTH.isLoggedIn || hasSkipped()){
     avviaApp();
   }else{
@@ -3764,5 +3821,6 @@ async function avviaApp(){
   }
 })();
 </script>
+<script defer src="/_vercel/insights/script.js"></script>
 </body>
 </html>
