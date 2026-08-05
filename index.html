@@ -64,11 +64,21 @@
   .theme-switch{display:flex;border:1px solid rgba(244,240,232,.22);border-radius:100px;overflow:hidden;}
   .theme-switch button{width:32px;height:28px;border:0;background:transparent;color:rgba(244,240,232,.6);font:400 12px/1 'Instrument Sans';cursor:pointer;transition:all .18s;}
   .theme-switch button.on{background:var(--head-gold);color:var(--head-bg);}
+  .avatar-wrap{position:relative;}
   .avatar-btn{width:30px;height:30px;flex:none;border-radius:50%;cursor:pointer;
     display:flex;align-items:center;justify-content:center;
     font:600 11.5px/1 'Instrument Sans';letter-spacing:.02em;
     background:var(--head-gold);color:var(--head-bg);border:0;}
   .avatar-btn.guest{background:transparent;border:1.5px dashed rgba(244,240,232,.4);color:rgba(244,240,232,.55);}
+  .avatar-menu{position:absolute;top:calc(100% + 8px);right:0;z-index:70;min-width:168px;
+    background:var(--panel);border:1px solid var(--line-strong);border-radius:10px;
+    box-shadow:0 10px 26px rgba(0,0,0,.3);padding:10px;}
+  .avatar-menu.hidden{display:none;}
+  .avatar-menu-name{margin:0 0 8px;padding:0 4px;font:500 11.5px/1.4 'Instrument Sans';
+    color:var(--ink-3);word-break:break-word;}
+  .avatar-menu-item{width:100%;padding:9px 10px;border-radius:7px;border:0;background:none;
+    text-align:left;font:500 13px/1 'Instrument Sans';color:var(--ink);cursor:pointer;}
+  .avatar-menu-item:hover{background:var(--field);}
 
   .hdr-score{position:relative;display:flex;align-items:flex-end;gap:16px;margin-bottom:18px;}
   .hdr-num{font-family:var(--num);font-weight:500;font-size:68px;line-height:.9;letter-spacing:-.045em;font-variant-numeric:tabular-nums;color:var(--head-fg);}
@@ -612,7 +622,13 @@
           <button type="button" id="themeLight" class="on" title="Tema chiaro">&#9728;</button>
           <button type="button" id="themeDark" title="Tema scuro">&#9790;</button>
         </div>
-        <button type="button" class="avatar-btn" id="avatarBtn"><span id="avatarInitials">?</span></button>
+        <div class="avatar-wrap" id="avatarWrap">
+          <button type="button" class="avatar-btn" id="avatarBtn"><span id="avatarInitials">?</span></button>
+          <div class="avatar-menu hidden" id="avatarMenu">
+            <p class="avatar-menu-name" id="avatarMenuName"></p>
+            <button type="button" class="avatar-menu-item" id="logoutMenuBtn">Esci</button>
+          </div>
+        </div>
       </div>
     </div>
     <div class="hdr-score">
@@ -3703,15 +3719,20 @@ function renderAccount(){
   av.classList.toggle("guest", !in_);
   if(in_){
     $("avatarInitials").textContent = iniziali(AUTH.displayName || AUTH.username);
-    av.title = "Accesso come " + (AUTH.displayName || AUTH.username) + " — tocca per uscire";
+    av.title = "Accesso come " + (AUTH.displayName || AUTH.username) + " — tocca per il menu account";
+    $("avatarMenuName").textContent = AUTH.displayName || AUTH.username;
   }else{
     $("avatarInitials").textContent = "";
     av.title = "Non hai effettuato l'accesso — tocca per accedere con Google";
+    closeAvatarMenu();
   }
 }
 
+function openAvatarMenu(){ $("avatarMenu").classList.remove("hidden"); }
+function closeAvatarMenu(){ $("avatarMenu").classList.add("hidden"); }
+function toggleAvatarMenu(){ $("avatarMenu").classList.contains("hidden") ? openAvatarMenu() : closeAvatarMenu(); }
+
 function doLogout(){
-  if(!confirm("Uscire dall'account? Su questo dispositivo resterà comunque una copia locale delle schede già caricate.")) return;
   AUTH.logout();
   setSkipped(false);
   location.reload();
@@ -3724,7 +3745,15 @@ $("loginGoogleBtn").addEventListener("click", () => {
   location.href = "/api/auth-google-start";
 });
 $("logoutBtn").addEventListener("click", doLogout);
-$("avatarBtn").addEventListener("click", () => { AUTH.isLoggedIn ? doLogout() : openGate(); });
+$("logoutMenuBtn").addEventListener("click", doLogout);
+$("avatarBtn").addEventListener("click", (e) => {
+  e.stopPropagation();
+  AUTH.isLoggedIn ? toggleAvatarMenu() : openGate();
+});
+document.addEventListener("click", (e) => {
+  if(!$("avatarWrap").contains(e.target)) closeAvatarMenu();
+});
+document.addEventListener("keydown", (e) => { if(e.key === "Escape") closeAvatarMenu(); });
 window.__sorsoOnSessionExpired = () => {
   setSkipped(false);
   alert("La sessione è scaduta: accedi di nuovo per continuare a sincronizzare le tue schede.");
