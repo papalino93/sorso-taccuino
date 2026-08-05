@@ -64,6 +64,11 @@
   .theme-switch{display:flex;border:1px solid rgba(244,240,232,.22);border-radius:100px;overflow:hidden;}
   .theme-switch button{width:32px;height:28px;border:0;background:transparent;color:rgba(244,240,232,.6);font:400 12px/1 'Instrument Sans';cursor:pointer;transition:all .18s;}
   .theme-switch button.on{background:var(--head-gold);color:var(--head-bg);}
+  .avatar-btn{width:30px;height:30px;flex:none;border-radius:50%;cursor:pointer;
+    display:flex;align-items:center;justify-content:center;
+    font:600 11.5px/1 'Instrument Sans';letter-spacing:.02em;
+    background:var(--head-gold);color:var(--head-bg);border:0;}
+  .avatar-btn.guest{background:transparent;border:1.5px dashed rgba(244,240,232,.4);color:rgba(244,240,232,.55);}
 
   .hdr-score{position:relative;display:flex;align-items:flex-end;gap:16px;margin-bottom:18px;}
   .hdr-num{font-family:var(--num);font-weight:500;font-size:68px;line-height:.9;letter-spacing:-.045em;font-variant-numeric:tabular-nums;color:var(--head-fg);}
@@ -589,6 +594,7 @@
           <button type="button" id="themeLight" class="on" title="Tema chiaro">&#9728;</button>
           <button type="button" id="themeDark" title="Tema scuro">&#9790;</button>
         </div>
+        <button type="button" class="avatar-btn" id="avatarBtn"><span id="avatarInitials">?</span></button>
       </div>
     </div>
     <div class="hdr-score">
@@ -3660,6 +3666,13 @@ function setSkipped(v){ try{ v ? window.localStorage.setItem(SKIP_KEY,"1") : win
 function openGate(){ $("loginGate").classList.remove("hidden"); $("loginError").textContent = ""; }
 function closeGate(){ $("loginGate").classList.add("hidden"); }
 
+function iniziali(nome){
+  var parti = String(nome || "").trim().split(/\s+/).filter(Boolean);
+  if(!parti.length) return "?";
+  var lettere = parti.slice(0, 2).map(function(p){ return p[0] ? p[0].toUpperCase() : ""; });
+  return lettere.join("") || "?";
+}
+
 function renderAccount(){
   const in_ = AUTH.isLoggedIn;
   $("logoutBtn").classList.toggle("hidden", !in_);
@@ -3667,6 +3680,23 @@ function renderAccount(){
   $("accountNote").textContent = in_
     ? "Hai effettuato l'accesso con Google come " + (AUTH.displayName || AUTH.username) + ": le tue schede si sincronizzano su ogni dispositivo dove accedi con lo stesso account Google."
     : "Non hai effettuato l'accesso: le schede restano solo su questo dispositivo. Accedi con Google per ritrovarle ovunque.";
+
+  const av = $("avatarBtn");
+  av.classList.toggle("guest", !in_);
+  if(in_){
+    $("avatarInitials").textContent = iniziali(AUTH.displayName || AUTH.username);
+    av.title = "Accesso come " + (AUTH.displayName || AUTH.username) + " — tocca per uscire";
+  }else{
+    $("avatarInitials").textContent = "";
+    av.title = "Non hai effettuato l'accesso — tocca per accedere con Google";
+  }
+}
+
+function doLogout(){
+  if(!confirm("Uscire dall'account? Su questo dispositivo resterà comunque una copia locale delle schede già caricate.")) return;
+  AUTH.logout();
+  setSkipped(false);
+  location.reload();
 }
 
 $("loginSkip").addEventListener("click", () => { setSkipped(true); closeGate(); avviaApp(); });
@@ -3675,12 +3705,8 @@ $("loginGoogleBtn").addEventListener("click", () => {
   $("loginGoogleBtn").disabled = true;
   location.href = "/api/auth-google-start";
 });
-$("logoutBtn").addEventListener("click", () => {
-  if(!confirm("Uscire dall'account? Su questo dispositivo resterà comunque una copia locale delle schede già caricate.")) return;
-  AUTH.logout();
-  setSkipped(false);
-  location.reload();
-});
+$("logoutBtn").addEventListener("click", doLogout);
+$("avatarBtn").addEventListener("click", () => { AUTH.isLoggedIn ? doLogout() : openGate(); });
 window.__sorsoOnSessionExpired = () => {
   setSkipped(false);
   alert("La sessione è scaduta: accedi di nuovo per continuare a sincronizzare le tue schede.");
