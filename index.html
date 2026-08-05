@@ -538,20 +538,13 @@
   .login-brand{text-align:center;margin-bottom:22px;}
   .login-brand-name{display:block;font-family:'Instrument Serif',serif;font-size:32px;color:var(--ink);}
   .login-brand-tag{display:block;font:500 10px/1 'Instrument Sans';letter-spacing:.22em;text-transform:uppercase;color:var(--ink-4);margin-top:6px;}
-  .login-tabs{display:flex;border:1px solid var(--line-strong);border-radius:8px;overflow:hidden;margin-bottom:18px;}
-  .login-tab{flex:1;padding:10px;border:0;background:var(--field);color:var(--ink-3);font:500 12px/1 'Instrument Sans';cursor:pointer;transition:all .15s;}
-  .login-tab.on{background:var(--sel-bg);color:var(--sel-fg);}
-  .login-card .fld{margin-bottom:12px;}
-  .login-error{min-height:16px;font:400 12px/1.5 'Instrument Sans';color:#B4552F;margin:8px 0 4px;text-align:center;}
+  .login-intro{font:400 13px/1.5 'Instrument Sans';color:var(--ink-3);text-align:center;margin:0 0 18px;}
+  .login-error{min-height:16px;font:400 12px/1.5 'Instrument Sans';color:#B4552F;margin:0 0 8px;text-align:center;}
   .login-skip{width:100%;margin-top:12px;background:none;border:0;padding:8px;color:var(--ink-4);
     font:400 11.5px/1.4 'Instrument Sans';text-decoration:underline;cursor:pointer;text-align:center;}
-  .login-submit{width:100%;margin-top:4px;}
-  .login-submit:disabled{opacity:.5;cursor:not-allowed;}
-  .login-divider{display:flex;align-items:center;gap:10px;margin:16px 0;color:var(--ink-4);
-    font:400 11px/1 'Instrument Sans';text-transform:uppercase;letter-spacing:.08em;}
-  .login-divider::before,.login-divider::after{content:'';flex:1;height:1px;background:var(--line-strong);}
-  .login-google{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;padding:12px;
-    border-radius:6px;border:1px solid var(--line-strong);background:var(--field);color:var(--ink);
+  .login-note{font:400 11px/1.5 'Instrument Sans';color:var(--ink-4);text-align:center;margin:14px 0 0;}
+  .login-google{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;padding:13px;
+    border-radius:6px;border:0;background:var(--sel-bg);color:var(--sel-fg);
     font:500 12.5px/1 'Instrument Sans';cursor:pointer;}
   .login-google:disabled{opacity:.5;cursor:not-allowed;}
 
@@ -570,22 +563,14 @@
       <span class="login-brand-name">Sorso</span>
       <span class="login-brand-tag">taccuino di degustazione</span>
     </div>
-    <div class="login-tabs">
-      <button type="button" class="login-tab on" id="loginTabIn">Accedi</button>
-      <button type="button" class="login-tab" id="loginTabUp">Crea account</button>
-    </div>
-    <label class="fld"><span class="fld-lab">Nome</span>
-      <input class="in-line" id="loginNome" placeholder="es. Andrea" autocomplete="username" maxlength="40"></label>
-    <label class="fld"><span class="fld-lab">Password</span>
-      <input class="in-line" id="loginPassword" type="password" placeholder="almeno 4 caratteri" autocomplete="current-password"></label>
+    <p class="login-intro">Accedi con Google per ritrovare le tue schede su ogni dispositivo.</p>
     <div class="login-error" id="loginError"></div>
-    <button type="button" class="act-save login-submit" id="loginSubmit">Accedi</button>
-    <div class="login-divider"><span>oppure</span></div>
     <button type="button" class="login-google" id="loginGoogleBtn">
       <svg width="18" height="18" viewBox="0 0 48 48" aria-hidden="true"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.9 29.3 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.1 8 3l6-6C34.5 5.1 29.5 3 24 3 12.4 3 3 12.4 3 24s9.4 21 21 21 21-9.4 21-21c0-1.2-.1-2.4-.4-3.5z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.6 15.9 18.9 13 24 13c3.1 0 5.8 1.1 8 3l6-6C34.5 5.1 29.5 3 24 3 16.3 3 9.6 7.4 6.3 14.7z"/><path fill="#4CAF50" d="M24 45c5.3 0 10.2-2 13.9-5.4l-6.4-5.4C29.4 35.9 26.8 37 24 37c-5.3 0-9.7-3.5-11.3-8.2l-6.6 5.1C9.5 40.6 16.2 45 24 45z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.3-2.3 4.3-4.3 5.7l6.4 5.4C39.9 37.5 43 31.2 43 24c0-1.2-.1-2.4-.4-3.5z"/></svg>
       Accedi con Google
     </button>
     <button type="button" class="login-skip" id="loginSkip">Continua senza account, solo su questo dispositivo</button>
+    <p class="login-note">Senza account con Google, se cambi dispositivo o cancelli i dati del browser le schede si perdono: non essendoci una password, non c'è modo di recuperarle.</p>
   </div>
 </div>
 
@@ -1403,51 +1388,43 @@ function renderUvaggi(){
 }
 
 /* ============================================================
-   ACCOUNT — nome + password, per ritrovare i propri dati su
+   ACCOUNT — accesso con Google, per ritrovare i propri dati su
    qualsiasi dispositivo. Il token di sessione vive in localStorage;
-   il server lo traduce nel nome utente ad ogni chiamata a /api/db.
+   il server lo traduce nell'utente ad ogni chiamata a /api/db.
    ============================================================ */
 const AUTH = (function(){
   const TOKEN_KEY = "sorso.auth.token";
   const USER_KEY = "sorso.auth.user";
-  let token = null, username = null;
+  const NAME_KEY = "sorso.auth.name";
+  let token = null, username = null, displayName = null;
   try{
     token = window.localStorage.getItem(TOKEN_KEY);
     username = window.localStorage.getItem(USER_KEY);
+    displayName = window.localStorage.getItem(NAME_KEY);
   }catch(e){}
 
-  function persist(t, u){
-    token = t; username = u;
+  function persist(t, u, n){
+    token = t; username = u; displayName = n || null;
     try{
-      if(t){ window.localStorage.setItem(TOKEN_KEY, t); window.localStorage.setItem(USER_KEY, u); }
-      else { window.localStorage.removeItem(TOKEN_KEY); window.localStorage.removeItem(USER_KEY); }
+      if(t){
+        window.localStorage.setItem(TOKEN_KEY, t);
+        window.localStorage.setItem(USER_KEY, u);
+        if(n) window.localStorage.setItem(NAME_KEY, n); else window.localStorage.removeItem(NAME_KEY);
+      }else{
+        window.localStorage.removeItem(TOKEN_KEY);
+        window.localStorage.removeItem(USER_KEY);
+        window.localStorage.removeItem(NAME_KEY);
+      }
     }catch(e){}
-  }
-
-  async function call(action, nome, password){
-    let res;
-    try{
-      res = await fetch("/api/auth", {
-        method:"POST", headers:{"Content-Type":"application/json"},
-        body: JSON.stringify({action, username:nome, password})
-      });
-    }catch(e){
-      throw new Error("Impossibile contattare il server. Controlla la connessione e riprova.");
-    }
-    let data = null;
-    try{ data = await res.json(); }catch(e){}
-    if(!res.ok) throw new Error((data && data.error) || "Errore di rete.");
-    return data;
   }
 
   return {
     get token(){ return token; },
     get username(){ return username; },
+    get displayName(){ return displayName; },
     get isLoggedIn(){ return !!token; },
-    async register(nome, password){ const d = await call("register", nome, password); persist(d.token, d.username); return d; },
-    async login(nome, password){ const d = await call("login", nome, password); persist(d.token, d.username); return d; },
-    acceptToken(t, u){ persist(t, u); },
-    logout(){ persist(null, null); }
+    acceptToken(t, u, n){ persist(t, u, n); },
+    logout(){ persist(null, null, null); }
   };
 })();
 
@@ -3685,53 +3662,18 @@ const SKIP_KEY = "sorso.auth.skipped";
 function hasSkipped(){ try{ return window.localStorage.getItem(SKIP_KEY) === "1"; }catch(e){ return false; } }
 function setSkipped(v){ try{ v ? window.localStorage.setItem(SKIP_KEY,"1") : window.localStorage.removeItem(SKIP_KEY); }catch(e){} }
 
-let loginMode = "login";
-function renderLoginMode(){
-  const up = loginMode === "register";
-  $("loginTabIn").classList.toggle("on", !up);
-  $("loginTabUp").classList.toggle("on", up);
-  if(!$("loginSubmit").disabled) $("loginSubmit").textContent = up ? "Crea account" : "Accedi";
-  $("loginError").textContent = "";
-}
-function openGate(){ $("loginGate").classList.remove("hidden"); $("loginNome").focus(); }
+function openGate(){ $("loginGate").classList.remove("hidden"); $("loginError").textContent = ""; }
 function closeGate(){ $("loginGate").classList.add("hidden"); }
-
-async function submitLogin(){
-  const nome = $("loginNome").value.trim();
-  const password = $("loginPassword").value;
-  $("loginError").textContent = "";
-  if(nome.length < 2){ $("loginError").textContent = "Il nome deve avere almeno 2 caratteri."; return; }
-  if(password.length < 4){ $("loginError").textContent = "La password deve avere almeno 4 caratteri."; return; }
-  $("loginSubmit").disabled = true;
-  $("loginSubmit").textContent = "Un attimo…";
-  try{
-    if(loginMode === "register") await AUTH.register(nome, password);
-    else await AUTH.login(nome, password);
-    setSkipped(false);
-    $("loginPassword").value = "";
-    closeGate();
-    await avviaApp();
-  }catch(e){
-    $("loginError").textContent = e && e.message ? e.message : "Qualcosa è andato storto.";
-  }finally{
-    $("loginSubmit").disabled = false;
-    $("loginSubmit").textContent = loginMode === "register" ? "Crea account" : "Accedi";
-  }
-}
 
 function renderAccount(){
   const in_ = AUTH.isLoggedIn;
   $("logoutBtn").classList.toggle("hidden", !in_);
   $("loginPromptBtn").classList.toggle("hidden", in_);
   $("accountNote").textContent = in_
-    ? "Hai effettuato l'accesso come " + AUTH.username + ": le tue schede si sincronizzano su ogni dispositivo dove accedi con lo stesso nome e password."
-    : "Non hai effettuato l'accesso: le schede restano solo su questo dispositivo. Accedi o crea un account per ritrovarle ovunque.";
+    ? "Hai effettuato l'accesso con Google come " + (AUTH.displayName || AUTH.username) + ": le tue schede si sincronizzano su ogni dispositivo dove accedi con lo stesso account Google."
+    : "Non hai effettuato l'accesso: le schede restano solo su questo dispositivo. Accedi con Google per ritrovarle ovunque.";
 }
 
-$("loginTabIn").addEventListener("click", () => { loginMode = "login"; renderLoginMode(); });
-$("loginTabUp").addEventListener("click", () => { loginMode = "register"; renderLoginMode(); });
-$("loginSubmit").addEventListener("click", submitLogin);
-$("loginPassword").addEventListener("keydown", e => { if(e.key === "Enter") submitLogin(); });
 $("loginSkip").addEventListener("click", () => { setSkipped(true); closeGate(); avviaApp(); });
 $("loginPromptBtn").addEventListener("click", openGate);
 $("loginGoogleBtn").addEventListener("click", () => {
@@ -3784,7 +3726,6 @@ async function handleGoogleRedirect(){
   history.replaceState(null, "", location.pathname);
 
   if(err){
-    renderLoginMode();
     openGate();
     $("loginError").textContent = err;
     return true;
@@ -3797,11 +3738,10 @@ async function handleGoogleRedirect(){
     });
     const data = await res.json();
     if(!res.ok) throw new Error(data && data.error || "Accesso con Google non riuscito.");
-    AUTH.acceptToken(data.token, data.username);
+    AUTH.acceptToken(data.token, data.username, data.name);
     setSkipped(false);
     await avviaApp();
   }catch(e){
-    renderLoginMode();
     openGate();
     $("loginError").textContent = e && e.message ? e.message : "Accesso con Google non riuscito.";
   }
@@ -3816,7 +3756,6 @@ async function handleGoogleRedirect(){
   if(AUTH.isLoggedIn || hasSkipped()){
     avviaApp();
   }else{
-    renderLoginMode();
     openGate();
   }
 })();
