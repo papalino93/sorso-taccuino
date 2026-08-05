@@ -548,10 +548,6 @@
     font:500 12.5px/1 'Instrument Sans';cursor:pointer;}
   .login-google:disabled{opacity:.5;cursor:not-allowed;}
 
-  /* ---------- Donazione ---------- */
-  .donate-link{display:flex;align-items:center;justify-content:center;gap:7px;width:100%;padding:11px;
-    margin-top:10px;border-radius:6px;border:1px solid var(--line-strong);background:none;
-    color:var(--ink-3);font:500 11px/1 'Instrument Sans';letter-spacing:.06em;text-decoration:none;cursor:pointer;}
 </style>
 </head>
 <body>
@@ -727,7 +723,6 @@
           <button type="button" class="pill-ghost hidden" id="logoutBtn">Esci dall'account</button>
           <button type="button" class="pill-solid hidden" id="loginPromptBtn">Accedi o crea un account</button>
         </div>
-        <a class="donate-link" id="donateLink" href="https://buymeacoffee.com/papalino" target="_blank" rel="noopener noreferrer">☕ Offrimi un caffè</a>
       </div>
     </section>
 
@@ -3761,5 +3756,6 @@ async function handleGoogleRedirect(){
 })();
 </script>
 <script defer src="/_vercel/insights/script.js"></script>
+<script data-name="BMC-Widget" data-cfasync="false" src="https://cdn.buymeacoffee.com/widget/production/widget.supabase.min.js" data-id="papalino" data-description="Offrimi un caffè!" data-message="Ti piace Sorso? Offrimi un caffè ☕" data-color="#722F37" data-position="Right" data-x_margin="18" data-y_margin="18"></script>
 </body>
 </html>
