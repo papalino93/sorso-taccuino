@@ -1220,14 +1220,21 @@ function judge(t){
    HEADER
    ============================================================ */
 function renderHeader(){
-  const sc = scores();
   let num, unit, caption, showSegs;
   if(S.tab === "new"){
+    const sc = scores();
     num = sc.total; unit = "su 100"; caption = judge(sc.total); showSegs = true;
     $("segVis").style.width = (sc.v/SEZ_MAX.v*100)+"%"; $("valVis").textContent = sc.v+"/"+SEZ_MAX.v;
     $("segOlf").style.width = (sc.o/SEZ_MAX.o*100)+"%"; $("valOlf").textContent = sc.o+"/"+SEZ_MAX.o;
     $("segGus").style.width = (sc.g/SEZ_MAX.g*100)+"%"; $("valGus").textContent = sc.g+"/"+SEZ_MAX.g;
     $("segArm").style.width = (sc.f/SEZ_MAX.f*100)+"%"; $("valArm").textContent = sc.f+"/"+SEZ_MAX.f;
+  } else if(S.tab === "blind"){
+    const bsc = scoresOf(B);
+    num = bsc.total; unit = "su 100"; caption = "Alla cieca"; showSegs = true;
+    $("segVis").style.width = (bsc.v/SEZ_MAX.v*100)+"%"; $("valVis").textContent = bsc.v+"/"+SEZ_MAX.v;
+    $("segOlf").style.width = (bsc.o/SEZ_MAX.o*100)+"%"; $("valOlf").textContent = bsc.o+"/"+SEZ_MAX.o;
+    $("segGus").style.width = (bsc.g/SEZ_MAX.g*100)+"%"; $("valGus").textContent = bsc.g+"/"+SEZ_MAX.g;
+    $("segArm").style.width = (bsc.f/SEZ_MAX.f*100)+"%"; $("valArm").textContent = bsc.f+"/"+SEZ_MAX.f;
   } else if(S.tab === "event"){
     const n = S.lb ? S.lb.length : 0;
     num = n; unit = n===1 ? "vino in gara" : "vini in gara";
@@ -1244,7 +1251,7 @@ function renderHeader(){
   $("hdrCaption").textContent = caption;
   $("segs").classList.toggle("hidden", !showSegs);
   const mod = !!S.editingId;
-  $("saveBtn").textContent = (mod ? "Aggiorna · " : "Salva · ")+sc.total+"/100";
+  $("saveBtn").textContent = (mod ? "Aggiorna · " : "Salva · ")+scores().total+"/100";
   $("resetBtn").textContent = mod ? "Annulla" : "Azzera";
   const ban = $("editBanner");
   ban.classList.toggle("hidden", !mod);
