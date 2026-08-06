@@ -554,8 +554,8 @@
   .coffee-fab{position:fixed;right:max(16px, calc(50vw - 280px + 16px));bottom:calc(100px + env(safe-area-inset-bottom, 0px));z-index:60;
     width:44px;height:44px;border-radius:50%;flex:none;
     display:flex;align-items:center;justify-content:center;
-    background:var(--card);color:var(--ink);text-decoration:none;
-    border:1px solid var(--line-strong);box-shadow:0 4px 14px rgba(0,0,0,.22);
+    background:var(--sel-bg);color:var(--sel-fg);text-decoration:none;
+    box-shadow:0 4px 14px rgba(0,0,0,.3);
     font-size:19px;line-height:1;transition:transform .15s ease;}
   .coffee-fab:hover{transform:scale(1.08);}
   .coffee-fab:active{transform:scale(.94);}
@@ -575,10 +575,11 @@
   .login-skip{width:100%;margin-top:12px;background:none;border:0;padding:8px;color:var(--ink-4);
     font:400 11.5px/1.4 'Instrument Sans';text-decoration:underline;cursor:pointer;text-align:center;}
   .login-note{font:400 11px/1.5 'Instrument Sans';color:var(--ink-4);text-align:center;margin:14px 0 0;}
-  .login-coffee-link{display:flex;align-items:center;justify-content:center;gap:6px;margin:16px 0 0;padding-top:14px;
-    border-top:1px solid var(--line-soft);font:500 12px/1 'Instrument Sans';
-    color:var(--ink-3);text-decoration:none;}
-  .login-coffee-link:hover{color:var(--ink);}
+  .login-coffee-link{display:flex;align-items:center;justify-content:center;gap:7px;
+    margin-top:18px;padding:11px 16px;border-radius:8px;border:1px solid var(--sel-bg);
+    font:600 13px/1 'Instrument Sans';color:var(--sel-bg);text-decoration:none;
+    transition:background .15s,color .15s;}
+  .login-coffee-link:hover{background:var(--sel-bg);color:var(--sel-fg);}
   .login-google{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;padding:13px;
     border-radius:6px;border:0;background:var(--sel-bg);color:var(--sel-fg);
     font:500 12.5px/1 'Instrument Sans';cursor:pointer;}
