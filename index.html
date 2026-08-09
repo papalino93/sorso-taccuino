@@ -62,12 +62,12 @@
   .brand-tag{font:500 9.5px/1 'Inter';letter-spacing:.26em;text-transform:uppercase;color:rgba(228,192,122,.75);}
   .hdr-ctrl{display:flex;align-items:center;gap:8px;}
   .theme-switch{display:flex;border:1px solid rgba(244,240,232,.22);border-radius:100px;overflow:hidden;}
-  .theme-switch button{width:32px;height:28px;border:0;background:transparent;color:rgba(244,240,232,.6);font:400 12px/1 'Inter';cursor:pointer;transition:all .18s;}
+  .theme-switch button{width:40px;height:38px;border:0;background:transparent;color:rgba(244,240,232,.6);font:400 12px/1 'Inter';cursor:pointer;transition:all .18s;}
   .theme-switch button.on{background:var(--head-gold);color:var(--head-bg);}
   .avatar-wrap{position:relative;}
-  .avatar-btn{width:30px;height:30px;flex:none;border-radius:50%;cursor:pointer;
+  .avatar-btn{width:40px;height:40px;flex:none;border-radius:50%;cursor:pointer;
     display:flex;align-items:center;justify-content:center;
-    font:600 11.5px/1 'Inter';letter-spacing:.02em;
+    font:600 12.5px/1 'Inter';letter-spacing:.02em;
     background:var(--head-gold);color:var(--head-bg);border:0;}
   .avatar-btn.guest{background:transparent;border:1.5px dashed rgba(244,240,232,.4);color:rgba(244,240,232,.55);}
   .avatar-menu{position:absolute;top:calc(100% + 8px);right:0;z-index:70;min-width:168px;
@@ -150,10 +150,10 @@
   .id-row{display:flex;gap:14px;}
   /* cinque colonne uguali: le tipologie stanno su una riga sola anche a 360px */
   .type-chips{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;padding-top:16px;}
-  .type-chip-btn{padding:9px 2px;border-radius:100px;border:1px solid var(--line);background:var(--field);
+  .type-chip-btn{padding:13px 2px;border-radius:100px;border:1px solid var(--line);background:var(--field);
                  color:var(--ink-2);font:500 12px/1 'Inter';cursor:pointer;transition:all .15s;
                  text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-  @media (max-width:380px){ .type-chip-btn{font-size:11px;padding:9px 1px;} .type-chips{gap:4px;} }
+  @media (max-width:380px){ .type-chip-btn{font-size:11px;padding:13px 1px;} .type-chips{gap:4px;} }
   .type-chip-btn.on{background:var(--sel-bg);color:var(--sel-fg);border-color:var(--sel-bg);}
 
   .in-main{width:100%;padding:11px 12px;border:1px solid var(--line);border-radius:5px;background:var(--field);font:500 15px/1.2 'Inter';color:var(--ink);}
@@ -531,7 +531,7 @@
   /* barra di navigazione in alto, resta visibile allo scroll */
   .nav{position:sticky;top:0;z-index:20;display:grid;grid-template-columns:repeat(5,1fr);
        background:var(--bar);backdrop-filter:blur(14px);border-bottom:1px solid var(--line);transition:background .25s;}
-  .nav button{position:relative;display:flex;align-items:center;justify-content:center;gap:5px;padding:14px 2px 13px;background:none;border:0;cursor:pointer;}
+  .nav button{position:relative;display:flex;align-items:center;justify-content:center;gap:5px;padding:17px 2px 16px;background:none;border:0;cursor:pointer;}
   .nav button::after{content:'';position:absolute;left:14%;right:14%;bottom:0;height:2px;background:transparent;border-radius:2px 2px 0 0;transition:background .2s;}
   .nav button.on::after{background:var(--sel-bg);}
   .nav .dot{width:5px;height:5px;border-radius:50%;background:transparent;flex:none;transition:background .2s;}
@@ -1203,7 +1203,7 @@ const S = {
   desc:[], note:"", abbinamento:"",
   saved:[], query:"", filter:"Tutti", sortBy:"score-desc", picked:[], expanded:null,
   editingId:null, editThumb:null, editTimestamp:null, editEvento:"",
-  events:[], currentEvent:"", newEventMode:false, quickNewMode:false, lb:null
+  events:[], miei:[], currentEvent:"", newEventMode:false, quickNewMode:false, lb:null
 };
 
 const $ = id => document.getElementById(id);
@@ -1668,7 +1668,7 @@ $("brandBtn").addEventListener("click", async () => {
 function renderEvtQuick(){
   const sel = $("evtQuickPicker");
   sel.innerHTML = ['<option value=""'+(!S.currentEvent && !S.quickNewMode?" selected":"")+'>Nessun evento — degustazione personale</option>']
-    .concat(S.events.map(e => '<option value="'+esc(e.slug)+'"'+(!S.quickNewMode && S.currentEvent===e.name?" selected":"")+'>'+esc(e.name)+'</option>'))
+    .concat(eventiVisibili().map(e => '<option value="'+esc(e.slug)+'"'+(!S.quickNewMode && S.currentEvent===e.name?" selected":"")+'>'+esc(e.name)+'</option>'))
     .concat(['<option value="__new"'+(S.quickNewMode?" selected":"")+'>+ Crea nuovo evento…</option>'])
     .join("");
   $("evtQuickNewWrap").classList.toggle("hidden", !S.quickNewMode);
@@ -2509,6 +2509,14 @@ function slugify(s){
     .replace(/[^a-z0-9]+/g,"-").replace(/(^-|-$)/g,"") || "evento";
 }
 
+/* Confronto tollerante per l'etichetta di un vino in classifica: ignora
+   maiuscole e spazi doppi o ai bordi, non tocca il resto (chi include il
+   produttore e chi no restano comunque due etichette diverse — unirle
+   rischierebbe di mescolare due vini diversi con lo stesso nome). */
+function normLabel(s){
+  return String(s||"").trim().toLowerCase().replace(/\s+/g," ");
+}
+
 /* Legge molte chiavi IN PARALLELO a blocchi, invece che una alla volta.
    Le letture in sequenza superavano il limite di richieste dello storage:
    era la causa principale della classifica vuota. */
@@ -2624,13 +2632,61 @@ async function loadEventIndex(){
   if(!Array.isArray(S.events)) S.events = [];
 }
 
+/* Elenco privato — sotto il proprio utente, non condiviso — degli eventi a
+   cui si è già preso parte (creandoli o solo votando). Serve a decidere
+   cosa mostrare nel menu: vedi eventiVisibili(). */
+const OWN_EVENTS_KEY = "eventi-miei";
+async function loadOwnEvents(){
+  try{
+    const r = await DB.get(OWN_EVENTS_KEY, false);
+    S.miei = r ? JSON.parse(r.value) : [];
+  }catch(e){ S.miei = []; }
+  if(!Array.isArray(S.miei)) S.miei = [];
+}
+async function segnaPartecipazione(slug){
+  if(!AUTH.isLoggedIn) return; // in locale il menu è già isolato per dispositivo, non serve
+  if(S.miei.indexOf(slug) > -1) return;
+  S.miei.push(slug);
+  try{ await DB.set(OWN_EVENTS_KEY, JSON.stringify(S.miei), false); }catch(e){}
+}
+
+/* Il menu non elenca più OGNI evento mai creato da chiunque nell'intera
+   app (era leggibile e votabile da chiunque avesse fatto accesso, anche
+   estranei — §III del controllo dell'8 agosto): mostra solo i propri e
+   quelli a cui si è già collegata una scheda. Chi conosce il nome di un
+   evento altrui può comunque raggiungerlo scrivendolo per esteso in
+   "+ Nuovo evento" — non è una password, è il nome detto a voce in sala.
+   Gli eventi creati PRIMA di questa modifica non hanno un proprietario
+   registrato: restano visibili a tutti come già accadeva, per non far
+   sparire di colpo una classifica che qualcuno sta ancora usando. */
+function eventiVisibili(){
+  if(!AUTH.isLoggedIn) return S.events;
+  const miei = S.miei || [];
+  return S.events.filter(e => !e.owner || e.owner === AUTH.username || miei.indexOf(e.slug) > -1);
+}
+
 async function registerEvent(name){
   const slug = slugify(name);
   await loadEventIndex();
-  if(!S.events.some(e => e.slug === slug)){
-    S.events.push({name:name.trim(), slug});
+  const already = S.events.some(e => e.slug === slug);
+  if(!already){
+    S.events.push({name:name.trim(), slug, owner: AUTH.isLoggedIn ? AUTH.username : null});
+    // Rilettura appena prima di scrivere, per accorciare la finestra in cui
+    // una creazione concorrente da un altro dispositivo verrebbe persa:
+    // qui lo storage non offre una scrittura atomica, quindi la corsa non
+    // si elimina del tutto, ma si restringe di molto.
+    try{
+      const fresh = await DB.get(EVENT_INDEX_KEY, true);
+      const freshList = (fresh && JSON.parse(fresh.value)) || [];
+      if(Array.isArray(freshList)){
+        S.events = freshList.some(e => e.slug === slug)
+          ? freshList
+          : freshList.concat([{name:name.trim(), slug, owner: AUTH.isLoggedIn ? AUTH.username : null}]);
+      }
+    }catch(e){}
     try{ await DB.set(EVENT_INDEX_KEY, JSON.stringify(S.events), true); }catch(e){}
   }
+  await segnaPartecipazione(slug);
   return slug;
 }
 
@@ -3184,7 +3240,7 @@ async function importaArchivio(file){
    ============================================================ */
 function renderEventPicker(){
   const opts = ['<option value=""'+(!S.currentEvent && !S.newEventMode?" selected":"")+'>— scegli un evento —</option>']
-    .concat(S.events.map(e => '<option value="'+esc(e.slug)+'"'+(!S.newEventMode && S.currentEvent===e.name?" selected":"")+'>'+esc(e.name)+'</option>'))
+    .concat(eventiVisibili().map(e => '<option value="'+esc(e.slug)+'"'+(!S.newEventMode && S.currentEvent===e.name?" selected":"")+'>'+esc(e.name)+'</option>'))
     .concat(['<option value="__new"'+(S.newEventMode?" selected":"")+'>+ Nuovo evento…</option>']);
   $("eventPicker").innerHTML = opts.join("");
   $("newEventWrap").classList.toggle("hidden", !S.newEventMode);
@@ -3242,17 +3298,21 @@ async function loadLeaderboard(){
   }
 
   const {values, failed} = await getMany(keys, true);
+  // Due voti sono "lo stesso vino" se il testo coincide a meno di spazi e
+  // maiuscole: senza, "Amarone" e "amarone " finivano in due righe separate
+  // — capitava spesso, perché ognuno scrive il nome a modo suo.
   const byWine = {};
   values.forEach(v => {
     let e; try{ e = JSON.parse(v.value); }catch(err){ return; }
     if(!e || typeof e.score !== "number") return;
     const label = (e.wineLabel || "Vino senza nome").trim();
-    if(!byWine[label]) byWine[label] = {total:0, count:0};
-    byWine[label].total += e.score;
-    byWine[label].count += 1;
+    const key = normLabel(label);
+    if(!byWine[key]) byWine[key] = {total:0, count:0, label};
+    byWine[key].total += e.score;
+    byWine[key].count += 1;
   });
-  const arr = Object.keys(byWine).map(label => ({
-    label, avg: byWine[label].total/byWine[label].count, count: byWine[label].count
+  const arr = Object.keys(byWine).map(key => ({
+    label: byWine[key].label, avg: byWine[key].total/byWine[key].count, count: byWine[key].count
   })).sort((a,b) => b.avg - a.avg);
   S.lb = arr;
 
@@ -3334,6 +3394,11 @@ $("nav").addEventListener("click", e => {
   if(!b) return;
   S.tab = b.dataset.tab;
   renderAll();
+  // Arrivando sulla tab Evento con un evento già scelto, la classifica si
+  // legge subito da sola: prima bisognava sapere di dover premere "Aggiorna
+  // classifica", e nel frattempo l'intestazione mostrava "0 vini in gara"
+  // anche quando un voto era già stato registrato.
+  if(S.tab === "event" && S.currentEvent && !S.newEventMode) loadLeaderboard();
 });
 
 $("themeLight").addEventListener("click", () => setTheme("light"));
@@ -3540,6 +3605,11 @@ $("eventPicker").addEventListener("change", () => {
   renderEventPicker();
   renderEvtQuick();
   if(S.newEventMode) $("eventNewInput").focus();
+  // Scegliere un evento già esistente (o "nessun evento") deve mostrare
+  // subito il risultato: prima restava tutto vuoto finché non si toccava
+  // "Aggiorna classifica" a parte. loadLeaderboard() gestisce già da sola
+  // sia il caso "nessun evento" sia la modalità "nuovo evento".
+  if(!S.newEventMode) loadLeaderboard();
 });
 $("evtQuickPicker").addEventListener("change", e => {
   if(e.target.value === "__new"){
@@ -3800,6 +3870,7 @@ async function avviaApp(){
   await loadSaved();
   await bLoad();
   await loadEventIndex();
+  await loadOwnEvents();
   renderAll();
   renderAccount();
 }
