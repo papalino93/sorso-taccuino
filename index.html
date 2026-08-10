@@ -213,6 +213,7 @@
   .uv-hint{margin-top:8px;font:400 11px/1.5 'Inter';color:var(--ink-3);}
   .uv-hint.warn{color:var(--rust);}
   .in-sm{flex:1;min-width:0;padding:10px 12px;border:1px solid var(--line);border-radius:5px;background:var(--field);font:400 13px/1.2 'Inter';color:var(--ink-2);}
+  .pairing-hint{margin:6px 0 0;font:400 11.5px/1.4 'Inter';color:var(--ink-4);font-style:italic;}
   .in-yr{width:78px;flex:none;}
   .sel-wrap{position:relative;}
   .sel-wrap::after{content:'';position:absolute;right:12px;top:42%;width:6px;height:6px;border-right:1.4px solid var(--ink-4);border-bottom:1.4px solid var(--ink-4);transform:rotate(45deg);pointer-events:none;}
@@ -1236,6 +1237,82 @@ function bilancia(T){
   return {d, m, scarto, esito};
 }
 
+/* Abbinamento suggerito: non sostituisce la nota libera del corsista (resta
+   scrivibile e resta sua), la affianca. Due vini "corpo pieno, tannino alto"
+   non sono la stessa cosa a tavola se uno è un Nebbiolo e l'altro un
+   Primitivo: il vitigno (quando riconosciuto) e la cucina del territorio
+   contano più della sola struttura, e vengono prima. La struttura
+   (corpo/tannino/acidità/dolcezza, già raccolta nella scheda) resta la base
+   sempre disponibile quando vitigno e regione non dicono nulla di più
+   specifico. Copre i vitigni e i territori più comuni, non tutti quelli del
+   catalogo: per gli altri resta comunque una risposta corretta, solo più
+   generale. */
+const ABBINAMENTO_VITIGNO = {
+  "Nebbiolo":"pairing.grape.nebbiolo", "Sangiovese":"pairing.grape.sangiovese",
+  "Barbera":"pairing.grape.barbera", "Dolcetto":"pairing.grape.dolcetto",
+  "Corvina":"pairing.grape.corvina", "Primitivo":"pairing.grape.primitivo",
+  "Zinfandel":"pairing.grape.primitivo", "Negroamaro":"pairing.grape.negroamaro",
+  "Nero d'Avola":"pairing.grape.neroavola", "Montepulciano":"pairing.grape.montepulciano",
+  "Aglianico":"pairing.grape.aglianico", "Nerello Mascalese":"pairing.grape.nerello",
+  "Cannonau":"pairing.grape.cannonau", "Cabernet Sauvignon":"pairing.grape.cabernet",
+  "Merlot":"pairing.grape.merlot", "Pinot Nero":"pairing.grape.pinotnero",
+  "Syrah":"pairing.grape.syrah", "Malbec":"pairing.grape.malbec",
+  "Tempranillo":"pairing.grape.tempranillo", "Grenache":"pairing.grape.grenache",
+  "Gamay":"pairing.grape.gamay", "Chardonnay":"pairing.grape.chardonnay",
+  "Sauvignon Blanc":"pairing.grape.sauvignon", "Pinot Grigio":"pairing.grape.pinotgrigio",
+  "Vermentino":"pairing.grape.vermentino", "Garganega":"pairing.grape.garganega",
+  "Trebbiano":"pairing.grape.trebbiano", "Falanghina":"pairing.grape.falanghina",
+  "Fiano":"pairing.grape.fiano", "Greco":"pairing.grape.greco",
+  "Riesling":"pairing.grape.riesling", "Gewürztraminer":"pairing.grape.gewurztraminer",
+  "Grüner Veltliner":"pairing.grape.gruner", "Verdicchio":"pairing.grape.verdicchio",
+  "Glera":"pairing.grape.glera", "Moscato Bianco":"pairing.grape.moscato"
+};
+const ABBINAMENTO_REGIONE = {
+  "Piemonte":"pairing.region.piemonte", "Toscana":"pairing.region.toscana",
+  "Veneto":"pairing.region.veneto", "Sicilia":"pairing.region.sicilia",
+  "Puglia":"pairing.region.puglia", "Campania":"pairing.region.campania",
+  "Emilia-Romagna":"pairing.region.emilia", "Friuli-Venezia Giulia":"pairing.region.friuli",
+  "Sardegna":"pairing.region.sardegna", "Alto Adige":"pairing.region.altoadige",
+  "Bordeaux":"pairing.region.bordeaux", "Borgogna":"pairing.region.borgogna",
+  "Champagne":"pairing.region.champagne", "Rioja":"pairing.region.rioja"
+};
+function suggerisciAbbinamento(w){
+  const corpo = (w.corpo != null) ? w.corpo : 3;
+  const acid = (w.durezze && w.durezze.acidita != null) ? w.durezze.acidita : 3;
+  const tan = (w.durezze && w.durezze.tannicita != null) ? w.durezze.tannicita : 3;
+  const dolce = w.zuccheri === "Dolce" || w.zuccheri === "Amabile";
+  const tp = w.tipologia;
+  const grape = mainGrape(w);
+  const regione = w.regione ? splitLuogo(w.regione).regione : null;
+  const idee = [];
+
+  if(tp === "Spumante") idee.push("pairing.sparkling");
+  if(dolce || tp === "Passito") idee.push("pairing.sweet");
+
+  if(grape && ABBINAMENTO_VITIGNO[grape]){
+    idee.push(ABBINAMENTO_VITIGNO[grape]);
+  }else if(regione && ABBINAMENTO_REGIONE[regione]){
+    idee.push(ABBINAMENTO_REGIONE[regione]);
+  }else{
+    const regoleStruttura = [
+      [tp === "Rosato", "pairing.rose"],
+      [tp === "Rosso" && tan >= 4 && corpo >= 4, "pairing.tanninFull"],
+      [tp === "Rosso" && tan >= 4, "pairing.tannin"],
+      [tp === "Rosso" && corpo <= 2 && tan <= 2, "pairing.lightRed"],
+      [tp === "Bianco" && corpo >= 4, "pairing.fullWhite"],
+      [tp === "Bianco" && corpo <= 2, "pairing.lightWhite"],
+      [acid >= 4 && !dolce, "pairing.acid"]
+    ];
+    for(const [cond, key] of regoleStruttura){
+      if(cond){ idee.push(key); break; }
+    }
+  }
+
+  if(!idee.length) idee.push("pairing.generic");
+  if((w.stato === "Maturo" || w.stato === "Vecchio") && idee.length < 3) idee.push("pairing.aged");
+  return idee.slice(0,3).map(k => t(k)).join(" ");
+}
+
 function valInit(){
   const o = {};
   Object.keys(VALUTA).forEach(g => {
@@ -1427,6 +1504,67 @@ const I18N = {
     "bilancia.moltoDurezze":"nettamente sbilanciato sulle durezze",
     "bilancia.pocoMorbidezze":"un po' sbilanciato sulle morbidezze",
     "bilancia.moltoMorbidezze":"nettamente sbilanciato sulle morbidezze",
+    "pairing.sparkling":"Aperitivo, fritture leggere, antipasti di mare.",
+    "pairing.sweet":"Formaggi erborinati, foie gras, crostate di frutta — mai un dolce più dolce del vino.",
+    "pairing.rose":"Insalate estive, pesce alla griglia, antipasti leggeri.",
+    "pairing.tanninFull":"Carni rosse saporite, brasati, formaggi stagionati: la grassezza ammorbidisce il tannino.",
+    "pairing.tannin":"Carni rosse e formaggi non troppo delicati.",
+    "pairing.lightRed":"Salumi, primi piatti saporiti, pizza.",
+    "pairing.fullWhite":"Risotti, carni bianche in salsa, pesce strutturato.",
+    "pairing.lightWhite":"Pesce, crostacei, piatti delicati — l'acidità pulisce il palato.",
+    "pairing.acid":"Piatti grassi o di mare: regge il confronto con l'acidità.",
+    "pairing.generic":"Vino versatile, bene a tutto pasto con piatti di media struttura.",
+    "pairing.aged":"È un vino più maturo: piatti con cotture lunghe, funghi, tartufo o formaggi stagionati gli si addicono.",
+    "field.pairing.hint":"Suggerimento: {sugg}",
+    "pairing.grape.nebbiolo":"Vitigno Nebbiolo: brasato al Barolo, tajarin al tartufo, formaggi di malga stagionati.",
+    "pairing.grape.sangiovese":"Vitigno Sangiovese: bistecca alla fiorentina, ribollita, pecorino stagionato.",
+    "pairing.grape.barbera":"Vitigno Barbera: bolliti e salumi — la sua acidità sgrassa che è un piacere.",
+    "pairing.grape.dolcetto":"Vitigno Dolcetto: salumi e primi piatti semplici, si beve giovane e fresco.",
+    "pairing.grape.corvina":"Base di Amarone e Valpolicella: brasati importanti, stracotti, formaggi erborinati stagionati.",
+    "pairing.grape.primitivo":"Vitigno Primitivo: carni alla brace, salsicce piccanti, formaggi stagionati.",
+    "pairing.grape.negroamaro":"Vitigno Negroamaro: carni alla griglia, verdure ripiene, formaggi pugliesi.",
+    "pairing.grape.neroavola":"Vitigno Nero d'Avola: caponata, involtini di carne, formaggi siciliani stagionati.",
+    "pairing.grape.montepulciano":"Vitigno Montepulciano: arrosticini, agnello, pasta con sughi di carne.",
+    "pairing.grape.aglianico":"Vitigno Aglianico: agnello al forno, salsicce, pecorino stagionato — vuole tempo o un piatto importante.",
+    "pairing.grape.nerello":"Vitigno Nerello Mascalese: cucina etnea, carni alla brace, formaggi di montagna.",
+    "pairing.grape.cannonau":"Vitigno Cannonau: carne alla brace, salsiccia sarda, pecorino sardo stagionato.",
+    "pairing.grape.cabernet":"Cabernet Sauvignon: carni rosse importanti, agnello, formaggi stagionati a pasta dura.",
+    "pairing.grape.merlot":"Merlot: carni rosse morbide, brasati leggeri, formaggi semi-stagionati.",
+    "pairing.grape.pinotnero":"Pinot Nero: carni bianche, funghi, salumi delicati, formaggi a pasta molle.",
+    "pairing.grape.syrah":"Syrah: carni speziate, cacciagione, piatti affumicati alla griglia.",
+    "pairing.grape.malbec":"Malbec: carne alla griglia, l'abbinamento classico dell'asado argentino.",
+    "pairing.grape.tempranillo":"Tempranillo: jamón, agnello, formaggi stagionati spagnoli.",
+    "pairing.grape.grenache":"Grenache: piatti mediterranei, agnello speziato, verdure grigliate.",
+    "pairing.grape.gamay":"Gamay: salumi, pollame, formaggi freschi — meglio leggermente fresco di temperatura.",
+    "pairing.grape.chardonnay":"Chardonnay: pesce in salsa, pollame, risotti — più struttura ha, più regge piatti importanti.",
+    "pairing.grape.sauvignon":"Sauvignon Blanc: antipasti di verdure, formaggi di capra freschi, asparagi.",
+    "pairing.grape.pinotgrigio":"Pinot Grigio: antipasti leggeri, pesce delicato, verdure di stagione.",
+    "pairing.grape.vermentino":"Vermentino: pesce del territorio, frutti di mare, zuppe di pesce.",
+    "pairing.grape.garganega":"Base del Soave: baccalà, risotti di pesce, formaggi freschi.",
+    "pairing.grape.trebbiano":"Trebbiano: piatti semplici di pesce o pollame, antipasti leggeri.",
+    "pairing.grape.falanghina":"Falanghina: frutti di mare, pesce al forno, mozzarella di bufala.",
+    "pairing.grape.fiano":"Fiano: pesce strutturato, crostacei, formaggi freschi campani.",
+    "pairing.grape.greco":"Greco: pesce al forno, primi di mare, formaggi freschi.",
+    "pairing.grape.riesling":"Riesling: cucina speziata, pesce affumicato — se più dolce, prova formaggi erborinati.",
+    "pairing.grape.gewurztraminer":"Gewürztraminer: cucina speziata (asiatica), formaggi aromatici, foie gras se più dolce.",
+    "pairing.grape.gruner":"Grüner Veltliner: asparagi, verdure, piatti delicati della cucina austriaca.",
+    "pairing.grape.verdicchio":"Verdicchio: brodetto di pesce, crostacei, piatti marchigiani di mare.",
+    "pairing.grape.glera":"Base del Prosecco: aperitivo, finger food, fritture leggere.",
+    "pairing.grape.moscato":"Moscato: dolci da forno non troppo ricchi, frutta fresca.",
+    "pairing.region.piemonte":"Cucina piemontese: agnolotti, bagna cauda, brasati, tartufo bianco.",
+    "pairing.region.toscana":"Cucina toscana: pici al ragù, cinghiale, pecorino, bistecca.",
+    "pairing.region.veneto":"Cucina veneta: risotti, baccalà, radicchio, formaggi di malga.",
+    "pairing.region.sicilia":"Cucina siciliana: caponata, pesce spada, involtini, formaggi stagionati.",
+    "pairing.region.puglia":"Cucina pugliese: orecchiette, verdure grigliate, agnello, burrata.",
+    "pairing.region.campania":"Cucina campana: mozzarella di bufala, pesce, pasta e fagioli.",
+    "pairing.region.emilia":"Cucina emiliana: tortellini in brodo, bollito misto, parmigiano stagionato.",
+    "pairing.region.friuli":"Cucina friulana: prosciutto di San Daniele, frico, piatti di confine.",
+    "pairing.region.sardegna":"Cucina sarda: porceddu, pecorino sardo, bottarga.",
+    "pairing.region.altoadige":"Cucina altoatesina: canederli, speck, formaggi di malga alpini.",
+    "pairing.region.bordeaux":"Cucina del Bordolese: agnello di Pauillac, carni rosse, formaggi stagionati.",
+    "pairing.region.borgogna":"Cucina borgognona: boeuf bourguignon, pollame, formaggi a crosta lavata.",
+    "pairing.region.champagne":"Aperitivo, ostriche, fritture leggere — la tradizione dello Champagne a tavola.",
+    "pairing.region.rioja":"Cucina della Rioja: agnello arrosto, chorizo, formaggi stagionati spagnoli.",
     "field.pairing.ph":"Abbinamento consigliato",
     "field.notes.ph":"Note: evoluzione nel bicchiere, contesto, impressioni...",
     "field.notesBlind.ph":"Note: cosa ti ha guidato verso la tua ipotesi...",
@@ -1484,6 +1622,7 @@ const I18N = {
     "book.dl.descriptors":"Descrittori",
     "book.dl.taste":"Gusto",
     "book.dl.pairing":"Abbinamento",
+    "book.dl.pairingAuto":"Abbinamento suggerito",
     "book.notesPh":"Note personali",
     "book.editWine":"Modifica scheda",
     "book.saveNotesOnly":"Salva solo le note",
@@ -1582,6 +1721,18 @@ const I18N = {
     "stats.phase.taste":"bocca", "stats.phase.final":"finale",
     "stats.prosa.avgNamed":"{name}, su {n} {schede} la tua media è <b>{avg}</b> ({giudizio}).",
     "stats.prosa.avgAnon":"Su {n} {schede} la tua media è <b>{avg}</b> ({giudizio}).",
+    "stats.prosa.topWine":"Il vino che ti ha convinto di più finora è <b>{nome}</b> ({score}/100).",
+    "stats.prosa.preference":"Nel vino cerchi soprattutto <b>{pref}</b>.",
+    "pref.fullBody":"corpo pieno e struttura",
+    "pref.lightBody":"vini leggeri e snelli",
+    "pref.highTannin":"buona tannicità",
+    "pref.lowTannin":"vini morbidi, con poco tannino",
+    "pref.highAcid":"buona freschezza e acidità",
+    "pref.lowAcid":"vini morbidi, poco acidi",
+    "pref.highAlcohol":"vini caldi e alcolici",
+    "pref.lowAlcohol":"vini leggeri, poco alcolici",
+    "pref.highIntensity":"profumi intensi e decisi",
+    "pref.lowIntensity":"profumi delicati e sottili",
     "stats.prosa.byType":"Fra le tipologie premi soprattutto i <b>{top}</b> ({topAvg} su {topN} schede), mentre i {bottom} restano a {bottomAvg}.",
     "stats.prosa.byGrape":"Il vitigno che ti convince di più è il <b>{grape}</b>, {avg} di media su {n} vini.",
     "stats.prosa.byRegion":"Il territorio che ti dà più soddisfazione: <b>{region}</b> ({avg} su {n} vini).",
@@ -1801,6 +1952,67 @@ const I18N = {
     "bilancia.moltoDurezze":"clearly leaning toward hardness",
     "bilancia.pocoMorbidezze":"slightly leaning toward softness",
     "bilancia.moltoMorbidezze":"clearly leaning toward softness",
+    "pairing.sparkling":"Aperitif, light fried food, seafood starters.",
+    "pairing.sweet":"Blue cheese, foie gras, fruit tarts — never a dessert sweeter than the wine.",
+    "pairing.rose":"Summer salads, grilled fish, light starters.",
+    "pairing.tanninFull":"Rich red meat, braises, aged cheese: the fat softens the tannin.",
+    "pairing.tannin":"Red meat and firmer cheeses.",
+    "pairing.lightRed":"Cured meats, hearty first courses, pizza.",
+    "pairing.fullWhite":"Risotto, white meat in sauce, richer fish dishes.",
+    "pairing.lightWhite":"Fish, shellfish, delicate dishes — the acidity cleanses the palate.",
+    "pairing.acid":"Rich or seafood dishes: it stands up to the acidity.",
+    "pairing.generic":"A versatile wine, good throughout a meal with medium-bodied dishes.",
+    "pairing.aged":"This is a more mature wine: long-cooked dishes, mushrooms, truffle, or aged cheeses suit it well.",
+    "field.pairing.hint":"Suggestion: {sugg}",
+    "pairing.grape.nebbiolo":"Nebbiolo grape: Barolo-style braises, truffle pasta, aged mountain cheeses.",
+    "pairing.grape.sangiovese":"Sangiovese grape: Florentine steak, hearty bean stews, aged pecorino.",
+    "pairing.grape.barbera":"Barbera grape: boiled meats and cured meats — its acidity cuts through fat beautifully.",
+    "pairing.grape.dolcetto":"Dolcetto grape: cured meats and simple first courses, best drunk young and fresh.",
+    "pairing.grape.corvina":"The backbone of Amarone and Valpolicella: rich braises, stews, aged blue cheese.",
+    "pairing.grape.primitivo":"Primitivo grape: grilled meats, spicy sausages, aged cheeses.",
+    "pairing.grape.negroamaro":"Negroamaro grape: grilled meats, stuffed vegetables, southern Italian cheeses.",
+    "pairing.grape.neroavola":"Nero d'Avola grape: caponata, meat rolls, aged Sicilian cheeses.",
+    "pairing.grape.montepulciano":"Montepulciano grape: grilled lamb skewers, hearty meat sauces.",
+    "pairing.grape.aglianico":"Aglianico grape: roast lamb, sausages, aged pecorino — wants time or a serious dish.",
+    "pairing.grape.nerello":"Nerello Mascalese grape: Etna-area cuisine, grilled meats, mountain cheeses.",
+    "pairing.grape.cannonau":"Cannonau grape: grilled meat, Sardinian sausage, aged pecorino sardo.",
+    "pairing.grape.cabernet":"Cabernet Sauvignon: substantial red meat, lamb, hard aged cheeses.",
+    "pairing.grape.merlot":"Merlot: softer red meats, light braises, semi-aged cheeses.",
+    "pairing.grape.pinotnero":"Pinot Noir: white meat, mushrooms, delicate cured meats, soft-rind cheeses.",
+    "pairing.grape.syrah":"Syrah: spiced meats, game, smoky grilled dishes.",
+    "pairing.grape.malbec":"Malbec: grilled meat — the classic match for Argentine asado.",
+    "pairing.grape.tempranillo":"Tempranillo: cured ham, lamb, aged Spanish cheeses.",
+    "pairing.grape.grenache":"Grenache: Mediterranean dishes, spiced lamb, grilled vegetables.",
+    "pairing.grape.gamay":"Gamay: cured meats, poultry, fresh cheeses — best served slightly chilled.",
+    "pairing.grape.chardonnay":"Chardonnay: fish in sauce, poultry, risotto — the fuller it is, the richer the dish it can carry.",
+    "pairing.grape.sauvignon":"Sauvignon Blanc: vegetable starters, fresh goat cheese, asparagus.",
+    "pairing.grape.pinotgrigio":"Pinot Grigio: light starters, delicate fish, seasonal vegetables.",
+    "pairing.grape.vermentino":"Vermentino: local fish, shellfish, fish soups.",
+    "pairing.grape.garganega":"The grape behind Soave: salt cod, fish risotto, fresh cheeses.",
+    "pairing.grape.trebbiano":"Trebbiano: simple fish or poultry dishes, light starters.",
+    "pairing.grape.falanghina":"Falanghina: shellfish, baked fish, buffalo mozzarella.",
+    "pairing.grape.fiano":"Fiano: richer fish, shellfish, fresh Campanian cheeses.",
+    "pairing.grape.greco":"Greco: baked fish, seafood first courses, fresh cheeses.",
+    "pairing.grape.riesling":"Riesling: spiced cuisine, smoked fish — if sweeter, try blue cheese.",
+    "pairing.grape.gewurztraminer":"Gewürztraminer: spiced (Asian) cuisine, aromatic cheeses, foie gras if sweeter.",
+    "pairing.grape.gruner":"Grüner Veltliner: asparagus, vegetables, delicate Austrian dishes.",
+    "pairing.grape.verdicchio":"Verdicchio: fish stew, shellfish, seafood dishes from the Marche.",
+    "pairing.grape.glera":"The grape behind Prosecco: aperitif, finger food, light fried dishes.",
+    "pairing.grape.moscato":"Moscato: not-too-rich baked desserts, fresh fruit.",
+    "pairing.region.piemonte":"Piedmontese cuisine: agnolotti, bagna cauda, braises, white truffle.",
+    "pairing.region.toscana":"Tuscan cuisine: pici with ragù, wild boar, pecorino, steak.",
+    "pairing.region.veneto":"Venetian cuisine: risotto, salt cod, radicchio, alpine cheeses.",
+    "pairing.region.sicilia":"Sicilian cuisine: caponata, swordfish, meat rolls, aged cheeses.",
+    "pairing.region.puglia":"Apulian cuisine: orecchiette, grilled vegetables, lamb, burrata.",
+    "pairing.region.campania":"Campanian cuisine: buffalo mozzarella, fish, pasta e fagioli.",
+    "pairing.region.emilia":"Emilian cuisine: tortellini in broth, mixed boiled meats, aged Parmigiano.",
+    "pairing.region.friuli":"Friulian cuisine: San Daniele ham, frico, border-region dishes.",
+    "pairing.region.sardegna":"Sardinian cuisine: roast suckling pig, pecorino sardo, bottarga.",
+    "pairing.region.altoadige":"South Tyrolean cuisine: canederli dumplings, speck, alpine cheeses.",
+    "pairing.region.bordeaux":"Bordeaux-region cuisine: Pauillac lamb, red meat, aged cheeses.",
+    "pairing.region.borgogna":"Burgundian cuisine: boeuf bourguignon, poultry, washed-rind cheeses.",
+    "pairing.region.champagne":"Aperitif, oysters, light fried food — the classic Champagne table tradition.",
+    "pairing.region.rioja":"Rioja-region cuisine: roast lamb, chorizo, aged Spanish cheeses.",
     "field.pairing.ph":"Suggested pairing",
     "field.notes.ph":"Notes: evolution in the glass, context, impressions...",
     "field.notesBlind.ph":"Notes: what guided you toward your guess...",
@@ -1858,6 +2070,7 @@ const I18N = {
     "book.dl.descriptors":"Descriptors",
     "book.dl.taste":"Taste",
     "book.dl.pairing":"Pairing",
+    "book.dl.pairingAuto":"Suggested pairing",
     "book.notesPh":"Personal notes",
     "book.editWine":"Edit entry",
     "book.saveNotesOnly":"Save notes only",
@@ -1956,6 +2169,18 @@ const I18N = {
     "stats.phase.taste":"mouth", "stats.phase.final":"finish",
     "stats.prosa.avgNamed":"{name}, over {n} {schede} your average is <b>{avg}</b> ({giudizio}).",
     "stats.prosa.avgAnon":"Over {n} {schede} your average is <b>{avg}</b> ({giudizio}).",
+    "stats.prosa.topWine":"The wine that's won you over the most so far is <b>{nome}</b> ({score}/100).",
+    "stats.prosa.preference":"In a wine, you especially look for <b>{pref}</b>.",
+    "pref.fullBody":"a full, structured body",
+    "pref.lightBody":"light, slender wines",
+    "pref.highTannin":"firm tannin",
+    "pref.lowTannin":"soft wines, low in tannin",
+    "pref.highAcid":"good freshness and acidity",
+    "pref.lowAcid":"soft, low-acid wines",
+    "pref.highAlcohol":"warm, alcoholic wines",
+    "pref.lowAlcohol":"light, low-alcohol wines",
+    "pref.highIntensity":"intense, assertive aromas",
+    "pref.lowIntensity":"delicate, subtle aromas",
     "stats.prosa.byType":"Among the types you especially favor <b>{top}</b> ({topAvg} over {topN} entries), while {bottom} stay at {bottomAvg}.",
     "stats.prosa.byGrape":"The grape that wins you over most is <b>{grape}</b>, averaging {avg} over {n} wines.",
     "stats.prosa.byRegion":"The territory that satisfies you most: <b>{region}</b> ({avg} over {n} wines).",
@@ -2215,6 +2440,10 @@ function sectionDefs(T, pre, tipologia){
   const durezze = DUREZZE.filter(r => !(isBianco && r[0] === "tannicita"));
   const finale = (pre === "s")
     ? '<input class="in-sm" id="abbInput" placeholder="'+t("field.pairing.ph")+'" style="width:100%" value="'+esc(T.abbinamento)+'">'+
+      '<p class="pairing-hint">'+tf("field.pairing.hint",{sugg: suggerisciAbbinamento({
+        corpo:T.corpo, durezze:T.durezze, morbidezze:T.morbidezze, zuccheri:T.zuccheri, stato:T.stato,
+        tipologia:tipologia, regione:T.wine.regione, uvaggi:T.wine.uvaggi
+      })})+'</p>'+
       '<textarea class="ta" id="noteInput" rows="3" placeholder="'+t("field.notes.ph")+'">'+esc(T.note)+'</textarea>'
     : '<textarea class="ta" id="bNoteInput" rows="3" placeholder="'+t("field.notesBlind.ph")+'">'+esc(T.note)+'</textarea>';
 
@@ -2792,6 +3021,7 @@ function renderBook(){
         '</div>'+
         '<div class="dl"><b>'+t("book.dl.taste")+'</b><span>'+esc([w.zuccheri,w.stato].filter(Boolean).join(" · "))+'</span></div>'+
         '<div class="dl"><b>'+t("book.dl.pairing")+'</b><span>'+esc(w.abbinamento||"—")+'</span></div>'+
+        '<div class="dl"><b>'+t("book.dl.pairingAuto")+'</b><span>'+esc(suggerisciAbbinamento(w))+'</span></div>'+
         '<textarea class="ta" data-editnote="'+w.id+'" rows="2" placeholder="'+t("book.notesPh")+'">'+esc(w.note)+'</textarea>'+
         '<div class="detail-actions">'+
           '<button type="button" class="pill-solid" data-edit="'+w.id+'">'+t("book.editWine")+'</button>'+
@@ -3018,6 +3248,45 @@ function dec(n, d){
 function euro(n){
   return n.toLocaleString(S.lang === "en" ? "en-US" : "it-IT", {minimumFractionDigits:2, maximumFractionDigits:2})+" \u20ac";
 }
+/* correlazione lineare (Pearson): stessa idea della retta prezzo/punteggio
+   qui sotto, applicata ai tratti sensoriali invece che al prezzo. */
+function correlazione(xs, ys){
+  const n = xs.length;
+  if(n < 2) return 0;
+  const mx = media(xs), my = media(ys);
+  let num = 0, dx2 = 0, dy2 = 0;
+  for(let i=0;i<n;i++){
+    const dx = xs[i]-mx, dy = ys[i]-my;
+    num += dx*dy; dx2 += dx*dx; dy2 += dy*dy;
+  }
+  const den = Math.sqrt(dx2*dy2);
+  return den === 0 ? 0 : num/den;
+}
+const SOGLIA_GUSTO = 5;
+/* Quale tratto sensoriale (corpo, tannino, acidità, alcolicità, intensità)
+   spiega meglio perché dai voti alti o bassi: non un'opinione, la
+   correlazione fra quel valore e il punteggio dato su tutte le schede.
+   Sotto una soglia minima di dati o di correlazione non dice nulla — un
+   'ti piace' inventato da 3 schede sarebbe peggio che tacere. */
+function preferenzaGusto(all){
+  const TRATTI = [
+    {get:w=>w.corpo, alto:"pref.fullBody", basso:"pref.lightBody"},
+    {get:w=>w.durezze&&w.durezze.tannicita, alto:"pref.highTannin", basso:"pref.lowTannin"},
+    {get:w=>w.durezze&&w.durezze.acidita, alto:"pref.highAcid", basso:"pref.lowAcid"},
+    {get:w=>w.morbidezze&&w.morbidezze.alcolicita, alto:"pref.highAlcohol", basso:"pref.lowAlcohol"},
+    {get:w=>w.intensita, alto:"pref.highIntensity", basso:"pref.lowIntensity"}
+  ];
+  let migliore = null;
+  TRATTI.forEach(tr => {
+    const coppie = all.map(w => [tr.get(w), w.score]).filter(c => typeof c[0] === "number");
+    if(coppie.length < SOGLIA_GUSTO) return;
+    const r = correlazione(coppie.map(c=>c[0]), coppie.map(c=>c[1]));
+    if(!migliore || Math.abs(r) > Math.abs(migliore.r)) migliore = {r, tr};
+  });
+  if(!migliore || Math.abs(migliore.r) < 0.35) return null;
+  return t(migliore.r > 0 ? migliore.tr.alto : migliore.tr.basso);
+}
+
 function prosaGusti(all){
   const n = all.length;
   const frasi = [];
@@ -3027,6 +3296,15 @@ function prosaGusti(all){
     name: esc(nome||""), n, schede: n===1?t("hdr.card"):t("hdr.cardPl"),
     avg: dec(avg), giudizio: judge(Math.round(avg)).toLowerCase()
   }));
+
+  const migliore = all.reduce((a,w) => w.score > a.score ? w : a, all[0]);
+  const peggiore = all.reduce((a,w) => w.score < a.score ? w : a, all[0]);
+  if(n >= 2 && migliore.score !== peggiore.score){
+    frasi.push(tf("stats.prosa.topWine", {nome: esc(migliore.nome||t("book.noName")), score: migliore.score}));
+  }
+
+  const pref = n >= SOGLIA_GUSTO ? preferenzaGusto(all) : null;
+  if(pref) frasi.push(tf("stats.prosa.preference", {pref}));
 
   const perTipo = {};
   all.forEach(w => { (perTipo[w.tipologia] = perTipo[w.tipologia] || []).push(w.score); });
