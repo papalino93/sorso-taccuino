@@ -55,7 +55,11 @@
 
   .hdr{position:relative;overflow:hidden;background:var(--head-bg);padding:18px 22px 26px;transition:background .25s;}
   .hdr::before{content:'';position:absolute;inset:0;background:radial-gradient(380px 220px at 80% -10%, rgba(228,192,122,.18), transparent 72%);pointer-events:none;}
-  .hdr-top{position:relative;display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;gap:12px;}
+  /* Sotto ~380px il nome+sottotitolo e i comandi (lingua, tema, avatar) non stanno più
+     affiancati sulla stessa riga: prima la scritta veniva schiacciata in una colonna
+     troppo stretta e sconfinava, in orizzontale, sotto il commutatore lingua. Andare a
+     capo su due righe è più leggibile che spezzare le parole. */
+  .hdr-top{position:relative;display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;margin-bottom:20px;gap:12px;row-gap:10px;}
   .brand{display:flex;align-items:baseline;gap:9px;background:none;border:0;padding:0;cursor:pointer;text-align:left;flex-wrap:wrap;min-width:0;}
   .brand:hover .brand-tag{color:rgba(228,192,122,1);}
   .brand-name{font-family:'Instrument Serif',serif;font-size:22px;color:var(--head-fg);}
@@ -1306,6 +1310,7 @@ const I18N = {
     "label.loadedAlt":"Etichetta caricata",
     "label.remove":"Rimuovi",
     "label.defaultName":"etichetta.jpg",
+    "label.invalidType":"Serve un'immagine (JPG o PNG)",
 
     "field.wineName":"Nome del vino", "field.wineName.ph":"es. Flaccianello della Pieve",
     "field.producer":"Produttore", "field.producer.ph":"es. Fontodi",
@@ -1677,6 +1682,7 @@ const I18N = {
     "label.loadedAlt":"Uploaded label",
     "label.remove":"Remove",
     "label.defaultName":"label.jpg",
+    "label.invalidType":"An image is needed (JPG or PNG)",
 
     "field.wineName":"Wine name", "field.wineName.ph":"e.g. Flaccianello della Pieve",
     "field.producer":"Producer", "field.producer.ph":"e.g. Fontodi",
@@ -2092,8 +2098,6 @@ $("segs").addEventListener("click", e => {
 /* Questi blocchi servono a due moduli diversi — la scheda normale (S) e quella
    alla cieca (B) — quindi lavorano su un oggetto passato come parametro invece
    che sullo stato globale. Il prefisso distingue gli eventi dei due moduli. */
-/* Questi blocchi servono a due moduli diversi — la scheda normale (S) e quella
-   alla cieca (B) — quindi lavorano su un oggetto passato come parametro. */
 
 /* riga a punteggio: solo per le voci di qualità */
 function valRowHTML(T, pre, group, def){
@@ -2725,7 +2729,7 @@ function renderBook(){
     if(S.expanded === w.id){
       h += '<div class="wine-detail">'+
         (w.thumb ? '<img class="detail-thumb" src="'+w.thumb+'" alt="'+t("card.label")+'">' : '')+
-        '<div class="dl"><b>'+t("book.dl.score")+'</b><span>'+tf("book.dl.scoreDetail",{total:w.score, v:(w.parts?w.parts.v:0), o:(w.parts?w.parts.o:0), g:(w.parts?w.parts.g:0), a:(w.parts?w.parts.a:0)})+'</span></div>'+
+        '<div class="dl"><b>'+t("book.dl.score")+'</b><span>'+tf("book.dl.scoreDetail",{total:w.score, v:(w.parts?w.parts.v:0), o:(w.parts?w.parts.o:0), g:(w.parts?w.parts.g:0), a:(w.parts?w.parts.f:0)})+'</span></div>'+
         '<div class="dl"><b>'+t("book.dl.visual")+'</b><span>'+esc([w.limpidezza,w.colore,w.consistenza].filter(Boolean).join(" · "))+'</span></div>'+
         (w.denominazione ? '<div class="dl"><b>'+t("book.dl.denomination")+'</b><span>'+esc(w.denominazione)+'</span></div>' : "")+
         (uvaggioText(w) ? '<div class="dl"><b>'+t("book.dl.blend")+'</b><span>'+esc(uvaggioText(w))+'</span></div>' : "")+
@@ -2944,13 +2948,13 @@ function lolliList(params){
 /* --- riepilogo in prosa dei gusti, generato dai dati --- */
 const PLURALI = {Rosso:"rossi", Bianco:"bianchi", Rosato:"rosati", Spumante:"spumanti", Passito:"passiti"};
 function plurale(t){ return PLURALI[t] || String(t||"").toLowerCase(); }
-/* decimali con la virgola, come si scrivono in italiano */
+/* decimali con la virgola in italiano, col punto in inglese */
 function dec(n, d){
   d = (d === undefined) ? 1 : d;
-  return Number(n).toLocaleString("it-IT", {minimumFractionDigits:d, maximumFractionDigits:d});
+  return Number(n).toLocaleString(S.lang === "en" ? "en-US" : "it-IT", {minimumFractionDigits:d, maximumFractionDigits:d});
 }
 function euro(n){
-  return n.toLocaleString("it-IT", {minimumFractionDigits:2, maximumFractionDigits:2})+" \u20ac";
+  return n.toLocaleString(S.lang === "en" ? "en-US" : "it-IT", {minimumFractionDigits:2, maximumFractionDigits:2})+" \u20ac";
 }
 /* mini barre a 4 fasi */
 function miniProfile(parts){
@@ -4139,7 +4143,7 @@ async function loadLeaderboard(){
       '<span class="lb-rank">'+(i+1)+'</span>'+
       '<div class="lb-mid"><div class="lb-name">'+esc(w.label)+'</div>'+
         '<div class="lb-sub">'+w.count+" "+(w.count===1?t("hdr.card"):t("hdr.cardPl"))+' · '+judge(Math.round(w.avg))+'</div></div>'+
-      '<span class="lb-avg">'+w.avg.toFixed(1)+'</span>'+
+      '<span class="lb-avg">'+dec(w.avg,1)+'</span>'+
     '</div>'
   ).join("")+'</div>';
   if(failed.length){
@@ -4184,7 +4188,8 @@ function fileToBase64(file){
   });
 }
 async function handleFile(file){
-  if(!file || !/^image\//.test(file.type||"")) return;
+  if(!file) return;
+  if(!/^image\//.test(file.type||"")){ $("labelStatus").textContent = t("label.invalidType"); return; }
   const {dataUrl, base64, mediaType} = await fileToBase64(file);
   S.photo = dataUrl; S.photoB64 = base64; S.photoMedia = mediaType; S.photoName = file.name || t("label.defaultName");
   $("labelStatus").textContent = t("label.loaded");
