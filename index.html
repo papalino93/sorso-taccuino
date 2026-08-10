@@ -28,6 +28,11 @@
     --rust:#A2532F;
     --head-bg:#0D0D0D; --head-fg:#F5F5F5; --head-dim:rgba(245,245,245,.55); --head-line:rgba(245,245,245,.12);
     --bar:rgba(255,255,255,.94); --chip:#F0EBDF;
+    /* Le 4 fasi dell'esame AIS lette come un unico percorso di colore, dal più
+       chiaro al più profondo — non 4 tinte arbitrarie: visivo è il colore del
+       vino nel bicchiere, il finale è già il bordeaux dell'identità del sito.
+       Servono ovunque compaiano le 4 fasi insieme (mini-profilo, radar). */
+    --ph-v:#C9A227; --ph-o:#C1751A; --ph-g:var(--rust); --ph-f:var(--sel-bg);
     --serif:'Instrument Serif',serif;
     --num:'JetBrains Mono',ui-monospace,'SF Mono',Menlo,Consolas,monospace;
     --name:'Inter',system-ui,sans-serif;
@@ -40,6 +45,7 @@
     --rust:#E8875A;
     --head-bg:#000000; --head-fg:#FFFFFF; --head-dim:rgba(255,255,255,.55); --head-line:rgba(255,255,255,.12);
     --bar:rgba(10,10,10,.94); --chip:#232323;
+    --ph-v:#E8C547; --ph-o:#FFA94D; --ph-g:var(--rust); --ph-f:var(--sel-bg);
   }
   html,body{margin:0;}
   body{background:#EFECE4;-webkit-font-smoothing:antialiased;}
@@ -59,12 +65,16 @@
      affiancati sulla stessa riga: prima la scritta veniva schiacciata in una colonna
      troppo stretta e sconfinava, in orizzontale, sotto il commutatore lingua. Andare a
      capo su due righe è più leggibile che spezzare le parole. */
-  .hdr-top{position:relative;display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;margin-bottom:20px;gap:12px;row-gap:10px;}
+  .hdr-top{position:relative;display:flex;flex-wrap:wrap;align-items:center;margin-bottom:20px;gap:12px;row-gap:10px;}
   .brand{display:flex;align-items:baseline;gap:9px;background:none;border:0;padding:0;cursor:pointer;text-align:left;flex-wrap:wrap;min-width:0;}
   .brand:hover .brand-tag{color:rgba(228,192,122,1);}
   .brand-name{font-family:'Instrument Serif',serif;font-size:22px;color:var(--head-fg);}
   .brand-tag{font:500 9.5px/1 'Inter';letter-spacing:.26em;text-transform:uppercase;color:rgba(228,192,122,.75);}
-  .hdr-ctrl{display:flex;align-items:center;gap:8px;}
+  /* margin-left:auto invece di affidarsi a justify-content:space-between sul contenitore:
+     quando questo blocco va a capo su una riga propria (schermo stretto), resta comunque
+     ancorato a destra invece di scivolare a sinistra — "space-between" con un solo elemento
+     sulla riga lo avrebbe lasciato lì dov'è, cioè all'inizio. */
+  .hdr-ctrl{display:flex;align-items:center;gap:8px;margin-left:auto;}
   .theme-switch{display:flex;border:1px solid rgba(244,240,232,.22);border-radius:100px;overflow:hidden;}
   .theme-switch button{width:40px;height:38px;border:0;background:transparent;color:rgba(244,240,232,.6);font:400 12px/1 'Inter';cursor:pointer;transition:all .18s;}
   .theme-switch button.on{background:var(--head-gold);color:var(--head-bg);}
@@ -353,7 +363,11 @@
   /* --- podio --- */
   .podio{display:flex;flex-direction:column;gap:12px;}
   .podio-row{display:flex;align-items:flex-start;gap:12px;}
-  .podio-pos{width:24px;flex:none;font-family:'Instrument Serif',serif;font-style:italic;font-size:22px;color:var(--gold);text-align:center;line-height:1.1;}
+  /* Il primo classificato prende il bordeaux dell'identità del sito, non l'oro
+     dato: è l'unico che merita di distinguersi dagli altri due, che restano
+     in un tono neutro invece di ripetere la stessa enfasi tre volte. */
+  .podio-pos{width:24px;flex:none;font-family:'Instrument Serif',serif;font-style:italic;font-size:20px;color:var(--ink-4);text-align:center;line-height:1.1;}
+  .podio-row:first-child .podio-pos{color:var(--sel-bg);font-size:27px;}
   .podio-mid{flex:1;min-width:0;}
   .podio-name{font:600 14px/1.3 var(--name);letter-spacing:-.005em;color:var(--ink);overflow-wrap:anywhere;text-wrap:pretty;}
   .podio-meta{margin-top:3px;font:400 11.5px/1.45 'Inter';color:var(--ink-3);overflow-wrap:anywhere;text-wrap:pretty;}
@@ -361,10 +375,20 @@
   .podio-score{font-family:var(--num);font-weight:500;font-variant-numeric:tabular-nums;letter-spacing:normal;font-size:22px;line-height:1;color:var(--ink);}
   .podio-price{font:400 10.5px/1 'Inter';color:var(--ink-4);}
 
-  /* --- mini profilo a 4 fasi --- */
-  .mini-prof{display:flex;gap:2px;margin-top:7px;height:5px;}
+  /* --- mini profilo a 4 fasi ---
+     Un colore per fase (non 4 barre identiche a larghezza diversa): altrimenti
+     la stessa tinta ripetuta 4 volte legge come un unico segno spezzato invece
+     che come 4 misure distinte. La legenda (mp-legend) va spiegata una sola
+     volta per pagina, qui il codice colore basta a farsi riconoscere. */
+  .mini-prof{display:flex;gap:3px;margin-top:8px;height:7px;}
   .mini-seg{background:var(--chip);border-radius:2px;overflow:hidden;}
-  .mini-seg i{display:block;height:100%;background:var(--gold);border-radius:2px;}
+  .mini-seg i{display:block;height:100%;border-radius:2px;}
+  /* non solo dentro .mini-seg: le stesse classi colorano anche i quadratini della legenda */
+  .ph-v{background:var(--ph-v);} .ph-o{background:var(--ph-o);}
+  .ph-g{background:var(--ph-g);} .ph-f{background:var(--ph-f);}
+  .mp-legend{display:flex;flex-wrap:wrap;gap:5px 14px;margin:2px 0 16px;}
+  .mp-legend span{display:flex;align-items:center;gap:6px;font:400 11px/1 'Inter';color:var(--ink-3);}
+  .mp-legend i{width:9px;height:9px;border-radius:2px;flex:none;}
 
   /* --- profilo per vitigno --- */
   .vit-list{display:flex;flex-direction:column;gap:12px;}
@@ -380,6 +404,13 @@
   .rad-val{font:600 11px 'Inter';fill:var(--gold);}
 
   .sub-label{font:500 9.5px/1 'Inter';letter-spacing:.16em;text-transform:uppercase;color:var(--ink-4);margin-bottom:10px;}
+
+  /* Divide gli 11 pannelli delle statistiche in capitoli leggibili invece di
+     un'unica scorrevole indifferenziata: non è un altro riquadro, è un titolo
+     che segna dove comincia un argomento nuovo. */
+  .stats-section-head{display:flex;align-items:center;gap:10px;margin:30px 0 -4px;}
+  .stats-section-head b{font-family:var(--serif);font-style:italic;font-size:16px;color:var(--ink);white-space:nowrap;}
+  .stats-section-head::after{content:'';flex:1;height:1px;background:var(--line-strong);}
 
   .cols{width:100%;height:auto;display:block;}
   .col-n{font:600 11px 'Inter';fill:var(--ink-2);}
@@ -1491,6 +1522,8 @@ const I18N = {
     "stats.emptyTitle":"Ancora nulla da contare",
     "stats.emptySub":"Le statistiche compaiono dopo la prima degustazione salvata.",
     "stats.profileEyebrow":"Il tuo profilo",
+    "stats.section.yourWines":"I tuoi vini",
+    "stats.section.context":"Contesto",
     "stats.favWinesTitle":"I tuoi vini preferiti",
     "stats.favWinesBlockedDiff":"voti diversi",
     "stats.favWinesBlockedWhat":"una classifica dei preferiti",
@@ -1863,6 +1896,8 @@ const I18N = {
     "stats.emptyTitle":"Nothing to count yet",
     "stats.emptySub":"Statistics appear after your first saved tasting.",
     "stats.profileEyebrow":"Your profile",
+    "stats.section.yourWines":"Your wines",
+    "stats.section.context":"Context",
     "stats.favWinesTitle":"Your favorite wines",
     "stats.favWinesBlockedDiff":"different scores",
     "stats.favWinesBlockedWhat":"a ranking of favorites",
@@ -2813,6 +2848,9 @@ function mainGrape(w){
 }
 
 /* pannello con titolo + eventuale nota "servono N schede" */
+function statsSectionHead(title){
+  return '<div class="stats-section-head"><b>'+title+'</b></div>';
+}
 function statPanel(title, inner, note){
   return '<div class="card stat-panel">'+
     '<div class="stat-panel-head"><span class="stat-label">'+title+'</span>'+
@@ -2956,12 +2994,18 @@ function dec(n, d){
 function euro(n){
   return n.toLocaleString(S.lang === "en" ? "en-US" : "it-IT", {minimumFractionDigits:2, maximumFractionDigits:2})+" \u20ac";
 }
-/* mini barre a 4 fasi */
+/* mini barre a 4 fasi: un colore per fase, spiegato una volta sola da miniProfLegend() */
 function miniProfile(parts){
-  const segs = [["v",SEZ_MAX.v],["o",SEZ_MAX.o],["g",SEZ_MAX.g],["f",SEZ_MAX.f]];
+  const segs = [["v",SEZ_MAX.v,"ph-v"],["o",SEZ_MAX.o,"ph-o"],["g",SEZ_MAX.g,"ph-g"],["f",SEZ_MAX.f,"ph-f"]];
   return '<div class="mini-prof">'+segs.map(s =>
-    '<div class="mini-seg" style="flex:'+s[1]+'"><i style="width:'+
+    '<div class="mini-seg" style="flex:'+s[1]+'"><i class="'+s[2]+'" style="width:'+
       (Math.max(0, Math.min(1, (parts[s[0]]||0)/s[1]))*100).toFixed(0)+'%"></i></div>'
+  ).join("")+'</div>';
+}
+function miniProfLegend(){
+  const segs = [["ph-v","seg.visual"],["ph-o","seg.olfactory"],["ph-g","seg.taste"],["ph-f","seg.final"]];
+  return '<div class="mp-legend">'+segs.map(s =>
+    '<span><i class="'+s[0]+'"></i>'+t(s[1]).toLowerCase()+'</span>'
   ).join("")+'</div>';
 }
 
@@ -3060,6 +3104,11 @@ function renderStats(){
     '<div class="stat-card"><div class="stat-label">'+c.label+'</div>'+
     '<div class="stat-value">'+c.value+'</div><div class="stat-note">'+c.note+'</div></div>'
   ).join("")+'</div>';
+
+  /* La legenda del mini-profilo si spiega una sola volta qui, all'inizio del
+     capitolo "I tuoi vini": vale per il podio e per il profilo per vitigno
+     che seguono, senza ripeterla a ogni riga. */
+  html += statsSectionHead(t("stats.section.yourWines")) + miniProfLegend();
 
   /* ---- 2. podio: solo quando c'è davvero una classifica ---- */
   const ordinati = all.slice().sort((a,b) => b.score - a.score);
@@ -3161,6 +3210,8 @@ function renderStats(){
   } else {
     html += bloccato(t("stats.sensoryTitle"), quante(SOGLIA_PALATO-withVoti.length,t("hdr.card"),t("hdr.cardPl")), t("stats.sensoryBlockedWhat"));
   }
+
+  html += statsSectionHead(t("stats.section.context"));
 
   /* ---- 5. prezzi ---- */
   const conPrezzo = all.filter(w => w.prezzo != null && w.prezzo > 0);
