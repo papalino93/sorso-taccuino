@@ -64,6 +64,15 @@
   .theme-switch{display:flex;border:1px solid rgba(244,240,232,.22);border-radius:100px;overflow:hidden;}
   .theme-switch button{width:40px;height:38px;border:0;background:transparent;color:rgba(244,240,232,.6);font:400 12px/1 'Inter';cursor:pointer;transition:all .18s;}
   .theme-switch button.on{background:var(--head-gold);color:var(--head-bg);}
+  /* Commutatore lingua: stessa forma del commutatore tema, stesso bersaglio da 40x38px al tocco. */
+  .lang-switch{display:flex;border:1px solid rgba(244,240,232,.22);border-radius:100px;overflow:hidden;}
+  .lang-switch button{width:40px;height:38px;border:0;background:transparent;color:rgba(244,240,232,.6);font:500 11px/1 'Inter';letter-spacing:.02em;cursor:pointer;transition:all .18s;}
+  .lang-switch button.on{background:var(--head-gold);color:var(--head-bg);}
+  /* Dentro il login-card lo sfondo è chiaro (var(--panel)), non lo scuro dell'header:
+     qui il commutatore usa i toni della carta invece di quelli dell'header. */
+  .login-card .lang-switch{border-color:var(--line-strong);}
+  .login-card .lang-switch button{color:var(--ink-3);}
+  .login-card .lang-switch button.on{background:var(--sel-bg);color:var(--sel-fg);}
   .avatar-wrap{position:relative;}
   .avatar-btn{width:40px;height:40px;flex:none;border-radius:50%;cursor:pointer;
     display:flex;align-items:center;justify-content:center;
@@ -605,23 +614,27 @@
 <body>
 <div id="root">
 
-<a class="coffee-fab" id="coffeeFab" href="https://buymeacoffee.com/papalino" target="_blank" rel="noopener noreferrer" title="Offrimi un calice" aria-label="Offrimi un calice"><span class="coffee-fab-label">Offrimi un calice</span><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 22h8"/><path d="M12 15v7"/><path d="M12 15a7 7 0 0 0 7-7V3H5v5a7 7 0 0 0 7 7z"/></svg></a>
+<a class="coffee-fab" id="coffeeFab" href="https://buymeacoffee.com/papalino" target="_blank" rel="noopener noreferrer" data-i18n-title="coffee.label" data-i18n-aria="coffee.label" title="Offrimi un calice" aria-label="Offrimi un calice"><span class="coffee-fab-label" data-i18n="coffee.label">Offrimi un calice</span><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 22h8"/><path d="M12 15v7"/><path d="M12 15a7 7 0 0 0 7-7V3H5v5a7 7 0 0 0 7 7z"/></svg></a>
 
 <div class="login-gate hidden" id="loginGate">
   <div class="login-card">
+    <div class="lang-switch" id="loginLangSwitch" style="justify-content:center;margin:0 0 16px">
+      <button type="button" id="loginLangIt" class="on">IT</button>
+      <button type="button" id="loginLangEn">EN</button>
+    </div>
     <div class="login-brand">
       <span class="login-brand-name">Sorso</span>
-      <span class="login-brand-tag">taccuino di degustazione</span>
+      <span class="login-brand-tag" data-i18n="login.tag">taccuino di degustazione</span>
     </div>
-    <p class="login-intro">Accedi con Google per ritrovare le tue schede su ogni dispositivo.</p>
+    <p class="login-intro" data-i18n="login.intro">Accedi con Google per ritrovare le tue schede su ogni dispositivo.</p>
     <div class="login-error" id="loginError"></div>
     <button type="button" class="login-google" id="loginGoogleBtn">
       <svg width="18" height="18" viewBox="0 0 48 48" aria-hidden="true"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.9 29.3 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.1 8 3l6-6C34.5 5.1 29.5 3 24 3 12.4 3 3 12.4 3 24s9.4 21 21 21 21-9.4 21-21c0-1.2-.1-2.4-.4-3.5z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.6 15.9 18.9 13 24 13c3.1 0 5.8 1.1 8 3l6-6C34.5 5.1 29.5 3 24 3 16.3 3 9.6 7.4 6.3 14.7z"/><path fill="#4CAF50" d="M24 45c5.3 0 10.2-2 13.9-5.4l-6.4-5.4C29.4 35.9 26.8 37 24 37c-5.3 0-9.7-3.5-11.3-8.2l-6.6 5.1C9.5 40.6 16.2 45 24 45z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.3-2.3 4.3-4.3 5.7l6.4 5.4C39.9 37.5 43 31.2 43 24c0-1.2-.1-2.4-.4-3.5z"/></svg>
-      Accedi con Google
+      <span data-i18n="login.google">Accedi con Google</span>
     </button>
-    <button type="button" class="login-skip" id="loginSkip">Continua senza account, solo su questo dispositivo</button>
-    <p class="login-note">Senza account con Google, se cambi dispositivo o cancelli i dati del browser le schede si perdono: non essendoci una password, non c'è modo di recuperarle.</p>
-    <a class="login-coffee-link" href="https://buymeacoffee.com/papalino" target="_blank" rel="noopener noreferrer"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 22h8"/><path d="M12 15v7"/><path d="M12 15a7 7 0 0 0 7-7V3H5v5a7 7 0 0 0 7 7z"/></svg> Offrimi un calice</a>
+    <button type="button" class="login-skip" id="loginSkip" data-i18n="login.skip">Continua senza account, solo su questo dispositivo</button>
+    <p class="login-note" data-i18n="login.note">Senza account con Google, se cambi dispositivo o cancelli i dati del browser le schede si perdono: non essendoci una password, non c'è modo di recuperarle.</p>
+    <a class="login-coffee-link" href="https://buymeacoffee.com/papalino" target="_blank" rel="noopener noreferrer"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 22h8"/><path d="M12 15v7"/><path d="M12 15a7 7 0 0 0 7-7V3H5v5a7 7 0 0 0 7 7z"/></svg> <span data-i18n="coffee.label">Offrimi un calice</span></a>
   </div>
 </div>
 
@@ -629,26 +642,30 @@
 <div class="panel">
 
   <nav class="nav" id="nav">
-    <button type="button" class="on" data-tab="new"><span class="dot"></span><span class="lbl">Nuova</span></button>
-    <button type="button" data-tab="blind"><span class="dot"></span><span class="lbl">Alla cieca</span></button>
-    <button type="button" data-tab="book"><span class="dot"></span><span class="lbl">Taccuino</span></button>
-    <button type="button" data-tab="stats"><span class="dot"></span><span class="lbl">Statistiche</span></button>
-    <button type="button" data-tab="event"><span class="dot"></span><span class="lbl">Evento</span></button>
+    <button type="button" class="on" data-tab="new"><span class="dot"></span><span class="lbl" data-i18n="nav.new">Nuova</span></button>
+    <button type="button" data-tab="blind"><span class="dot"></span><span class="lbl" data-i18n="nav.blind">Alla cieca</span></button>
+    <button type="button" data-tab="book"><span class="dot"></span><span class="lbl" data-i18n="nav.book">Taccuino</span></button>
+    <button type="button" data-tab="stats"><span class="dot"></span><span class="lbl" data-i18n="nav.stats">Statistiche</span></button>
+    <button type="button" data-tab="event"><span class="dot"></span><span class="lbl" data-i18n="nav.event">Evento</span></button>
   </nav>
 
   <header class="hdr">
     <div class="hdr-top">
-      <button type="button" class="brand" id="brandBtn" title="Tocca per personalizzare"><span class="brand-name" id="brandName">Sorso</span><span class="brand-tag" id="brandOwner">il taccuino</span></button>
+      <button type="button" class="brand" id="brandBtn" data-i18n-title="hdr.brandTitle" title="Tocca per personalizzare"><span class="brand-name" id="brandName">Sorso</span><span class="brand-tag" id="brandOwner" data-i18n="hdr.brandTagDefault">il taccuino</span></button>
       <div class="hdr-ctrl">
+        <div class="lang-switch" id="langSwitch">
+          <button type="button" id="langIt" class="on">IT</button>
+          <button type="button" id="langEn">EN</button>
+        </div>
         <div class="theme-switch">
-          <button type="button" id="themeLight" class="on" title="Tema chiaro">&#9728;</button>
-          <button type="button" id="themeDark" title="Tema scuro">&#9790;</button>
+          <button type="button" id="themeLight" class="on" data-i18n-title="theme.light" title="Tema chiaro">&#9728;</button>
+          <button type="button" id="themeDark" data-i18n-title="theme.dark" title="Tema scuro">&#9790;</button>
         </div>
         <div class="avatar-wrap" id="avatarWrap">
           <button type="button" class="avatar-btn" id="avatarBtn"><span id="avatarInitials">?</span></button>
           <div class="avatar-menu hidden" id="avatarMenu">
             <p class="avatar-menu-name" id="avatarMenuName"></p>
-            <button type="button" class="avatar-menu-item" id="logoutMenuBtn">Esci</button>
+            <button type="button" class="avatar-menu-item" id="logoutMenuBtn" data-i18n="account.logout">Esci</button>
           </div>
         </div>
       </div>
@@ -656,16 +673,16 @@
     <div class="hdr-score">
       <span class="hdr-num" id="ringNum">0</span>
       <div class="hdr-side">
-        <div class="hdr-unit" id="ringUnit">su 100</div>
-        <div class="hdr-caption" id="hdrCaption">Nuova degustazione</div>
+        <div class="hdr-unit" id="ringUnit" data-i18n="hdr.of100">su 100</div>
+        <div class="hdr-caption" id="hdrCaption" data-i18n="hdr.newTasting">Nuova degustazione</div>
       </div>
     </div>
     <div class="hdr-evt hidden" id="hdrEvt"></div>
     <div class="segs" id="segs">
-      <button type="button" class="seg" data-goto="vis"><span class="seg-label">Visivo</span><span class="seg-track"><span class="seg-fill" id="segVis"></span></span><span class="seg-val" id="valVis">0/15</span></button>
-      <button type="button" class="seg" data-goto="olf"><span class="seg-label">Olfattivo</span><span class="seg-track"><span class="seg-fill" id="segOlf"></span></span><span class="seg-val" id="valOlf">0/30</span></button>
-      <button type="button" class="seg" data-goto="gus"><span class="seg-label">Gusto-olf.</span><span class="seg-track"><span class="seg-fill" id="segGus"></span></span><span class="seg-val" id="valGus">0/40</span></button>
-      <button type="button" class="seg" data-goto="fin"><span class="seg-label">Finale</span><span class="seg-track"><span class="seg-fill" id="segArm"></span></span><span class="seg-val" id="valArm">0/15</span></button>
+      <button type="button" class="seg" data-goto="vis"><span class="seg-label" data-i18n="seg.visual">Visivo</span><span class="seg-track"><span class="seg-fill" id="segVis"></span></span><span class="seg-val" id="valVis">0/15</span></button>
+      <button type="button" class="seg" data-goto="olf"><span class="seg-label" data-i18n="seg.olfactory">Olfattivo</span><span class="seg-track"><span class="seg-fill" id="segOlf"></span></span><span class="seg-val" id="valOlf">0/30</span></button>
+      <button type="button" class="seg" data-goto="gus"><span class="seg-label" data-i18n="seg.taste">Gusto-olf.</span><span class="seg-track"><span class="seg-fill" id="segGus"></span></span><span class="seg-val" id="valGus">0/40</span></button>
+      <button type="button" class="seg" data-goto="fin"><span class="seg-label" data-i18n="seg.final">Finale</span><span class="seg-track"><span class="seg-fill" id="segArm"></span></span><span class="seg-val" id="valArm">0/15</span></button>
     </div>
   </header>
 
@@ -675,28 +692,28 @@
     <section class="tabpane" id="pane-new">
       <div class="edit-banner hidden" id="editBanner">
         <span id="editBannerText"></span>
-        <button type="button" class="edit-cancel" id="editCancelBtn">Annulla</button>
+        <button type="button" class="edit-cancel" id="editCancelBtn" data-i18n="action.cancel">Annulla</button>
       </div>
       <div class="card" id="labelCard">
         <div class="card-head">
-          <span class="eyebrow">Etichetta</span><span class="fill"></span>
-          <span class="status" id="labelStatus">Nessuna foto</span>
+          <span class="eyebrow" data-i18n="card.label">Etichetta</span><span class="fill"></span>
+          <span class="status" id="labelStatus" data-i18n="label.none">Nessuna foto</span>
         </div>
         <label class="drop" id="dropZone">
           <span class="drop-icon"><span class="drop-lens"></span><span class="drop-ext">JPG · PNG</span></span>
           <span style="flex:1;min-width:0">
-            <span class="drop-title" style="display:block">Fotografa o trascina l'etichetta</span>
-            <span class="drop-sub" style="display:block">La allega alla scheda, da compilare a mano qui sotto.</span>
-            <span class="drop-btns"><span class="pill-solid">Scegli file</span><span class="pill-ghost">Scatta foto</span></span>
+            <span class="drop-title" style="display:block" data-i18n="label.dropTitle">Fotografa o trascina l'etichetta</span>
+            <span class="drop-sub" style="display:block" data-i18n="label.dropSub">La allega alla scheda, da compilare a mano qui sotto.</span>
+            <span class="drop-btns"><span class="pill-solid" data-i18n="label.chooseFile">Scegli file</span><span class="pill-ghost" data-i18n="label.takePhoto">Scatta foto</span></span>
           </span>
           <input type="file" accept="image/*" id="photoInput">
         </label>
         <div class="label-loaded hidden" id="labelLoaded">
-          <div class="label-thumb"><img id="labelThumb" alt="Etichetta caricata"></div>
+          <div class="label-thumb"><img id="labelThumb" data-i18n-alt="label.loadedAlt" alt="Etichetta caricata"></div>
           <div style="flex:1;min-width:0">
             <div class="label-name" id="labelName"></div>
             <div class="drop-btns">
-              <button type="button" class="pill-ghost" id="removeLabelBtn">Rimuovi</button>
+              <button type="button" class="pill-ghost" id="removeLabelBtn" data-i18n="label.remove">Rimuovi</button>
             </div>
           </div>
         </div>
@@ -704,54 +721,54 @@
 
       <div class="id-fields" id="idFields">
         <label class="fld fld-main">
-          <span class="fld-lab">Nome del vino</span>
-          <input class="in-title" id="nomeInput" placeholder="es. Flaccianello della Pieve">
+          <span class="fld-lab" data-i18n="field.wineName">Nome del vino</span>
+          <input class="in-title" id="nomeInput" data-i18n-placeholder="field.wineName.ph" placeholder="es. Flaccianello della Pieve">
         </label>
         <div class="id-row">
-          <label class="fld"><span class="fld-lab">Produttore</span>
-            <input class="in-line" id="produttoreInput" placeholder="es. Fontodi"></label>
-          <label class="fld fld-yr"><span class="fld-lab">Annata</span>
-            <input class="in-line" id="annataInput" inputmode="numeric" placeholder="es. 2021"></label>
+          <label class="fld"><span class="fld-lab" data-i18n="field.producer">Produttore</span>
+            <input class="in-line" id="produttoreInput" data-i18n-placeholder="field.producer.ph" placeholder="es. Fontodi"></label>
+          <label class="fld fld-yr"><span class="fld-lab" data-i18n="field.vintage">Annata</span>
+            <input class="in-line" id="annataInput" inputmode="numeric" data-i18n-placeholder="field.vintage.ph" placeholder="es. 2021"></label>
         </div>
         <div class="id-row">
-          <label class="fld"><span class="fld-lab">Denominazione</span>
-            <input class="in-line" id="denominazioneInput" placeholder="es. Colli della Toscana Centrale IGT"></label>
-          <label class="fld fld-price"><span class="fld-lab">Prezzo</span>
+          <label class="fld"><span class="fld-lab" data-i18n="field.denomination">Denominazione</span>
+            <input class="in-line" id="denominazioneInput" data-i18n-placeholder="field.denomination.ph" placeholder="es. Colli della Toscana Centrale IGT"></label>
+          <label class="fld fld-price"><span class="fld-lab" data-i18n="field.price">Prezzo</span>
             <span class="price-wrap"><input class="in-line in-price" id="prezzoInput" type="number" inputmode="decimal" min="0" step="0.01"><span class="price-cur">€</span></span></label>
         </div>
-        <label class="fld"><span class="fld-lab">Regione o paese</span>
-          <input class="in-line" id="regioneInput" placeholder="es. Toscana — Italia"></label>
-        <label class="fld"><span class="fld-lab">Affinamento</span>
-          <input class="in-line" id="affinamentoInput" placeholder="es. 24 mesi in barrique e botti di rovere"></label>
+        <label class="fld"><span class="fld-lab" data-i18n="field.region">Regione o paese</span>
+          <input class="in-line" id="regioneInput" data-i18n-placeholder="field.region.ph" placeholder="es. Toscana — Italia"></label>
+        <label class="fld"><span class="fld-lab" data-i18n="field.aging">Affinamento</span>
+          <input class="in-line" id="affinamentoInput" data-i18n-placeholder="field.aging.ph" placeholder="es. 24 mesi in barrique e botti di rovere"></label>
         <div class="type-chips" id="typeChips"></div>
 
         <div class="uv-box">
           <div class="uv-head">
-            <span class="uv-title">Uvaggio</span>
+            <span class="uv-title" data-i18n="blend.title">Uvaggio</span>
             <span class="uv-total" id="uvTotal">0%</span>
           </div>
           <div id="uvRows"></div>
           <div class="uv-actions">
-            <button type="button" class="uv-add" id="uvAddBtn">+ Vitigno</button>
-            <button type="button" class="uv-add" id="uvOtherBtn">+ Altro (resto)</button>
+            <button type="button" class="uv-add" id="uvAddBtn" data-i18n="blend.addGrape">+ Vitigno</button>
+            <button type="button" class="uv-add" id="uvOtherBtn" data-i18n="blend.addOther">+ Altro (resto)</button>
           </div>
           <div class="uv-hint" id="uvHint"></div>
         </div>
-        <div class="opt-hint">Tutti i campi oltre al nome sono facoltativi. L'uvaggio alimenta le statistiche per vitigno: più lo compili, più il tuo profilo diventa preciso.</div>
+        <div class="opt-hint" data-i18n="new.optHint">Tutti i campi oltre al nome sono facoltativi. L'uvaggio alimenta le statistiche per vitigno: più lo compili, più il tuo profilo diventa preciso.</div>
       </div>
 
       <div id="sectionsWrap"></div>
 
-      <p class="guide-note">Voci e terminologia della scheda AIS. Ogni giudizio si dà <b>in riferimento alla tipologia</b>: un vino delicato non viene penalizzato per non essere potente. Limpidezza, colore, corpo e tannino si descrivono soltanto, perché sono caratteristiche e non pregi. Pesi: visivo 10, olfattivo 30, gusto-olfattivo 40, finale 20.</p>
+      <p class="guide-note" data-i18n-html="new.guideNote">Voci e terminologia della scheda AIS. Ogni giudizio si dà <b>in riferimento alla tipologia</b>: un vino delicato non viene penalizzato per non essere potente. Limpidezza, colore, corpo e tannino si descrivono soltanto, perché sono caratteristiche e non pregi. Pesi: visivo 10, olfattivo 30, gusto-olfattivo 40, finale 20.</p>
 
       <div class="card evt-card">
-        <div class="card-head"><span class="eyebrow">Evento</span><span class="fill"></span>
-          <span class="status">facoltativo</span></div>
-        <p class="evt-intro">Serve solo se stai degustando <b>insieme ad altri</b>: tutti compilano la scheda degli stessi vini e alla fine esce la classifica dei più apprezzati — una serata in enoteca, un corso, una fiera. Se stai bevendo per conto tuo lascia com'è: la scheda finisce comunque nel tuo taccuino.</p>
+        <div class="card-head"><span class="eyebrow" data-i18n="event.eyebrow">Evento</span><span class="fill"></span>
+          <span class="status" data-i18n="event.optional">facoltativo</span></div>
+        <p class="evt-intro" data-i18n-html="event.introNew">Serve solo se stai degustando <b>insieme ad altri</b>: tutti compilano la scheda degli stessi vini e alla fine esce la classifica dei più apprezzati — una serata in enoteca, un corso, una fiera. Se stai bevendo per conto tuo lascia com'è: la scheda finisce comunque nel tuo taccuino.</p>
         <div class="sel-wrap"><select class="sel" id="evtQuickPicker"></select></div>
         <div class="evt-new hidden" id="evtQuickNewWrap">
-          <input class="in-sm" id="evtQuickNewInput" placeholder="Nome del nuovo evento" maxlength="48">
-          <button type="button" class="pill-solid" id="evtQuickCreateBtn">Crea</button>
+          <input class="in-sm" id="evtQuickNewInput" data-i18n-placeholder="event.newNamePh" placeholder="Nome del nuovo evento" maxlength="48">
+          <button type="button" class="pill-solid" id="evtQuickCreateBtn" data-i18n="action.create">Crea</button>
         </div>
         <div class="evt-note" id="evtQuickNote"></div>
       </div>
@@ -760,29 +777,29 @@
     <!-- ============ TACCUINO ============ -->
     <section class="tabpane hidden" id="pane-book">
       <div style="display:flex;flex-direction:column;gap:10px">
-        <div class="search-wrap"><span>&#9906;</span><input id="queryInput" placeholder="Cerca vino, produttore, denominazione..."></div>
+        <div class="search-wrap"><span>&#9906;</span><input id="queryInput" data-i18n-placeholder="book.searchPh" placeholder="Cerca vino, produttore, denominazione..."></div>
         <div class="filter-row" id="filterRow"></div>
       </div>
       <div id="cmpWrap"></div>
       <div id="bookList"></div>
 
       <div class="card backup-card">
-        <div class="card-head"><span class="eyebrow">Il tuo archivio</span><span class="fill"></span>
+        <div class="card-head"><span class="eyebrow" data-i18n="book.archiveEyebrow">Il tuo archivio</span><span class="fill"></span>
           <span class="status" id="storageMode"></span></div>
         <p class="note-line" id="backupNote"></p>
         <div class="backup-actions">
-          <button type="button" class="pill-solid" id="exportBtn">Salva copia</button>
-          <button type="button" class="pill-ghost" id="importBtn">Ripristina da copia</button>
+          <button type="button" class="pill-solid" id="exportBtn" data-i18n="book.exportBtn">Salva copia</button>
+          <button type="button" class="pill-ghost" id="importBtn" data-i18n="book.importBtn">Ripristina da copia</button>
           <input type="file" id="importInput" accept="application/json,.json" hidden>
         </div>
         <div class="note-line" id="backupStatus"></div>
       </div>
 
       <div class="card backup-card" id="accountCard">
-        <div class="card-head"><span class="eyebrow">Account</span><span class="fill"></span></div>
+        <div class="card-head"><span class="eyebrow" data-i18n="account.eyebrow">Account</span><span class="fill"></span></div>
         <p class="note-line" id="accountNote"></p>
         <div class="backup-actions">
-          <button type="button" class="pill-ghost hidden" id="logoutBtn">Esci dall'account</button>
+          <button type="button" class="pill-ghost hidden" id="logoutBtn" data-i18n="account.logoutFull">Esci dall'account</button>
           <button type="button" class="pill-solid hidden" id="loginPromptBtn">Accedi o crea un account</button>
         </div>
       </div>
@@ -796,48 +813,48 @@
     <!-- ============ ALLA CIECA ============ -->
     <section class="tabpane hidden" id="pane-blind">
       <div class="card">
-        <div class="card-head"><span class="eyebrow">Degustazione alla cieca</span><span class="fill"></span></div>
-        <p class="evt-intro">Assaggi senza guardare l'etichetta e provi a riconoscere vitigno, regione, tipologia e annata, da solo o a cena con gli amici, per vedere chi si avvicina di più. La prova resta nella sezione «Alla cieca» finché il vino è un mistero; quando lo sveli e scrivi il suo nome, la ritrovi anche nel tuo taccuino.</p>
+        <div class="card-head"><span class="eyebrow" data-i18n="blind.eyebrow">Degustazione alla cieca</span><span class="fill"></span></div>
+        <p class="evt-intro" data-i18n="blind.intro">Assaggi senza guardare l'etichetta e provi a riconoscere vitigno, regione, tipologia e annata, da solo o a cena con gli amici, per vedere chi si avvicina di più. La prova resta nella sezione «Alla cieca» finché il vino è un mistero; quando lo sveli e scrivi il suo nome, la ritrovi anche nel tuo taccuino.</p>
       </div>
 
       <div class="card">
-        <div class="card-head"><span class="eyebrow">La tua ipotesi</span><span class="fill"></span>
-          <span class="status">tutto facoltativo</span></div>
+        <div class="card-head"><span class="eyebrow" data-i18n="blind.guessEyebrow">La tua ipotesi</span><span class="fill"></span>
+          <span class="status" data-i18n="blind.allOptional">tutto facoltativo</span></div>
         <div class="id-fields">
           <div class="type-chips" id="bTypeChips"></div>
           <div class="id-row" style="margin-top:14px">
-            <label class="fld"><span class="fld-lab">Vitigno che pensi sia</span>
-              <input class="in-line" id="bVitignoInput" placeholder="es. Sangiovese"></label>
-            <label class="fld fld-yr"><span class="fld-lab">Annata</span>
-              <input class="in-line" id="bAnnataInput" inputmode="numeric" placeholder="es. 2019"></label>
+            <label class="fld"><span class="fld-lab" data-i18n="blind.grapeGuess">Vitigno che pensi sia</span>
+              <input class="in-line" id="bVitignoInput" data-i18n-placeholder="field.grape.ph" placeholder="es. Sangiovese"></label>
+            <label class="fld fld-yr"><span class="fld-lab" data-i18n="field.vintage">Annata</span>
+              <input class="in-line" id="bAnnataInput" inputmode="numeric" data-i18n-placeholder="field.vintageAlt.ph" placeholder="es. 2019"></label>
           </div>
-          <label class="fld"><span class="fld-lab">Regione o paese</span>
-            <input class="in-line" id="bRegioneInput" placeholder="es. Toscana — Italia"></label>
-          <label class="fld"><span class="fld-lab">Nome, se te la senti</span>
-            <input class="in-line" id="bNomeInput" placeholder="tira a indovinare"></label>
+          <label class="fld"><span class="fld-lab" data-i18n="field.region">Regione o paese</span>
+            <input class="in-line" id="bRegioneInput" data-i18n-placeholder="field.region.ph" placeholder="es. Toscana — Italia"></label>
+          <label class="fld"><span class="fld-lab" data-i18n="blind.nameGuess">Nome, se te la senti</span>
+            <input class="in-line" id="bNomeInput" data-i18n-placeholder="blind.nameGuess.ph" placeholder="tira a indovinare"></label>
         </div>
       </div>
 
       <div id="bSectionsWrap"></div>
 
       <div class="card">
-        <label class="fld"><span class="fld-lab">Come la chiami per ritrovarla</span>
-          <input class="in-line" id="bEtichettaInput" placeholder="es. Calice n.3 — serata del giovedì"></label>
+        <label class="fld"><span class="fld-lab" data-i18n="blind.labelName">Come la chiami per ritrovarla</span>
+          <input class="in-line" id="bEtichettaInput" data-i18n-placeholder="blind.labelName.ph" placeholder="es. Calice n.3 — serata del giovedì"></label>
       </div>
 
       <div class="edit-banner hidden" id="bEditBanner">
         <span id="bEditBannerText"></span>
-        <button type="button" class="edit-cancel" id="bEditCancelBtn">Annulla</button>
+        <button type="button" class="edit-cancel" id="bEditCancelBtn" data-i18n="action.cancel">Annulla</button>
       </div>
 
       <div class="act-row" style="padding:0">
-        <button type="button" class="act-reset" id="bResetBtn">Azzera</button>
-        <button type="button" class="act-save" id="bSaveBtn">Salva alla cieca</button>
+        <button type="button" class="act-reset" id="bResetBtn" data-i18n="action.clear">Azzera</button>
+        <button type="button" class="act-save" id="bSaveBtn" data-i18n="blind.saveBtn">Salva alla cieca</button>
       </div>
       <div class="note-line" id="bStatus" style="text-align:center"></div>
 
       <div class="card">
-        <div class="card-head"><span class="eyebrow">Le tue prove</span><span class="fill"></span>
+        <div class="card-head"><span class="eyebrow" data-i18n="blind.yourTrials">Le tue prove</span><span class="fill"></span>
           <span class="status" id="bCount"></span></div>
         <div id="bList"></div>
       </div>
@@ -846,12 +863,12 @@
     <!-- ============ EVENTO ============ -->
     <section class="tabpane hidden" id="pane-event">
       <div class="card">
-        <div class="card-head"><span class="eyebrow">Classifica evento</span><span class="fill"></span></div>
-        <p class="evt-intro">Qui vedi come sono stati votati i vini di una degustazione di gruppo. Le schede si collegano a un evento dal menu in fondo alla pagina "Nuova".</p>
+        <div class="card-head"><span class="eyebrow" data-i18n="event.leaderboardEyebrow">Classifica evento</span><span class="fill"></span></div>
+        <p class="evt-intro" data-i18n="event.introEvent">Qui vedi come sono stati votati i vini di una degustazione di gruppo. Le schede si collegano a un evento dal menu in fondo alla pagina "Nuova".</p>
         <div class="sel-stack">
           <div class="sel-wrap"><select class="sel" id="eventPicker"></select></div>
-          <div id="newEventWrap" class="hidden"><input class="in-sm" id="eventNewInput" placeholder="Nome del nuovo evento" style="width:100%"></div>
-          <button type="button" class="pill-solid" id="lookupBtn" style="width:100%;padding:12px">Aggiorna classifica</button>
+          <div id="newEventWrap" class="hidden"><input class="in-sm" id="eventNewInput" data-i18n-placeholder="event.newNamePh" placeholder="Nome del nuovo evento" style="width:100%"></div>
+          <button type="button" class="pill-solid" id="lookupBtn" style="width:100%;padding:12px" data-i18n="event.refreshBtn">Aggiorna classifica</button>
         </div>
         <div class="note-line" id="eventNote" style="margin-top:12px"></div>
         <div class="storage-warn hidden" id="storageWarn"></div>
@@ -866,7 +883,7 @@
   <div class="bottom" id="bottomBar">
     <div class="bottom-inner">
       <div class="act-row" id="actRow">
-        <button type="button" class="act-reset" id="resetBtn">Azzera</button>
+        <button type="button" class="act-reset" id="resetBtn" data-i18n="action.clear">Azzera</button>
         <button type="button" class="act-save" id="saveBtn">Salva · 0/100</button>
       </div>
     </div>
@@ -1173,9 +1190,9 @@ function bilancia(T){
   const m = MORBIDEZZE.reduce((s,r) => s + (T.morbidezze[r[0]] || 3), 0) / MORBIDEZZE.length;
   const scarto = d - m;
   let esito;
-  if(Math.abs(scarto) < 0.5) esito = "in equilibrio";
-  else if(scarto > 0) esito = Math.abs(scarto) > 1.2 ? "nettamente sbilanciato sulle durezze" : "un po' sbilanciato sulle durezze";
-  else esito = Math.abs(scarto) > 1.2 ? "nettamente sbilanciato sulle morbidezze" : "un po' sbilanciato sulle morbidezze";
+  if(Math.abs(scarto) < 0.5) esito = t("bilancia.equilibrio");
+  else if(scarto > 0) esito = Math.abs(scarto) > 1.2 ? t("bilancia.moltoDurezze") : t("bilancia.pocoDurezze");
+  else esito = Math.abs(scarto) > 1.2 ? t("bilancia.moltoMorbidezze") : t("bilancia.pocoMorbidezze");
   return {d, m, scarto, esito};
 }
 
@@ -1198,7 +1215,7 @@ function descInit(){
    STATO
    ============================================================ */
 const S = {
-  tab:"new", theme:"light", open:"vis",
+  tab:"new", theme:"light", lang:"it", open:"vis",
   photo:null, photoName:"", photoB64:null, photoMedia:null,
   owner:"", brandName:"Sorso",
   wine:{nome:"", produttore:"", annata:"", tipologia:"Rosso", denominazione:"",
@@ -1221,15 +1238,799 @@ const S = {
 const $ = id => document.getElementById(id);
 
 /* ============================================================
+   TRADUZIONE DELL'INTERFACCIA (IT/EN)
+   ------------------------------------------------------------
+   Traduce SOLO la cornice dell'interfaccia (etichette, pulsanti,
+   titoli, messaggi). Il vocabolario tecnico AIS — tipologie,
+   colori, vitigni, regioni, i giudizi descrittivi (PAROLE_VAL) —
+   resta sempre in italiano: è per scelta di prodotto, non è stato
+   dimenticato. Vedi le costanti TYPES/LIMPIDEZZA/COLORI/ecc. sopra.
+   ============================================================ */
+const I18N = {
+  it: {
+    "nav.new":"Nuova", "nav.blind":"Alla cieca", "nav.book":"Taccuino",
+    "nav.stats":"Statistiche", "nav.event":"Evento",
+
+    "theme.light":"Tema chiaro", "theme.dark":"Tema scuro",
+    "lang.it":"Italiano", "lang.en":"Inglese",
+
+    "coffee.label":"Offrimi un calice",
+
+    "login.tag":"taccuino di degustazione",
+    "login.intro":"Accedi con Google per ritrovare le tue schede su ogni dispositivo.",
+    "login.google":"Accedi con Google",
+    "login.skip":"Continua senza account, solo su questo dispositivo",
+    "login.note":"Senza account con Google, se cambi dispositivo o cancelli i dati del browser le schede si perdono: non essendoci una password, non c'è modo di recuperarle.",
+
+    "hdr.brandTitle":"Tocca per personalizzare",
+    "hdr.brandRenameTitle":"Tocca per rinominare il taccuino",
+    "hdr.brandTagDefault":"il taccuino",
+    "hdr.brandTagOwned":"il taccuino di {owner}",
+    "hdr.brandTagGeneric":"taccuino di degustazione",
+    "hdr.of100":"su 100",
+    "hdr.newTasting":"Nuova degustazione",
+    "hdr.blindCaption":"Alla cieca",
+    "hdr.classifica":"Classifica",
+    "hdr.average":"media",
+    "hdr.statsCaption":"Statistiche",
+    "hdr.wineInRace":"vino in gara", "hdr.wineInRacePl":"vini in gara",
+    "hdr.card":"scheda", "hdr.cardPl":"schede",
+    "hdr.savePrefix":"Salva · ", "hdr.updatePrefix":"Aggiorna · ",
+
+    "seg.visual":"Visivo", "seg.olfactory":"Olfattivo", "seg.taste":"Gusto-olf.", "seg.final":"Finale",
+    "seg.tasteShort":"Gusto",
+
+    "action.cancel":"Annulla", "action.clear":"Azzera", "action.create":"Crea",
+    "action.close":"Chiudi", "action.confirm":"Conferma", "action.edit":"Modifica",
+    "action.delete":"Elimina",
+
+    "account.eyebrow":"Account",
+    "account.logout":"Esci",
+    "account.logoutFull":"Esci dall'account",
+    "account.loginPrompt":"Accedi o crea un account",
+    "account.loginPromptHtml":"{icon} <span>Accedi con Google</span>",
+    "account.noteIn":"Hai effettuato l'accesso con Google come {who}: le tue schede si sincronizzano su ogni dispositivo dove accedi con lo stesso account Google.",
+    "account.noteOut":"Non hai effettuato l'accesso: le schede restano solo su questo dispositivo. Accedi con Google per ritrovarle ovunque.",
+    "account.avatarTitleIn":"Accesso come {who} — tocca per il menu account",
+    "account.avatarTitleOut":"Non hai effettuato l'accesso — tocca per accedere con Google",
+    "account.sessionExpired":"La sessione è scaduta: accedi di nuovo per continuare a sincronizzare le tue schede.",
+    "account.googleFailed":"Accesso con Google non riuscito.",
+
+    "card.label":"Etichetta",
+    "label.none":"Nessuna foto",
+    "label.loaded":"Foto caricata",
+    "label.dropTitle":"Fotografa o trascina l'etichetta",
+    "label.dropSub":"La allega alla scheda, da compilare a mano qui sotto.",
+    "label.chooseFile":"Scegli file",
+    "label.takePhoto":"Scatta foto",
+    "label.loadedAlt":"Etichetta caricata",
+    "label.remove":"Rimuovi",
+    "label.defaultName":"etichetta.jpg",
+
+    "field.wineName":"Nome del vino", "field.wineName.ph":"es. Flaccianello della Pieve",
+    "field.producer":"Produttore", "field.producer.ph":"es. Fontodi",
+    "field.vintage":"Annata", "field.vintage.ph":"es. 2021", "field.vintageAlt.ph":"es. 2019",
+    "field.denomination":"Denominazione", "field.denomination.ph":"es. Colli della Toscana Centrale IGT",
+    "field.price":"Prezzo",
+    "field.region":"Regione o paese", "field.region.ph":"es. Toscana — Italia",
+    "field.aging":"Affinamento", "field.aging.ph":"es. 24 mesi in barrique e botti di rovere",
+    "field.grape.ph":"es. Sangiovese",
+
+    "blend.title":"Uvaggio",
+    "blend.addGrape":"+ Vitigno",
+    "blend.addOther":"+ Altro (resto)",
+    "blend.removeGrape":"Rimuovi vitigno",
+    "blend.hintEmpty":"Facoltativo, ma è ciò che rende possibile il profilo per vitigno.",
+    "blend.hintOver":"Il totale supera il 100%: correggi le percentuali.",
+    "blend.hintMissing":"Manca il {pct}%: aggiungi un vitigno oppure chiudi con “Altro”, che non entra nelle statistiche.",
+    "blend.hintDone":"Uvaggio completo.",
+    "blend.sameGrapeAs":"stesso vitigno di {name}",
+
+    "new.optHint":"Tutti i campi oltre al nome sono facoltativi. L'uvaggio alimenta le statistiche per vitigno: più lo compili, più il tuo profilo diventa preciso.",
+    "new.guideNote":"Voci e terminologia della scheda AIS. Ogni giudizio si dà <b>in riferimento alla tipologia</b>: un vino delicato non viene penalizzato per non essere potente. Limpidezza, colore, corpo e tannino si descrivono soltanto, perché sono caratteristiche e non pregi. Pesi: visivo 10, olfattivo 30, gusto-olfattivo 40, finale 20.",
+
+    "event.eyebrow":"Evento",
+    "event.optional":"facoltativo",
+    "event.introNew":"Serve solo se stai degustando <b>insieme ad altri</b>: tutti compilano la scheda degli stessi vini e alla fine esce la classifica dei più apprezzati — una serata in enoteca, un corso, una fiera. Se stai bevendo per conto tuo lascia com'è: la scheda finisce comunque nel tuo taccuino.",
+    "event.introEvent":"Qui vedi come sono stati votati i vini di una degustazione di gruppo. Le schede si collegano a un evento dal menu in fondo alla pagina \"Nuova\".",
+    "event.newNamePh":"Nome del nuovo evento",
+    "event.refreshBtn":"Aggiorna classifica",
+    "event.leaderboardEyebrow":"Classifica evento",
+    "event.none":"Nessun evento — degustazione personale",
+    "event.createNew":"+ Crea nuovo evento…",
+    "event.createNewShort":"+ Nuovo evento…",
+    "event.pickOne":"— scegli un evento —",
+    "event.noteNewMode":"Scrivi il nome e tocca Crea: l'evento sarà poi selezionabile anche dalle prossime schede.",
+    "event.noteLinked":"Questa scheda finirà anche nella classifica di \"{name}\".",
+    "event.noteHasEvents":"Collega la scheda a un evento per farla entrare nella sua classifica.",
+    "event.noteNoEvents":"Nessun evento ancora: creane uno qui sopra.",
+    "event.noteWillBeAdded":"Le degustazioni che salvi ora vengono aggiunte anche a \"{name}\".",
+    "event.noteCreateHint":"Scrivi il nome, poi tocca Aggiorna: l'evento viene creato e condiviso.",
+    "event.noteChooseOrCreate":"Scegli o crea un evento: i voti di tutti i partecipanti finiscono nella stessa classifica.",
+    "event.warnLocal":"Non hai effettuato l'accesso: la classifica raccoglie solo i voti di questo dispositivo, non quelli degli altri partecipanti. Accedi con Google — e fallo fare anche a loro — per condividere davvero i voti.",
+    "event.warnUnavailable":"Archivio non disponibile in questo browser: i dati resteranno solo per questa sessione.",
+    "event.missingName":"Manca il nome",
+    "event.missingNameSub":"Scrivi il nome del nuovo evento.",
+    "event.noneChosen":"Nessun evento scelto",
+    "event.noneChosenSub":"Seleziona un evento dall'elenco per vedere la classifica.",
+    "event.loading":"Carico la classifica…",
+    "event.loadError":"Errore nel leggere la classifica: {msg}",
+    "event.noVotesYet":"Ancora nessun voto",
+    "event.noVotesYetSub":"Salva una degustazione con questo evento selezionato per aprire la classifica.",
+    "event.votesUnread":"{n} voti non sono stati letti. Tocca di nuovo \"Aggiorna classifica\".",
+    "event.createdLinked":"Evento \"{name}\" creato e collegato a questa scheda.",
+    "event.createFailed":"Non sono riuscito a creare l'evento. Riprova.",
+    "event.voteAdded":" Voto aggiunto a \"{name}\".",
+    "event.voteUntouched":" Il voto già in classifica non è stato toccato.",
+    "event.voteNotRegistered":" Attenzione: il voto per l'evento non è stato registrato.",
+    "event.noWineName":"Vino senza nome",
+
+    "sec.visualTitle":"Esame visivo",
+    "sec.olfactoryTitle":"Esame olfattivo",
+    "sec.tasteTitle":"Esame gusto-olfattivo",
+    "sec.finalTitle":"Valutazione finale",
+    "zona.descTitle":"Descrizione", "zona.descTag":"nessun punteggio",
+    "zona.valTitle":"Valutazione", "zona.valTag":"a punteggio",
+    "sel.clarity":"Limpidezza", "sel.color":"Colore", "sel.consistency":"Consistenza",
+    "sel.sugar":"Zuccheri", "sel.evolution":"Stato evolutivo",
+    "lvl.intensity":"Intensità", "lvl.body":"Corpo",
+    "lvl.recognizedAromas":"Profumi riconosciuti",
+    "lvl.hardnessGroup":"Elementi di durezza",
+    "lvl.softnessGroup":"Elementi di morbidezza",
+    "durezza.acidita":"Acidità", "durezza.tannicita":"Tannicità", "durezza.sapidita":"Sapidità",
+    "morbidezza.alcolicita":"Alcolicità", "morbidezza.morbidezza":"Morbidezza",
+    "bil.hardness":"Durezze", "bil.softness":"Morbidezze",
+    "bil.esito":"Il vino risulta <b>{esito}</b>. È una lettura, non un voto: tienine conto quando valuti l'equilibrio qui sotto.",
+    "bilancia.equilibrio":"in equilibrio",
+    "bilancia.pocoDurezze":"un po' sbilanciato sulle durezze",
+    "bilancia.moltoDurezze":"nettamente sbilanciato sulle durezze",
+    "bilancia.pocoMorbidezze":"un po' sbilanciato sulle morbidezze",
+    "bilancia.moltoMorbidezze":"nettamente sbilanciato sulle morbidezze",
+    "field.pairing.ph":"Abbinamento consigliato",
+    "field.notes.ph":"Note: evoluzione nel bicchiere, contesto, impressioni...",
+    "field.notesBlind.ph":"Note: cosa ti ha guidato verso la tua ipotesi...",
+    "val.weightDouble":"conta doppio",
+
+    "val.v.qualita.title":"Qualità visiva",
+    "val.v.qualita.help":"quanto l'aspetto è convincente e coerente con questo vino e la sua età",
+    "val.o.intensita.title":"Intensità",
+    "val.o.intensita.help":"la forza con cui i profumi arrivano, rispetto a quanto ne dovrebbe avere questo vino",
+    "val.o.complessita.title":"Complessità",
+    "val.o.complessita.help":"la varietà delle sfumature odorose che riesci a distinguere",
+    "val.o.qualita.title":"Qualità olfattiva",
+    "val.o.qualita.help":"la sintesi: piacevolezza, eleganza, nitidezza, assenza di difetti",
+    "val.g.equilibrio.title":"Equilibrio",
+    "val.g.equilibrio.help":"durezze e morbidezze in accordo fra loro, per come è fatto questo vino",
+    "val.g.intensita.title":"Intensità",
+    "val.g.intensita.help":"la forza delle sensazioni in bocca, rispetto alla tipologia",
+    "val.g.persistenza.title":"Persistenza",
+    "val.g.persistenza.help":"per quanti secondi resta la sensazione dopo aver deglutito",
+    "val.g.qualita.title":"Qualità gustativa",
+    "val.g.qualita.help":"la sintesi: piacevolezza, eleganza, finezza, tipicità",
+    "val.f.armonia.title":"Armonia",
+    "val.f.armonia.help":"la sintesi di tutto: caratteristiche coerenti fra loro e livello qualitativo d'insieme",
+
+    "judge.excellent":"Eccellente", "judge.great":"Ottimo", "judge.good":"Buono",
+    "judge.fair":"Discreto", "judge.sufficient":"Sufficiente", "judge.insufficient":"Insufficiente",
+
+    "book.searchPh":"Cerca vino, produttore, denominazione...",
+    "book.filterAll":"Tutti",
+    "book.sortLabel":"Ordina le schede",
+    "book.sort.scoreDesc":"Punteggio — dal più alto",
+    "book.sort.scoreAsc":"Punteggio — dal più basso",
+    "book.sort.dateDesc":"Data — più recenti",
+    "book.sort.dateAsc":"Data — meno recenti",
+    "book.sort.priceDesc":"Prezzo — dal più caro",
+    "book.sort.priceAsc":"Prezzo — dal più economico",
+    "book.cmpTitle":"Confronto",
+    "book.cmpToTouch":"Tocca per confrontare",
+    "book.noResultsTitle":"Nessun risultato",
+    "book.noResultsEmpty":"Salva una degustazione per iniziare.",
+    "book.noResultsFilter":"Prova a cambiare ricerca o filtro.",
+    "book.labelAlt":"Etichetta di {name}",
+    "book.defaultWineAlt":"vino",
+    "book.noName":"Senza nome",
+    "book.fromBlind":"alla cieca",
+    "book.footNote":"Tocca un vino per aprirlo, modificarne le note o eliminarlo.",
+    "book.footNoteCmp":" Tocca il punteggio di due vini per confrontarli.",
+    "book.dl.score":"Punteggio",
+    "book.dl.scoreDetail":"{total}/100 — visivo {v}, olfattivo {o}, gusto-olf. {g}, armonia {a}",
+    "book.dl.visual":"Visivo",
+    "book.dl.denomination":"Denominazione",
+    "book.dl.blend":"Uvaggio",
+    "book.dl.aging":"Affinamento",
+    "book.dl.price":"Prezzo",
+    "book.dl.descriptors":"Descrittori",
+    "book.dl.taste":"Gusto",
+    "book.dl.pairing":"Abbinamento",
+    "book.notesPh":"Note personali",
+    "book.editWine":"Modifica scheda",
+    "book.saveNotesOnly":"Salva solo le note",
+    "book.deleteWine":"Elimina scheda",
+    "book.saved":"Salvato",
+    "book.error":"Errore",
+    "book.confirmDelete":"Eliminare \"{name}\"? L'operazione non si può annullare.",
+    "book.thisWine":"questa scheda",
+    "book.archiveEyebrow":"Il tuo archivio",
+    "book.exportBtn":"Salva copia",
+    "book.importBtn":"Ripristina da copia",
+    "book.storage.cloud":"account {who}",
+    "book.storage.shared":"archivio Claude",
+    "book.storage.local":"archivio del browser",
+    "book.storage.memory":"solo questa sessione",
+    "book.note.memory":"Questo browser non permette di archiviare nulla: le schede spariranno chiudendo la pagina. Salva una copia prima di uscire.",
+    "book.note.local":"Le schede restano in questo browser, su questo dispositivo. Si perdono se cancelli i dati del browser o cambi telefono: la copia serve a quello.",
+    "book.note.cloud":"Le schede sono salvate sul tuo account: le ritrovi accedendo da qualsiasi dispositivo. Una copia periodica resta comunque la garanzia migliore.",
+    "book.note.shared":"Le schede sono archiviate da Claude. Una copia periodica resta comunque la garanzia migliore.",
+    "book.exportPreparing":"Preparo la copia…",
+    "book.exportDone":"{n} nel file.",
+    "book.exportOneSaved":"scheda salvata",
+    "book.exportManySaved":"schede salvate",
+    "book.exportFailed":"Non sono riuscito a preparare la copia.",
+    "book.importReading":"Leggo il file…",
+    "book.importNotOurs":"Questo file non sembra una copia di Sorso.",
+    "book.importDone":"{n} schede ripristinate{extra}.",
+    "book.importAlready":", {n} già presenti o illeggibili",
+    "book.importUnreadable":"File non leggibile.",
+
+    "stat.tastings":"Degustazioni",
+    "stat.average":"Media",
+    "stat.best":"Migliore",
+    "stat.avgPrice":"Prezzo medio",
+    "stat.topScoresAt":"Voti più alti a",
+    "stat.spread":"Escursione",
+    "stat.note.oneSaved":"scheda salvata", "stat.note.manySaved":"schede salvate",
+    "stat.note.withPrice":"{n} di {total} con prezzo",
+    "stat.note.avgOf":"{avg} di media",
+    "stat.note.pointsBetween":"punti fra un vino e l'altro",
+    "stats.emptyTitle":"Ancora nulla da contare",
+    "stats.emptySub":"Le statistiche compaiono dopo la prima degustazione salvata.",
+    "stats.profileEyebrow":"Il tuo profilo",
+    "stats.favWinesTitle":"I tuoi vini preferiti",
+    "stats.favWinesBlockedDiff":"voti diversi",
+    "stats.favWinesBlockedWhat":"una classifica dei preferiti",
+    "stats.favWinesBlockedWhat2":"il podio dei tuoi migliori",
+    "stats.grapeProfileTitle":"Profilo per vitigno",
+    "stats.grapeProfileIntro":"Ordinati per il voto medio che dai loro. Conta il vitigno prevalente di ogni vino; le voci “Altro” sono escluse.",
+    "stats.grapeProfileFoot":"Uvaggio indicato su <b>{con} di {n}</b> schede, completo al 100% su <b>{completa}</b>.",
+    "stats.grapeProfileFootMore":" Compilarlo sulle altre renderebbe questo profilo più affidabile.",
+    "stats.grapeProfileBlockedWhat":"compila vitigno e percentuale in una scheda",
+    "stats.oneWine":"vino", "stats.manyWines":"vini",
+    "stats.sensoryTitle":"Profilo sensoriale",
+    "stats.sensoryOn":"su {n} schede",
+    "stats.sensoryBlockedWhat":"il radar del tuo palato",
+    "stats.byVoiceTitle":"Come giudichi, voce per voce",
+    "stats.byVoiceIntro":"Media di ogni voce sulla scala della scheda (0, poi da 2 a 7). La linea verticale è la sufficienza ({suff}): a destra sei generoso, a sinistra severo.",
+    "stats.priceTitle":"Quanto conta il prezzo",
+    "stats.priceTypical":"prezzo tipico",
+    "stats.priceSpent":"spesa registrata",
+    "stats.priceWithPrice":"schede col prezzo",
+    "stats.priceGapIntro":"Scarto fra il punteggio che hai dato e quello che ci si aspetterebbe a quel prezzo.",
+    "stats.priceWorthMore":"Valgono più di quanto costano",
+    "stats.priceNotWorth":"Non valgono il prezzo",
+    "stats.priceCloseToExpected":"I tuoi voti seguono da vicino il prezzo: nessun vino si discosta in modo netto.",
+    "stats.priceDoubleFoot":"Ogni raddoppio di prezzo vale in media <b>{pts} punti</b>. {verdict}",
+    "stats.priceVerdictUp":"Spendere di più, per te, alza davvero il voto.",
+    "stats.priceVerdictDown":"Curiosamente i vini più cari non ti convincono di più.",
+    "stats.priceVerdictFlat":"Il prezzo incide poco sui tuoi voti: paghi soprattutto il nome.",
+    "stats.priceNeedMore":"Con almeno 4 schede col prezzo posso dirti quali vini valgono più di quanto costano.",
+    "stats.priceBlockedWhat":"quali vini valgono quello che costano",
+    "stats.onePrice":"prezzo", "stats.manyPrices":"prezzi",
+    "stats.territoriesTitle":"Territori",
+    "stats.byCountry":"Per paese",
+    "stats.byZone":"Per zona",
+    "stats.distributionTitle":"Distribuzione dei tuoi voti",
+    "stats.distributionFoot":"Variabilità dei voti: <b>{sd} punti</b>{extra}",
+    "stats.distributionClose":" — dai voti piuttosto ravvicinati.",
+    "stats.distributionWide":" — spazi molto tra un vino e l'altro.",
+    "stats.distributionGood":" — buona escursione tra i vini.",
+    "stats.distributionUpTo":"fino a 59",
+    "stats.trendTitle":"Andamento nel tempo",
+    "stats.trendFirst":"prima scheda", "stats.trendLast":"ultima",
+    "stats.trendRange":"da {lo} a {hi}",
+    "stats.trendStable":"Il tuo metro di giudizio è stabile.",
+    "stats.trendStricter":"Nelle schede più recenti sei più severo di {pts} punti.",
+    "stats.trendMoreGenerous":"Nelle schede più recenti sei più generoso di {pts} punti.",
+    "stats.trendBlockedWhat":"se stai diventando più severo",
+    "stats.avgByTypeTitle":"Media per tipologia",
+    "stats.descriptorsTitle":"Descrittori più usati",
+    "stats.unlockGrows":"Si aggiungono man mano che il taccuino cresce",
+    "stats.phase.visual":"vista", "stats.phase.olfactory":"naso",
+    "stats.phase.taste":"bocca", "stats.phase.final":"finale",
+    "stats.prosa.avgNamed":"{name}, su {n} {schede} la tua media è <b>{avg}</b> ({giudizio}).",
+    "stats.prosa.avgAnon":"Su {n} {schede} la tua media è <b>{avg}</b> ({giudizio}).",
+    "stats.prosa.byType":"Fra le tipologie premi soprattutto i <b>{top}</b> ({topAvg} su {topN} schede), mentre i {bottom} restano a {bottomAvg}.",
+    "stats.prosa.byGrape":"Il vitigno che ti convince di più è il <b>{grape}</b>, {avg} di media su {n} vini.",
+    "stats.prosa.byRegion":"Il territorio che ti dà più soddisfazione: <b>{region}</b> ({avg} su {n} vini).",
+    "stats.prosa.avgPrice":"Spendi in media <b>{price}</b> per bottiglia.",
+
+    "blind.eyebrow":"Degustazione alla cieca",
+    "blind.intro":"Assaggi senza guardare l'etichetta e provi a riconoscere vitigno, regione, tipologia e annata, da solo o a cena con gli amici, per vedere chi si avvicina di più. La prova resta nella sezione «Alla cieca» finché il vino è un mistero; quando lo sveli e scrivi il suo nome, la ritrovi anche nel tuo taccuino.",
+    "blind.guessEyebrow":"La tua ipotesi",
+    "blind.allOptional":"tutto facoltativo",
+    "blind.grapeGuess":"Vitigno che pensi sia",
+    "blind.nameGuess":"Nome, se te la senti",
+    "blind.nameGuess.ph":"tira a indovinare",
+    "blind.labelName":"Come la chiami per ritrovarla",
+    "blind.labelName.ph":"es. Calice n.3 — serata del giovedì",
+    "blind.saveBtn":"Salva alla cieca",
+    "blind.yourTrials":"Le tue prove",
+    "blind.trial":"prova", "blind.trials":"prove",
+    "blind.noneYet":"Nessuna prova ancora. Compila la scheda qui sopra e salvala.",
+    "blind.noGuess":"nessuna ipotesi",
+    "blind.toReveal":"da svelare",
+    "blind.edit":"Modifica",
+    "blind.fix":"Correggi",
+    "blind.reveal":"Svela il vino",
+    "blind.was":"Era: <b>{name}</b>",
+    "blind.inBook":"nel taccuino",
+    "blind.k.type":"Tipologia", "blind.k.grape":"Vitigno", "blind.k.region":"Regione", "blind.k.vintage":"Annata",
+    "blind.confirmDelete":"Eliminare \"{name}\"?",
+    "blind.editingBadge":"Stai modificando <b>{name}</b>.",
+    "blind.editingWine":"una scheda",
+    "blind.editingTrial":"una prova",
+    "blind.noNameTrial":"Prova senza nome",
+    "blind.savingError":"Errore nel salvataggio: {msg}",
+    "blind.saveFailed":"set fallita",
+    "blind.unknown":"sconosciuto",
+    "blind.updated":"Prova aggiornata.",
+    "blind.saved":"Prova salvata. Quando scopri il vino, tocca “Svela il vino”.",
+    "blind.cleared":"Scheda azzerata.",
+    "blind.editCancelled":"Modifica annullata.",
+    "blind.editingNotify":"Stai modificando una prova. Salva per aggiornarla.",
+    "blind.saveErrorGeneric":"Non sono riuscito a salvare.",
+    "blind.guessedNOfM":"Ne hai indovinati {ok} su {tot}.",
+    "blind.revealed":"Vino svelato.",
+    "blind.alsoAddedToBook":" Aggiunta anche al taccuino.",
+    "blind.noNameStaysHere":" Senza nome resta solo qui: nel taccuino servirebbe almeno quello.",
+    "blind.reveal.title":"Che vino era davvero?",
+    "blind.reveal.name":"Nome", "blind.reveal.name.ph":"es. Barolo Cannubi",
+    "blind.reveal.producer":"Produttore", "blind.reveal.producer.ph":"es. Sandrone",
+    "blind.reveal.vintage":"Annata", "blind.reveal.vintage.ph":"2019",
+    "blind.reveal.grape":"Vitigno prevalente", "blind.reveal.grape.ph":"es. Nebbiolo",
+    "blind.reveal.region":"Regione o paese", "blind.reveal.region.ph":"es. Piemonte — Italia",
+    "blind.reveal.price":"Prezzo",
+    "blind.reveal.note":"Col nome compilato la scheda entra anche nel taccuino, con i voti che hai dato alla cieca.",
+
+    "new.nameMissing":"Manca il nome del vino.",
+    "new.saving":"Salvataggio...",
+    "new.savingError":"Errore nel salvataggio: {msg}",
+    "new.saveFailed":"set fallita",
+    "new.unknown":"sconosciuto",
+    "new.updated":"Scheda aggiornata.",
+    "new.saved":"Degustazione salvata.",
+    "new.editing":"Stai modificando \"{name}\".",
+    "new.editingSave":"Stai modificando \"{name}\". Salva per aggiornarla.",
+    "new.editingFallback":"una scheda",
+    "new.editCancelled":"Modifica annullata.",
+    "new.cleared":"Scheda azzerata.",
+    "new.photoLoaded":"Foto caricata",
+    "new.editingBannerHtml":"Stai modificando <b>{name}</b>. Le modifiche sostituiranno quella già in archivio.",
+
+    "ac.noMatch":"Nessuna corrispondenza. Puoi comunque scrivere il tuo valore.",
+    "ac.radarLabel":"Profilo sensoriale medio",
+    "ac.columnsLabel":"Distribuzione dei voti",
+    "ac.scatterLabel":"Prezzo e punteggio",
+    "ac.yourProfile":"il tuo profilo",
+    "ac.sufficiency":"sufficienza (60%)",
+    "ac.scoreAtPrice":"{score} a {price}",
+
+    "brand.askOwner":"Di chi è questo taccuino?",
+    "brand.askName":"Come vuoi chiamarlo? (lascia vuoto per “Sorso”)"
+  },
+  en: {
+    "nav.new":"New", "nav.blind":"Blind", "nav.book":"Notebook",
+    "nav.stats":"Stats", "nav.event":"Event",
+
+    "theme.light":"Light theme", "theme.dark":"Dark theme",
+    "lang.it":"Italian", "lang.en":"English",
+
+    "coffee.label":"Buy me a glass",
+
+    "login.tag":"tasting notebook",
+    "login.intro":"Sign in with Google to find your notes on every device.",
+    "login.google":"Sign in with Google",
+    "login.skip":"Continue without an account, on this device only",
+    "login.note":"Without a Google account, if you switch device or clear your browser data your notes are lost: since there is no password, there is no way to recover them.",
+
+    "hdr.brandTitle":"Tap to personalize",
+    "hdr.brandRenameTitle":"Tap to rename the notebook",
+    "hdr.brandTagDefault":"the notebook",
+    "hdr.brandTagOwned":"{owner}'s notebook",
+    "hdr.brandTagGeneric":"tasting notebook",
+    "hdr.of100":"out of 100",
+    "hdr.newTasting":"New tasting",
+    "hdr.blindCaption":"Blind tasting",
+    "hdr.classifica":"Leaderboard",
+    "hdr.average":"average",
+    "hdr.statsCaption":"Statistics",
+    "hdr.wineInRace":"wine in the running", "hdr.wineInRacePl":"wines in the running",
+    "hdr.card":"entry", "hdr.cardPl":"entries",
+    "hdr.savePrefix":"Save · ", "hdr.updatePrefix":"Update · ",
+
+    "seg.visual":"Visual", "seg.olfactory":"Aroma", "seg.taste":"Taste-aroma", "seg.final":"Final",
+    "seg.tasteShort":"Taste",
+
+    "action.cancel":"Cancel", "action.clear":"Clear", "action.create":"Create",
+    "action.close":"Close", "action.confirm":"Confirm", "action.edit":"Edit",
+    "action.delete":"Delete",
+
+    "account.eyebrow":"Account",
+    "account.logout":"Sign out",
+    "account.logoutFull":"Sign out of account",
+    "account.loginPrompt":"Sign in or create an account",
+    "account.loginPromptHtml":"{icon} <span>Sign in with Google</span>",
+    "account.noteIn":"You are signed in with Google as {who}: your entries sync across every device where you sign in with the same Google account.",
+    "account.noteOut":"You are not signed in: entries stay only on this device. Sign in with Google to find them anywhere.",
+    "account.avatarTitleIn":"Signed in as {who} — tap for the account menu",
+    "account.avatarTitleOut":"Not signed in — tap to sign in with Google",
+    "account.sessionExpired":"Your session has expired: sign in again to keep syncing your entries.",
+    "account.googleFailed":"Sign-in with Google failed.",
+
+    "card.label":"Label",
+    "label.none":"No photo",
+    "label.loaded":"Photo uploaded",
+    "label.dropTitle":"Photograph or drag the label here",
+    "label.dropSub":"It's attached to the entry, to fill in by hand below.",
+    "label.chooseFile":"Choose file",
+    "label.takePhoto":"Take photo",
+    "label.loadedAlt":"Uploaded label",
+    "label.remove":"Remove",
+    "label.defaultName":"label.jpg",
+
+    "field.wineName":"Wine name", "field.wineName.ph":"e.g. Flaccianello della Pieve",
+    "field.producer":"Producer", "field.producer.ph":"e.g. Fontodi",
+    "field.vintage":"Vintage", "field.vintage.ph":"e.g. 2021", "field.vintageAlt.ph":"e.g. 2019",
+    "field.denomination":"Denomination", "field.denomination.ph":"e.g. Colli della Toscana Centrale IGT",
+    "field.price":"Price",
+    "field.region":"Region or country", "field.region.ph":"e.g. Tuscany — Italy",
+    "field.aging":"Aging", "field.aging.ph":"e.g. 24 months in barrique and oak casks",
+    "field.grape.ph":"e.g. Sangiovese",
+
+    "blend.title":"Blend",
+    "blend.addGrape":"+ Grape",
+    "blend.addOther":"+ Other (remainder)",
+    "blend.removeGrape":"Remove grape",
+    "blend.hintEmpty":"Optional, but it's what makes the per-grape profile possible.",
+    "blend.hintOver":"The total is over 100%: fix the percentages.",
+    "blend.hintMissing":"{pct}% missing: add a grape or close it off with “Other”, which does not count toward statistics.",
+    "blend.hintDone":"Blend complete.",
+    "blend.sameGrapeAs":"same grape as {name}",
+
+    "new.optHint":"All fields besides the name are optional. The blend feeds the per-grape statistics: the more you fill it in, the more precise your profile becomes.",
+    "new.guideNote":"Terms and wording from the AIS tasting sheet. Every judgment is given <b>relative to the type</b>: a delicate wine is not penalized for not being powerful. Clarity, color, body and tannin are only described, because they are characteristics, not merits. Weights: visual 10, aroma 30, taste-aroma 40, final 20.",
+
+    "event.eyebrow":"Event",
+    "event.optional":"optional",
+    "event.introNew":"Only needed if you're tasting <b>together with others</b>: everyone fills in the sheet for the same wines and at the end a ranking of the most appreciated ones comes out — an evening at a wine bar, a course, a fair. If you're drinking on your own leave this as is: the entry still ends up in your notebook.",
+    "event.introEvent":"Here you see how the wines of a group tasting were voted. Entries are linked to an event from the menu at the bottom of the \"New\" page.",
+    "event.newNamePh":"New event name",
+    "event.refreshBtn":"Refresh leaderboard",
+    "event.leaderboardEyebrow":"Event leaderboard",
+    "event.none":"No event — personal tasting",
+    "event.createNew":"+ Create new event…",
+    "event.createNewShort":"+ New event…",
+    "event.pickOne":"— choose an event —",
+    "event.noteNewMode":"Write the name and tap Create: the event will then be selectable from future entries too.",
+    "event.noteLinked":"This entry will also count toward the \"{name}\" leaderboard.",
+    "event.noteHasEvents":"Link the entry to an event so it counts toward its leaderboard.",
+    "event.noteNoEvents":"No events yet: create one above.",
+    "event.noteWillBeAdded":"Tastings you save now are also added to \"{name}\".",
+    "event.noteCreateHint":"Write the name, then tap Refresh: the event is created and shared.",
+    "event.noteChooseOrCreate":"Choose or create an event: every participant's votes end up in the same leaderboard.",
+    "event.warnLocal":"You are not signed in: the leaderboard only collects votes from this device, not from other participants. Sign in with Google — and have them do the same — to really share the votes.",
+    "event.warnUnavailable":"Storage not available in this browser: data will only last for this session.",
+    "event.missingName":"Name missing",
+    "event.missingNameSub":"Write the name of the new event.",
+    "event.noneChosen":"No event chosen",
+    "event.noneChosenSub":"Select an event from the list to see the leaderboard.",
+    "event.loading":"Loading the leaderboard…",
+    "event.loadError":"Error reading the leaderboard: {msg}",
+    "event.noVotesYet":"No votes yet",
+    "event.noVotesYetSub":"Save a tasting with this event selected to open the leaderboard.",
+    "event.votesUnread":"{n} votes could not be read. Tap \"Refresh leaderboard\" again.",
+    "event.createdLinked":"Event \"{name}\" created and linked to this entry.",
+    "event.createFailed":"Couldn't create the event. Try again.",
+    "event.voteAdded":" Vote added to \"{name}\".",
+    "event.voteUntouched":" The vote already on the leaderboard was left untouched.",
+    "event.voteNotRegistered":" Warning: the vote for the event was not registered.",
+    "event.noWineName":"Unnamed wine",
+
+    "sec.visualTitle":"Visual examination",
+    "sec.olfactoryTitle":"Olfactory examination",
+    "sec.tasteTitle":"Taste-olfactory examination",
+    "sec.finalTitle":"Final evaluation",
+    "zona.descTitle":"Description", "zona.descTag":"no score",
+    "zona.valTitle":"Evaluation", "zona.valTag":"scored",
+    "sel.clarity":"Clarity", "sel.color":"Color", "sel.consistency":"Consistency",
+    "sel.sugar":"Sugar", "sel.evolution":"Evolutionary state",
+    "lvl.intensity":"Intensity", "lvl.body":"Body",
+    "lvl.recognizedAromas":"Recognized aromas",
+    "lvl.hardnessGroup":"Hardness components",
+    "lvl.softnessGroup":"Softness components",
+    "durezza.acidita":"Acidity", "durezza.tannicita":"Tannin", "durezza.sapidita":"Sapidity",
+    "morbidezza.alcolicita":"Alcohol", "morbidezza.morbidezza":"Softness",
+    "bil.hardness":"Hardness", "bil.softness":"Softness",
+    "bil.esito":"The wine turns out <b>{esito}</b>. It's a reading, not a score: keep it in mind when you judge the balance below.",
+    "bilancia.equilibrio":"balanced",
+    "bilancia.pocoDurezze":"slightly leaning toward hardness",
+    "bilancia.moltoDurezze":"clearly leaning toward hardness",
+    "bilancia.pocoMorbidezze":"slightly leaning toward softness",
+    "bilancia.moltoMorbidezze":"clearly leaning toward softness",
+    "field.pairing.ph":"Suggested pairing",
+    "field.notes.ph":"Notes: evolution in the glass, context, impressions...",
+    "field.notesBlind.ph":"Notes: what guided you toward your guess...",
+    "val.weightDouble":"counts double",
+
+    "val.v.qualita.title":"Visual quality",
+    "val.v.qualita.help":"how convincing and coherent the appearance is with this wine and its age",
+    "val.o.intensita.title":"Intensity",
+    "val.o.intensita.help":"how forcefully the aromas come through, relative to how much this wine should have",
+    "val.o.complessita.title":"Complexity",
+    "val.o.complessita.help":"the variety of aromatic nuances you can pick out",
+    "val.o.qualita.title":"Olfactory quality",
+    "val.o.qualita.help":"the synthesis: pleasantness, elegance, cleanliness, absence of flaws",
+    "val.g.equilibrio.title":"Balance",
+    "val.g.equilibrio.help":"hardness and softness in agreement with each other, for how this wine is made",
+    "val.g.intensita.title":"Intensity",
+    "val.g.intensita.help":"the strength of the sensations in the mouth, relative to the type",
+    "val.g.persistenza.title":"Length",
+    "val.g.persistenza.help":"how many seconds the sensation lasts after swallowing",
+    "val.g.qualita.title":"Palate quality",
+    "val.g.qualita.help":"the synthesis: pleasantness, elegance, finesse, typicity",
+    "val.f.armonia.title":"Harmony",
+    "val.f.armonia.help":"the synthesis of everything: coherent characteristics and overall quality level",
+
+    "judge.excellent":"Excellent", "judge.great":"Great", "judge.good":"Good",
+    "judge.fair":"Fair", "judge.sufficient":"Sufficient", "judge.insufficient":"Insufficient",
+
+    "book.searchPh":"Search wine, producer, denomination...",
+    "book.filterAll":"All",
+    "book.sortLabel":"Sort entries",
+    "book.sort.scoreDesc":"Score — highest first",
+    "book.sort.scoreAsc":"Score — lowest first",
+    "book.sort.dateDesc":"Date — most recent",
+    "book.sort.dateAsc":"Date — least recent",
+    "book.sort.priceDesc":"Price — priciest first",
+    "book.sort.priceAsc":"Price — cheapest first",
+    "book.cmpTitle":"Comparison",
+    "book.cmpToTouch":"Tap to compare",
+    "book.noResultsTitle":"No results",
+    "book.noResultsEmpty":"Save a tasting to get started.",
+    "book.noResultsFilter":"Try changing the search or filter.",
+    "book.labelAlt":"Label of {name}",
+    "book.defaultWineAlt":"wine",
+    "book.noName":"Unnamed",
+    "book.fromBlind":"blind tasting",
+    "book.footNote":"Tap a wine to open it, edit its notes or delete it.",
+    "book.footNoteCmp":" Tap the score of two wines to compare them.",
+    "book.dl.score":"Score",
+    "book.dl.scoreDetail":"{total}/100 — visual {v}, aroma {o}, taste-aroma {g}, harmony {a}",
+    "book.dl.visual":"Visual",
+    "book.dl.denomination":"Denomination",
+    "book.dl.blend":"Blend",
+    "book.dl.aging":"Aging",
+    "book.dl.price":"Price",
+    "book.dl.descriptors":"Descriptors",
+    "book.dl.taste":"Taste",
+    "book.dl.pairing":"Pairing",
+    "book.notesPh":"Personal notes",
+    "book.editWine":"Edit entry",
+    "book.saveNotesOnly":"Save notes only",
+    "book.deleteWine":"Delete entry",
+    "book.saved":"Saved",
+    "book.error":"Error",
+    "book.confirmDelete":"Delete \"{name}\"? This cannot be undone.",
+    "book.thisWine":"this entry",
+    "book.archiveEyebrow":"Your archive",
+    "book.exportBtn":"Save a copy",
+    "book.importBtn":"Restore from copy",
+    "book.storage.cloud":"account {who}",
+    "book.storage.shared":"Claude storage",
+    "book.storage.local":"browser storage",
+    "book.storage.memory":"this session only",
+    "book.note.memory":"This browser doesn't allow storing anything: entries will disappear when you close the page. Save a copy before leaving.",
+    "book.note.local":"Entries stay in this browser, on this device. They're lost if you clear the browser's data or change phone: that's what the copy is for.",
+    "book.note.cloud":"Entries are saved to your account: you'll find them by signing in from any device. A periodic copy is still the best guarantee.",
+    "book.note.shared":"Entries are stored by Claude. A periodic copy is still the best guarantee.",
+    "book.exportPreparing":"Preparing the copy…",
+    "book.exportDone":"{n} in the file.",
+    "book.exportOneSaved":"entry saved",
+    "book.exportManySaved":"entries saved",
+    "book.exportFailed":"Couldn't prepare the copy.",
+    "book.importReading":"Reading the file…",
+    "book.importNotOurs":"This file doesn't look like a Sorso backup.",
+    "book.importDone":"{n} entries restored{extra}.",
+    "book.importAlready":", {n} already present or unreadable",
+    "book.importUnreadable":"File not readable.",
+
+    "stat.tastings":"Tastings",
+    "stat.average":"Average",
+    "stat.best":"Best",
+    "stat.avgPrice":"Average price",
+    "stat.topScoresAt":"Highest scores for",
+    "stat.spread":"Spread",
+    "stat.note.oneSaved":"entry saved", "stat.note.manySaved":"entries saved",
+    "stat.note.withPrice":"{n} of {total} with a price",
+    "stat.note.avgOf":"{avg} average",
+    "stat.note.pointsBetween":"points between one wine and another",
+    "stats.emptyTitle":"Nothing to count yet",
+    "stats.emptySub":"Statistics appear after your first saved tasting.",
+    "stats.profileEyebrow":"Your profile",
+    "stats.favWinesTitle":"Your favorite wines",
+    "stats.favWinesBlockedDiff":"different scores",
+    "stats.favWinesBlockedWhat":"a ranking of favorites",
+    "stats.favWinesBlockedWhat2":"the podium of your best",
+    "stats.grapeProfileTitle":"Profile by grape",
+    "stats.grapeProfileIntro":"Sorted by the average score you give them. Counts the prevailing grape of each wine; “Other” entries are excluded.",
+    "stats.grapeProfileFoot":"Blend indicated on <b>{con} of {n}</b> entries, 100% complete on <b>{completa}</b>.",
+    "stats.grapeProfileFootMore":" Filling it in on the others would make this profile more reliable.",
+    "stats.grapeProfileBlockedWhat":"fill in grape and percentage on one entry",
+    "stats.oneWine":"wine", "stats.manyWines":"wines",
+    "stats.sensoryTitle":"Sensory profile",
+    "stats.sensoryOn":"on {n} entries",
+    "stats.sensoryBlockedWhat":"the radar of your palate",
+    "stats.byVoiceTitle":"How you judge, voice by voice",
+    "stats.byVoiceIntro":"Average of each item on the entry's scale (0, then from 2 to 7). The vertical line is the passing mark ({suff}): to the right you're generous, to the left you're strict.",
+    "stats.priceTitle":"How much price matters",
+    "stats.priceTypical":"typical price",
+    "stats.priceSpent":"total spent",
+    "stats.priceWithPrice":"entries with a price",
+    "stats.priceGapIntro":"Gap between the score you gave and what would be expected at that price.",
+    "stats.priceWorthMore":"Worth more than they cost",
+    "stats.priceNotWorth":"Not worth the price",
+    "stats.priceCloseToExpected":"Your scores closely follow the price: no wine stands out sharply.",
+    "stats.priceDoubleFoot":"Every doubling of price is worth on average <b>{pts} points</b>. {verdict}",
+    "stats.priceVerdictUp":"Spending more, for you, really does raise the score.",
+    "stats.priceVerdictDown":"Interestingly, pricier wines don't win you over more.",
+    "stats.priceVerdictFlat":"Price has little effect on your scores: you're mostly paying for the name.",
+    "stats.priceNeedMore":"With at least 4 entries with a price I can tell you which wines are worth more than they cost.",
+    "stats.priceBlockedWhat":"which wines are worth what they cost",
+    "stats.onePrice":"price", "stats.manyPrices":"prices",
+    "stats.territoriesTitle":"Territories",
+    "stats.byCountry":"By country",
+    "stats.byZone":"By zone",
+    "stats.distributionTitle":"Distribution of your scores",
+    "stats.distributionFoot":"Score variability: <b>{sd} points</b>{extra}",
+    "stats.distributionClose":" — your scores are quite close together.",
+    "stats.distributionWide":" — you spread scores widely between wines.",
+    "stats.distributionGood":" — good spread between wines.",
+    "stats.distributionUpTo":"up to 59",
+    "stats.trendTitle":"Trend over time",
+    "stats.trendFirst":"first entry", "stats.trendLast":"latest",
+    "stats.trendRange":"from {lo} to {hi}",
+    "stats.trendStable":"Your judgment has been stable.",
+    "stats.trendStricter":"In your more recent entries you're {pts} points stricter.",
+    "stats.trendMoreGenerous":"In your more recent entries you're {pts} points more generous.",
+    "stats.trendBlockedWhat":"whether you're becoming stricter",
+    "stats.avgByTypeTitle":"Average by type",
+    "stats.descriptorsTitle":"Most used descriptors",
+    "stats.unlockGrows":"These get added as your notebook grows",
+    "stats.phase.visual":"sight", "stats.phase.olfactory":"nose",
+    "stats.phase.taste":"mouth", "stats.phase.final":"finish",
+    "stats.prosa.avgNamed":"{name}, over {n} {schede} your average is <b>{avg}</b> ({giudizio}).",
+    "stats.prosa.avgAnon":"Over {n} {schede} your average is <b>{avg}</b> ({giudizio}).",
+    "stats.prosa.byType":"Among the types you especially favor <b>{top}</b> ({topAvg} over {topN} entries), while {bottom} stay at {bottomAvg}.",
+    "stats.prosa.byGrape":"The grape that wins you over most is <b>{grape}</b>, averaging {avg} over {n} wines.",
+    "stats.prosa.byRegion":"The territory that satisfies you most: <b>{region}</b> ({avg} over {n} wines).",
+    "stats.prosa.avgPrice":"You spend on average <b>{price}</b> per bottle.",
+
+    "blind.eyebrow":"Blind tasting",
+    "blind.intro":"You taste without looking at the label and try to guess the grape, region, type and vintage, alone or over dinner with friends, to see who gets closest. The trial stays in the \"Blind\" section as long as the wine is a mystery; once you reveal it and write its name, you'll find it in your notebook too.",
+    "blind.guessEyebrow":"Your guess",
+    "blind.allOptional":"all optional",
+    "blind.grapeGuess":"Grape you think it is",
+    "blind.nameGuess":"Name, if you're brave enough",
+    "blind.nameGuess.ph":"take a guess",
+    "blind.labelName":"What you call it to find it again",
+    "blind.labelName.ph":"e.g. Glass no.3 — Thursday evening",
+    "blind.saveBtn":"Save blind trial",
+    "blind.yourTrials":"Your trials",
+    "blind.trial":"trial", "blind.trials":"trials",
+    "blind.noneYet":"No trials yet. Fill in the sheet above and save it.",
+    "blind.noGuess":"no guess",
+    "blind.toReveal":"to reveal",
+    "blind.edit":"Edit",
+    "blind.fix":"Fix",
+    "blind.reveal":"Reveal the wine",
+    "blind.was":"It was: <b>{name}</b>",
+    "blind.inBook":"in the notebook",
+    "blind.k.type":"Type", "blind.k.grape":"Grape", "blind.k.region":"Region", "blind.k.vintage":"Vintage",
+    "blind.confirmDelete":"Delete \"{name}\"?",
+    "blind.editingBadge":"You're editing <b>{name}</b>.",
+    "blind.editingWine":"an entry",
+    "blind.editingTrial":"a trial",
+    "blind.noNameTrial":"Unnamed trial",
+    "blind.savingError":"Error while saving: {msg}",
+    "blind.saveFailed":"save failed",
+    "blind.unknown":"unknown",
+    "blind.updated":"Trial updated.",
+    "blind.saved":"Trial saved. When you find out the wine, tap “Reveal the wine”.",
+    "blind.cleared":"Entry cleared.",
+    "blind.editCancelled":"Edit cancelled.",
+    "blind.editingNotify":"You're editing a trial. Save to update it.",
+    "blind.saveErrorGeneric":"Couldn't save.",
+    "blind.guessedNOfM":"You got {ok} out of {tot} right.",
+    "blind.revealed":"Wine revealed.",
+    "blind.alsoAddedToBook":" Also added to the notebook.",
+    "blind.noNameStaysHere":" Without a name it only stays here: the notebook needs at least that.",
+    "blind.reveal.title":"What wine was it really?",
+    "blind.reveal.name":"Name", "blind.reveal.name.ph":"e.g. Barolo Cannubi",
+    "blind.reveal.producer":"Producer", "blind.reveal.producer.ph":"e.g. Sandrone",
+    "blind.reveal.vintage":"Vintage", "blind.reveal.vintage.ph":"2019",
+    "blind.reveal.grape":"Prevailing grape", "blind.reveal.grape.ph":"e.g. Nebbiolo",
+    "blind.reveal.region":"Region or country", "blind.reveal.region.ph":"e.g. Piedmont — Italy",
+    "blind.reveal.price":"Price",
+    "blind.reveal.note":"With the name filled in, the entry also enters the notebook, with the scores you gave blind.",
+
+    "new.nameMissing":"The wine's name is missing.",
+    "new.saving":"Saving...",
+    "new.savingError":"Error while saving: {msg}",
+    "new.saveFailed":"save failed",
+    "new.unknown":"unknown",
+    "new.updated":"Entry updated.",
+    "new.saved":"Tasting saved.",
+    "new.editing":"You're editing \"{name}\".",
+    "new.editingSave":"You're editing \"{name}\". Save to update it.",
+    "new.editingFallback":"an entry",
+    "new.editCancelled":"Edit cancelled.",
+    "new.cleared":"Entry cleared.",
+    "new.photoLoaded":"Photo uploaded",
+    "new.editingBannerHtml":"You're editing <b>{name}</b>. The changes will replace the one already in the archive.",
+
+    "ac.noMatch":"No match found. You can still type your own value.",
+    "ac.radarLabel":"Average sensory profile",
+    "ac.columnsLabel":"Score distribution",
+    "ac.scatterLabel":"Price and score",
+    "ac.yourProfile":"your profile",
+    "ac.sufficiency":"passing mark (60%)",
+    "ac.scoreAtPrice":"{score} at {price}",
+
+    "brand.askOwner":"Whose notebook is this?",
+    "brand.askName":"What do you want to call it? (leave blank for “Sorso”)"
+  }
+};
+function t(key){ return (I18N[S.lang] && I18N[S.lang][key]) || I18N.it[key] || key; }
+/* sostituzione semplice di segnaposto {nome} dentro una stringa tradotta */
+function tf(key, vars){
+  var s = t(key);
+  if(vars) Object.keys(vars).forEach(function(k){ s = s.split("{"+k+"}").join(vars[k]); });
+  return s;
+}
+/* Applica le traduzioni al markup statico (mai toccato da una funzione
+   render*): la porta d'accesso e la cornice della shell. Le funzioni
+   render* traducono da sole il contenuto che generano a ogni chiamata. */
+function applyStaticText(){
+  document.querySelectorAll("[data-i18n]").forEach(el => { el.textContent = t(el.getAttribute("data-i18n")); });
+  document.querySelectorAll("[data-i18n-html]").forEach(el => { el.innerHTML = t(el.getAttribute("data-i18n-html")); });
+  document.querySelectorAll("[data-i18n-placeholder]").forEach(el => { el.placeholder = t(el.getAttribute("data-i18n-placeholder")); });
+  document.querySelectorAll("[data-i18n-title]").forEach(el => { el.title = t(el.getAttribute("data-i18n-title")); });
+  document.querySelectorAll("[data-i18n-aria]").forEach(el => { el.setAttribute("aria-label", t(el.getAttribute("data-i18n-aria"))); });
+  document.querySelectorAll("[data-i18n-alt]").forEach(el => { el.alt = t(el.getAttribute("data-i18n-alt")); });
+  document.title = "Sorso — " + t("login.tag");
+}
+const LANG_KEY = "sorso-lang";
+function setLang(lang){
+  S.lang = (lang === "en") ? "en" : "it";
+  try{ window.localStorage.setItem(LANG_KEY, S.lang); }catch(e){}
+  [["langIt","it"],["langEn","en"],["loginLangIt","it"],["loginLangEn","en"]].forEach(([id,code]) => {
+    const el = $(id); if(el) el.classList.toggle("on", S.lang === code);
+  });
+  applyStaticText();
+  try{ renderAll(); }catch(e){}
+  try{ renderAccount(); }catch(e){}
+}
+
+/* ============================================================
    PUNTEGGIO
    ============================================================ */
-function judge(t){
-  if(t>=95) return "Eccellente";
-  if(t>=90) return "Ottimo";
-  if(t>=80) return "Buono";
-  if(t>=70) return "Discreto";
-  if(t>=60) return "Sufficiente";
-  return "Insufficiente";
+function judge(score){
+  if(score>=95) return t("judge.excellent");
+  if(score>=90) return t("judge.great");
+  if(score>=80) return t("judge.good");
+  if(score>=70) return t("judge.fair");
+  if(score>=60) return t("judge.sufficient");
+  return t("judge.insufficient");
 }
 
 /* ============================================================
@@ -1239,27 +2040,27 @@ function renderHeader(){
   let num, unit, caption, showSegs;
   if(S.tab === "new"){
     const sc = scores();
-    num = sc.total; unit = "su 100"; caption = judge(sc.total); showSegs = true;
+    num = sc.total; unit = t("hdr.of100"); caption = judge(sc.total); showSegs = true;
     $("segVis").style.width = (sc.v/SEZ_MAX.v*100)+"%"; $("valVis").textContent = sc.v+"/"+SEZ_MAX.v;
     $("segOlf").style.width = (sc.o/SEZ_MAX.o*100)+"%"; $("valOlf").textContent = sc.o+"/"+SEZ_MAX.o;
     $("segGus").style.width = (sc.g/SEZ_MAX.g*100)+"%"; $("valGus").textContent = sc.g+"/"+SEZ_MAX.g;
     $("segArm").style.width = (sc.f/SEZ_MAX.f*100)+"%"; $("valArm").textContent = sc.f+"/"+SEZ_MAX.f;
   } else if(S.tab === "blind"){
     const bsc = scoresOf(B);
-    num = bsc.total; unit = "su 100"; caption = "Alla cieca"; showSegs = true;
+    num = bsc.total; unit = t("hdr.of100"); caption = t("hdr.blindCaption"); showSegs = true;
     $("segVis").style.width = (bsc.v/SEZ_MAX.v*100)+"%"; $("valVis").textContent = bsc.v+"/"+SEZ_MAX.v;
     $("segOlf").style.width = (bsc.o/SEZ_MAX.o*100)+"%"; $("valOlf").textContent = bsc.o+"/"+SEZ_MAX.o;
     $("segGus").style.width = (bsc.g/SEZ_MAX.g*100)+"%"; $("valGus").textContent = bsc.g+"/"+SEZ_MAX.g;
     $("segArm").style.width = (bsc.f/SEZ_MAX.f*100)+"%"; $("valArm").textContent = bsc.f+"/"+SEZ_MAX.f;
   } else if(S.tab === "event"){
     const n = S.lb ? S.lb.length : 0;
-    num = n; unit = n===1 ? "vino in gara" : "vini in gara";
-    caption = S.currentEvent || "Classifica"; showSegs = false;
+    num = n; unit = n===1 ? t("hdr.wineInRace") : t("hdr.wineInRacePl");
+    caption = S.currentEvent || t("hdr.classifica"); showSegs = false;
   } else {
     const n = S.saved.length;
     const avg = n ? Math.round(S.saved.reduce((a,w)=>a+w.score,0)/n) : 0;
-    num = n ? avg : 0; unit = "media";
-    caption = S.tab==="book" ? (n+(n===1?" scheda":" schede")) : "Statistiche";
+    num = n ? avg : 0; unit = t("hdr.average");
+    caption = S.tab==="book" ? (n+" "+(n===1?t("hdr.card"):t("hdr.cardPl"))) : t("hdr.statsCaption");
     showSegs = false;
   }
   $("ringNum").textContent = num;
@@ -1267,14 +2068,13 @@ function renderHeader(){
   $("hdrCaption").textContent = caption;
   $("segs").classList.toggle("hidden", !showSegs);
   const mod = !!S.editingId;
-  $("saveBtn").textContent = (mod ? "Aggiorna · " : "Salva · ")+scores().total+"/100";
-  $("resetBtn").textContent = mod ? "Annulla" : "Azzera";
+  $("saveBtn").textContent = (mod ? t("hdr.updatePrefix") : t("hdr.savePrefix"))+scores().total+"/100";
+  $("resetBtn").textContent = mod ? t("action.cancel") : t("action.clear");
   const ban = $("editBanner");
   ban.classList.toggle("hidden", !mod);
   if(mod){
     const wEd = S.saved.find(x => x.id === S.editingId);
-    $("editBannerText").innerHTML = "Stai modificando <b>"+esc((wEd && wEd.nome) || "una scheda")+
-      "</b>. Le modifiche sostituiranno quella già in archivio.";
+    $("editBannerText").innerHTML = tf("new.editingBannerHtml", {name: esc((wEd && wEd.nome) || t("new.editingFallback"))});
   }
 }
 
@@ -1297,7 +2097,9 @@ $("segs").addEventListener("click", e => {
 
 /* riga a punteggio: solo per le voci di qualità */
 function valRowHTML(T, pre, group, def){
-  const [key, titolo, spiega, peso] = def;
+  const [key, , , peso] = def;
+  const titolo = t("val."+group+"."+key+".title");
+  const spiega = t("val."+group+"."+key+".help");
   const v = T[group][key];
   const tone = v >= 8 ? "up" : (v < SUFF_VAL ? "down" : "mid");
   let btn = '<div class="rgroup">';
@@ -1310,7 +2112,7 @@ function valRowHTML(T, pre, group, def){
     '<div class="vrow-top"><span class="vrow-label">'+titolo+'</span>'+
       '<span class="vrow-read"><span class="vrow-word">'+PAROLE_VAL[v]+'</span>'+
       '<span class="vrow-val '+tone+'">'+v+'</span></span></div>'+
-    '<div class="vrow-help">'+spiega+(peso>1?' <b>· conta doppio</b>':'')+'</div>'+
+    '<div class="vrow-help">'+spiega+(peso>1?' <b>· '+t("val.weightDouble")+'</b>':'')+'</div>'+
     btn+
   '</div>';
 }
@@ -1346,12 +2148,11 @@ function bilanciaHTML(T){
   const b = bilancia(T);
   const perc = x => ((x-1)/4*100).toFixed(1);
   return '<div class="bil">'+
-    '<div class="bil-riga"><span class="bil-lab">Durezze</span>'+
+    '<div class="bil-riga"><span class="bil-lab">'+t("bil.hardness")+'</span>'+
       '<div class="bil-track"><i style="width:'+perc(b.d)+'%"></i></div></div>'+
-    '<div class="bil-riga"><span class="bil-lab">Morbidezze</span>'+
+    '<div class="bil-riga"><span class="bil-lab">'+t("bil.softness")+'</span>'+
       '<div class="bil-track morb"><i style="width:'+perc(b.m)+'%"></i></div></div>'+
-    '<p class="bil-esito">Il vino risulta <b>'+b.esito+'</b>. È una lettura, non un voto: '+
-    'tienine conto quando valuti l\'equilibrio qui sotto.</p>'+
+    '<p class="bil-esito">'+tf("bil.esito", {esito: b.esito})+'</p>'+
   '</div>';
 }
 
@@ -1359,40 +2160,40 @@ function sectionDefs(T, pre, tipologia){
   const isBianco = tipologia === "Bianco" || tipologia === "Spumante";
   const durezze = DUREZZE.filter(r => !(isBianco && r[0] === "tannicita"));
   const finale = (pre === "s")
-    ? '<input class="in-sm" id="abbInput" placeholder="Abbinamento consigliato" style="width:100%" value="'+esc(T.abbinamento)+'">'+
-      '<textarea class="ta" id="noteInput" rows="3" placeholder="Note: evoluzione nel bicchiere, contesto, impressioni...">'+esc(T.note)+'</textarea>'
-    : '<textarea class="ta" id="bNoteInput" rows="3" placeholder="Note: cosa ti ha guidato verso la tua ipotesi...">'+esc(T.note)+'</textarea>';
+    ? '<input class="in-sm" id="abbInput" placeholder="'+t("field.pairing.ph")+'" style="width:100%" value="'+esc(T.abbinamento)+'">'+
+      '<textarea class="ta" id="noteInput" rows="3" placeholder="'+t("field.notes.ph")+'">'+esc(T.note)+'</textarea>'
+    : '<textarea class="ta" id="bNoteInput" rows="3" placeholder="'+t("field.notesBlind.ph")+'">'+esc(T.note)+'</textarea>';
 
   const zonaDesc = (inner) =>
-    '<div class="zona zona-desc"><div class="zona-tit">Descrizione <span>nessun punteggio</span></div>'+inner+'</div>';
+    '<div class="zona zona-desc"><div class="zona-tit">'+t("zona.descTitle")+' <span>'+t("zona.descTag")+'</span></div>'+inner+'</div>';
   const zonaVal = (inner) =>
-    '<div class="zona zona-val"><div class="zona-tit">Valutazione <span>a punteggio</span></div>'+inner+'</div>';
+    '<div class="zona zona-val"><div class="zona-tit">'+t("zona.valTitle")+' <span>'+t("zona.valTag")+'</span></div>'+inner+'</div>';
 
   return [
-    { id:"vis", title:"Esame visivo", score:sezScore(T,"v")+"/"+SEZ_MAX.v,
+    { id:"vis", title:t("sec.visualTitle"), score:sezScore(T,"v")+"/"+SEZ_MAX.v,
       body: zonaDesc('<div class="dsel-stack">'+
-              selectHTML(T,pre,"limpidezza",LIMPIDEZZA,"Limpidezza")+
-              selectHTML(T,pre,"colore",COLORI[tipologia]||COLORI.Rosso,"Colore")+
-              selectHTML(T,pre,"consistenza",CONSISTENZA,"Consistenza")+'</div>')+
+              selectHTML(T,pre,"limpidezza",LIMPIDEZZA,t("sel.clarity"))+
+              selectHTML(T,pre,"colore",COLORI[tipologia]||COLORI.Rosso,t("sel.color"))+
+              selectHTML(T,pre,"consistenza",CONSISTENZA,t("sel.consistency"))+'</div>')+
             zonaVal(valBlockHTML(T,pre,"v")) },
 
-    { id:"olf", title:"Esame olfattivo", score:sezScore(T,"o")+"/"+SEZ_MAX.o,
-      body: zonaDesc(livelloHTML(T,pre,null,"intensita","Intensità",LIV_INTENSITA)+
-              '<div class="dsel-lab-solo" style="margin-top:14px">Profumi riconosciuti</div>'+chipsHTML(T,pre))+
+    { id:"olf", title:t("sec.olfactoryTitle"), score:sezScore(T,"o")+"/"+SEZ_MAX.o,
+      body: zonaDesc(livelloHTML(T,pre,null,"intensita",t("lvl.intensity"),LIV_INTENSITA)+
+              '<div class="dsel-lab-solo" style="margin-top:14px">'+t("lvl.recognizedAromas")+'</div>'+chipsHTML(T,pre))+
             zonaVal(valBlockHTML(T,pre,"o")) },
 
-    { id:"gus", title:"Esame gusto-olfattivo", score:sezScore(T,"g")+"/"+SEZ_MAX.g,
-      body: zonaDesc('<div class="dsel-stack">'+selectHTML(T,pre,"zuccheri",ZUCCHERI,"Zuccheri")+'</div>'+
-              '<div style="margin-top:12px">'+livelloHTML(T,pre,null,"corpo","Corpo",LIV_CORPO)+'</div>'+
-              '<div class="dsel-lab-solo" style="margin-top:14px">Elementi di durezza</div>'+
-              durezze.map(r => livelloHTML(T,pre,"durezze",r[0],r[1])).join("")+
-              '<div class="dsel-lab-solo" style="margin-top:14px">Elementi di morbidezza</div>'+
-              MORBIDEZZE.map(r => livelloHTML(T,pre,"morbidezze",r[0],r[1])).join("")+
+    { id:"gus", title:t("sec.tasteTitle"), score:sezScore(T,"g")+"/"+SEZ_MAX.g,
+      body: zonaDesc('<div class="dsel-stack">'+selectHTML(T,pre,"zuccheri",ZUCCHERI,t("sel.sugar"))+'</div>'+
+              '<div style="margin-top:12px">'+livelloHTML(T,pre,null,"corpo",t("lvl.body"),LIV_CORPO)+'</div>'+
+              '<div class="dsel-lab-solo" style="margin-top:14px">'+t("lvl.hardnessGroup")+'</div>'+
+              durezze.map(r => livelloHTML(T,pre,"durezze",r[0],t("durezza."+r[0]))).join("")+
+              '<div class="dsel-lab-solo" style="margin-top:14px">'+t("lvl.softnessGroup")+'</div>'+
+              MORBIDEZZE.map(r => livelloHTML(T,pre,"morbidezze",r[0],t("morbidezza."+r[0]))).join("")+
               bilanciaHTML(T))+
             zonaVal(valBlockHTML(T,pre,"g")) },
 
-    { id:"fin", title:"Valutazione finale", score:sezScore(T,"f")+"/"+SEZ_MAX.f,
-      body: zonaDesc('<div class="dsel-stack">'+selectHTML(T,pre,"stato",STATO,"Stato evolutivo")+'</div>')+
+    { id:"fin", title:t("sec.finalTitle"), score:sezScore(T,"f")+"/"+SEZ_MAX.f,
+      body: zonaDesc('<div class="dsel-stack">'+selectHTML(T,pre,"stato",STATO,t("sel.evolution"))+'</div>')+
             zonaVal(valBlockHTML(T,pre,"f")+finale) }
   ];
 }
@@ -1423,9 +2224,9 @@ function renderUvaggi(){
   $("uvRows").innerHTML = list.map((r,i) => {
     const isAltro = r.v === ALTRO;
     return '<div class="uv-row">'+
-      '<input type="text" data-uv-v="'+i+'" value="'+esc(r.v)+'" placeholder="es. Sangiovese"'+(isAltro?' readonly':'')+'>'+
+      '<input type="text" data-uv-v="'+i+'" value="'+esc(r.v)+'" placeholder="'+t("field.grape.ph")+'"'+(isAltro?' readonly':'')+'>'+
       '<span class="uv-pct"><input type="number" min="0" max="100" step="1" data-uv-p="'+i+'" value="'+(r.p===""||r.p==null?"":r.p)+'" placeholder="—"><span>%</span></span>'+
-      '<button type="button" class="uv-del" data-uv-del="'+i+'" aria-label="Rimuovi vitigno">&times;</button>'+
+      '<button type="button" class="uv-del" data-uv-del="'+i+'" aria-label="'+t("blend.removeGrape")+'">&times;</button>'+
     '</div>';
   }).join("");
 
@@ -1437,16 +2238,16 @@ function renderUvaggi(){
 
   const hint = $("uvHint");
   if(list.length === 0){
-    hint.textContent = "Facoltativo, ma è ciò che rende possibile il profilo per vitigno.";
+    hint.textContent = t("blend.hintEmpty");
     hint.classList.remove("warn");
   } else if(tot > 100){
-    hint.textContent = "Il totale supera il 100%: correggi le percentuali.";
+    hint.textContent = t("blend.hintOver");
     hint.classList.add("warn");
   } else if(tot < 100){
-    hint.textContent = "Manca il "+(100-tot)+"%: aggiungi un vitigno oppure chiudi con \u201cAltro\u201d, che non entra nelle statistiche.";
+    hint.textContent = tf("blend.hintMissing", {pct: String(100-tot)});
     hint.classList.remove("warn");
   } else {
-    hint.textContent = "Uvaggio completo.";
+    hint.textContent = t("blend.hintDone");
     hint.classList.remove("warn");
   }
 }
@@ -1650,8 +2451,8 @@ const PROFILE_KEY = "profilo-taccuino";
 
 function renderBrand(){
   $("brandName").textContent = S.brandName || "Sorso";
-  $("brandOwner").textContent = S.owner ? "il taccuino di "+S.owner : "taccuino di degustazione";
-  $("brandBtn").title = "Tocca per rinominare il taccuino";
+  $("brandOwner").textContent = S.owner ? tf("hdr.brandTagOwned", {owner: S.owner}) : t("hdr.brandTagGeneric");
+  $("brandBtn").title = t("hdr.brandRenameTitle");
 }
 async function loadProfile(){
   try{
@@ -1668,10 +2469,10 @@ async function saveProfile(){
   catch(e){}
 }
 $("brandBtn").addEventListener("click", async () => {
-  const nome = prompt("Di chi è questo taccuino?", S.owner || "");
+  const nome = prompt(t("brand.askOwner"), S.owner || "");
   if(nome === null) return;
   S.owner = nome.trim().slice(0,32);
-  const titolo = prompt("Come vuoi chiamarlo? (lascia vuoto per \u201cSorso\u201d)", S.brandName || "Sorso");
+  const titolo = prompt(t("brand.askName"), S.brandName || "Sorso");
   if(titolo !== null) S.brandName = (titolo.trim() || "Sorso").slice(0,24);
   renderBrand();
   await saveProfile();
@@ -1679,22 +2480,22 @@ $("brandBtn").addEventListener("click", async () => {
 
 function renderEvtQuick(){
   const sel = $("evtQuickPicker");
-  sel.innerHTML = ['<option value=""'+(!S.currentEvent && !S.quickNewMode?" selected":"")+'>Nessun evento — degustazione personale</option>']
+  sel.innerHTML = ['<option value=""'+(!S.currentEvent && !S.quickNewMode?" selected":"")+'>'+t("event.none")+'</option>']
     .concat(eventiVisibili().map(e => '<option value="'+esc(e.slug)+'"'+(!S.quickNewMode && S.currentEvent===e.name?" selected":"")+'>'+esc(e.name)+'</option>'))
-    .concat(['<option value="__new"'+(S.quickNewMode?" selected":"")+'>+ Crea nuovo evento…</option>'])
+    .concat(['<option value="__new"'+(S.quickNewMode?" selected":"")+'>'+t("event.createNew")+'</option>'])
     .join("");
   $("evtQuickNewWrap").classList.toggle("hidden", !S.quickNewMode);
   const note = $("evtQuickNote");
   if(S.quickNewMode){
-    note.textContent = "Scrivi il nome e tocca Crea: l'evento sarà poi selezionabile anche dalle prossime schede.";
+    note.textContent = t("event.noteNewMode");
     note.classList.remove("active");
   }else if(S.currentEvent){
-    note.textContent = 'Questa scheda finirà anche nella classifica di "'+S.currentEvent+'".';
+    note.textContent = tf("event.noteLinked", {name: S.currentEvent});
     note.classList.add("active");
   }else{
     note.textContent = S.events.length
-      ? "Collega la scheda a un evento per farla entrare nella sua classifica."
-      : "Nessun evento ancora: creane uno qui sopra.";
+      ? t("event.noteHasEvents")
+      : t("event.noteNoEvents");
     note.classList.remove("active");
   }
   const badge = $("hdrEvt");
@@ -1716,7 +2517,7 @@ function renderIdentity(){
   const has = !!S.photo;
   $("dropZone").classList.toggle("hidden", has);
   $("labelLoaded").classList.toggle("hidden", !has);
-  if(has){ $("labelThumb").src = S.photo; $("labelName").textContent = S.photoName || "etichetta.jpg"; }
+  if(has){ $("labelThumb").src = S.photo; $("labelName").textContent = S.photoName || t("label.defaultName"); }
 }
 
 /* ============================================================
@@ -1770,14 +2571,14 @@ const AC = (function(){
   }
   function disegna(q){
     if(!items.length){
-      box.innerHTML = '<div class="ac-empty">Nessuna corrispondenza. Puoi comunque scrivere il tuo valore.</div>';
+      box.innerHTML = '<div class="ac-empty">'+t("ac.noMatch")+'</div>';
     }else{
       box.innerHTML = items.map((v,i) => {
         const L = (typeof splitLuogo === "function" && v.indexOf(" — ") > -1) ? splitLuogo(v) : null;
         const syn = (typeof SINONIMI === "object" && SINONIMI[v]) ? SINONIMI[v] : null;
         return '<button type="button" class="ac-item'+(i===sel?" sel":"")+'" data-ac="'+i+'" role="option">'+
           (L ? evidenzia(L.regione, q)+'<span class="ac-sub">'+esc(L.paese)+'</span>'
-             : evidenzia(v, q)+(syn ? '<span class="ac-sub">stesso vitigno di '+esc(syn)+'</span>' : ''))+
+             : evidenzia(v, q)+(syn ? '<span class="ac-sub">'+tf("blend.sameGrapeAs",{name:esc(syn)})+'</span>' : ''))+
         '</button>';
       }).join("");
     }
@@ -1847,12 +2648,12 @@ function cmpPrezzo(a, b, cresc){
   return cresc ? pa - pb : pb - pa;
 }
 const ORDINAMENTI = {
-  "score-desc":{label:"Punteggio — dal più alto", cmp:(a,b) => b.score - a.score || (b.timestamp||0)-(a.timestamp||0)},
-  "score-asc": {label:"Punteggio — dal più basso", cmp:(a,b) => a.score - b.score || (b.timestamp||0)-(a.timestamp||0)},
-  "date-desc": {label:"Data — più recenti", cmp:(a,b) => (b.timestamp||0) - (a.timestamp||0)},
-  "date-asc":  {label:"Data — meno recenti", cmp:(a,b) => (a.timestamp||0) - (b.timestamp||0)},
-  "price-desc":{label:"Prezzo — dal più caro", cmp:(a,b) => cmpPrezzo(a,b,false)},
-  "price-asc": {label:"Prezzo — dal più economico", cmp:(a,b) => cmpPrezzo(a,b,true)}
+  "score-desc":{labelKey:"book.sort.scoreDesc", cmp:(a,b) => b.score - a.score || (b.timestamp||0)-(a.timestamp||0)},
+  "score-asc": {labelKey:"book.sort.scoreAsc", cmp:(a,b) => a.score - b.score || (b.timestamp||0)-(a.timestamp||0)},
+  "date-desc": {labelKey:"book.sort.dateDesc", cmp:(a,b) => (b.timestamp||0) - (a.timestamp||0)},
+  "date-asc":  {labelKey:"book.sort.dateAsc", cmp:(a,b) => (a.timestamp||0) - (b.timestamp||0)},
+  "price-desc":{labelKey:"book.sort.priceDesc", cmp:(a,b) => cmpPrezzo(a,b,false)},
+  "price-asc": {labelKey:"book.sort.priceAsc", cmp:(a,b) => cmpPrezzo(a,b,true)}
 };
 
 function filteredWines(){
@@ -1869,11 +2670,11 @@ function filteredWines(){
 }
 function renderBook(){
   $("filterRow").innerHTML =
-    ["Tutti"].concat(TYPES).map(f => '<button type="button" class="fchip'+(S.filter===f?" on":"")+'" data-filter="'+f+'">'+f+'</button>').join("")+
+    ["Tutti"].concat(TYPES).map(f => '<button type="button" class="fchip'+(S.filter===f?" on":"")+'" data-filter="'+f+'">'+(f==="Tutti"?t("book.filterAll"):f)+'</button>').join("")+
     '<span style="flex:1"></span>'+
-    '<span class="sel-wrap sort-wrap"><select class="sel sort-sel" id="sortSel" aria-label="Ordina le schede">'+
+    '<span class="sel-wrap sort-wrap"><select class="sel sort-sel" id="sortSel" aria-label="'+t("book.sortLabel")+'">'+
       Object.keys(ORDINAMENTI).map(k =>
-        '<option value="'+k+'"'+(S.sortBy===k?" selected":"")+'>'+ORDINAMENTI[k].label+'</option>').join("")+
+        '<option value="'+k+'"'+(S.sortBy===k?" selected":"")+'>'+t(ORDINAMENTI[k].labelKey)+'</option>').join("")+
     '</select></span>';
 
   const list = filteredWines();
@@ -1881,11 +2682,11 @@ function renderBook(){
 
   // pannello confronto
   if(picked.length === 2){
-    const rows = [["v","Visivo",SEZ_MAX.v],["o","Olfattivo",SEZ_MAX.o],["g","Gusto-olf.",SEZ_MAX.g],["f","Finale",SEZ_MAX.f]];
-    $("cmpWrap").innerHTML = '<div class="cmp"><div class="cmp-top"><span class="cmp-eyebrow">Confronto</span>'+
-      '<button type="button" class="cmp-close" id="cmpClose">Chiudi</button></div>'+
+    const rows = [["v",t("seg.visual"),SEZ_MAX.v],["o",t("seg.olfactory"),SEZ_MAX.o],["g",t("seg.taste"),SEZ_MAX.g],["f",t("seg.final"),SEZ_MAX.f]];
+    $("cmpWrap").innerHTML = '<div class="cmp"><div class="cmp-top"><span class="cmp-eyebrow">'+t("book.cmpTitle")+'</span>'+
+      '<button type="button" class="cmp-close" id="cmpClose">'+t("action.close")+'</button></div>'+
       '<div class="cmp-grid">'+picked.map(w =>
-        '<div><div class="cmp-name">'+esc(w.nome||"Senza nome")+'</div><div class="cmp-meta">'+esc(metaOf(w))+'</div><div class="cmp-score">'+w.score+'</div></div>'
+        '<div><div class="cmp-name">'+esc(w.nome||t("book.noName"))+'</div><div class="cmp-meta">'+esc(metaOf(w))+'</div><div class="cmp-score">'+w.score+'</div></div>'
       ).join("")+'</div>'+
       '<div class="cmp-rows">'+rows.map(r => {
         const L = (picked[0].parts&&picked[0].parts[r[0]])||0, R = (picked[1].parts&&picked[1].parts[r[0]])||0;
@@ -1901,8 +2702,8 @@ function renderBook(){
   }
 
   if(list.length === 0){
-    $("bookList").innerHTML = '<div class="empty"><div class="empty-title">Nessun risultato</div><p class="empty-sub">'+
-      (S.saved.length===0 ? "Salva una degustazione per iniziare." : "Prova a cambiare ricerca o filtro.")+'</p></div>';
+    $("bookList").innerHTML = '<div class="empty"><div class="empty-title">'+t("book.noResultsTitle")+'</div><p class="empty-sub">'+
+      (S.saved.length===0 ? t("book.noResultsEmpty") : t("book.noResultsFilter"))+'</p></div>';
     return;
   }
 
@@ -1910,57 +2711,59 @@ function renderBook(){
     const on = S.picked.indexOf(w.id) > -1;
     let h = '<div class="wine-row'+(on?" picked":"")+'">'+
       '<div class="wine-side">'+
-        '<button type="button" class="wine-score" data-pick="'+w.id+'" title="Tocca per confrontare">'+w.score+'</button>'+
+        '<button type="button" class="wine-score" data-pick="'+w.id+'" title="'+t("book.cmpToTouch")+'">'+w.score+'</button>'+
         '<div class="wine-slot'+(w.thumb?'':' no-photo')+'" aria-hidden="'+(w.thumb?'false':'true')+'">'+
-          (w.thumb ? '<img src="'+w.thumb+'" alt="Etichetta di '+esc(w.nome||"vino")+'">' : '')+'</div>'+
+          (w.thumb ? '<img src="'+w.thumb+'" alt="'+tf("book.labelAlt",{name:esc(w.nome||t("book.defaultWineAlt"))})+'">' : '')+'</div>'+
       '</div>'+
       '<div class="wine-mid" data-expand="'+w.id+'">'+
-        '<div class="wine-name">'+esc(w.nome||"Senza nome")+'</div>'+
+        '<div class="wine-name">'+esc(w.nome||t("book.noName"))+'</div>'+
         '<div class="wine-meta">'+esc(metaOf(w))+'</div>'+
         '<div class="wine-tags"><span class="type-chip">'+esc(w.tipologia||"")+'</span><span class="judge">'+judge(w.score)+'</span>'+
-          (w.daCieca ? '<span class="da-cieca">alla cieca</span>' : '')+'</div>'+
+          (w.daCieca ? '<span class="da-cieca">'+t("book.fromBlind")+'</span>' : '')+'</div>'+
       '</div>'+
     '</div>';
     if(S.expanded === w.id){
       h += '<div class="wine-detail">'+
-        (w.thumb ? '<img class="detail-thumb" src="'+w.thumb+'" alt="Etichetta">' : '')+
-        '<div class="dl"><b>Punteggio</b><span>'+w.score+'/100 — visivo '+(w.parts?w.parts.v:0)+', olfattivo '+(w.parts?w.parts.o:0)+', gusto-olf. '+(w.parts?w.parts.g:0)+', armonia '+(w.parts?w.parts.a:0)+'</span></div>'+
-        '<div class="dl"><b>Visivo</b><span>'+esc([w.limpidezza,w.colore,w.consistenza].filter(Boolean).join(" · "))+'</span></div>'+
-        (w.denominazione ? '<div class="dl"><b>Denominazione</b><span>'+esc(w.denominazione)+'</span></div>' : "")+
-        (uvaggioText(w) ? '<div class="dl"><b>Uvaggio</b><span>'+esc(uvaggioText(w))+'</span></div>' : "")+
-        (w.affinamento ? '<div class="dl"><b>Affinamento</b><span>'+esc(w.affinamento)+'</span></div>' : "")+
-        (w.prezzo != null ? '<div class="dl"><b>Prezzo</b><span>'+euro(w.prezzo)+'</span></div>' : "")+
-        '<div class="dl"><b>Descrittori</b><span>'+esc((w.desc||[]).join(", ")||"—")+'</span></div>'+
-        '<div class="dl"><b>Gusto</b><span>'+esc([w.zuccheri,w.stato].filter(Boolean).join(" · "))+'</span></div>'+
-        '<div class="dl"><b>Abbinamento</b><span>'+esc(w.abbinamento||"—")+'</span></div>'+
-        '<textarea class="ta" data-editnote="'+w.id+'" rows="2" placeholder="Note personali">'+esc(w.note)+'</textarea>'+
+        (w.thumb ? '<img class="detail-thumb" src="'+w.thumb+'" alt="'+t("card.label")+'">' : '')+
+        '<div class="dl"><b>'+t("book.dl.score")+'</b><span>'+tf("book.dl.scoreDetail",{total:w.score, v:(w.parts?w.parts.v:0), o:(w.parts?w.parts.o:0), g:(w.parts?w.parts.g:0), a:(w.parts?w.parts.a:0)})+'</span></div>'+
+        '<div class="dl"><b>'+t("book.dl.visual")+'</b><span>'+esc([w.limpidezza,w.colore,w.consistenza].filter(Boolean).join(" · "))+'</span></div>'+
+        (w.denominazione ? '<div class="dl"><b>'+t("book.dl.denomination")+'</b><span>'+esc(w.denominazione)+'</span></div>' : "")+
+        (uvaggioText(w) ? '<div class="dl"><b>'+t("book.dl.blend")+'</b><span>'+esc(uvaggioText(w))+'</span></div>' : "")+
+        (w.affinamento ? '<div class="dl"><b>'+t("book.dl.aging")+'</b><span>'+esc(w.affinamento)+'</span></div>' : "")+
+        (w.prezzo != null ? '<div class="dl"><b>'+t("book.dl.price")+'</b><span>'+euro(w.prezzo)+'</span></div>' : "")+
+        '<div class="dl"><b>'+t("book.dl.descriptors")+'</b><span>'+esc((w.desc||[]).join(", ")||"—")+'</span></div>'+
+        '<div class="dl"><b>'+t("book.dl.taste")+'</b><span>'+esc([w.zuccheri,w.stato].filter(Boolean).join(" · "))+'</span></div>'+
+        '<div class="dl"><b>'+t("book.dl.pairing")+'</b><span>'+esc(w.abbinamento||"—")+'</span></div>'+
+        '<textarea class="ta" data-editnote="'+w.id+'" rows="2" placeholder="'+t("book.notesPh")+'">'+esc(w.note)+'</textarea>'+
         '<div class="detail-actions">'+
-          '<button type="button" class="pill-solid" data-edit="'+w.id+'">Modifica scheda</button>'+
-          '<button type="button" class="pill-ghost" data-savenote="'+w.id+'">Salva solo le note</button>'+
-          '<button type="button" class="pill-danger" data-del="'+w.id+'">Elimina scheda</button>'+
+          '<button type="button" class="pill-solid" data-edit="'+w.id+'">'+t("book.editWine")+'</button>'+
+          '<button type="button" class="pill-ghost" data-savenote="'+w.id+'">'+t("book.saveNotesOnly")+'</button>'+
+          '<button type="button" class="pill-danger" data-del="'+w.id+'">'+t("book.deleteWine")+'</button>'+
         '</div>'+
       '</div>';
     }
     return h;
   }).join("")+'</div>'+
-  '<p style="margin:8px 0 0;text-align:center" class="note-line">Tocca un vino per aprirlo, modificarne le note o eliminarlo.'+
-  (S.picked.length<2 && list.length>1 ? ' Tocca il punteggio di due vini per confrontarli.' : '')+'</p>';
+  '<p style="margin:8px 0 0;text-align:center" class="note-line">'+t("book.footNote")+
+  (S.picked.length<2 && list.length>1 ? t("book.footNoteCmp") : '')+'</p>';
 }
 
 /* ============================================================
    TAB "STATISTICHE"
    ============================================================ */
 
-/* etichette leggibili degli 11 parametri a punteggio */
-const PARAM_LABELS = (function(){
+/* etichette leggibili degli 11 parametri a punteggio: ricalcolate a ogni
+   chiamata (non una volta sola) perché dipendono dalla lingua corrente. */
+function paramLabels(){
+  const nomi = {v:t("stats.phase.visual"), o:t("stats.phase.olfactory"), g:t("stats.phase.taste"), f:t("stats.phase.final")};
+  const voci = [];
+  Object.keys(VALUTA).forEach(g => VALUTA[g].forEach(r => voci.push({g, key:r[0], base:t("val."+g+"."+r[0]+".title")})));
+  const conteggio = {};
+  voci.forEach(v => { conteggio[v.base] = (conteggio[v.base]||0)+1; });
   const o = {};
-  const nomi = {v:"vista", o:"naso", g:"bocca", f:"finale"};
-  Object.keys(VALUTA).forEach(g => VALUTA[g].forEach(r => {
-    const base = r[1].replace(/ (visiva|olfattiva|gustativa)$/,"");
-    o[g+"."+r[0]] = (base === r[1]) ? base : base+" · "+nomi[g];
-  }));
+  voci.forEach(v => { o[v.g+"."+v.key] = conteggio[v.base] > 1 ? (v.base+" · "+nomi[v.g]) : v.base; });
   return o;
-})();
+}
 const SOGLIA_PALATO = 3;   // schede minime per il profilo
 const SOGLIA_TREND  = 4;   // schede minime per l'andamento
 
@@ -2023,7 +2826,7 @@ function bloccato(titolo, quante, cosa){
 function strisciaSblocchi(){
   if(!daSbloccare.length) return "";
   return '<div class="sblocchi">'+
-    '<div class="sblocchi-titolo">Si aggiungono man mano che il taccuino cresce</div>'+
+    '<div class="sblocchi-titolo">'+t("stats.unlockGrows")+'</div>'+
     daSbloccare.map(x =>
       '<div class="sblocco"><span class="sblocco-n">'+x.quante+'</span>'+
       '<span class="sblocco-t">'+x.titolo+'</span>'+
@@ -2034,7 +2837,7 @@ function strisciaSblocchi(){
 /* --- radar a 4 assi: profilo medio contro il riferimento neutro (tutti 3) --- */
 function radarSVG(pcts){
   const R = 78, CX = 100, CY = 96;
-  const axes = [{k:"v",label:"Visivo"},{k:"o",label:"Olfattivo"},{k:"g",label:"Gusto"},{k:"f",label:"Finale"}];
+  const axes = [{k:"v",label:t("seg.visual")},{k:"o",label:t("seg.olfactory")},{k:"g",label:t("seg.tasteShort")},{k:"f",label:t("seg.final")}];
   const ang = i => (-90 + i*90) * Math.PI/180;
   const pt = (i,r) => [CX + Math.cos(ang(i))*r, CY + Math.sin(ang(i))*r];
   const poly = vals => vals.map((v,i) => pt(i, R*Math.max(0.03, v)).map(n=>n.toFixed(1)).join(",")).join(" ");
@@ -2059,13 +2862,13 @@ function radarSVG(pcts){
   }).join("");
   /* il riquadro è più largo del grafico per contenere le etichette laterali,
      che altrimenti sbordano fuori dalla scheda sugli schermi stretti */
-  return '<div class="radar-wrap"><svg viewBox="-62 -10 324 222" role="img" aria-label="Profilo sensoriale medio">'+
+  return '<div class="radar-wrap"><svg viewBox="-62 -10 324 222" role="img" aria-label="'+t("ac.radarLabel")+'">'+
     '<defs><radialGradient id="radGrad" cx="50%" cy="50%" r="50%">'+
       '<stop offset="0%" stop-color="var(--gold)" stop-opacity="0.42"/>'+
       '<stop offset="100%" stop-color="var(--gold)" stop-opacity="0.10"/></radialGradient></defs>'+
     grid+spokes+neutral+shape+dots+labels+'</svg>'+
-    '<div class="radar-legend"><span><i class="key-gold"></i>il tuo profilo</span>'+
-    '<span><i class="key-dash"></i>sufficienza (60%)</span></div></div>';
+    '<div class="radar-legend"><span><i class="key-gold"></i>'+t("ac.yourProfile")+'</span>'+
+    '<span><i class="key-dash"></i>'+t("ac.sufficiency")+'</span></div></div>';
 }
 
 /* istogramma a colonne verticali */
@@ -2073,7 +2876,7 @@ function columnsSVG(items){
   const W = 300, H = 110, base = 88, n = items.length;
   const slot = W/n, bw = Math.min(38, slot*0.56);
   const max = Math.max(1, ...items.map(i => i.count));
-  return '<svg class="cols" viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Distribuzione dei voti">'+
+  return '<svg class="cols" viewBox="0 0 '+W+' '+H+'" role="img" aria-label="'+t("ac.columnsLabel")+'">'+
     '<line x1="0" y1="'+base+'" x2="'+W+'" y2="'+base+'" stroke="var(--line)" stroke-width="1"/>'+
     items.map((it,i) => {
       const h = it.count ? Math.max(3, (it.count/max)*70) : 0;
@@ -2103,7 +2906,7 @@ function scatterSVG(rows, conRetta){
     '<text x="'+X(v).toFixed(1)+'" y="'+(H-8)+'" text-anchor="middle" class="sc-ax">'+v+'\u20ac</text>').join("");
   const pts = rows.map(r =>
     '<circle cx="'+X(r.prezzo).toFixed(1)+'" cy="'+Y(r.score).toFixed(1)+'" r="5" fill="var(--gold)" fill-opacity="0.55" stroke="var(--gold)" stroke-width="1.5"><title>'+
-    esc(r.nome||"")+' — '+r.score+' a '+euro(r.prezzo)+'</title></circle>').join("");
+    esc(r.nome||"")+' — '+tf("ac.scoreAtPrice",{score:r.score, price:euro(r.prezzo)})+'</title></circle>').join("");
   let retta = "";
   if(conRetta && rows.length >= 4){
     const xs = rows.map(r => Math.log(r.prezzo)), ys = rows.map(r => r.score);
@@ -2117,7 +2920,7 @@ function scatterSVG(rows, conRetta){
     retta = '<line x1="'+X(p1).toFixed(1)+'" y1="'+cl(y1).toFixed(1)+'" x2="'+X(p2).toFixed(1)+'" y2="'+cl(y2).toFixed(1)+
       '" stroke="var(--ink-4)" stroke-width="1.4" stroke-dasharray="5 4"/>';
   }
-  return '<svg class="scatter" viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Prezzo e punteggio">'+grid+xlab+retta+pts+'</svg>';
+  return '<svg class="scatter" viewBox="0 0 '+W+' '+H+'" role="img" aria-label="'+t("ac.scatterLabel")+'">'+grid+xlab+retta+pts+'</svg>';
 }
 
 /* barre a lecca-lecca su asse 1-10, con la sufficienza segnata */
@@ -2163,17 +2966,20 @@ function prosaGusti(all){
   const frasi = [];
   const nome = S.owner ? S.owner : null;
   const avg = media(all.map(w=>w.score));
-  frasi.push((nome ? nome+", su " : "Su ")+n+(n===1?" scheda":" schede")+
-    " la tua media è <b>"+dec(avg)+"</b> ("+judge(Math.round(avg)).toLowerCase()+").");
+  frasi.push(tf(nome ? "stats.prosa.avgNamed" : "stats.prosa.avgAnon", {
+    name: esc(nome||""), n, schede: n===1?t("hdr.card"):t("hdr.cardPl"),
+    avg: dec(avg), giudizio: judge(Math.round(avg)).toLowerCase()
+  }));
 
   const perTipo = {};
   all.forEach(w => { (perTipo[w.tipologia] = perTipo[w.tipologia] || []).push(w.score); });
-  const tipi = Object.keys(perTipo).filter(t => perTipo[t].length >= 2)
-    .map(t => ({t, avg:media(perTipo[t]), n:perTipo[t].length})).sort((a,b) => b.avg - a.avg);
+  const tipi = Object.keys(perTipo).filter(tp => perTipo[tp].length >= 2)
+    .map(tp => ({t:tp, avg:media(perTipo[tp]), n:perTipo[tp].length})).sort((a,b) => b.avg - a.avg);
   if(tipi.length >= 2){
-    frasi.push("Fra le tipologie premi soprattutto i <b>"+esc(plurale(tipi[0].t))+"</b> ("+
-      dec(tipi[0].avg)+" su "+tipi[0].n+" schede), mentre i "+
-      esc(plurale(tipi[tipi.length-1].t))+" restano a "+dec(tipi[tipi.length-1].avg)+".");
+    frasi.push(tf("stats.prosa.byType", {
+      top: esc(plurale(tipi[0].t)), topAvg: dec(tipi[0].avg), topN: tipi[0].n,
+      bottom: esc(plurale(tipi[tipi.length-1].t)), bottomAvg: dec(tipi[tipi.length-1].avg)
+    }));
   }
 
   const perVit = {};
@@ -2181,8 +2987,7 @@ function prosaGusti(all){
   const vit = Object.keys(perVit).filter(v => perVit[v].length >= 2)
     .map(v => ({v, avg:media(perVit[v]), n:perVit[v].length})).sort((a,b) => b.avg - a.avg);
   if(vit.length){
-    frasi.push("Il vitigno che ti convince di più è il <b>"+esc(vit[0].v)+"</b>, "+
-      dec(vit[0].avg)+" di media su "+vit[0].n+" vini.");
+    frasi.push(tf("stats.prosa.byGrape", {grape: esc(vit[0].v), avg: dec(vit[0].avg), n: vit[0].n}));
   }
 
   const perLuogo = {};
@@ -2191,13 +2996,12 @@ function prosaGusti(all){
   const reg = Object.keys(perLuogo).filter(r => perLuogo[r].length >= 2)
     .map(r => ({r, avg:media(perLuogo[r]), n:perLuogo[r].length})).sort((a,b) => b.avg - a.avg);
   if(reg.length){
-    frasi.push("Il territorio che ti dà più soddisfazione: <b>"+esc(reg[0].r)+"</b> ("+
-      dec(reg[0].avg)+" su "+reg[0].n+" vini).");
+    frasi.push(tf("stats.prosa.byRegion", {region: esc(reg[0].r), avg: dec(reg[0].avg), n: reg[0].n}));
   }
 
   const prezzi = all.filter(w => w.prezzo != null).map(w => w.prezzo);
   if(prezzi.length >= 2){
-    frasi.push("Spendi in media <b>"+euro(media(prezzi))+"</b> per bottiglia.");
+    frasi.push(tf("stats.prosa.avgPrice", {price: euro(media(prezzi))}));
   }
   return frasi.join(" ");
 }
@@ -2207,8 +3011,8 @@ function renderStats(){
   const all = S.saved;
   const n = all.length;
   if(n === 0){
-    $("statsWrap").innerHTML = '<div class="empty"><div class="empty-title">Ancora nulla da contare</div>'+
-      '<p class="empty-sub">Le statistiche compaiono dopo la prima degustazione salvata.</p></div>';
+    $("statsWrap").innerHTML = '<div class="empty"><div class="empty-title">'+t("stats.emptyTitle")+'</div>'+
+      '<p class="empty-sub">'+t("stats.emptySub")+'</p></div>';
     return;
   }
 
@@ -2218,7 +3022,7 @@ function renderStats(){
   const sd = devStd(scoresArr);
 
   /* ---- 0. riepilogo in prosa ---- */
-  let html = '<div class="card resume"><div class="resume-eyebrow">Il tuo profilo</div>'+
+  let html = '<div class="card resume"><div class="resume-eyebrow">'+t("stats.profileEyebrow")+'</div>'+
     '<p class="resume-text">'+prosaGusti(all)+'</p></div>';
 
   /* ---- 1. numeri chiave ---- */
@@ -2235,18 +3039,18 @@ function renderStats(){
      non dice niente. Restano solo i riquadri che aggiungono informazione. */
   const peggiore = all.reduce((a,w) => w.score < a.score ? w : a, all[0]);
   const cards = [
-    { label:"Degustazioni", value:n, note:n===1 ? "scheda salvata" : "schede salvate" },
-    { label:"Media", value:dec(avg), note:judge(Math.round(avg)).toLowerCase() }
+    { label:t("stat.tastings"), value:n, note:n===1 ? t("stat.note.oneSaved") : t("stat.note.manySaved") },
+    { label:t("stat.average"), value:dec(avg), note:judge(Math.round(avg)).toLowerCase() }
   ];
   if(best.score !== peggiore.score){
-    cards.push({ label:"Migliore", value:best.score, note:esc(best.nome||"—") });
+    cards.push({ label:t("stat.best"), value:best.score, note:esc(best.nome||"—") });
   }
   if(prezzi.length >= 2){
-    cards.push({ label:"Prezzo medio", value:euro(media(prezzi)), note:prezzi.length+" di "+n+" con prezzo" });
+    cards.push({ label:t("stat.avgPrice"), value:euro(media(prezzi)), note:tf("stat.note.withPrice",{n:prezzi.length, total:n}) });
   }else if(byType.length >= 2){
-    cards.push({ label:"Voti più alti a", value:esc(byType[0].label), note:dec(byType[0].avg)+" di media" });
+    cards.push({ label:t("stat.topScoresAt"), value:esc(byType[0].label), note:tf("stat.note.avgOf",{avg:dec(byType[0].avg)}) });
   }else if(sd > 0){
-    cards.push({ label:"Escursione", value:dec(sd), note:"punti fra un vino e l'altro" });
+    cards.push({ label:t("stat.spread"), value:dec(sd), note:t("stat.note.pointsBetween") });
   }
   html += '<div class="stat-grid">'+cards.map(c =>
     '<div class="stat-card"><div class="stat-label">'+c.label+'</div>'+
@@ -2258,13 +3062,13 @@ function renderStats(){
   const variano = ordinati[0].score !== ordinati[ordinati.length-1].score;
   if(n >= 3 && variano){
     const podio = ordinati.slice(0,3);
-    html += statPanel("I tuoi vini preferiti",
+    html += statPanel(t("stats.favWinesTitle"),
       '<div class="podio">'+podio.map((w,i) => {
         const meta = [w.produttore, w.annata, w.regione].filter(Boolean).join(" · ");
         return '<div class="podio-row">'+
           '<span class="podio-pos">'+(i+1)+'</span>'+
           '<div class="podio-mid">'+
-            '<div class="podio-name">'+esc(w.nome||"Senza nome")+'</div>'+
+            '<div class="podio-name">'+esc(w.nome||t("book.noName"))+'</div>'+
             (meta ? '<div class="podio-meta">'+esc(meta)+'</div>' : '')+
             (w.parts ? miniProfile(w.parts) : "")+
           '</div>'+
@@ -2274,9 +3078,9 @@ function renderStats(){
         '</div>';
       }).join("")+'</div>', null);
   }else if(n >= 3){
-    html += bloccato("I tuoi vini preferiti", "voti diversi", "una classifica dei preferiti");
+    html += bloccato(t("stats.favWinesTitle"), t("stats.favWinesBlockedDiff"), t("stats.favWinesBlockedWhat"));
   }else{
-    html += bloccato("I tuoi vini preferiti", quante(3-n,"scheda","schede"), "il podio dei tuoi migliori");
+    html += bloccato(t("stats.favWinesTitle"), quante(3-n,t("hdr.card"),t("hdr.cardPl")), t("stats.favWinesBlockedWhat2"));
   }
 
   /* ---- 3. profilo per vitigno ---- */
@@ -2296,24 +3100,24 @@ function renderStats(){
 
   const completa = all.filter(w => uvTotal(w.uvaggi) === 100).length;
   if(vitigni.length){
-    html += statPanel("Profilo per vitigno",
-      '<p class="panel-intro">Ordinati per il voto medio che dai loro. Conta il vitigno prevalente di ogni vino; le voci \u201cAltro\u201d sono escluse.</p>'+
-      '<div class="vit-list">'+vitigni.map(t =>
+    html += statPanel(t("stats.grapeProfileTitle"),
+      '<p class="panel-intro">'+t("stats.grapeProfileIntro")+'</p>'+
+      '<div class="vit-list">'+vitigni.map(row =>
         '<div class="vit-row">'+
           '<div class="vit-top">'+
-            '<span class="vit-name">'+esc(t.v)+'</span>'+
-            '<span class="vit-n">'+t.n+(t.n===1?" vino":" vini")+'</span>'+
-            '<span class="vit-avg">'+dec(t.avg)+'</span>'+
+            '<span class="vit-name">'+esc(row.v)+'</span>'+
+            '<span class="vit-n">'+row.n+" "+(row.n===1?t("stats.oneWine"):t("stats.manyWines"))+'</span>'+
+            '<span class="vit-avg">'+dec(row.avg)+'</span>'+
           '</div>'+
-          (t.hasParts ? miniProfile(t.parts) : '')+
+          (row.hasParts ? miniProfile(row.parts) : '')+
         '</div>'
       ).join("")+'</div>'+
-      '<p class="panel-foot">Uvaggio indicato su <b>'+conUva.length+' di '+n+'</b> schede, completo al 100% su <b>'+completa+'</b>.'+
-        (conUva.length < n ? " Compilarlo sulle altre renderebbe questo profilo più affidabile." : "")+
+      '<p class="panel-foot">'+tf("stats.grapeProfileFoot",{con:conUva.length, n:n, completa:completa})+
+        (conUva.length < n ? t("stats.grapeProfileFootMore") : "")+
       '</p>',
       null);
   } else {
-    html += bloccato("Profilo per vitigno", "uvaggio", "compila vitigno e percentuale in una scheda");
+    html += bloccato(t("stats.grapeProfileTitle"), t("blend.title").toLowerCase(), t("stats.grapeProfileBlockedWhat"));
   }
 
   /* ---- 4. profilo sensoriale (radar) + palato per parametro ---- */
@@ -2326,31 +3130,32 @@ function renderStats(){
     ["v","o","g","f"].forEach(k => {
       pcts[k] = media(withVoti.map(w => (w.parts[k]||0) / SEZ_MAX[k]));
     });
-    html += statPanel("Profilo sensoriale",
+    html += statPanel(t("stats.sensoryTitle"),
       radarSVG(pcts)+
       '<div class="radar-read">'+
         ["v","o","g","f"].map(k => {
-          const lbl = {v:"visivo",o:"olfattivo",g:"gusto-olf.",f:"finale"}[k];
+          const lbl = {v:t("seg.visual"),o:t("seg.olfactory"),g:t("seg.taste"),f:t("seg.final")}[k].toLowerCase();
           return '<span>'+lbl+' <b>'+Math.round(pcts[k]*100)+'%</b></span>';
         }).join("")+
       '</div>',
-      "su "+withVoti.length+" schede");
+      tf("stats.sensoryOn",{n:withVoti.length}));
 
     /* i voti 1-5 delle schede vecchie valgono il doppio sulla scala 1-10:
        3/5 e 6/10 sono entrambi il 60%, quindi la proporzione si conserva */
-    const params = Object.keys(PARAM_LABELS).map(key => {
+    const paramLabelsNow = paramLabels();
+    const params = Object.keys(paramLabelsNow).map(key => {
       const [g,pp] = key.split(".");
       const vals = withVoti.map(w => (w.voti[g] && typeof w.voti[g][pp] === "number") ? w.voti[g][pp] : null)
                            .filter(v => v !== null);
-      return { key, label:PARAM_LABELS[key], avg:media(vals), n:vals.length };
+      return { key, label:paramLabelsNow[key], avg:media(vals), n:vals.length };
     }).filter(pr => pr.n > 0).sort((a,b) => b.avg - a.avg);
 
-    html += statPanel("Come giudichi, voce per voce",
-      '<p class="panel-intro">Media di ogni voce sulla scala della scheda (0, poi da 2 a 7). La linea verticale è la sufficienza ('+SUFF_VAL+'): a destra sei generoso, a sinistra severo.</p>'+
+    html += statPanel(t("stats.byVoiceTitle"),
+      '<p class="panel-intro">'+tf("stats.byVoiceIntro",{suff:SUFF_VAL})+'</p>'+
       lolliList(params),
       null);
   } else {
-    html += bloccato("Profilo sensoriale", quante(SOGLIA_PALATO-withVoti.length,"scheda","schede"), "il radar del tuo palato");
+    html += bloccato(t("stats.sensoryTitle"), quante(SOGLIA_PALATO-withVoti.length,t("hdr.card"),t("hdr.cardPl")), t("stats.sensoryBlockedWhat"));
   }
 
   /* ---- 5. prezzi ---- */
@@ -2364,9 +3169,9 @@ function renderStats(){
 
     let corpo = scatterSVG(conPrezzo.map(w => ({prezzo:w.prezzo, score:w.score, nome:w.nome})), conPrezzo.length >= 4);
     corpo += '<div class="prezzo-cifre">'+
-      '<div><span class="pc-n">'+euro(mediana)+'</span><span class="pc-l">prezzo tipico</span></div>'+
-      '<div><span class="pc-n">'+euro(spesa)+'</span><span class="pc-l">spesa registrata</span></div>'+
-      '<div><span class="pc-n">'+conPrezzo.length+'/'+n+'</span><span class="pc-l">schede col prezzo</span></div>'+
+      '<div><span class="pc-n">'+euro(mediana)+'</span><span class="pc-l">'+t("stats.priceTypical")+'</span></div>'+
+      '<div><span class="pc-n">'+euro(spesa)+'</span><span class="pc-l">'+t("stats.priceSpent")+'</span></div>'+
+      '<div><span class="pc-n">'+conPrezzo.length+'/'+n+'</span><span class="pc-l">'+t("stats.priceWithPrice")+'</span></div>'+
     '</div>';
 
     /* Quanto vale davvero un vino per quello che costa.
@@ -2391,21 +3196,21 @@ function renderStats(){
         '<span class="val-prezzo">'+euro(x.w.prezzo)+'</span>'+
         '<span class="val-scarto '+verso+'">'+(x.r>0?"+":"")+dec(x.r,0)+'</span></div>';
       corpo += '<div class="valore-box">'+
-        '<p class="panel-intro" style="margin-bottom:10px">Scarto fra il punteggio che hai dato e quello che ci si aspetterebbe a quel prezzo.</p>'+
-        (su.length ? '<div class="sub-label">Valgono più di quanto costano</div>'+su.map(x=>riga(x,"su")).join("") : "")+
-        (giu.length ? '<div class="sub-label" style="margin-top:12px">Non valgono il prezzo</div>'+giu.map(x=>riga(x,"giu")).join("") : "")+
-        (!su.length && !giu.length ? '<p class="note-line">I tuoi voti seguono da vicino il prezzo: nessun vino si discosta in modo netto.</p>' : "")+
+        '<p class="panel-intro" style="margin-bottom:10px">'+t("stats.priceGapIntro")+'</p>'+
+        (su.length ? '<div class="sub-label">'+t("stats.priceWorthMore")+'</div>'+su.map(x=>riga(x,"su")).join("") : "")+
+        (giu.length ? '<div class="sub-label" style="margin-top:12px">'+t("stats.priceNotWorth")+'</div>'+giu.map(x=>riga(x,"giu")).join("") : "")+
+        (!su.length && !giu.length ? '<p class="note-line">'+t("stats.priceCloseToExpected")+'</p>' : "")+
       '</div>';
-      const pendTxt = pend > 3 ? "Spendere di più, per te, alza davvero il voto."
-        : (pend < -1 ? "Curiosamente i vini più cari non ti convincono di più."
-        : "Il prezzo incide poco sui tuoi voti: paghi soprattutto il nome.");
-      corpo += '<p class="panel-foot">Ogni raddoppio di prezzo vale in media <b>'+dec(pend*Math.LN2,1)+' punti</b>. '+pendTxt+'</p>';
+      const pendTxt = pend > 3 ? t("stats.priceVerdictUp")
+        : (pend < -1 ? t("stats.priceVerdictDown")
+        : t("stats.priceVerdictFlat"));
+      corpo += '<p class="panel-foot">'+tf("stats.priceDoubleFoot",{pts:dec(pend*Math.LN2,1), verdict:pendTxt})+'</p>';
     }else{
-      corpo += '<p class="panel-foot">Con almeno 4 schede col prezzo posso dirti quali vini valgono più di quanto costano.</p>';
+      corpo += '<p class="panel-foot">'+t("stats.priceNeedMore")+'</p>';
     }
-    html += statPanel("Quanto conta il prezzo", corpo, null);
+    html += statPanel(t("stats.priceTitle"), corpo, null);
   }else{
-    html += bloccato("Quanto conta il prezzo", quante(2-conPrezzo.length,"prezzo","prezzi"), "quali vini valgono quello che costano");
+    html += bloccato(t("stats.priceTitle"), quante(2-conPrezzo.length,t("stats.onePrice"),t("stats.manyPrices")), t("stats.priceBlockedWhat"));
   }
 
   /* ---- 6. regioni ---- */
@@ -2428,9 +3233,9 @@ function renderStats(){
         '<div class="bar-track"><div class="bar-fill" style="width:'+(x.avg/m*100)+'%"></div></div>'+
         '<span class="bar-val">'+dec(x.avg)+' <em>('+x.n+')</em></span></div>').join("")+'</div>';
     };
-    html += statPanel("Territori",
-      (paesi.length > 1 ? '<div class="sub-label">Per paese</div>'+barre(paesi.slice(0,8))+
-        '<div class="sub-label" style="margin-top:16px">Per zona</div>' : '')+
+    html += statPanel(t("stats.territoriesTitle"),
+      (paesi.length > 1 ? '<div class="sub-label">'+t("stats.byCountry")+'</div>'+barre(paesi.slice(0,8))+
+        '<div class="sub-label" style="margin-top:16px">'+t("stats.byZone")+'</div>' : '')+
       barre(regioni.slice(0,10)), null);
   }
 
@@ -2440,12 +3245,13 @@ function renderStats(){
     {label:"80-89",  lo:80, hi:90},
     {label:"70-79",  lo:70, hi:80},
     {label:"60-69",  lo:60, hi:70},
-    {label:"fino a 59", lo:0, hi:60}
+    {label:t("stats.distributionUpTo"), lo:0, hi:60}
   ].map(b => Object.assign({}, b, {count: scoresArr.filter(s => s>=b.lo && s<b.hi).length}));
-  html += statPanel("Distribuzione dei tuoi voti",
+  html += statPanel(t("stats.distributionTitle"),
     columnsSVG(bands.slice().reverse())+
-    '<p class="panel-foot">Variabilità dei voti: <b>'+(sd?dec(sd):"—")+' punti</b>'+
-      (n>=SOGLIA_PALATO ? (sd < 6 ? " — dai voti piuttosto ravvicinati." : sd > 12 ? " — spazi molto tra un vino e l'altro." : " — buona escursione tra i vini.") : "")+
+    '<p class="panel-foot">'+tf("stats.distributionFoot",{sd:(sd?dec(sd):"—"), extra:
+      (n>=SOGLIA_PALATO ? (sd < 6 ? t("stats.distributionClose") : sd > 12 ? t("stats.distributionWide") : t("stats.distributionGood")) : "")
+    })+
     '</p>',
     null);
 
@@ -2466,30 +3272,30 @@ function renderStats(){
     const d2 = media(chrono.slice(half).map(w=>w.score));
     const delta = d2 - d1;
     const verdict = Math.abs(delta) < 2
-      ? "Il tuo metro di giudizio è stabile."
+      ? t("stats.trendStable")
       : (delta < 0
-          ? "Nelle schede più recenti sei più severo di "+dec(Math.abs(delta))+" punti."
-          : "Nelle schede più recenti sei più generoso di "+dec(delta)+" punti.");
-    html += statPanel("Andamento nel tempo",
-      '<svg class="spark" viewBox="0 0 '+W+' '+H+'" preserveAspectRatio="none" role="img" aria-label="Andamento dei punteggi">'+
+          ? tf("stats.trendStricter",{pts:dec(Math.abs(delta))})
+          : tf("stats.trendMoreGenerous",{pts:dec(delta)}));
+    html += statPanel(t("stats.trendTitle"),
+      '<svg class="spark" viewBox="0 0 '+W+' '+H+'" preserveAspectRatio="none" role="img" aria-label="'+t("stats.trendTitle")+'">'+
         '<path d="'+area+'" fill="var(--gold)" fill-opacity="0.14"/>'+
         '<path d="'+path+'" fill="none" stroke="var(--gold)" stroke-width="2" stroke-linejoin="round"/>'+
         pts.map(pp => '<circle cx="'+pp[0].toFixed(1)+'" cy="'+pp[1].toFixed(1)+'" r="2.5" fill="var(--gold)"/>').join("")+
       '</svg>'+
-      '<div class="spark-axis"><span>prima scheda</span><span>ultima</span></div>'+
+      '<div class="spark-axis"><span>'+t("stats.trendFirst")+'</span><span>'+t("stats.trendLast")+'</span></div>'+
       '<p class="panel-foot">'+verdict+'</p>',
-      "da "+lo+" a "+hi);
+      tf("stats.trendRange",{lo:lo, hi:hi}));
   } else {
-    html += bloccato("Andamento nel tempo", quante(SOGLIA_TREND-chrono.length,"scheda","schede"), "se stai diventando più severo");
+    html += bloccato(t("stats.trendTitle"), quante(SOGLIA_TREND-chrono.length,t("hdr.card"),t("hdr.cardPl")), t("stats.trendBlockedWhat"));
   }
 
   /* ---- 9. media per tipologia ---- */
-  const typeMax = Math.max.apply(null, [1].concat(byType.map(t => t.avg)));
-  html += statPanel("Media per tipologia",
-    '<div class="bars">'+byType.map(t =>
-      '<div class="bar-row"><span class="bar-label">'+esc(t.label)+'</span>'+
-      '<div class="bar-track"><div class="bar-fill" style="width:'+(t.avg/typeMax*100)+'%"></div></div>'+
-      '<span class="bar-val">'+dec(t.avg)+' <em>('+t.count+')</em></span></div>'
+  const typeMax = Math.max.apply(null, [1].concat(byType.map(tp => tp.avg)));
+  html += statPanel(t("stats.avgByTypeTitle"),
+    '<div class="bars">'+byType.map(tp =>
+      '<div class="bar-row"><span class="bar-label">'+esc(tp.label)+'</span>'+
+      '<div class="bar-track"><div class="bar-fill" style="width:'+(tp.avg/typeMax*100)+'%"></div></div>'+
+      '<span class="bar-val">'+dec(tp.avg)+' <em>('+tp.count+')</em></span></div>'
     ).join("")+'</div>', null);
 
   /* ---- 10. descrittori ---- */
@@ -2498,7 +3304,7 @@ function renderStats(){
   const descs = Object.keys(descCount).sort((a,b) => descCount[b]-descCount[a]);
   if(descs.length){
     const dMax = Math.max.apply(null, [1].concat(descs.map(d => descCount[d])));
-    html += statPanel("Descrittori più usati",
+    html += statPanel(t("stats.descriptorsTitle"),
       '<div class="bars">'+descs.slice(0,8).map(d =>
         '<div class="bar-row"><span class="bar-label">'+esc(d)+'</span>'+
         '<div class="bar-track"><div class="bar-fill" style="width:'+(descCount[d]/dMax*100)+'%"></div></div>'+
@@ -2708,11 +3514,11 @@ async function registerEvent(name){
 async function saveTasting(){
   const sc = scores();
   if(!S.wine.nome.trim()){
-    setStatus("Manca il nome del vino.");
+    setStatus(t("new.nameMissing"));
     $("nomeInput").focus();
     return;
   }
-  setStatus("Salvataggio...");
+  setStatus(t("new.saving"));
   const entry = {
     nome:S.wine.nome, produttore:S.wine.produttore, annata:S.wine.annata,
     tipologia:S.wine.tipologia, denominazione:S.wine.denominazione,
@@ -2736,8 +3542,8 @@ async function saveTasting(){
   };
   if(S.editingId && S.editTimestamp) entry.modificato = Date.now();
   if(S.photo){
-    const t = await makeThumb(S.photo, 220);
-    if(t) entry.thumb = t;
+    const thumb = await makeThumb(S.photo, 220);
+    if(thumb) entry.thumb = thumb;
   }else if(S.editingId && S.editThumb){
     entry.thumb = S.editThumb;   // nessuna foto nuova: si tiene quella già archiviata
   }
@@ -2745,9 +3551,9 @@ async function saveTasting(){
   const inModifica = !!S.editingId;
   try{
     const res = await DB.set(key, JSON.stringify(entry), false);
-    if(!res) throw new Error("set fallita");
+    if(!res) throw new Error(t("new.saveFailed"));
   }catch(e){
-    setStatus("Errore nel salvataggio: "+(e && e.message ? e.message : "sconosciuto"));
+    setStatus(tf("new.savingError",{msg:(e && e.message ? e.message : t("new.unknown"))}));
     return;
   }
 
@@ -2755,16 +3561,16 @@ async function saveTasting(){
   // In modifica non si aggiunge: il voto in classifica c'è già e si creerebbe un doppione.
   let eventMsg = "";
   if(inModifica && S.currentEvent){
-    eventMsg = " Il voto già in classifica non è stato toccato.";
+    eventMsg = t("event.voteUntouched");
   }else if(S.currentEvent){
     try{
       const slug = await registerEvent(S.currentEvent);
       const wineLabel = [S.wine.nome, S.wine.produttore, S.wine.annata].filter(Boolean).join(" — ");
       const voteKey = "evento:"+slug+":"+Date.now()+"-"+Math.random().toString(36).slice(2,6);
       await DB.set(voteKey, JSON.stringify({wineLabel, score:sc.total, ts:Date.now()}), true);
-      eventMsg = ' Voto aggiunto a "'+S.currentEvent+'".';
+      eventMsg = tf("event.voteAdded",{name:S.currentEvent});
     }catch(e){
-      eventMsg = " Attenzione: il voto per l'evento non è stato registrato.";
+      eventMsg = t("event.voteNotRegistered");
     }
   }
 
@@ -2772,7 +3578,7 @@ async function saveTasting(){
   resetForm(false);
   if(inModifica){ S.tab = "book"; S.expanded = key; }
   renderAll();
-  setStatus((inModifica ? "Scheda aggiornata." : "Degustazione salvata.")+eventMsg);
+  setStatus((inModifica ? t("new.updated") : t("new.saved"))+eventMsg);
 }
 
 let statusTimer = null;
@@ -2837,14 +3643,14 @@ function apriInModifica(id){
   S.expanded = null;
   renderAll();
   window.scrollTo({top:0, behavior:"smooth"});
-  setStatus('Stai modificando "'+(w.nome||"la scheda")+'". Salva per aggiornarla.');
+  setStatus(tf("new.editingSave",{name:(w.nome||t("new.editingFallback"))}));
 }
 
 function annullaModifica(){
   S.editingId = null; S.editThumb = null; S.editTimestamp = null;
   resetForm(false);
   renderAll();
-  setStatus("Modifica annullata.");
+  setStatus(t("new.editCancelled"));
 }
 
 function resetForm(notify){
@@ -2858,7 +3664,7 @@ function resetForm(notify){
   S.desc = []; S.note = ""; S.abbinamento = "";
   S.editingId = null; S.editThumb = null; S.editTimestamp = null;
   $("photoInput").value = "";
-  if(notify) setStatus("Scheda azzerata.");
+  if(notify) setStatus(t("new.cleared"));
 }
 
 /* ============================================================
@@ -2923,13 +3729,13 @@ function renderBlindForm(){
 
   const sc = scoresOf(B);
   const mod = !!B.editingId;
-  $("bSaveBtn").textContent = (mod ? "Aggiorna · " : "Salva alla cieca · ")+sc.total+"/100";
-  $("bResetBtn").textContent = mod ? "Annulla" : "Azzera";
+  $("bSaveBtn").textContent = (mod ? t("hdr.updatePrefix") : t("blind.saveBtn")+" · ")+sc.total+"/100";
+  $("bResetBtn").textContent = mod ? t("action.cancel") : t("action.clear");
   const ban = $("bEditBanner");
   ban.classList.toggle("hidden", !mod);
   if(mod){
     const pr = B.prove.find(x => x.id === B.editingId);
-    $("bEditBannerText").innerHTML = "Stai modificando <b>"+esc((pr && (pr.etichetta || pr.ipotesi.nome)) || "una prova")+"</b>.";
+    $("bEditBannerText").innerHTML = tf("blind.editingBadge", {name: esc((pr && (pr.etichetta || pr.ipotesi.nome)) || t("blind.editingTrial"))});
   }
 }
 
@@ -2937,34 +3743,34 @@ function renderBlindForm(){
 function esito(ip, re){
   const norm = s => normVit(String(s||""));
   const out = [];
-  if(re.tipologia) out.push({k:"Tipologia", mio:ip.tipologia, vero:re.tipologia, ok: ip.tipologia === re.tipologia});
-  if(re.vitigno)  out.push({k:"Vitigno", mio:ip.vitigno||"—", vero:re.vitigno,
+  if(re.tipologia) out.push({k:t("blind.k.type"), mio:ip.tipologia, vero:re.tipologia, ok: ip.tipologia === re.tipologia});
+  if(re.vitigno)  out.push({k:t("blind.k.grape"), mio:ip.vitigno||"—", vero:re.vitigno,
                             ok: !!ip.vitigno && canonVitigno(ip.vitigno) === canonVitigno(re.vitigno)});
-  if(re.regione)  out.push({k:"Regione", mio:ip.regione||"—", vero:re.regione,
+  if(re.regione)  out.push({k:t("blind.k.region"), mio:ip.regione||"—", vero:re.regione,
                             ok: !!ip.regione && norm(splitLuogo(ip.regione).regione) === norm(splitLuogo(re.regione).regione)});
-  if(re.annata)   out.push({k:"Annata", mio:ip.annata||"—", vero:re.annata,
+  if(re.annata)   out.push({k:t("blind.k.vintage"), mio:ip.annata||"—", vero:re.annata,
                             ok: !!ip.annata && Math.abs(Number(ip.annata)-Number(re.annata)) <= 1});
   return out;
 }
 
 function renderBlindList(){
   const list = B.prove.slice().sort((a,b) => (b.timestamp||0)-(a.timestamp||0));
-  $("bCount").textContent = list.length ? list.length+(list.length===1?" prova":" prove") : "";
+  $("bCount").textContent = list.length ? list.length+" "+(list.length===1?t("blind.trial"):t("blind.trials")) : "";
   if(!list.length){
-    $("bList").innerHTML = '<p class="note-line">Nessuna prova ancora. Compila la scheda qui sopra e salvala.</p>';
+    $("bList").innerHTML = '<p class="note-line">'+t("blind.noneYet")+'</p>';
     return;
   }
   $("bList").innerHTML = '<div style="display:flex;flex-direction:column;gap:10px">'+list.map(pr => {
-    const titolo = pr.etichetta || pr.ipotesi.nome || "Prova senza nome";
+    const titolo = pr.etichetta || pr.ipotesi.nome || t("blind.noNameTrial");
     const es = pr.svelato ? esito(pr.ipotesi, pr.reale) : [];
     const giusti = es.filter(x => x.ok).length;
     return '<div class="blind-row">'+
       '<div class="blind-top">'+
         '<span class="blind-score">'+pr.score+'</span>'+
         '<div class="blind-mid"><div class="blind-name">'+esc(titolo)+'</div>'+
-          '<div class="blind-meta">'+esc([pr.ipotesi.tipologia, pr.ipotesi.vitigno, pr.ipotesi.regione, pr.ipotesi.annata].filter(Boolean).join(" · ") || "nessuna ipotesi")+'</div></div>'+
+          '<div class="blind-meta">'+esc([pr.ipotesi.tipologia, pr.ipotesi.vitigno, pr.ipotesi.regione, pr.ipotesi.annata].filter(Boolean).join(" · ") || t("blind.noGuess"))+'</div></div>'+
         (pr.svelato ? '<span class="blind-badge'+(giusti===es.length&&es.length?" pieno":"")+'">'+giusti+'/'+es.length+'</span>'
-                    : '<span class="blind-badge da-svelare">da svelare</span>')+
+                    : '<span class="blind-badge da-svelare">'+t("blind.toReveal")+'</span>')+
       '</div>'+
       (pr.svelato ? '<div class="blind-esito">'+es.map(x =>
           '<div class="esito-riga"><span class="esito-k">'+x.k+'</span>'+
@@ -2972,15 +3778,15 @@ function renderBlindList(){
           (x.ok ? '<span class="esito-segno ok">✓</span>'
                 : '<span class="esito-segno no">→</span><span class="esito-vero">'+esc(x.vero)+'</span>')+
           '</div>').join("")+
-          (pr.reale.nome ? '<div class="esito-nome">Era: <b>'+esc(pr.reale.nome)+'</b>'+(pr.reale.produttore?" — "+esc(pr.reale.produttore):"")+
-            (pr.taccuinoId ? '<span class="in-taccuino">nel taccuino</span>' : '')+'</div>' : '')+
+          (pr.reale.nome ? '<div class="esito-nome">'+tf("blind.was",{name:esc(pr.reale.nome)})+(pr.reale.produttore?" — "+esc(pr.reale.produttore):"")+
+            (pr.taccuinoId ? '<span class="in-taccuino">'+t("blind.inBook")+'</span>' : '')+'</div>' : '')+
         '</div>' : '')+
       (B.svelando === pr.id
         ? moduloSvelamento(pr)
         : '<div class="blind-actions">'+
-            '<button type="button" class="pill-ghost" data-bedit="'+pr.id+'">Modifica</button>'+
-            '<button type="button" class="pill-solid" data-breveal="'+pr.id+'">'+(pr.svelato?"Correggi":"Svela il vino")+'</button>'+
-            '<button type="button" class="pill-danger" data-bdel="'+pr.id+'">Elimina</button>'+
+            '<button type="button" class="pill-ghost" data-bedit="'+pr.id+'">'+t("blind.edit")+'</button>'+
+            '<button type="button" class="pill-solid" data-breveal="'+pr.id+'">'+(pr.svelato?t("blind.fix"):t("blind.reveal"))+'</button>'+
+            '<button type="button" class="pill-danger" data-bdel="'+pr.id+'">'+t("action.delete")+'</button>'+
           '</div>')+
     '</div>';
   }).join("")+'</div>';
@@ -3032,15 +3838,15 @@ async function bSave(){
   const mod = !!B.editingId;
   try{
     const res = await DB.set(key, JSON.stringify(entry), false);
-    if(!res) throw new Error("set fallita");
+    if(!res) throw new Error(t("blind.saveFailed"));
   }catch(e){
-    bStatus("Errore nel salvataggio: "+(e && e.message ? e.message : "sconosciuto"));
+    bStatus(tf("blind.savingError",{msg:(e && e.message ? e.message : t("blind.unknown"))}));
     return;
   }
   await bLoad();
   bReset();
   renderBlindForm(); renderBlindList();
-  bStatus(mod ? "Prova aggiornata." : "Prova salvata. Quando scopri il vino, tocca “Svela il vino”.");
+  bStatus(mod ? t("blind.updated") : t("blind.saved"));
 }
 
 function bEdit(id){
@@ -3073,7 +3879,7 @@ function bEdit(id){
   B.intensita = Number(pr.intensita) || 3; B.corpo = Number(pr.corpo) || 3;
   renderBlindForm(); renderBlindList();
   window.scrollTo({top:0, behavior:"smooth"});
-  bStatus("Stai modificando una prova. Salva per aggiornarla.");
+  bStatus(t("blind.editingNotify"));
 }
 
 function moduloSvelamento(pr){
@@ -3081,29 +3887,29 @@ function moduloSvelamento(pr){
   const ip = pr.ipotesi || {};
   const pre = (a,b) => esc(a || b || "");
   return '<div class="svela-box">'+
-    '<div class="sub-label">Che vino era davvero?</div>'+
+    '<div class="sub-label">'+t("blind.reveal.title")+'</div>'+
     '<div class="id-fields">'+
-      '<label class="fld"><span class="fld-lab">Nome</span>'+
-        '<input class="in-line" id="rvNome" placeholder="es. Barolo Cannubi" value="'+pre(r.nome, ip.nome)+'"></label>'+
+      '<label class="fld"><span class="fld-lab">'+t("blind.reveal.name")+'</span>'+
+        '<input class="in-line" id="rvNome" placeholder="'+t("blind.reveal.name.ph")+'" value="'+pre(r.nome, ip.nome)+'"></label>'+
       '<div class="id-row">'+
-        '<label class="fld"><span class="fld-lab">Produttore</span>'+
-          '<input class="in-line" id="rvProduttore" placeholder="es. Sandrone" value="'+pre(r.produttore,"")+'"></label>'+
-        '<label class="fld fld-yr"><span class="fld-lab">Annata</span>'+
-          '<input class="in-line" id="rvAnnata" inputmode="numeric" placeholder="2019" value="'+pre(r.annata, ip.annata)+'"></label>'+
+        '<label class="fld"><span class="fld-lab">'+t("blind.reveal.producer")+'</span>'+
+          '<input class="in-line" id="rvProduttore" placeholder="'+t("blind.reveal.producer.ph")+'" value="'+pre(r.produttore,"")+'"></label>'+
+        '<label class="fld fld-yr"><span class="fld-lab">'+t("blind.reveal.vintage")+'</span>'+
+          '<input class="in-line" id="rvAnnata" inputmode="numeric" placeholder="'+t("blind.reveal.vintage.ph")+'" value="'+pre(r.annata, ip.annata)+'"></label>'+
       '</div>'+
-      '<div class="type-chips" id="rvTipi">'+TYPES.map(t =>
-        '<button type="button" class="type-chip-btn'+((r.tipologia||ip.tipologia)===t?" on":"")+'" data-rvtype="'+t+'">'+t+'</button>').join("")+'</div>'+
-      '<label class="fld" style="margin-top:14px"><span class="fld-lab">Vitigno prevalente</span>'+
-        '<input class="in-line" id="rvVitigno" placeholder="es. Nebbiolo" value="'+pre(r.vitigno, ip.vitigno)+'"></label>'+
-      '<label class="fld"><span class="fld-lab">Regione o paese</span>'+
-        '<input class="in-line" id="rvRegione" placeholder="es. Piemonte — Italia" value="'+pre(r.regione, ip.regione)+'"></label>'+
-      '<label class="fld"><span class="fld-lab">Prezzo</span>'+
+      '<div class="type-chips" id="rvTipi">'+TYPES.map(tp =>
+        '<button type="button" class="type-chip-btn'+((r.tipologia||ip.tipologia)===tp?" on":"")+'" data-rvtype="'+tp+'">'+tp+'</button>').join("")+'</div>'+
+      '<label class="fld" style="margin-top:14px"><span class="fld-lab">'+t("blind.reveal.grape")+'</span>'+
+        '<input class="in-line" id="rvVitigno" placeholder="'+t("blind.reveal.grape.ph")+'" value="'+pre(r.vitigno, ip.vitigno)+'"></label>'+
+      '<label class="fld"><span class="fld-lab">'+t("blind.reveal.region")+'</span>'+
+        '<input class="in-line" id="rvRegione" placeholder="'+t("blind.reveal.region.ph")+'" value="'+pre(r.regione, ip.regione)+'"></label>'+
+      '<label class="fld"><span class="fld-lab">'+t("blind.reveal.price")+'</span>'+
         '<span class="price-wrap"><input class="in-line in-price" id="rvPrezzo" type="number" inputmode="decimal" min="0" step="0.01" value="'+(r.prezzo!=null?r.prezzo:"")+'"><span class="price-cur">€</span></span></label>'+
     '</div>'+
-    '<p class="note-line" style="margin-top:12px">Col nome compilato la scheda entra anche nel taccuino, con i voti che hai dato alla cieca.</p>'+
+    '<p class="note-line" style="margin-top:12px">'+t("blind.reveal.note")+'</p>'+
     '<div class="blind-actions">'+
-      '<button type="button" class="pill-solid" data-rvok="'+pr.id+'">Conferma</button>'+
-      '<button type="button" class="pill-ghost" data-rvno="1">Annulla</button>'+
+      '<button type="button" class="pill-solid" data-rvok="'+pr.id+'">'+t("action.confirm")+'</button>'+
+      '<button type="button" class="pill-ghost" data-rvno="1">'+t("action.cancel")+'</button>'+
     '</div>'+
   '</div>';
 }
@@ -3153,19 +3959,19 @@ async function bConfermaSvelamento(id){
   let msg = "";
   if(pr.reale.nome){
     const key = await portaInTaccuino(pr);
-    if(key){ pr.taccuinoId = key; msg = " Aggiunta anche al taccuino."; }
+    if(key){ pr.taccuinoId = key; msg = t("blind.alsoAddedToBook"); }
   }else{
-    msg = " Senza nome resta solo qui: nel taccuino servirebbe almeno quello.";
+    msg = t("blind.noNameStaysHere");
   }
   const copia = Object.assign({}, pr); delete copia.id;
   try{ await DB.set(id, JSON.stringify(copia), false); }
-  catch(e){ bStatus("Non sono riuscito a salvare."); return; }
+  catch(e){ bStatus(t("blind.saveErrorGeneric")); return; }
 
   B.svelando = null;
   await loadSaved();
   renderBlindList();
   const es = esito(pr.ipotesi, pr.reale);
-  bStatus((es.length ? "Ne hai indovinati "+es.filter(x=>x.ok).length+" su "+es.length+"." : "Vino svelato.")+msg);
+  bStatus((es.length ? tf("blind.guessedNOfM",{ok:es.filter(x=>x.ok).length, tot:es.length}) : t("blind.revealed"))+msg);
 }
 
 /* ============================================================
@@ -3173,21 +3979,21 @@ async function bConfermaSvelamento(id){
    ============================================================ */
 function descriviArchivio(){
   const m = DB.mode;
-  $("storageMode").textContent = m === "cloud" ? "account " + (AUTH.username || "")
-    : m === "condiviso" ? "archivio Claude"
-    : (m === "locale" ? "archivio del browser" : "solo questa sessione");
+  $("storageMode").textContent = m === "cloud" ? tf("book.storage.cloud",{who:AUTH.username || ""})
+    : m === "condiviso" ? t("book.storage.shared")
+    : (m === "locale" ? t("book.storage.local") : t("book.storage.memory"));
   $("backupNote").textContent = m === "memoria"
-    ? "Questo browser non permette di archiviare nulla: le schede spariranno chiudendo la pagina. Salva una copia prima di uscire."
+    ? t("book.note.memory")
     : (m === "locale"
-       ? "Le schede restano in questo browser, su questo dispositivo. Si perdono se cancelli i dati del browser o cambi telefono: la copia serve a quello."
+       ? t("book.note.local")
        : m === "cloud"
-       ? "Le schede sono salvate sul tuo account: le ritrovi accedendo da qualsiasi dispositivo. Una copia periodica resta comunque la garanzia migliore."
-       : "Le schede sono archiviate da Claude. Una copia periodica resta comunque la garanzia migliore.");
+       ? t("book.note.cloud")
+       : t("book.note.shared"));
   try{ renderAccount(); }catch(e){}
 }
 
 async function esportaArchivio(){
-  $("backupStatus").textContent = "Preparo la copia…";
+  $("backupStatus").textContent = t("book.exportPreparing");
   try{
     const res = await DB.list("degustazione:", false);
     const keys = (res && res.keys) || [];
@@ -3209,19 +4015,19 @@ async function esportaArchivio(){
     a.download = "sorso-" + (slugify(S.owner || "taccuino")) + "-" + oggi + ".json";
     document.body.appendChild(a); a.click(); document.body.removeChild(a);
     setTimeout(() => URL.revokeObjectURL(url), 4000);
-    $("backupStatus").textContent = schede.length + (schede.length===1?" scheda salvata":" schede salvate")+" nel file.";
+    $("backupStatus").textContent = tf("book.exportDone",{n: schede.length+" "+(schede.length===1?t("book.exportOneSaved"):t("book.exportManySaved"))});
   }catch(e){
-    $("backupStatus").textContent = "Non sono riuscito a preparare la copia.";
+    $("backupStatus").textContent = t("book.exportFailed");
   }
 }
 
 async function importaArchivio(file){
-  $("backupStatus").textContent = "Leggo il file…";
+  $("backupStatus").textContent = t("book.importReading");
   try{
     const testo = await file.text();
     const dump = JSON.parse(testo);
     if(!dump || dump.formato !== "sorso-archivio" || !Array.isArray(dump.schede)){
-      $("backupStatus").textContent = "Questo file non sembra una copia di Sorso.";
+      $("backupStatus").textContent = t("book.importNotOurs");
       return;
     }
     const esistenti = new Set(S.saved.map(w => w.timestamp+"|"+w.nome));
@@ -3241,9 +4047,9 @@ async function importaArchivio(file){
     }
     await loadSaved();
     renderAll();
-    $("backupStatus").textContent = aggiunte+" schede ripristinate"+(saltate?", "+saltate+" già presenti o illeggibili":"")+".";
+    $("backupStatus").textContent = tf("book.importDone",{n:aggiunte, extra:(saltate?tf("book.importAlready",{n:saltate}):"")});
   }catch(e){
-    $("backupStatus").textContent = "File non leggibile.";
+    $("backupStatus").textContent = t("book.importUnreadable");
   }
 }
 
@@ -3251,24 +4057,24 @@ async function importaArchivio(file){
    CLASSIFICA EVENTO
    ============================================================ */
 function renderEventPicker(){
-  const opts = ['<option value=""'+(!S.currentEvent && !S.newEventMode?" selected":"")+'>— scegli un evento —</option>']
+  const opts = ['<option value=""'+(!S.currentEvent && !S.newEventMode?" selected":"")+'>'+t("event.pickOne")+'</option>']
     .concat(eventiVisibili().map(e => '<option value="'+esc(e.slug)+'"'+(!S.newEventMode && S.currentEvent===e.name?" selected":"")+'>'+esc(e.name)+'</option>'))
-    .concat(['<option value="__new"'+(S.newEventMode?" selected":"")+'>+ Nuovo evento…</option>']);
+    .concat(['<option value="__new"'+(S.newEventMode?" selected":"")+'>'+t("event.createNewShort")+'</option>']);
   $("eventPicker").innerHTML = opts.join("");
   $("newEventWrap").classList.toggle("hidden", !S.newEventMode);
   $("eventNote").textContent = S.currentEvent
-    ? 'Le degustazioni che salvi ora vengono aggiunte anche a "'+S.currentEvent+'".'
+    ? tf("event.noteWillBeAdded",{name:S.currentEvent})
     : (S.newEventMode
-        ? "Scrivi il nome, poi tocca Aggiorna: l'evento viene creato e condiviso."
-        : "Scegli o crea un evento: i voti di tutti i partecipanti finiscono nella stessa classifica.");
+        ? t("event.noteCreateHint")
+        : t("event.noteChooseOrCreate"));
   const warn = $("storageWarn");
   if(DB.isShared){
     warn.classList.add("hidden");
   } else {
     warn.classList.remove("hidden");
     warn.textContent = DB.mode === "locale"
-      ? "Non hai effettuato l'accesso: la classifica raccoglie solo i voti di questo dispositivo, non quelli degli altri partecipanti. Accedi con Google — e fallo fare anche a loro — per condividere davvero i voti."
-      : "Archivio non disponibile in questo browser: i dati resteranno solo per questa sessione.";
+      ? t("event.warnLocal")
+      : t("event.warnUnavailable");
   }
 }
 
@@ -3277,7 +4083,7 @@ async function loadLeaderboard(){
   if(S.newEventMode){
     name = $("eventNewInput").value.trim();
     if(!name){
-      $("lbList").innerHTML = '<div class="empty"><div class="empty-title">Manca il nome</div><p class="empty-sub">Scrivi il nome del nuovo evento.</p></div>';
+      $("lbList").innerHTML = '<div class="empty"><div class="empty-title">'+t("event.missingName")+'</div><p class="empty-sub">'+t("event.missingNameSub")+'</p></div>';
       return;
     }
     await registerEvent(name);
@@ -3289,23 +4095,23 @@ async function loadLeaderboard(){
   renderEventPicker();
   renderEvtQuick();
   if(!name){
-    $("lbList").innerHTML = '<div class="empty"><div class="empty-title">Nessun evento scelto</div><p class="empty-sub">Seleziona un evento dall\'elenco per vedere la classifica.</p></div>';
+    $("lbList").innerHTML = '<div class="empty"><div class="empty-title">'+t("event.noneChosen")+'</div><p class="empty-sub">'+t("event.noneChosenSub")+'</p></div>';
     S.lb = null; renderHeader(); return;
   }
 
-  $("lbList").innerHTML = '<div class="card"><div class="note-line">Carico la classifica…</div></div>';
+  $("lbList").innerHTML = '<div class="card"><div class="note-line">'+t("event.loading")+'</div></div>';
   const slug = slugify(name);
   let keys = [];
   try{
     const res = await DB.list("evento:"+slug+":", true);
     keys = (res && res.keys) || [];
   }catch(e){
-    $("lbList").innerHTML = '<div class="card"><div class="warn">Errore nel leggere la classifica: '+esc(e && e.message ? e.message : "sconosciuto")+'</div></div>';
+    $("lbList").innerHTML = '<div class="card"><div class="warn">'+tf("event.loadError",{msg:esc(e && e.message ? e.message : t("blind.unknown"))})+'</div></div>';
     return;
   }
   if(keys.length === 0){
     S.lb = [];
-    $("lbList").innerHTML = '<div class="empty"><div class="empty-title">Ancora nessun voto</div><p class="empty-sub">Salva una degustazione con questo evento selezionato per aprire la classifica.</p></div>';
+    $("lbList").innerHTML = '<div class="empty"><div class="empty-title">'+t("event.noVotesYet")+'</div><p class="empty-sub">'+t("event.noVotesYetSub")+'</p></div>';
     renderHeader(); return;
   }
 
@@ -3317,7 +4123,7 @@ async function loadLeaderboard(){
   values.forEach(v => {
     let e; try{ e = JSON.parse(v.value); }catch(err){ return; }
     if(!e || typeof e.score !== "number") return;
-    const label = (e.wineLabel || "Vino senza nome").trim();
+    const label = (e.wineLabel || t("event.noWineName")).trim();
     const key = normLabel(label);
     if(!byWine[key]) byWine[key] = {total:0, count:0, label};
     byWine[key].total += e.score;
@@ -3332,12 +4138,12 @@ async function loadLeaderboard(){
     '<div class="lb-row'+(i===0?" top":"")+'">'+
       '<span class="lb-rank">'+(i+1)+'</span>'+
       '<div class="lb-mid"><div class="lb-name">'+esc(w.label)+'</div>'+
-        '<div class="lb-sub">'+w.count+(w.count===1?" scheda":" schede")+' · '+judge(Math.round(w.avg))+'</div></div>'+
+        '<div class="lb-sub">'+w.count+" "+(w.count===1?t("hdr.card"):t("hdr.cardPl"))+' · '+judge(Math.round(w.avg))+'</div></div>'+
       '<span class="lb-avg">'+w.avg.toFixed(1)+'</span>'+
     '</div>'
   ).join("")+'</div>';
   if(failed.length){
-    html += '<div class="card" style="margin-top:10px"><div class="warn">'+failed.length+' voti non sono stati letti. Tocca di nuovo "Aggiorna classifica".</div></div>';
+    html += '<div class="card" style="margin-top:10px"><div class="warn">'+tf("event.votesUnread",{n:failed.length})+'</div></div>';
   }
   $("lbList").innerHTML = html;
   renderHeader();
@@ -3380,8 +4186,8 @@ function fileToBase64(file){
 async function handleFile(file){
   if(!file || !/^image\//.test(file.type||"")) return;
   const {dataUrl, base64, mediaType} = await fileToBase64(file);
-  S.photo = dataUrl; S.photoB64 = base64; S.photoMedia = mediaType; S.photoName = file.name || "etichetta.jpg";
-  $("labelStatus").textContent = "Foto caricata";
+  S.photo = dataUrl; S.photoB64 = base64; S.photoMedia = mediaType; S.photoName = file.name || t("label.defaultName");
+  $("labelStatus").textContent = t("label.loaded");
   renderIdentity();
 }
 
@@ -3422,6 +4228,10 @@ function setTheme(t){
   $("themeLight").classList.toggle("on", t === "light");
   $("themeDark").classList.toggle("on", t === "dark");
 }
+$("langIt").addEventListener("click", () => setLang("it"));
+$("langEn").addEventListener("click", () => setLang("en"));
+$("loginLangIt").addEventListener("click", () => setLang("it"));
+$("loginLangEn").addEventListener("click", () => setLang("en"));
 
 
 // campi identità
@@ -3510,7 +4320,7 @@ $("typeChips").addEventListener("click", e => {
 
 // foto
 $("photoInput").addEventListener("change", e => handleFile(e.target.files[0]));
-$("removeLabelBtn").addEventListener("click", () => { S.photo=null; S.photoName=""; $("photoInput").value=""; $("labelStatus").textContent="Nessuna foto"; renderIdentity(); });
+$("removeLabelBtn").addEventListener("click", () => { S.photo=null; S.photoName=""; $("photoInput").value=""; $("labelStatus").textContent=t("label.none"); renderIdentity(); });
 const dz = $("dropZone");
 ["dragenter","dragover"].forEach(ev => dz.addEventListener(ev, e => { e.preventDefault(); dz.classList.add("over"); }));
 ["dragleave","dragend"].forEach(ev => dz.addEventListener(ev, () => dz.classList.remove("over")));
@@ -3590,8 +4400,8 @@ $("bookList").addEventListener("click", async e => {
     if(w && ta){
       w.note = ta.value;
       const copy = Object.assign({}, w); delete copy.id;
-      try{ await DB.set(id, JSON.stringify(copy), false); sv.textContent = "Salvato"; }
-      catch(err){ sv.textContent = "Errore"; }
+      try{ await DB.set(id, JSON.stringify(copy), false); sv.textContent = t("book.saved"); }
+      catch(err){ sv.textContent = t("book.error"); }
     }
     return;
   }
@@ -3599,7 +4409,7 @@ $("bookList").addEventListener("click", async e => {
   if(del){
     const id = del.dataset.del;
     const w0 = S.saved.find(x => x.id === id);
-    if(!confirm('Eliminare "'+((w0 && w0.nome) || "questa scheda")+'"? L\'operazione non si può annullare.')) return;
+    if(!confirm(tf("book.confirmDelete",{name:(w0 && w0.nome) || t("book.thisWine")}))) return;
     try{ await DB.delete(id, false); }catch(err){}
     S.saved = S.saved.filter(x => x.id !== id);
     S.picked = S.picked.filter(x => x !== id);
@@ -3652,9 +4462,9 @@ async function creaEventoRapido(){
     renderEvtQuick();
     renderEventPicker();
     renderHeader();
-    setStatus('Evento "'+nome+'" creato e collegato a questa scheda.');
+    setStatus(tf("event.createdLinked",{name:nome}));
   }catch(err){
-    setStatus("Non sono riuscito a creare l'evento. Riprova.");
+    setStatus(t("event.createFailed"));
   }
   btn.disabled = false;
 }
@@ -3723,8 +4533,8 @@ $("bSectionsWrap").addEventListener("input", e => {
 });
 
 $("bSaveBtn").addEventListener("click", bSave);
-$("bResetBtn").addEventListener("click", () => { bReset(); renderBlindForm(); renderBlindList(); bStatus("Scheda azzerata."); });
-$("bEditCancelBtn").addEventListener("click", () => { bReset(); renderBlindForm(); renderBlindList(); bStatus("Modifica annullata."); });
+$("bResetBtn").addEventListener("click", () => { bReset(); renderBlindForm(); renderBlindList(); bStatus(t("blind.cleared")); });
+$("bEditCancelBtn").addEventListener("click", () => { bReset(); renderBlindForm(); renderBlindList(); bStatus(t("blind.editCancelled")); });
 $("bList").addEventListener("click", async e => {
   const ed = e.target.closest("[data-bedit]"); if(ed){ bEdit(ed.dataset.bedit); return; }
   const rv = e.target.closest("[data-breveal]");
@@ -3742,7 +4552,7 @@ $("bList").addEventListener("click", async e => {
   const dl = e.target.closest("[data-bdel]");
   if(dl){
     const pr = B.prove.find(x => x.id === dl.dataset.bdel);
-    if(!confirm('Eliminare "'+((pr && (pr.etichetta||pr.ipotesi.nome)) || "questa prova")+'"?')) return;
+    if(!confirm(tf("blind.confirmDelete",{name:(pr && (pr.etichetta||pr.ipotesi.nome)) || t("blind.editingTrial")}))) return;
     try{ await DB.delete(dl.dataset.bdel, false); }catch(err){}
     if(B.editingId === dl.dataset.bdel){ bReset(); renderBlindForm(); }
     await bLoad(); renderBlindList();
@@ -3816,22 +4626,22 @@ function renderAccount(){
   $("logoutBtn").classList.toggle("hidden", !in_);
   $("loginPromptBtn").classList.toggle("hidden", in_);
   $("accountNote").textContent = in_
-    ? "Hai effettuato l'accesso con Google come " + (AUTH.displayName || AUTH.username) + ": le tue schede si sincronizzano su ogni dispositivo dove accedi con lo stesso account Google."
-    : "Non hai effettuato l'accesso: le schede restano solo su questo dispositivo. Accedi con Google per ritrovarle ovunque.";
+    ? tf("account.noteIn", {who: AUTH.displayName || AUTH.username})
+    : t("account.noteOut");
 
   const av = $("avatarBtn");
   av.classList.toggle("guest", !in_);
   if(in_){
     $("avatarInitials").textContent = iniziali(AUTH.displayName || AUTH.username);
-    av.title = "Accesso come " + (AUTH.displayName || AUTH.username) + " — tocca per il menu account";
+    av.title = tf("account.avatarTitleIn", {who: AUTH.displayName || AUTH.username});
     $("avatarMenuName").textContent = AUTH.displayName || AUTH.username;
   }else{
     $("avatarInitials").innerHTML = GOOGLE_G_ICON;
-    av.title = "Non hai effettuato l'accesso — tocca per accedere con Google";
+    av.title = t("account.avatarTitleOut");
     closeAvatarMenu();
   }
 
-  $("loginPromptBtn").innerHTML = GOOGLE_G_ICON + ' <span>Accedi con Google</span>';
+  $("loginPromptBtn").innerHTML = tf("account.loginPromptHtml", {icon: GOOGLE_G_ICON});
 }
 
 function openAvatarMenu(){ $("avatarMenu").classList.remove("hidden"); }
@@ -3862,7 +4672,7 @@ document.addEventListener("click", (e) => {
 document.addEventListener("keydown", (e) => { if(e.key === "Escape") closeAvatarMenu(); });
 window.__sorsoOnSessionExpired = () => {
   setSkipped(false);
-  alert("La sessione è scaduta: accedi di nuovo per continuare a sincronizzare le tue schede.");
+  alert(t("account.sessionExpired"));
   location.reload();
 };
 
@@ -3912,19 +4722,22 @@ async function handleGoogleRedirect(){
       body: JSON.stringify({code})
     });
     const data = await res.json();
-    if(!res.ok) throw new Error(data && data.error || "Accesso con Google non riuscito.");
+    if(!res.ok) throw new Error(data && data.error || t("account.googleFailed"));
     AUTH.acceptToken(data.token, data.username, data.name);
     setSkipped(false);
     await avviaApp();
   }catch(e){
     openGate();
-    $("loginError").textContent = e && e.message ? e.message : "Accesso con Google non riuscito.";
+    $("loginError").textContent = e && e.message ? e.message : t("account.googleFailed");
   }
   return true;
 }
 
 (async function init(){
   setTheme("light");
+  let savedLang = "it";
+  try{ savedLang = window.localStorage.getItem(LANG_KEY) || "it"; }catch(e){}
+  setLang(savedLang);
   AC.init();
   const handled = await handleGoogleRedirect();
   if(handled) return;
