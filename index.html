@@ -552,14 +552,26 @@
      ancorato al contenuto. La formula agganciato al bordo destro del
      pannello (metà = 280px) ovunque, senza bisogno di JS. */
   .coffee-fab{position:fixed;right:max(16px, calc((100vw - 560px) / 2 - 52px));bottom:calc(100px + env(safe-area-inset-bottom, 0px));z-index:60;
-    width:44px;height:44px;border-radius:50%;flex:none;
-    display:flex;align-items:center;justify-content:center;
+    width:44px;height:44px;border-radius:22px;flex:none;
+    display:flex;align-items:center;justify-content:flex-end;padding:0 12.5px 0 0;
+    overflow:hidden;white-space:nowrap;
     background:var(--sel-bg);color:var(--sel-fg);text-decoration:none;
     box-shadow:0 4px 14px rgba(0,0,0,.3);
-    font-size:19px;line-height:1;transition:transform .15s ease, opacity .15s ease;}
-  .coffee-fab:hover{transform:scale(1.08);}
+    font-size:19px;line-height:1;transition:width .28s ease, transform .15s ease, opacity .15s ease;}
+  .coffee-fab svg{flex:none;}
+  .coffee-fab-label{display:inline-block;max-width:0;opacity:0;overflow:hidden;white-space:nowrap;
+    font:600 13px/1 'Inter';letter-spacing:.01em;margin-right:0;
+    transition:max-width .28s ease, opacity .18s ease, margin-right .28s ease;}
+  /* Il calice si allarga al passaggio del mouse per dire cos'è, non solo mostrarlo:
+     solo con hover vero (mouse), mai al tocco, dove l'espansione resterebbe
+     agganciata dopo il tap senza un modo pulito per richiuderla. Il calice resta
+     ancorato al bordo destro (padding costante): è l'etichetta che scorre fuori
+     da sotto, non il calice che si sposta. */
+  @media (hover:hover) and (pointer:fine){
+    .coffee-fab:hover{width:198px;}
+    .coffee-fab:hover .coffee-fab-label{max-width:160px;opacity:1;margin-right:9px;}
+  }
   .coffee-fab:active{transform:scale(.94);}
-  .coffee-fab-label{display:none;}
   /* Quando il pulsante fluttua sopra un controllo interattivo del form (es. griglia
      punteggi, select), si attenua e lascia passare il tap: mai un ostacolo reale. */
   .coffee-fab.fab-yield{opacity:.32;pointer-events:none;}
@@ -593,7 +605,7 @@
 <body>
 <div id="root">
 
-<a class="coffee-fab" id="coffeeFab" href="https://buymeacoffee.com/papalino" target="_blank" rel="noopener noreferrer" title="Offrimi un calice" aria-label="Offrimi un calice"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 22h8"/><path d="M12 15v7"/><path d="M12 15a7 7 0 0 0 7-7V3H5v5a7 7 0 0 0 7 7z"/></svg></a>
+<a class="coffee-fab" id="coffeeFab" href="https://buymeacoffee.com/papalino" target="_blank" rel="noopener noreferrer" title="Offrimi un calice" aria-label="Offrimi un calice"><span class="coffee-fab-label">Offrimi un calice</span><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 22h8"/><path d="M12 15v7"/><path d="M12 15a7 7 0 0 0 7-7V3H5v5a7 7 0 0 0 7 7z"/></svg></a>
 
 <div class="login-gate hidden" id="loginGate">
   <div class="login-card">
