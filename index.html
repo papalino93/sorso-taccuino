@@ -33,6 +33,9 @@
        vino nel bicchiere, il finale è già il bordeaux dell'identità del sito.
        Servono ovunque compaiano le 4 fasi insieme (mini-profilo, radar). */
     --ph-v:#C9A227; --ph-o:#C1751A; --ph-g:var(--rust); --ph-f:var(--sel-bg);
+    /* "va meglio del previsto" — l'unico verde del sistema, prima era un
+       esadecimale fisso che non cambiava in tema scuro. */
+    --positive:#3F7D52;
     --serif:'Instrument Serif',serif;
     --num:'JetBrains Mono',ui-monospace,'SF Mono',Menlo,Consolas,monospace;
     --name:'Inter',system-ui,sans-serif;
@@ -46,6 +49,7 @@
     --head-bg:#000000; --head-fg:#FFFFFF; --head-dim:rgba(255,255,255,.55); --head-line:rgba(255,255,255,.12);
     --bar:rgba(10,10,10,.94); --chip:#232323;
     --ph-v:#E8C547; --ph-o:#FFA94D; --ph-g:var(--rust); --ph-f:var(--sel-bg);
+    --positive:#5FB37D;
   }
   html,body{margin:0;}
   body{background:#EFECE4;-webkit-font-smoothing:antialiased;}
@@ -138,9 +142,9 @@
   .drop-btns{margin-top:11px;display:flex;gap:8px;flex-wrap:wrap;}
   .pill-solid{padding:9px 14px;border-radius:5px;background:var(--sel-bg);color:var(--sel-fg);font:500 11px/1 'Inter';letter-spacing:.1em;text-transform:uppercase;border:0;cursor:pointer;}
   #loginPromptBtn{display:inline-flex;align-items:center;gap:7px;}
-  .pill-danger{padding:9px 14px;border-radius:5px;border:1px solid #B4552F;background:none;color:#B4552F;
+  .pill-danger{padding:9px 14px;border-radius:5px;border:1px solid var(--rust);background:none;color:var(--rust);
                font:500 11px/1 'Inter';letter-spacing:.1em;text-transform:uppercase;cursor:pointer;}
-  .pill-danger:hover{background:#B4552F;color:#fff;}
+  .pill-danger:hover{background:var(--rust);color:#fff;}
   .pill-ghost{padding:9px 14px;border-radius:5px;border:1px solid var(--line);background:none;color:var(--ink-3);font:500 11px/1 'Inter';letter-spacing:.1em;text-transform:uppercase;cursor:pointer;}
   .drop input[type=file]{position:absolute;top:0;left:0;width:1px;height:1px;margin:0;padding:0;
                           opacity:0;pointer-events:none;border:0;}
@@ -177,6 +181,10 @@
                  color:var(--ink-2);font:500 12px/1 'Inter';cursor:pointer;transition:all .15s;
                  text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
   @media (max-width:380px){ .type-chip-btn{font-size:11px;padding:13px 1px;} .type-chips{gap:4px;} }
+  /* Lo stesso componente, dentro il modulo di rivelazione alla cieca, ha meno
+     spazio (è annidato in una scheda già rientrata): senza questo, "Spumante"
+     tronca in ellissi anche su schermi dove altrove ci sta comodo. */
+  #rvTipi .type-chip-btn{font-size:11px;padding:13px 1px;}
   .type-chip-btn.on{background:var(--sel-bg);color:var(--sel-fg);border-color:var(--sel-bg);}
 
   .in-main{width:100%;padding:11px 12px;border:1px solid var(--line);border-radius:5px;background:var(--field);font:500 15px/1.2 'Inter';color:var(--ink);}
@@ -189,7 +197,7 @@
   .uv-title{font:500 9.5px/1 'Inter';letter-spacing:.2em;text-transform:uppercase;color:var(--ink-2);}
   .uv-total{font:600 12px/1 'Inter';color:var(--ink-3);padding:4px 9px;border-radius:100px;background:var(--chip);transition:all .2s;}
   .uv-total.full{background:var(--sel-bg);color:var(--sel-fg);}
-  .uv-total.over{background:#B4552F;color:#FFF6F0;}
+  .uv-total.over{background:var(--rust);color:#FFF6F0;}
   .uv-row{display:flex;gap:6px;align-items:center;margin-bottom:6px;}
   .uv-row input[type=text]{flex:1;min-width:0;padding:9px 10px;border:1px solid var(--line);border-radius:5px;background:var(--field);font:400 13px/1.2 'Inter';color:var(--ink);}
   .uv-row input[type=text][readonly]{color:var(--ink-3);background:var(--card-alt);}
@@ -202,7 +210,7 @@
   .uv-add{padding:7px 12px;border-radius:5px;border:1px dashed var(--line-strong);background:none;color:var(--ink-3);font:500 11px/1 'Inter';letter-spacing:.06em;cursor:pointer;}
   .uv-add:hover{border-color:var(--gold);color:var(--gold);}
   .uv-hint{margin-top:8px;font:400 11px/1.5 'Inter';color:var(--ink-3);}
-  .uv-hint.warn{color:#B4552F;}
+  .uv-hint.warn{color:var(--rust);}
   .in-sm{flex:1;min-width:0;padding:10px 12px;border:1px solid var(--line);border-radius:5px;background:var(--field);font:400 13px/1.2 'Inter';color:var(--ink-2);}
   .in-yr{width:78px;flex:none;}
   .sel-wrap{position:relative;}
@@ -269,7 +277,9 @@
   .lrow{display:flex;align-items:center;gap:9px;margin-bottom:7px;}
   .lrow-label{width:74px;flex:none;font:400 12.5px/1.3 'Inter';color:var(--ink-2);}
   .lgroup{display:flex;gap:3px;flex:1;min-width:0;}
-  .lgroup button{flex:1;height:30px;border:1px solid var(--line);border-radius:4px;background:var(--field);
+  /* stessa altezza dei pulsanti 0-10 (.rgroup) qui sopra nella stessa scheda:
+     erano rimasti a 30px mentre i controlli accanto erano già a 46px. */
+  .lgroup button{flex:1;height:40px;border:1px solid var(--line);border-radius:4px;background:var(--field);
                  color:var(--ink-4);font:500 11px/1 'Inter';cursor:pointer;transition:all .12s;}
   .lgroup button.on{background:var(--ink-3);color:var(--card);border-color:var(--ink-3);}
   .lrow-val{width:64px;flex:none;text-align:right;font:400 11px/1 'Inter';color:var(--ink-4);}
@@ -287,7 +297,7 @@
 
   .search-wrap{position:relative;}
   .search-wrap input{width:100%;padding:11px 12px 11px 34px;border:1px solid var(--line);border-radius:100px;background:var(--field);font:400 13.5px/1.2 'Inter';color:var(--ink);}
-  .search-wrap span{position:absolute;left:14px;top:50%;transform:translateY(-50%);font:400 13px/1 'Inter';color:var(--ink-4);}
+  .search-wrap span{position:absolute;left:14px;top:50%;transform:translateY(-50%);display:flex;color:var(--ink-4);}
   .filter-row{display:flex;gap:6px;flex-wrap:wrap;align-items:center;}
   .fchip{padding:8px 13px;min-height:28px;border-radius:100px;border:1px solid var(--line);background:var(--field);color:var(--ink-2);font:500 11.5px/1 'Inter';letter-spacing:.03em;cursor:pointer;transition:all .15s;}
   .fchip.on{background:var(--sel-bg);color:var(--sel-fg);border-color:var(--sel-bg);}
@@ -319,6 +329,7 @@
   .detail-thumb{width:100%;max-width:150px;border-radius:7px;display:block;margin-bottom:10px;border:1px solid var(--line);}
   .wine-detail .dl{display:flex;gap:8px;}
   .wine-detail .dl b{font-weight:500;color:var(--ink);min-width:96px;flex:none;}
+  .wine-detail .dl .desc-pills{flex:1;min-width:0;}
   .detail-actions{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;}
 
   .empty{text-align:center;padding:56px 20px;border:1px dashed var(--line-strong);border-radius:10px;}
@@ -424,11 +435,11 @@
   .valore-box{margin-top:16px;padding-top:14px;border-top:1px solid var(--line-soft);}
   .val-riga{display:flex;align-items:baseline;gap:8px;padding:5px 0;font:400 13px/1.3 'Inter';}
   .val-freccia{flex:none;font-size:9px;}
-  .val-freccia.su{color:#3F7D52;} .val-freccia.giu{color:var(--rust);}
+  .val-freccia.su{color:var(--positive);} .val-freccia.giu{color:var(--rust);}
   .val-nome{flex:1;min-width:0;color:var(--ink);overflow-wrap:anywhere;text-wrap:pretty;}
   .val-prezzo{flex:none;color:var(--ink-4);font-size:11.5px;}
   .val-scarto{flex:none;width:34px;text-align:right;font-weight:600;}
-  .val-scarto.su{color:#3F7D52;} .val-scarto.giu{color:var(--rust);}
+  .val-scarto.su{color:var(--positive);} .val-scarto.giu{color:var(--rust);}
   .sc-ax{font:400 9.5px 'Inter';fill:var(--ink-4);}
 
   .lolli{display:flex;flex-direction:column;gap:11px;}
@@ -481,7 +492,7 @@
   .lb-name{font:600 14px/1.3 var(--name);letter-spacing:-.005em;color:var(--ink);overflow-wrap:anywhere;text-wrap:pretty;}
   .lb-sub{margin-top:2px;font:400 11px/1.4 'Inter';color:var(--ink-3);}
   .lb-avg{flex:none;font-family:var(--num);font-weight:500;font-variant-numeric:tabular-nums;letter-spacing:normal;font-size:22px;color:var(--ink);}
-  .warn{font:400 12px/1.5 'Inter';color:#B4552F;}
+  .warn{font:400 12px/1.5 'Inter';color:var(--rust);}
   .guide-note{margin:4px 0 0;padding-top:20px;border-top:1px solid var(--line-soft);
               font:400 12px/1.6 'Inter';color:var(--ink-3);text-wrap:pretty;}
   .guide-note b{font-weight:600;color:var(--ink-2);}
@@ -536,7 +547,7 @@
   .esito-mio.ok{color:var(--ink);font-weight:500;}
   .esito-mio.no{color:var(--ink-4);text-decoration:line-through;}
   .esito-segno{font-weight:600;}
-  .esito-segno.ok{color:#3F7D52;}
+  .esito-segno.ok{color:var(--positive);}
   .esito-segno.no{color:var(--ink-4);}
   .esito-vero{color:var(--gold);font-weight:600;}
   .esito-nome{margin-top:6px;font:400 12.5px/1.5 'Inter';color:var(--ink-2);}
@@ -569,7 +580,7 @@
   .backup-card{margin-top:6px;}
   .backup-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;}
   .storage-warn{margin-top:10px;padding:10px 12px;border-radius:6px;background:var(--chip);
-                border-left:2px solid #B4552F;font:400 11.5px/1.55 'Inter';color:var(--ink-2);}
+                border-left:2px solid var(--rust);font:400 11.5px/1.55 'Inter';color:var(--ink-2);}
   .note-line{font:400 12px/1.55 'Inter';color:var(--ink-3);}
 
   /* barra di navigazione in alto, resta visibile allo scroll */
@@ -630,7 +641,7 @@
   .login-brand-name{display:block;font-family:'Instrument Serif',serif;font-size:32px;color:var(--ink);}
   .login-brand-tag{display:block;font:500 10px/1 'Inter';letter-spacing:.22em;text-transform:uppercase;color:var(--ink-4);margin-top:6px;}
   .login-intro{font:400 13px/1.5 'Inter';color:var(--ink-3);text-align:center;margin:0 0 18px;}
-  .login-error{min-height:16px;font:400 12px/1.5 'Inter';color:#B4552F;margin:0 0 8px;text-align:center;}
+  .login-error{min-height:16px;font:400 12px/1.5 'Inter';color:var(--rust);margin:0 0 8px;text-align:center;}
   .login-skip{width:100%;margin-top:12px;background:none;border:0;padding:8px;color:var(--ink-4);
     font:400 11.5px/1.4 'Inter';text-decoration:underline;cursor:pointer;text-align:center;}
   .login-note{font:400 11px/1.5 'Inter';color:var(--ink-4);text-align:center;margin:14px 0 0;}
@@ -653,7 +664,7 @@
 
 <div class="login-gate hidden" id="loginGate">
   <div class="login-card">
-    <div class="lang-switch" id="loginLangSwitch" style="justify-content:center;margin:0 0 16px">
+    <div class="lang-switch" id="loginLangSwitch" style="width:fit-content;margin:0 auto 16px">
       <button type="button" id="loginLangIt" class="on">IT</button>
       <button type="button" id="loginLangEn">EN</button>
     </div>
@@ -812,7 +823,7 @@
     <!-- ============ TACCUINO ============ -->
     <section class="tabpane hidden" id="pane-book">
       <div style="display:flex;flex-direction:column;gap:10px">
-        <div class="search-wrap"><span>&#9906;</span><input id="queryInput" data-i18n-placeholder="book.searchPh" placeholder="Cerca vino, produttore, denominazione..."></div>
+        <div class="search-wrap"><span aria-hidden="true"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg></span><input id="queryInput" data-i18n-placeholder="book.searchPh" placeholder="Cerca vino, produttore, denominazione..."></div>
         <div class="filter-row" id="filterRow"></div>
       </div>
       <div id="cmpWrap"></div>
@@ -2172,14 +2183,24 @@ function chipsHTML(T, pre){
 }
 
 /* scala descrittiva a 5 livelli per durezze e morbidezze */
+/* La prima lettera basta a distinguere quasi tutte le scale (LIVELLI: P A G M T),
+   ma "Snello"/"Strutturato" condividevano la S: se la sola iniziale non basta a
+   distinguere ogni voce della scala, si passa a due lettere per tutta la scala
+   invece che solo per le due in conflitto, per restare coerenti nella riga. */
+function livelloAbbrevs(lab){
+  const iniziali = lab.map(s => s.charAt(0));
+  const collide = iniziali.some((c,i) => iniziali.indexOf(c) !== i);
+  return collide ? lab.map(s => s.slice(0,2)) : iniziali;
+}
 function livelloHTML(T, pre, gruppo, key, titolo, etichette){
   const lab = etichette || LIVELLI;
+  const abbr = livelloAbbrevs(lab);
   const v = (gruppo ? (T[gruppo][key] || 3) : (T[key] || 3));
   const path = gruppo ? (gruppo+"."+key) : key;
   let h = '<div class="lrow"><span class="lrow-label">'+titolo+'</span><div class="lgroup">';
   for(let n=1;n<=5;n++){
     h += '<button type="button" data-liv="'+pre+':'+path+'" data-n="'+n+'" '+
-         'class="'+(v===n?"on":"")+'" title="'+lab[n-1]+'">'+lab[n-1].charAt(0)+'</button>';
+         'class="'+(v===n?"on":"")+'" title="'+lab[n-1]+'">'+abbr[n-1]+'</button>';
   }
   return h+'</div><span class="lrow-val">'+lab[v-1]+'</span></div>';
 }
@@ -2770,7 +2791,11 @@ function renderBook(){
         (uvaggioText(w) ? '<div class="dl"><b>'+t("book.dl.blend")+'</b><span>'+esc(uvaggioText(w))+'</span></div>' : "")+
         (w.affinamento ? '<div class="dl"><b>'+t("book.dl.aging")+'</b><span>'+esc(w.affinamento)+'</span></div>' : "")+
         (w.prezzo != null ? '<div class="dl"><b>'+t("book.dl.price")+'</b><span>'+euro(w.prezzo)+'</span></div>' : "")+
-        '<div class="dl"><b>'+t("book.dl.descriptors")+'</b><span>'+esc((w.desc||[]).join(", ")||"—")+'</span></div>'+
+        '<div class="dl"><b>'+t("book.dl.descriptors")+'</b>'+
+          ((w.desc && w.desc.length)
+            ? '<div class="desc-pills">'+w.desc.map(d => '<span class="desc-pill">'+esc(d)+'</span>').join("")+'</div>'
+            : '<span>—</span>')+
+        '</div>'+
         '<div class="dl"><b>'+t("book.dl.taste")+'</b><span>'+esc([w.zuccheri,w.stato].filter(Boolean).join(" · "))+'</span></div>'+
         '<div class="dl"><b>'+t("book.dl.pairing")+'</b><span>'+esc(w.abbinamento||"—")+'</span></div>'+
         '<textarea class="ta" data-editnote="'+w.id+'" rows="2" placeholder="'+t("book.notesPh")+'">'+esc(w.note)+'</textarea>'+
