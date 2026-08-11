@@ -3176,9 +3176,14 @@ function radarSVG(pcts){
     return '<text x="'+x.toFixed(1)+'" y="'+(y+dy).toFixed(1)+'" text-anchor="'+anchor+'" class="rad-lab">'+a.label+'</text>'+
       '<text x="'+x.toFixed(1)+'" y="'+(y+dy+12).toFixed(1)+'" text-anchor="'+anchor+'" class="rad-val" fill="'+a.c+'">'+Math.round(pcts[a.k]*100)+'%</text>';
   }).join("");
-  /* il riquadro è più largo del grafico per contenere le etichette laterali,
-     che altrimenti sbordano fuori dalla scheda sugli schermi stretti */
-  return '<div class="radar-wrap"><svg viewBox="-62 -10 324 222" role="img" aria-label="'+t("ac.radarLabel")+'">'+
+  /* Il riquadro è più largo del grafico per contenere le etichette laterali,
+     che altrimenti sbordano fuori dalla scheda sugli schermi stretti — e più
+     alto delle sole punte del rombo: le due righe di testo sotto (nome fase
+     + percentuale) e le lettere sopra la riga di base in alto salivano oltre
+     i bordi del viewBox e venivano tagliate via. Contava la base del testo,
+     non che le lettere si estendono anche sopra di essa — un margine non
+     bastava a coprirle entrambe. */
+  return '<div class="radar-wrap"><svg viewBox="-62 -18 324 246" role="img" aria-label="'+t("ac.radarLabel")+'">'+
     '<defs><radialGradient id="radGrad" cx="50%" cy="50%" r="50%">'+
       '<stop offset="0%" stop-color="var(--gold)" stop-opacity="0.42"/>'+
       '<stop offset="100%" stop-color="var(--gold)" stop-opacity="0.10"/></radialGradient></defs>'+
