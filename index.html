@@ -196,6 +196,11 @@
                  color:var(--ink-2);font:500 12px/1 'Inter';cursor:pointer;transition:all .15s;
                  text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
   @media (max-width:380px){ .type-chip-btn{font-size:11px;padding:13px 1px;} .type-chips{gap:4px;} }
+  /* A 320px anche 11px non basta per "Spumante", l'unica delle 5 parole
+     abbastanza lunga da toccare il bordo della pillola ed entrare in
+     ellissi: un gradino in più, come già per altri controlli a 5 colonne
+     in questa scheda. */
+  @media (max-width:340px){ .type-chip-btn{font-size:10px;padding:12px 1px;} .type-chips{gap:3px;} }
   /* Lo stesso componente, dentro il modulo di rivelazione alla cieca, ha meno
      spazio (è annidato in una scheda già rientrata): senza questo, "Spumante"
      tronca in ellissi anche su schermi dove altrove ci sta comodo. */
@@ -1193,9 +1198,12 @@ const SCALA_VAL = [0,1,2,3,4,5,6,7,8,9,10];
 const VAL_MAX = 10;
 const SUFF_VAL = 6;
 const VAL_INIZ = 6;
-const PAROLE_VAL = {0:"difetto grave",1:"gravemente carente",2:"carente",3:"scarso",
-                    4:"mediocre",5:"quasi sufficiente",6:"sufficiente",7:"discreto",
-                    8:"buono",9:"ottimo",10:"eccellente"};
+/* Non un dato salvato né mai confrontato — solo la parola calcolata dal
+   punteggio 0-10 di una singola voce, esattamente come judge() lo fa per il
+   voto complessivo: quindi si traduce, a differenza del vocabolario tecnico
+   scelto (colori, limpidezza, descrittori...) che resta in italiano perché è
+   il valore stesso che viene salvato e confrontato. */
+function paroleVal(v){ return t("valword."+v); }
 
 /* Le quattro fasi e quanto pesano sul totale di 100.
    Il visivo scende a 10: dice molto sul vino ma poco sulla sua qualità.
@@ -1329,6 +1337,19 @@ function suggerisciAbbinamento(w){
   if(!idee.length) idee.push("pairing.generic");
   if((w.stato === "Maturo" || w.stato === "Vecchio") && idee.length < 3) idee.push("pairing.aged");
   return idee.slice(0,3).map(k => t(k)).join(" ");
+}
+/* Aggiorna solo il testo del suggerimento, non l'intera scheda "Valutazione
+   finale": rifare il rendering di tutta la sezione mentre si digita nel
+   vitigno o nella regione perderebbe il fuoco e la posizione del cursore
+   sul campo che si sta scrivendo. Se la sezione non è aperta l'elemento
+   non c'è ancora: non serve fare nulla, si aggiornerà da solo aprendola. */
+function refreshPairingHint(){
+  const el = $("pairingHint");
+  if(!el) return;
+  el.textContent = tf("field.pairing.hint",{sugg: suggerisciAbbinamento({
+    corpo:S.corpo, durezze:S.durezze, morbidezze:S.morbidezze, zuccheri:S.zuccheri, stato:S.stato,
+    tipologia:S.wine.tipologia, regione:S.wine.regione, uvaggi:S.wine.uvaggi
+  })});
 }
 
 function valInit(){
@@ -1610,6 +1631,10 @@ const I18N = {
 
     "judge.excellent":"Eccellente", "judge.great":"Ottimo", "judge.good":"Buono",
     "judge.fair":"Discreto", "judge.sufficient":"Sufficiente", "judge.insufficient":"Insufficiente",
+    "valword.0":"difetto grave", "valword.1":"gravemente carente", "valword.2":"carente",
+    "valword.3":"scarso", "valword.4":"mediocre", "valword.5":"quasi sufficiente",
+    "valword.6":"sufficiente", "valword.7":"discreto", "valword.8":"buono",
+    "valword.9":"ottimo", "valword.10":"eccellente",
 
     "book.searchPh":"Cerca vino, produttore, denominazione...",
     "book.filterAll":"Tutti",
@@ -2059,6 +2084,10 @@ const I18N = {
 
     "judge.excellent":"Excellent", "judge.great":"Great", "judge.good":"Good",
     "judge.fair":"Fair", "judge.sufficient":"Sufficient", "judge.insufficient":"Insufficient",
+    "valword.0":"serious flaw", "valword.1":"gravely lacking", "valword.2":"lacking",
+    "valword.3":"poor", "valword.4":"mediocre", "valword.5":"nearly sufficient",
+    "valword.6":"sufficient", "valword.7":"fair", "valword.8":"good",
+    "valword.9":"very good", "valword.10":"excellent",
 
     "book.searchPh":"Search wine, producer, denomination...",
     "book.filterAll":"All",
@@ -2399,7 +2428,7 @@ function valRowHTML(T, pre, group, def){
   btn += '</div>';
   return '<div class="vrow">'+
     '<div class="vrow-top"><span class="vrow-label">'+titolo+'</span>'+
-      '<span class="vrow-read"><span class="vrow-word">'+PAROLE_VAL[v]+'</span>'+
+      '<span class="vrow-read"><span class="vrow-word">'+paroleVal(v)+'</span>'+
       '<span class="vrow-val '+tone+'">'+v+'</span></span></div>'+
     '<div class="vrow-help">'+spiega+(peso>1?' <b>· '+t("val.weightDouble")+'</b>':'')+'</div>'+
     btn+
@@ -2460,7 +2489,7 @@ function sectionDefs(T, pre, tipologia){
   const durezze = DUREZZE.filter(r => !(isBianco && r[0] === "tannicita"));
   const finale = (pre === "s")
     ? '<input class="in-sm" id="abbInput" placeholder="'+t("field.pairing.ph")+'" style="width:100%" value="'+esc(T.abbinamento)+'">'+
-      '<p class="pairing-hint">'+tf("field.pairing.hint",{sugg: suggerisciAbbinamento({
+      '<p class="pairing-hint" id="pairingHint">'+tf("field.pairing.hint",{sugg: suggerisciAbbinamento({
         corpo:T.corpo, durezze:T.durezze, morbidezze:T.morbidezze, zuccheri:T.zuccheri, stato:T.stato,
         tipologia:tipologia, regione:T.wine.regione, uvaggi:T.wine.uvaggi
       })})+'</p>'+
@@ -4603,7 +4632,8 @@ $("annataInput").addEventListener("input", e => S.wine.annata = e.target.value);
 $("denominazioneInput").addEventListener("input", e => S.wine.denominazione = e.target.value);
 $("regioneInput").addEventListener("input", e => {
   S.wine.regione = e.target.value;
-  AC.apri(e.target, REGIONI, v => { S.wine.regione = v; e.target.value = v; });
+  AC.apri(e.target, REGIONI, v => { S.wine.regione = v; e.target.value = v; refreshPairingHint(); });
+  refreshPairingHint();
 });
 $("regioneInput").addEventListener("focus", e => AC.apri(e.target, REGIONI, v => { S.wine.regione = v; e.target.value = v; }));
 $("regioneInput").addEventListener("keydown", e => AC.tasti(e));
@@ -4646,14 +4676,17 @@ $("uvRows").addEventListener("input", e => {
       AC.apri(e.target, VITIGNI_TUTTI, v => {
         const canon = canonVitigno(v);
         S.wine.uvaggi[Number(vi)].v = canon; e.target.value = canon; renderUvaggi();
+        refreshPairingHint();
       });
     }
+    refreshPairingHint();
     return;
   }
   const pi = e.target.getAttribute("data-uv-p");
   if(pi !== null){
     const n = e.target.value === "" ? "" : Math.max(0, Math.min(100, Number(e.target.value)));
     S.wine.uvaggi[Number(pi)].p = n;
+    refreshPairingHint();
     const badge = $("uvTotal"), tot = uvTotal(S.wine.uvaggi);
     badge.textContent = tot+"%";
     badge.classList.toggle("full", tot === 100);
@@ -4669,7 +4702,7 @@ $("uvRows").addEventListener("change", e => {
 });
 $("uvRows").addEventListener("click", e => {
   const d = e.target.closest("[data-uv-del]");
-  if(d){ S.wine.uvaggi.splice(Number(d.getAttribute("data-uv-del")), 1); renderUvaggi(); }
+  if(d){ S.wine.uvaggi.splice(Number(d.getAttribute("data-uv-del")), 1); renderUvaggi(); refreshPairingHint(); }
 });
 $("typeChips").addEventListener("click", e => {
   const b = e.target.closest("[data-type]");
