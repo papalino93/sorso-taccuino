@@ -54,6 +54,12 @@
     --serif:'Instrument Serif',serif;
     --num:'JetBrains Mono',ui-monospace,'SF Mono',Menlo,Consolas,monospace;
     --name:'Inter',system-ui,sans-serif;
+    /* Colore per tipologia, usato nella tab "Vini & vitigni" delle Statistiche
+       (donut e media per tipo): il rosso prende il bordeaux dell'identità del
+       sito, il passito il rust già usato altrove, gli altri tre sono varianti
+       oro/rosa pensate per restare leggibili una accanto all'altra. */
+    --type-rosso:var(--sel-bg); --type-bianco:#C9A227; --type-rosato:#B3455C;
+    --type-spumante:#D9B54A; --type-passito:var(--rust);
   }
   #root.dark{
     --shell:#0A0A0A; --panel:#141414; --card:#1A1A1A; --card-alt:#1F1F1F; --field:#1F1F1F;
@@ -65,6 +71,8 @@
     --bar:rgba(10,10,10,.94); --chip:#232323;
     --ph-v:#E8C547; --ph-o:#FFA94D; --ph-g:var(--rust); --ph-f:var(--sel-bg);
     --positive:#5FB37D;
+    --type-rosso:var(--sel-bg); --type-bianco:#E8C547; --type-rosato:#E0768D;
+    --type-spumante:#F0D878; --type-passito:var(--rust);
   }
   html,body{margin:0;}
   body{background:#EFECE4;-webkit-font-smoothing:antialiased;}
@@ -590,6 +598,50 @@
     .sblocco{flex-wrap:wrap;gap:4px 10px;}
     .sblocco-c{flex-basis:100%;}
   }
+
+  /* --- intestazione statistiche + tab --- */
+  .stats-hero{margin-bottom:18px;}
+  .stats-hero-eyebrow{font:600 10px/1 'Inter';letter-spacing:.2em;text-transform:uppercase;color:var(--gold);margin-bottom:10px;}
+  .stats-hero-top{display:flex;flex-wrap:wrap;align-items:baseline;gap:10px 18px;}
+  .stats-hero-title{margin:0;font:italic 400 clamp(28px,7vw,40px)/1.08 var(--serif);color:var(--ink);}
+  .stats-hero-meta{font:500 12.5px/1.4 'Inter';color:var(--ink-3);white-space:nowrap;}
+  .stats-hero-prosa{max-width:640px;margin:12px 0 0;font:400 14px/1.55 'Inter';color:var(--ink-2);text-wrap:pretty;}
+  .stats-hero-prosa b{font-weight:600;color:var(--gold);}
+  .stats-tabs{display:flex;gap:8px;overflow-x:auto;padding:4px 2px 4px;margin:16px 0 4px;-webkit-overflow-scrolling:touch;}
+  .stats-tab{flex:none;padding:10px 16px;border-radius:100px;border:1px solid var(--line);background:var(--field);color:var(--ink-2);font:600 12px/1 'Inter';letter-spacing:.01em;cursor:pointer;white-space:nowrap;transition:background .15s,border-color .15s,color .15s;}
+  .stats-tab.on{background:var(--sel-bg);border-color:var(--sel-bg);color:var(--sel-fg);}
+  .stats-grid-2{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px;align-items:start;}
+  .stats-grid-2 .stat-panel, .stats-grid-2 .empty{margin-top:0;}
+
+  /* --- donut tipologie --- */
+  .donut-flex{display:flex;gap:22px;align-items:center;flex-wrap:wrap;margin-bottom:16px;}
+  .donut-wrap{position:relative;width:148px;height:148px;flex:none;}
+  .donut-wrap svg{width:100%;height:100%;transform:rotate(-90deg);}
+  .donut-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+  .donut-n{font-family:var(--serif);font-style:italic;font-size:28px;color:var(--ink);line-height:1;}
+  .donut-l{margin-top:2px;font:500 9.5px/1 'Inter';letter-spacing:.1em;text-transform:uppercase;color:var(--ink-4);}
+  .donut-legend{flex:1;min-width:160px;display:flex;flex-direction:column;gap:8px;}
+  .donut-row{display:flex;align-items:center;gap:8px;}
+  .donut-dot{width:9px;height:9px;border-radius:50%;flex:none;}
+  .donut-row-label{flex:1;min-width:0;font:500 12.5px/1 'Inter';color:var(--ink-2);}
+  .donut-row-val{font-family:var(--num);font-weight:500;font-size:12px;color:var(--ink);}
+
+  /* --- confronto di gruppo --- */
+  .grp-head{display:flex;justify-content:space-between;align-items:baseline;gap:10px;margin-bottom:4px;}
+  .grp-name{font:600 13px/1.3 'Inter';color:var(--ink);}
+  .grp-delta{flex:none;font-family:var(--num);font-weight:600;font-size:12px;}
+  .grp-verdict{margin:0 0 14px;font:400 12px/1.4 'Inter';color:var(--ink-4);}
+  .grp-wine{margin-bottom:12px;}
+  .grp-wine-top{display:flex;justify-content:space-between;gap:8px;font:500 12px/1.3 'Inter';color:var(--ink-2);margin-bottom:5px;}
+  .grp-wine-name{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .grp-wine-delta{flex:none;font-family:var(--num);font-weight:600;font-size:11.5px;}
+  .grp-bars{position:relative;height:14px;}
+  .grp-bar-bg{position:absolute;left:0;top:0;height:6px;width:100%;border-radius:4px;background:var(--chip);}
+  .grp-bar-bg.lo{top:8px;}
+  .grp-bar-fill{position:absolute;left:0;top:0;height:6px;border-radius:4px;background:var(--sel-bg);}
+  .grp-bar-fill.lo{top:8px;background:var(--ink-4);}
+  .grp-legend{display:flex;gap:14px;margin-top:6px;font:500 10.5px/1 'Inter';color:var(--ink-4);}
+  .grp-legend i{display:inline-block;width:8px;height:8px;border-radius:2px;margin-right:5px;vertical-align:-1px;}
 
   .backup-card{margin-top:6px;}
   .backup-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;}
@@ -1388,7 +1440,8 @@ const S = {
   desc:[], note:"", abbinamento:"",
   saved:[], query:"", filter:"Tutti", sortBy:"score-desc", picked:[], expanded:null,
   editingId:null, editThumb:null, editTimestamp:null, editEvento:"",
-  events:[], miei:[], currentEvent:"", newEventMode:false, quickNewMode:false, lb:null
+  events:[], miei:[], currentEvent:"", newEventMode:false, quickNewMode:false, lb:null,
+  statsTab:"overview", groupData:null, groupDataKey:"", groupLoading:false
 };
 
 const $ = id => document.getElementById(id);
@@ -1781,6 +1834,43 @@ const I18N = {
     "stats.prosa.byGrape":"Il vitigno che ti convince di più è il <b>{grape}</b>, {avg} di media su {n} vini.",
     "stats.prosa.byRegion":"Il territorio che ti dà più soddisfazione: <b>{region}</b> ({avg} su {n} vini).",
     "stats.prosa.avgPrice":"Spendi in media <b>{price}</b> per bottiglia.",
+    "stats.heroTitle":"Il tuo taccuino in numeri",
+    "stats.tab.overview":"Panoramica",
+    "stats.tab.taste":"Il tuo gusto",
+    "stats.tab.wines":"Vini & vitigni",
+    "stats.tab.places":"Luoghi",
+    "stats.tab.value":"Prezzo",
+    "stats.tab.group":"Gruppo",
+    "stats.tasteProfileTitle":"Profilo di gusto",
+    "stats.tasteProfileIntro":"Corpo, tannino, acidità, alcolicità, intensità: la media dei vini che scegli.",
+    "stats.tasteProfileBlockedWhat":"il tuo profilo di gusto",
+    "stats.preferenceTitle":"Cosa cerchi nel vino",
+    "stats.preferenceText":"Nel vino cerchi soprattutto <b>{pref}</b>: è il tratto che spiega meglio i tuoi voti più alti.",
+    "stats.preferenceEmpty":"Non emerge ancora un gusto chiaro: serve più varietà di schede per dirlo con sicurezza.",
+    "stats.preferenceBlockedWhat":"cosa cerchi davvero nel vino",
+    "stats.regionHint":"regione",
+    "stats.winesTypesTitle":"Tipologie",
+    "stats.winesLabel":"vini",
+    "stats.avgByTypeSubLabel":"Media voto per tipo",
+    "stats.grapeCompareTitle":"Vitigni a confronto",
+    "stats.grapeCompareIntro":"Vitigno prevalente di ogni scheda, ordinato per media voto.",
+    "stats.producersTitle":"Cantine più degustate",
+    "stats.producersIntro":"Le produttrici che ricorrono di più nel tuo archivio.",
+    "stats.producersBlockedWhat":"quali cantine ricorrono di più",
+    "stats.byCountryTitle":"Per paese",
+    "stats.byRegionTitle":"Per regione",
+    "stats.byCountryBlockedWhat":"le zone che premi di più",
+    "stats.groupIntro":"Quando una scheda è legata a una degustazione di gruppo, qui vedi il tuo voto affiancato alla media di chi c'era con te.",
+    "stats.groupBlockedWhat":"il confronto con il gruppo",
+    "stats.groupYou":"tu",
+    "stats.groupAvg":"gruppo",
+    "stats.groupInLine":"Voti in linea con il resto del gruppo.",
+    "stats.groupMoreGenerous":"Sei stato più generoso del gruppo, in media.",
+    "stats.groupMoreStrict":"Sei stato più severo del gruppo, in media.",
+    "stats.groupLoading":"Carico i confronti…",
+    "stats.groupNoneTitle":"Nessun confronto ancora",
+    "stats.groupNoneSub":"Collega una scheda a un evento di gruppo dalla tab “Nuova” per vedere qui il confronto con gli altri.",
+    "stats.groupLoadError":"Non sono riuscito a leggere il confronto per “{name}”: {msg}",
 
     "blind.eyebrow":"Degustazione alla cieca",
     "blind.intro":"Assaggi senza guardare l'etichetta e provi a riconoscere vitigno, regione, tipologia e annata, da solo o a cena con gli amici, per vedere chi si avvicina di più. La prova resta nella sezione «Alla cieca» finché il vino è un mistero; quando lo sveli e scrivi il suo nome, la ritrovi anche nel tuo taccuino.",
@@ -2234,6 +2324,43 @@ const I18N = {
     "stats.prosa.byGrape":"The grape that wins you over most is <b>{grape}</b>, averaging {avg} over {n} wines.",
     "stats.prosa.byRegion":"The territory that satisfies you most: <b>{region}</b> ({avg} over {n} wines).",
     "stats.prosa.avgPrice":"You spend on average <b>{price}</b> per bottle.",
+    "stats.heroTitle":"Your notebook in numbers",
+    "stats.tab.overview":"Overview",
+    "stats.tab.taste":"Your taste",
+    "stats.tab.wines":"Wines & grapes",
+    "stats.tab.places":"Places",
+    "stats.tab.value":"Price",
+    "stats.tab.group":"Group",
+    "stats.tasteProfileTitle":"Taste profile",
+    "stats.tasteProfileIntro":"Body, tannin, acidity, alcohol, intensity: the average of the wines you choose.",
+    "stats.tasteProfileBlockedWhat":"your taste profile",
+    "stats.preferenceTitle":"What you look for in a wine",
+    "stats.preferenceText":"In a wine, you especially look for <b>{pref}</b>: it's the trait that best explains your highest scores.",
+    "stats.preferenceEmpty":"No clear taste has emerged yet: it takes more variety in your entries to say for sure.",
+    "stats.preferenceBlockedWhat":"what you really look for in a wine",
+    "stats.regionHint":"region",
+    "stats.winesTypesTitle":"Types",
+    "stats.winesLabel":"wines",
+    "stats.avgByTypeSubLabel":"Average score by type",
+    "stats.grapeCompareTitle":"Grapes compared",
+    "stats.grapeCompareIntro":"The prevailing grape of each entry, sorted by average score.",
+    "stats.producersTitle":"Most tasted producers",
+    "stats.producersIntro":"The producers that come up most often in your archive.",
+    "stats.producersBlockedWhat":"which producers come up most",
+    "stats.byCountryTitle":"By country",
+    "stats.byRegionTitle":"By region",
+    "stats.byCountryBlockedWhat":"the zones you rate highest",
+    "stats.groupIntro":"When an entry is linked to a group tasting, here you see your score next to the average of everyone who was there with you.",
+    "stats.groupBlockedWhat":"the comparison with the group",
+    "stats.groupYou":"you",
+    "stats.groupAvg":"group",
+    "stats.groupInLine":"Your scores are in line with the rest of the group.",
+    "stats.groupMoreGenerous":"On average, you were more generous than the group.",
+    "stats.groupMoreStrict":"On average, you were stricter than the group.",
+    "stats.groupLoading":"Loading comparisons…",
+    "stats.groupNoneTitle":"No comparison yet",
+    "stats.groupNoneSub":"Link an entry to a group event from the “New” tab to see the comparison with others here.",
+    "stats.groupLoadError":"Couldn't read the comparison for “{name}”: {msg}",
 
     "blind.eyebrow":"Blind tasting",
     "blind.intro":"You taste without looking at the label and try to guess the grape, region, type and vintage, alone or over dinner with friends, to see who gets closest. The trial stays in the \"Blind\" section as long as the wine is a mystery; once you reveal it and write its name, you'll find it in your notebook too.",
@@ -3146,9 +3273,6 @@ function mainGrape(w){
 }
 
 /* pannello con titolo + eventuale nota "servono N schede" */
-function statsSectionHead(title){
-  return '<div class="stats-section-head"><b>'+title+'</b></div>';
-}
 function statPanel(title, inner, note){
   return '<div class="card stat-panel">'+
     '<div class="stat-panel-head"><span class="stat-label">'+title+'</span>'+
@@ -3273,12 +3397,15 @@ function scatterSVG(rows, conRetta){
   return '<svg class="scatter" viewBox="0 0 '+W+' '+H+'" role="img" aria-label="'+t("ac.scatterLabel")+'">'+grid+xlab+retta+pts+'</svg>';
 }
 
-/* barre a lecca-lecca su asse 1-10, con la sufficienza segnata */
-function lolliList(params){
+/* barre a lecca-lecca su una scala qualsiasi, con un valore neutro segnato:
+   generalizza la vecchia lolliList (scala 1-10, sufficienza) a qualunque
+   massimo e qualunque riferimento neutro, per riusarla anche sulla scala
+   1-5 del profilo di gusto (corpo, tannino...). */
+function lolliListGeneric(params, maxVal, neutralVal){
+  const neu = (neutralVal / maxVal)*100;
   return '<div class="lolli">'+params.map(pr => {
-    const pos = (pr.avg / VAL_MAX)*100;
-    const neu = (SUFF_VAL / VAL_MAX)*100;
-    const sopra = pr.avg >= SUFF_VAL;
+    const pos = (pr.avg / maxVal)*100;
+    const sopra = pr.avg >= neutralVal;
     return '<div class="lolli-row">'+
       '<span class="lolli-label">'+pr.label+'</span>'+
       '<div class="lolli-track">'+
@@ -3289,6 +3416,10 @@ function lolliList(params){
       '<span class="lolli-val">'+dec(pr.avg,1)+'</span>'+
     '</div>';
   }).join("")+'</div>';
+}
+/* barre a lecca-lecca su asse 1-10, con la sufficienza segnata */
+function lolliList(params){
+  return lolliListGeneric(params, VAL_MAX, SUFF_VAL);
 }
 
 /* --- riepilogo in prosa dei gusti, generato dai dati --- */
@@ -3395,37 +3526,87 @@ function prosaGusti(all){
   return frasi.join(" ");
 }
 
-function renderStats(){
-  daSbloccare = [];
-  const all = S.saved;
-  const n = all.length;
-  if(n === 0){
-    $("statsWrap").innerHTML = '<div class="empty"><div class="empty-title">'+t("stats.emptyTitle")+'</div>'+
-      '<p class="empty-sub">'+t("stats.emptySub")+'</p></div>';
-    return;
-  }
+/* colore per tipologia, usato nella tab "Vini & vitigni" (donut + medie) */
+const TYPE_COLOR_VAR = {Rosso:"var(--type-rosso)", Bianco:"var(--type-bianco)", Rosato:"var(--type-rosato)",
+  Spumante:"var(--type-spumante)", Passito:"var(--type-passito)"};
 
-  const scoresArr = all.map(w => w.score);
-  const avg = media(scoresArr);
-  const best = all.reduce((a,w) => w.score > a.score ? w : a, all[0]);
-  const sd = devStd(scoresArr);
+/* "ago 2024 – lug 2025": mese abbreviato + anno nella lingua corrente,
+   via Intl invece di una tabella di nomi mesi da tenere in due lingue. */
+function heroRangeText(chrono){
+  const loc = S.lang === "en" ? "en-US" : "it-IT";
+  const fmt = new Intl.DateTimeFormat(loc, {month:"short", year:"numeric"});
+  const a = fmt.format(new Date(chrono[0].timestamp||Date.now()));
+  const b = fmt.format(new Date(chrono[chrono.length-1].timestamp||Date.now()));
+  return a === b ? a : a+" – "+b;
+}
 
-  /* ---- 0. riepilogo in prosa ---- */
-  let html = '<div class="card resume"><div class="resume-eyebrow">'+t("stats.profileEyebrow")+'</div>'+
-    '<p class="resume-text">'+prosaGusti(all)+'</p></div>';
+/* anello delle tipologie: rows già ordinate, ognuna con color e pct (0-100) */
+function donutSVG(rows){
+  const R = 80, C = 2*Math.PI*R;
+  let cum = 0;
+  return '<svg viewBox="0 0 200 200">'+rows.map(r => {
+    const len = (r.pct/100)*C;
+    const seg = '<circle cx="100" cy="100" r="'+R+'" fill="none" stroke="'+r.color+'" stroke-width="34" '+
+      'stroke-dasharray="'+len.toFixed(1)+' '+(C-len).toFixed(1)+'" stroke-dashoffset="'+(-cum).toFixed(1)+'"/>';
+    cum += len;
+    return seg;
+  }).join("")+'</svg>';
+}
 
-  /* ---- 1. numeri chiave ---- */
-  const prezzi = all.filter(w => w.prezzo != null).map(w => w.prezzo);
-  const typeCount = {};
-  all.forEach(w => { typeCount[w.tipologia] = (typeCount[w.tipologia]||0)+1; });
-  const byType = Object.keys(typeCount).map(t => {
-    const rows = all.filter(w => w.tipologia === t);
-    return { label:t, avg:media(rows.map(w=>w.score)), count:rows.length };
-  }).sort((a,b) => b.avg - a.avg);
+/* radar a N assi generico (qui usato per le 5 voci del profilo di gusto):
+   stessa logica di radarSVG ma senza le fasi fisse v/o/g/f e senza la linea
+   di sufficienza, che per tratti descrittivi come "corpo" non ha senso. */
+function radarNSVG(axes, vals, color){
+  const R = 78, CX = 100, CY = 104, n = axes.length;
+  const ang = i => (-90 + i*(360/n)) * Math.PI/180;
+  const pt = (i,r) => [CX + Math.cos(ang(i))*r, CY + Math.sin(ang(i))*r];
+  const poly = fracs => axes.map((a,i) => pt(i, R*fracs[i]).map(x=>x.toFixed(1)).join(",")).join(" ");
+  const grid = [0.25,0.5,0.75,1].map((f,i) =>
+    '<polygon points="'+poly(axes.map(()=>f))+'" fill="none" stroke="var(--line)" stroke-width="'+(i===3?1.4:1)+'"/>').join("");
+  const spokes = axes.map((a,i) => {
+    const [x,y] = pt(i,R);
+    return '<line x1="'+CX+'" y1="'+CY+'" x2="'+x.toFixed(1)+'" y2="'+y.toFixed(1)+'" stroke="var(--line)" stroke-width="1"/>';
+  }).join("");
+  const fracs = axes.map(a => Math.max(0.04, vals[a.key]||0));
+  const shape = '<polygon points="'+poly(fracs)+'" fill="'+color+'" fill-opacity="0.16" stroke="'+color+'" stroke-width="2.2" stroke-linejoin="round"/>';
+  const dots = axes.map((a,i) => {
+    const [x,y] = pt(i, R*fracs[i]);
+    return '<circle cx="'+x.toFixed(1)+'" cy="'+y.toFixed(1)+'" r="4.5" fill="var(--panel)" stroke="'+color+'" stroke-width="2.4"/>';
+  }).join("");
+  const labels = axes.map((a,i) => {
+    const [x,y] = pt(i, R+28);
+    const dx = Math.cos(ang(i)), dy = Math.sin(ang(i));
+    const anchor = dx>0.3 ? "start" : (dx<-0.3 ? "end" : "middle");
+    const baseY = dy<-0.3 ? y-6 : (dy>0.3 ? y+14 : y+4);
+    return '<text x="'+x.toFixed(1)+'" y="'+baseY.toFixed(1)+'" text-anchor="'+anchor+'" class="rad-lab">'+a.label+'</text>'+
+      '<text x="'+x.toFixed(1)+'" y="'+(baseY+13).toFixed(1)+'" text-anchor="'+anchor+'" class="rad-val" fill="'+color+'">'+a.valText+'</text>';
+  }).join("");
+  return '<div class="radar-wrap"><svg viewBox="-64 -20 328 258">'+grid+spokes+shape+dots+labels+'</svg></div>';
+}
 
-  /* Le schede-numero si scelgono da sole: mostrare "Migliore 60" accanto a
-     "Media 60,0" o "Voti più alti a Rosso" quando i rossi sono l'unica tipologia
-     non dice niente. Restano solo i riquadri che aggiungono informazione. */
+/* getter dei 5 tratti descrittivi: corpo e intensità sono in cima alla
+   scheda, tannino/acidità in durezze, alcolicità in morbidezze */
+const TASTE_GET = {
+  corpo: w => w.corpo,
+  tannino: w => w.durezze && w.durezze.tannicita,
+  acidita: w => w.durezze && w.durezze.acidita,
+  alcolicita: w => w.morbidezze && w.morbidezze.alcolicita,
+  intensita: w => w.intensita
+};
+function tasteAxes(){
+  return [
+    {key:"corpo", label:t("lvl.body")},
+    {key:"tannino", label:t("durezza.tannicita")},
+    {key:"acidita", label:t("durezza.acidita")},
+    {key:"alcolicita", label:t("morbidezza.alcolicita")},
+    {key:"intensita", label:t("lvl.intensity")}
+  ];
+}
+
+/* ---- costruttori dei contenuti delle singole tab ---- */
+
+function tabOverview(all, ctx){
+  const {n, avg, best, sd, prezzi, byType, scoresArr} = ctx;
   const peggiore = all.reduce((a,w) => w.score < a.score ? w : a, all[0]);
   const cards = [
     { label:t("stat.tastings"), value:n, note:n===1 ? t("stat.note.oneSaved") : t("stat.note.manySaved") },
@@ -3441,19 +3622,161 @@ function renderStats(){
   }else if(sd > 0){
     cards.push({ label:t("stat.spread"), value:dec(sd), note:t("stat.note.pointsBetween") });
   }
-  html += '<div class="stat-grid">'+cards.map(c =>
+  let html = '<div class="stat-grid">'+cards.map(c =>
     '<div class="stat-card"><div class="stat-label">'+c.label+'</div>'+
     '<div class="stat-value">'+c.value+'</div><div class="stat-note">'+c.note+'</div></div>'
   ).join("")+'</div>';
 
-  html += statsSectionHead(t("stats.section.yourWines"));
+  let trendCard;
+  const chrono = all.slice().sort((a,b) => (a.timestamp||0) - (b.timestamp||0));
+  if(chrono.length >= SOGLIA_TREND){
+    const W = 300, H = 76, pad = 6;
+    const lo = Math.min.apply(null, scoresArr), hi = Math.max.apply(null, scoresArr);
+    const span = Math.max(1, hi - lo);
+    const pts = chrono.map((w,i) => [
+      pad + i*(W-2*pad)/(chrono.length-1),
+      H - pad - ((w.score-lo)/span)*(H-2*pad)
+    ]);
+    const path = pts.map((pp,i) => (i?"L":"M")+pp[0].toFixed(1)+" "+pp[1].toFixed(1)).join(" ");
+    const area = path+" L "+pts[pts.length-1][0].toFixed(1)+" "+(H-pad)+" L "+pts[0][0].toFixed(1)+" "+(H-pad)+" Z";
+    const half = Math.floor(chrono.length/2);
+    const d1 = media(chrono.slice(0,half).map(w=>w.score));
+    const d2 = media(chrono.slice(half).map(w=>w.score));
+    const delta = d2 - d1;
+    const verdict = Math.abs(delta) < 2
+      ? t("stats.trendStable")
+      : (delta < 0
+          ? tf("stats.trendStricter",{pts:dec(Math.abs(delta))})
+          : tf("stats.trendMoreGenerous",{pts:dec(delta)}));
+    trendCard = statPanel(t("stats.trendTitle"),
+      '<svg class="spark" viewBox="0 0 '+W+' '+H+'" preserveAspectRatio="none" role="img" aria-label="'+t("stats.trendTitle")+'">'+
+        '<path d="'+area+'" fill="var(--gold)" fill-opacity="0.14"/>'+
+        '<path d="'+path+'" fill="none" stroke="var(--gold)" stroke-width="2" stroke-linejoin="round"/>'+
+        pts.map(pp => '<circle cx="'+pp[0].toFixed(1)+'" cy="'+pp[1].toFixed(1)+'" r="2.5" fill="var(--gold)"/>').join("")+
+      '</svg>'+
+      '<div class="spark-axis"><span>'+t("stats.trendFirst")+'</span><span>'+t("stats.trendLast")+'</span></div>'+
+      '<p class="panel-foot">'+verdict+'</p>',
+      tf("stats.trendRange",{lo:lo, hi:hi}));
+  } else {
+    trendCard = bloccato(t("stats.trendTitle"), quante(SOGLIA_TREND-chrono.length,t("hdr.card"),t("hdr.cardPl")), t("stats.trendBlockedWhat"));
+  }
 
-  /* ---- 2. podio: solo quando c'è davvero una classifica ---- */
+  const bands = [
+    {label:"90+", lo:90, hi:101},
+    {label:"80-89",  lo:80, hi:90},
+    {label:"70-79",  lo:70, hi:80},
+    {label:"60-69",  lo:60, hi:70},
+    {label:t("stats.distributionUpTo"), lo:0, hi:60}
+  ].map(b => Object.assign({}, b, {count: scoresArr.filter(s => s>=b.lo && s<b.hi).length}));
+  const distCard = statPanel(t("stats.distributionTitle"),
+    columnsSVG(bands.slice().reverse())+
+    '<p class="panel-foot">'+tf("stats.distributionFoot",{sd:(sd?dec(sd):"—"), extra:
+      (n>=SOGLIA_PALATO ? (sd < 6 ? t("stats.distributionClose") : sd > 12 ? t("stats.distributionWide") : t("stats.distributionGood")) : "")
+    })+
+    '</p>',
+    null);
+
+  html += '<div class="stats-grid-2">'+trendCard+distCard+'</div>';
+  html += strisciaSblocchi();
+  return html;
+}
+
+function tabTaste(all){
+  let cardsHtml = "";
+
+  /* profilo d'esame AIS: radar sulle 4 fasi (v/o/g/f) */
+  const withVoti = all.filter(w =>
+    w.modello === 4 && w.voti && w.voti.v && w.voti.o && w.voti.g && w.voti.f &&
+    w.parts && ["v","o","g","f"].every(k => typeof w.parts[k] === "number")
+  );
+  let byVoiceHtml = "";
+  if(withVoti.length >= SOGLIA_PALATO){
+    const pcts = {};
+    ["v","o","g","f"].forEach(k => {
+      pcts[k] = media(withVoti.map(w => (w.parts[k]||0) / SEZ_MAX[k]));
+    });
+    cardsHtml += statPanel(t("stats.sensoryTitle"),
+      radarSVG(pcts)+
+      '<div class="radar-read">'+
+        ["v","o","g","f"].map(k => {
+          const lbl = {v:t("seg.visual"),o:t("seg.olfactory"),g:t("seg.taste"),f:t("seg.final")}[k].toLowerCase();
+          return '<span>'+lbl+' <b>'+Math.round(pcts[k]*100)+'%</b></span>';
+        }).join("")+
+      '</div>',
+      tf("stats.sensoryOn",{n:withVoti.length}));
+
+    const paramLabelsNow = paramLabels();
+    const params = Object.keys(paramLabelsNow).map(key => {
+      const [g,pp] = key.split(".");
+      const vals = withVoti.map(w => (w.voti[g] && typeof w.voti[g][pp] === "number") ? w.voti[g][pp] : null)
+                           .filter(v => v !== null);
+      return { key, label:paramLabelsNow[key], avg:media(vals), n:vals.length };
+    }).filter(pr => pr.n > 0).sort((a,b) => b.avg - a.avg);
+    byVoiceHtml = statPanel(t("stats.byVoiceTitle"),
+      '<p class="panel-intro">'+tf("stats.byVoiceIntro",{suff:SUFF_VAL})+'</p>'+
+      lolliList(params),
+      null);
+  } else {
+    cardsHtml += bloccato(t("stats.sensoryTitle"), quante(SOGLIA_PALATO-withVoti.length,t("hdr.card"),t("hdr.cardPl")), t("stats.sensoryBlockedWhat"));
+  }
+
+  /* profilo di gusto: radar + lecca-lecca sui 5 tratti descrittivi */
+  const axes = tasteAxes();
+  const withTaste = all.filter(w => axes.every(a => typeof TASTE_GET[a.key](w) === "number"));
+  if(withTaste.length >= SOGLIA_PALATO){
+    const rawAvg = {}; axes.forEach(a => { rawAvg[a.key] = media(withTaste.map(w => TASTE_GET[a.key](w))); });
+    const vals = {}; axes.forEach(a => { vals[a.key] = rawAvg[a.key]/5; });
+    const radarAxes = axes.map(a => Object.assign({}, a, {valText: dec(rawAvg[a.key],1)}));
+    const voiceRows = axes.map(a => ({label:a.label, avg:rawAvg[a.key]}))
+      .sort((a,b) => b.avg - a.avg);
+    cardsHtml += statPanel(t("stats.tasteProfileTitle"),
+      '<p class="panel-intro">'+t("stats.tasteProfileIntro")+'</p>'+
+      radarNSVG(radarAxes, vals, "var(--sel-bg)")+
+      lolliListGeneric(voiceRows, 5, 3),
+      null);
+  } else {
+    cardsHtml += bloccato(t("stats.tasteProfileTitle"), quante(SOGLIA_PALATO-withTaste.length,t("hdr.card"),t("hdr.cardPl")), t("stats.tasteProfileBlockedWhat"));
+  }
+
+  /* cosa cerchi nel vino: stesso calcolo usato nel riepilogo in prosa, qui come pannello a sé */
+  if(all.length >= SOGLIA_GUSTO){
+    const pref = preferenzaGusto(all);
+    cardsHtml += statPanel(t("stats.preferenceTitle"),
+      pref ? '<p style="margin:0;font:400 15px/1.55 \'Inter\';color:var(--ink-2)">'+tf("stats.preferenceText",{pref})+'</p>'
+           : '<p class="note-line" style="margin:0">'+t("stats.preferenceEmpty")+'</p>',
+      null);
+  } else {
+    cardsHtml += bloccato(t("stats.preferenceTitle"), quante(SOGLIA_GUSTO-all.length,t("hdr.card"),t("hdr.cardPl")), t("stats.preferenceBlockedWhat"));
+  }
+
+  /* le parole che usi di più: gli stessi descrittori, come nuvola di etichette */
+  const descCount = {};
+  all.forEach(w => (w.desc||[]).forEach(d => { descCount[d] = (descCount[d]||0)+1; }));
+  const descs = Object.keys(descCount).sort((a,b) => descCount[b]-descCount[a]).slice(0,12);
+  if(descs.length){
+    cardsHtml += statPanel(t("stats.descriptorsTitle"),
+      '<div class="desc-pills">'+descs.map(d =>
+        '<span class="desc-pill">'+esc(d)+' <b>'+descCount[d]+'</b></span>'
+      ).join("")+'</div>', null);
+  }
+
+  let html = '<div class="stats-grid-2">'+cardsHtml+'</div>';
+  if(byVoiceHtml) html += byVoiceHtml;
+  html += strisciaSblocchi();
+  return html;
+}
+
+function tabWines(all, ctx){
+  const {n, byType} = ctx;
+  let html = "";
+
+  /* podio: solo quando c'è davvero una classifica */
   const ordinati = all.slice().sort((a,b) => b.score - a.score);
   const variano = ordinati[0].score !== ordinati[ordinati.length-1].score;
+  let podioHtml;
   if(n >= 3 && variano){
     const podio = ordinati.slice(0,3);
-    html += statPanel(t("stats.favWinesTitle"),
+    podioHtml = statPanel(t("stats.favWinesTitle"),
       '<div class="podio">'+podio.map((w,i) => {
         const meta = [w.produttore, w.annata, w.regione].filter(Boolean).join(" · ");
         return '<div class="podio-row">'+
@@ -3468,85 +3791,113 @@ function renderStats(){
         '</div>';
       }).join("")+'</div>', null);
   }else if(n >= 3){
-    html += bloccato(t("stats.favWinesTitle"), t("stats.favWinesBlockedDiff"), t("stats.favWinesBlockedWhat"));
+    podioHtml = bloccato(t("stats.favWinesTitle"), t("stats.favWinesBlockedDiff"), t("stats.favWinesBlockedWhat"));
   }else{
-    html += bloccato(t("stats.favWinesTitle"), quante(3-n,t("hdr.card"),t("hdr.cardPl")), t("stats.favWinesBlockedWhat2"));
+    podioHtml = bloccato(t("stats.favWinesTitle"), quante(3-n,t("hdr.card"),t("hdr.cardPl")), t("stats.favWinesBlockedWhat2"));
   }
 
-  /* ---- 3. profilo per vitigno ---- */
+  /* tipologie: anello + media voto per tipo */
+  const typeMax = Math.max.apply(null, [1].concat(byType.map(tp => tp.avg)));
+  const donutRows = byType.map(tp => Object.assign({}, tp, {
+    color: TYPE_COLOR_VAR[tp.label] || "var(--ink-4)", pct: tp.count/n*100
+  }));
+  const typesHtml = statPanel(t("stats.winesTypesTitle"),
+    '<div class="donut-flex"><div class="donut-wrap">'+donutSVG(donutRows)+
+      '<div class="donut-center"><span class="donut-n">'+n+'</span><span class="donut-l">'+t("stats.winesLabel")+'</span></div></div>'+
+      '<div class="donut-legend">'+donutRows.map(r =>
+        '<div class="donut-row"><span class="donut-dot" style="background:'+r.color+'"></span>'+
+        '<span class="donut-row-label">'+esc(r.label)+'</span><span class="donut-row-val">'+dec(r.pct,0)+'%</span></div>'
+      ).join("")+'</div></div>'+
+    '<div class="sub-label">'+t("stats.avgByTypeSubLabel")+'</div>'+
+    '<div class="bars">'+donutRows.map(r =>
+      '<div class="bar-row"><span class="bar-label">'+esc(r.label)+'</span>'+
+      '<div class="bar-track"><div class="bar-fill" style="width:'+(r.avg/typeMax*100)+'%;background:'+r.color+'"></div></div>'+
+      '<span class="bar-val">'+dec(r.avg)+' <em>('+r.count+')</em></span></div>'
+    ).join("")+'</div>', null);
+
+  /* vitigni a confronto */
   const conUva = all.filter(w => mainGrape(w));
   const perVit = {};
-  conUva.forEach(w => {
-    const g = mainGrape(w);
-    (perVit[g] = perVit[g] || []).push(w);
-  });
+  conUva.forEach(w => { const g = mainGrape(w); (perVit[g] = perVit[g] || []).push(w); });
   const vitigni = Object.keys(perVit).map(v => {
     const rows = perVit[v];
     return { v, n:rows.length, avg:media(rows.map(w=>w.score)) };
   }).sort((a,b) => b.avg - a.avg);
-
   const completa = all.filter(w => uvTotal(w.uvaggi) === 100).length;
+  let grapeHtml;
   if(vitigni.length){
-    html += statPanel(t("stats.grapeProfileTitle"),
-      '<p class="panel-intro">'+t("stats.grapeProfileIntro")+'</p>'+
-      '<div class="vit-list">'+vitigni.map(row =>
-        '<div class="vit-row">'+
-          '<div class="vit-top">'+
-            '<span class="vit-name">'+esc(row.v)+'</span>'+
-            '<span class="vit-n">'+row.n+" "+(row.n===1?t("stats.oneWine"):t("stats.manyWines"))+'</span>'+
-            '<span class="vit-avg">'+dec(row.avg)+'</span>'+
-          '</div>'+
-        '</div>'
+    const gMax = Math.max.apply(null, [1].concat(vitigni.map(x => x.avg)));
+    grapeHtml = statPanel(t("stats.grapeCompareTitle"),
+      '<p class="panel-intro">'+t("stats.grapeCompareIntro")+'</p>'+
+      '<div class="bars">'+vitigni.slice(0,8).map(row =>
+        '<div class="bar-row"><span class="bar-label">'+esc(row.v)+'</span>'+
+        '<div class="bar-track"><div class="bar-fill" style="width:'+(row.avg/gMax*100)+'%"></div></div>'+
+        '<span class="bar-val">'+dec(row.avg)+' <em>('+row.n+')</em></span></div>'
       ).join("")+'</div>'+
       '<p class="panel-foot">'+tf("stats.grapeProfileFoot",{con:conUva.length, n:n, completa:completa})+
         (conUva.length < n ? t("stats.grapeProfileFootMore") : "")+
-      '</p>',
-      null);
+      '</p>', null);
   } else {
-    html += bloccato(t("stats.grapeProfileTitle"), t("blend.title").toLowerCase(), t("stats.grapeProfileBlockedWhat"));
+    grapeHtml = bloccato(t("stats.grapeCompareTitle"), t("blend.title").toLowerCase(), t("stats.grapeProfileBlockedWhat"));
   }
 
-  /* ---- 4. profilo sensoriale (radar) + palato per parametro ---- */
-  const withVoti = all.filter(w =>
-    w.modello === 4 && w.voti && w.voti.v && w.voti.o && w.voti.g && w.voti.f &&
-    w.parts && ["v","o","g","f"].every(k => typeof w.parts[k] === "number")
-  );
-  if(withVoti.length >= SOGLIA_PALATO){
-    const pcts = {};
-    ["v","o","g","f"].forEach(k => {
-      pcts[k] = media(withVoti.map(w => (w.parts[k]||0) / SEZ_MAX[k]));
-    });
-    html += statPanel(t("stats.sensoryTitle"),
-      radarSVG(pcts)+
-      '<div class="radar-read">'+
-        ["v","o","g","f"].map(k => {
-          const lbl = {v:t("seg.visual"),o:t("seg.olfactory"),g:t("seg.taste"),f:t("seg.final")}[k].toLowerCase();
-          return '<span>'+lbl+' <b>'+Math.round(pcts[k]*100)+'%</b></span>';
-        }).join("")+
-      '</div>',
-      tf("stats.sensoryOn",{n:withVoti.length}));
-
-    /* i voti 1-5 delle schede vecchie valgono il doppio sulla scala 1-10:
-       3/5 e 6/10 sono entrambi il 60%, quindi la proporzione si conserva */
-    const paramLabelsNow = paramLabels();
-    const params = Object.keys(paramLabelsNow).map(key => {
-      const [g,pp] = key.split(".");
-      const vals = withVoti.map(w => (w.voti[g] && typeof w.voti[g][pp] === "number") ? w.voti[g][pp] : null)
-                           .filter(v => v !== null);
-      return { key, label:paramLabelsNow[key], avg:media(vals), n:vals.length };
-    }).filter(pr => pr.n > 0).sort((a,b) => b.avg - a.avg);
-
-    html += statPanel(t("stats.byVoiceTitle"),
-      '<p class="panel-intro">'+tf("stats.byVoiceIntro",{suff:SUFF_VAL})+'</p>'+
-      lolliList(params),
-      null);
-  } else {
-    html += bloccato(t("stats.sensoryTitle"), quante(SOGLIA_PALATO-withVoti.length,t("hdr.card"),t("hdr.cardPl")), t("stats.sensoryBlockedWhat"));
+  /* cantine più degustate */
+  const perProd = {};
+  all.forEach(w => { const p = (w.produttore||"").trim(); if(p) (perProd[p] = perProd[p] || []).push(w); });
+  const prodAgg = Object.keys(perProd).map(p => {
+    const rows = perProd[p];
+    return { p, n:rows.length, avg:media(rows.map(w=>w.score)) };
+  }).sort((a,b) => b.n - a.n || b.avg - a.avg);
+  let prodHtml = "";
+  if(prodAgg.length){
+    const pMax = Math.max.apply(null, [1].concat(prodAgg.map(x => x.n)));
+    prodHtml = statPanel(t("stats.producersTitle"),
+      '<p class="panel-intro">'+t("stats.producersIntro")+'</p>'+
+      '<div class="bars">'+prodAgg.slice(0,8).map(row =>
+        '<div class="bar-row"><span class="bar-label">'+esc(row.p)+'</span>'+
+        '<div class="bar-track"><div class="bar-fill" style="width:'+(row.n/pMax*100)+'%"></div></div>'+
+        '<span class="bar-val">'+row.n+' <em>('+dec(row.avg)+')</em></span></div>'
+      ).join("")+'</div>', null);
   }
 
-  html += statsSectionHead(t("stats.section.context"));
+  let html2 = '<div class="stats-grid-2">'+podioHtml+typesHtml+grapeHtml+prodHtml+'</div>';
+  html2 += strisciaSblocchi();
+  return html2;
+}
 
-  /* ---- 5. prezzi ---- */
+function tabPlaces(all){
+  const perReg = {}, perPaese = {};
+  all.forEach(w => {
+    if(!w.regione) return;
+    const L = splitLuogo(w.regione);
+    (perReg[L.regione] = perReg[L.regione] || []).push(w.score);
+    (perPaese[L.paese] = perPaese[L.paese] || []).push(w.score);
+  });
+  const regioni = Object.keys(perReg).map(r => ({r, n:perReg[r].length, avg:media(perReg[r])})).sort((a,b) => b.avg - a.avg);
+  const paesi = Object.keys(perPaese).map(r => ({r, n:perPaese[r].length, avg:media(perPaese[r])})).sort((a,b) => b.avg - a.avg);
+  const barre = (arr) => {
+    const m = Math.max.apply(null, [1].concat(arr.map(x => x.avg)));
+    return '<div class="bars">'+arr.map(x =>
+      '<div class="bar-row"><span class="bar-label">'+esc(x.r)+'</span>'+
+      '<div class="bar-track"><div class="bar-fill" style="width:'+(x.avg/m*100)+'%"></div></div>'+
+      '<span class="bar-val">'+dec(x.avg)+' <em>('+x.n+')</em></span></div>').join("")+'</div>';
+  };
+  let html;
+  if(regioni.length){
+    html = '<div class="stats-grid-2">'+
+      (paesi.length ? statPanel(t("stats.byCountryTitle"), barre(paesi.slice(0,8)), null) : "")+
+      statPanel(t("stats.byRegionTitle"), barre(regioni.slice(0,10)), null)+
+    '</div>';
+  } else {
+    html = bloccato(t("stats.territoriesTitle"), t("stats.regionHint"), t("stats.byCountryBlockedWhat"));
+  }
+  html += strisciaSblocchi();
+  return html;
+}
+
+function tabValue(all, ctx){
+  const {n} = ctx;
+  let html;
   const conPrezzo = all.filter(w => w.prezzo != null && w.prezzo > 0);
   if(conPrezzo.length >= 2){
     const spesa = conPrezzo.reduce((a,w) => a+w.prezzo, 0);
@@ -3562,11 +3913,6 @@ function renderStats(){
       '<div><span class="pc-n">'+conPrezzo.length+'/'+n+'</span><span class="pc-l">'+t("stats.priceWithPrice")+'</span></div>'+
     '</div>';
 
-    /* Quanto vale davvero un vino per quello che costa.
-       Il rapporto punteggio/prezzo non serve: premia sempre le bottiglie da 5 euro.
-       Qui si stima invece il punteggio atteso per quella fascia di prezzo
-       (retta sui logaritmi, perché fra 10 e 20 euro cambia molto più che fra 110 e 120)
-       e si guarda chi sta sopra e chi sotto quella attesa. */
     if(conPrezzo.length >= 4){
       const xs = conPrezzo.map(w => Math.log(w.prezzo));
       const ys = conPrezzo.map(w => w.score);
@@ -3596,111 +3942,153 @@ function renderStats(){
     }else{
       corpo += '<p class="panel-foot">'+t("stats.priceNeedMore")+'</p>';
     }
-    html += statPanel(t("stats.priceTitle"), corpo, null);
+    html = statPanel(t("stats.priceTitle"), corpo, null);
   }else{
-    html += bloccato(t("stats.priceTitle"), quante(2-conPrezzo.length,t("stats.onePrice"),t("stats.manyPrices")), t("stats.priceBlockedWhat"));
+    html = bloccato(t("stats.priceTitle"), quante(2-conPrezzo.length,t("stats.onePrice"),t("stats.manyPrices")), t("stats.priceBlockedWhat"));
   }
-
-  /* ---- 6. regioni ---- */
-  const perReg = {}, perPaese = {};
-  all.forEach(w => {
-    if(!w.regione) return;
-    const L = splitLuogo(w.regione);
-    (perReg[L.regione] = perReg[L.regione] || []).push(w.score);
-    (perPaese[L.paese] = perPaese[L.paese] || []).push(w.score);
-  });
-  const regioni = Object.keys(perReg).map(r => ({r, n:perReg[r].length, avg:media(perReg[r])}))
-    .sort((a,b) => b.avg - a.avg);
-  const paesi = Object.keys(perPaese).map(r => ({r, n:perPaese[r].length, avg:media(perPaese[r])}))
-    .sort((a,b) => b.avg - a.avg);
-  if(regioni.length){
-    const barre = (arr) => {
-      const m = Math.max.apply(null, [1].concat(arr.map(x => x.avg)));
-      return '<div class="bars">'+arr.map(x =>
-        '<div class="bar-row"><span class="bar-label">'+esc(x.r)+'</span>'+
-        '<div class="bar-track"><div class="bar-fill" style="width:'+(x.avg/m*100)+'%"></div></div>'+
-        '<span class="bar-val">'+dec(x.avg)+' <em>('+x.n+')</em></span></div>').join("")+'</div>';
-    };
-    html += statPanel(t("stats.territoriesTitle"),
-      (paesi.length > 1 ? '<div class="sub-label">'+t("stats.byCountry")+'</div>'+barre(paesi.slice(0,8))+
-        '<div class="sub-label" style="margin-top:16px">'+t("stats.byZone")+'</div>' : '')+
-      barre(regioni.slice(0,10)), null);
-  }
-
-  /* ---- 7. distribuzione dei voti ---- */
-  const bands = [
-    {label:"90+", lo:90, hi:101},
-    {label:"80-89",  lo:80, hi:90},
-    {label:"70-79",  lo:70, hi:80},
-    {label:"60-69",  lo:60, hi:70},
-    {label:t("stats.distributionUpTo"), lo:0, hi:60}
-  ].map(b => Object.assign({}, b, {count: scoresArr.filter(s => s>=b.lo && s<b.hi).length}));
-  html += statPanel(t("stats.distributionTitle"),
-    columnsSVG(bands.slice().reverse())+
-    '<p class="panel-foot">'+tf("stats.distributionFoot",{sd:(sd?dec(sd):"—"), extra:
-      (n>=SOGLIA_PALATO ? (sd < 6 ? t("stats.distributionClose") : sd > 12 ? t("stats.distributionWide") : t("stats.distributionGood")) : "")
-    })+
-    '</p>',
-    null);
-
-  /* ---- 8. andamento nel tempo ---- */
-  const chrono = all.slice().sort((a,b) => (a.timestamp||0) - (b.timestamp||0));
-  if(chrono.length >= SOGLIA_TREND){
-    const W = 300, H = 76, pad = 6;
-    const lo = Math.min.apply(null, scoresArr), hi = Math.max.apply(null, scoresArr);
-    const span = Math.max(1, hi - lo);
-    const pts = chrono.map((w,i) => [
-      pad + i*(W-2*pad)/(chrono.length-1),
-      H - pad - ((w.score-lo)/span)*(H-2*pad)
-    ]);
-    const path = pts.map((pp,i) => (i?"L":"M")+pp[0].toFixed(1)+" "+pp[1].toFixed(1)).join(" ");
-    const area = path+" L "+pts[pts.length-1][0].toFixed(1)+" "+(H-pad)+" L "+pts[0][0].toFixed(1)+" "+(H-pad)+" Z";
-    const half = Math.floor(chrono.length/2);
-    const d1 = media(chrono.slice(0,half).map(w=>w.score));
-    const d2 = media(chrono.slice(half).map(w=>w.score));
-    const delta = d2 - d1;
-    const verdict = Math.abs(delta) < 2
-      ? t("stats.trendStable")
-      : (delta < 0
-          ? tf("stats.trendStricter",{pts:dec(Math.abs(delta))})
-          : tf("stats.trendMoreGenerous",{pts:dec(delta)}));
-    html += statPanel(t("stats.trendTitle"),
-      '<svg class="spark" viewBox="0 0 '+W+' '+H+'" preserveAspectRatio="none" role="img" aria-label="'+t("stats.trendTitle")+'">'+
-        '<path d="'+area+'" fill="var(--gold)" fill-opacity="0.14"/>'+
-        '<path d="'+path+'" fill="none" stroke="var(--gold)" stroke-width="2" stroke-linejoin="round"/>'+
-        pts.map(pp => '<circle cx="'+pp[0].toFixed(1)+'" cy="'+pp[1].toFixed(1)+'" r="2.5" fill="var(--gold)"/>').join("")+
-      '</svg>'+
-      '<div class="spark-axis"><span>'+t("stats.trendFirst")+'</span><span>'+t("stats.trendLast")+'</span></div>'+
-      '<p class="panel-foot">'+verdict+'</p>',
-      tf("stats.trendRange",{lo:lo, hi:hi}));
-  } else {
-    html += bloccato(t("stats.trendTitle"), quante(SOGLIA_TREND-chrono.length,t("hdr.card"),t("hdr.cardPl")), t("stats.trendBlockedWhat"));
-  }
-
-  /* ---- 9. media per tipologia ---- */
-  const typeMax = Math.max.apply(null, [1].concat(byType.map(tp => tp.avg)));
-  html += statPanel(t("stats.avgByTypeTitle"),
-    '<div class="bars">'+byType.map(tp =>
-      '<div class="bar-row"><span class="bar-label">'+esc(tp.label)+'</span>'+
-      '<div class="bar-track"><div class="bar-fill" style="width:'+(tp.avg/typeMax*100)+'%"></div></div>'+
-      '<span class="bar-val">'+dec(tp.avg)+' <em>('+tp.count+')</em></span></div>'
-    ).join("")+'</div>', null);
-
-  /* ---- 10. descrittori ---- */
-  const descCount = {};
-  all.forEach(w => (w.desc||[]).forEach(d => { descCount[d] = (descCount[d]||0)+1; }));
-  const descs = Object.keys(descCount).sort((a,b) => descCount[b]-descCount[a]);
-  if(descs.length){
-    const dMax = Math.max.apply(null, [1].concat(descs.map(d => descCount[d])));
-    html += statPanel(t("stats.descriptorsTitle"),
-      '<div class="bars">'+descs.slice(0,8).map(d =>
-        '<div class="bar-row"><span class="bar-label">'+esc(d)+'</span>'+
-        '<div class="bar-track"><div class="bar-fill" style="width:'+(descCount[d]/dMax*100)+'%"></div></div>'+
-        '<span class="bar-val">'+descCount[d]+'</span></div>'
-      ).join("")+'</div>', null);
-  }
-
   html += strisciaSblocchi();
+  return html;
+}
+
+/* ---- tab Gruppo: unica tab che dipende da una lettura di rete ---- */
+async function loadGroupData(eventNames){
+  S.groupLoading = true;
+  const data = {};
+  for(const name of eventNames){
+    try{
+      const slug = slugify(name);
+      const res = await DB.list("evento:"+slug+":", true);
+      const keys = (res && res.keys) || [];
+      const byWine = {};
+      if(keys.length){
+        const {values} = await getMany(keys, true);
+        values.forEach(v => {
+          let e; try{ e = JSON.parse(v.value); }catch(err){ return; }
+          if(!e || typeof e.score !== "number") return;
+          const key = normLabel(e.wineLabel || "");
+          if(!key) return;
+          if(!byWine[key]) byWine[key] = {total:0, count:0};
+          byWine[key].total += e.score; byWine[key].count += 1;
+        });
+      }
+      const agg = {};
+      Object.keys(byWine).forEach(k => { agg[k] = {avg: byWine[k].total/byWine[k].count, count: byWine[k].count}; });
+      data[name] = agg;
+    }catch(e){ data[name] = {}; }
+  }
+  S.groupData = data;
+  S.groupDataKey = eventNames.slice().sort().join("|");
+  S.groupLoading = false;
+  if(S.tab === "stats" && S.statsTab === "group") renderStats();
+}
+
+function tabGroup(all){
+  const linked = all.filter(w => w.evento);
+  const intro = '<p class="panel-intro" style="margin:0 0 16px">'+t("stats.groupIntro")+'</p>';
+  const empty = '<div class="empty"><div class="empty-title">'+t("stats.groupNoneTitle")+'</div>'+
+    '<p class="empty-sub">'+t("stats.groupNoneSub")+'</p></div>';
+  if(!linked.length) return intro+empty;
+
+  const eventNames = Array.from(new Set(linked.map(w => w.evento)));
+  const key = eventNames.slice().sort().join("|");
+  if(S.groupLoading || S.groupDataKey !== key){
+    if(!S.groupLoading) loadGroupData(eventNames);
+    return intro+'<div class="note-line">'+t("stats.groupLoading")+'</div>';
+  }
+
+  const perEvent = eventNames.map(name => {
+    const groupMap = S.groupData[name] || {};
+    const wineRows = linked.filter(w => w.evento === name).map(w => {
+      const label = [w.nome, w.produttore, w.annata].filter(Boolean).join(" — ");
+      const gm = groupMap[normLabel(label)];
+      if(!gm) return null;
+      return {name: w.nome || label, userScore:w.score, groupAvg:gm.avg, delta: w.score - gm.avg};
+    }).filter(Boolean);
+    if(!wineRows.length) return null;
+    return {name, wineRows, avgDelta: media(wineRows.map(r => r.delta))};
+  }).filter(Boolean);
+
+  if(!perEvent.length) return intro+empty;
+
+  const colorFor = d => Math.abs(d) < 1 ? "var(--ink-4)" : (d > 0 ? "var(--positive)" : "var(--rust)");
+  const html = intro+'<div class="stats-grid-2">'+perEvent.map(ev => {
+    const verdict = Math.abs(ev.avgDelta) < 1 ? t("stats.groupInLine")
+      : (ev.avgDelta > 0 ? t("stats.groupMoreGenerous") : t("stats.groupMoreStrict"));
+    return '<div class="card stat-panel">'+
+      '<div class="grp-head"><span class="grp-name">'+esc(ev.name)+'</span>'+
+        '<span class="grp-delta" style="color:'+colorFor(ev.avgDelta)+'">'+(ev.avgDelta>0?"+":"")+dec(ev.avgDelta,1)+'</span></div>'+
+      '<p class="grp-verdict">'+verdict+'</p>'+
+      ev.wineRows.map(w =>
+        '<div class="grp-wine"><div class="grp-wine-top">'+
+          '<span class="grp-wine-name">'+esc(w.name||t("book.noName"))+'</span>'+
+          '<span class="grp-wine-delta" style="color:'+colorFor(w.delta)+'">'+(w.delta>0?"+":"")+dec(w.delta,0)+'</span>'+
+        '</div>'+
+        '<div class="grp-bars">'+
+          '<div class="grp-bar-bg"></div><div class="grp-bar-fill" style="width:'+w.userScore+'%"></div>'+
+          '<div class="grp-bar-bg lo"></div><div class="grp-bar-fill lo" style="width:'+w.groupAvg+'%"></div>'+
+        '</div></div>'
+      ).join("")+
+      '<div class="grp-legend"><span><i style="background:var(--sel-bg)"></i>'+t("stats.groupYou")+'</span>'+
+        '<span><i style="background:var(--ink-4)"></i>'+t("stats.groupAvg")+'</span></div>'+
+    '</div>';
+  }).join("")+'</div>';
+  return html;
+}
+
+function renderStats(){
+  daSbloccare = [];
+  const all = S.saved;
+  const n = all.length;
+  if(n === 0){
+    $("statsWrap").innerHTML = '<div class="empty"><div class="empty-title">'+t("stats.emptyTitle")+'</div>'+
+      '<p class="empty-sub">'+t("stats.emptySub")+'</p></div>';
+    return;
+  }
+
+  const scoresArr = all.map(w => w.score);
+  const avg = media(scoresArr);
+  const best = all.reduce((a,w) => w.score > a.score ? w : a, all[0]);
+  const sd = devStd(scoresArr);
+  const prezzi = all.filter(w => w.prezzo != null).map(w => w.prezzo);
+  const typeCount = {};
+  all.forEach(w => { typeCount[w.tipologia] = (typeCount[w.tipologia]||0)+1; });
+  const byType = Object.keys(typeCount).map(tp => {
+    const rows = all.filter(w => w.tipologia === tp);
+    return { label:tp, avg:media(rows.map(w=>w.score)), count:rows.length };
+  }).sort((a,b) => b.avg - a.avg);
+  const ctx = {n, scoresArr, avg, best, sd, prezzi, byType};
+
+  const chrono = all.slice().sort((a,b) => (a.timestamp||0) - (b.timestamp||0));
+
+  /* ---- intestazione, sempre visibile sopra le tab ---- */
+  let html = '<div class="stats-hero"><div class="stats-hero-eyebrow">'+t("nav.stats")+'</div>'+
+    '<div class="stats-hero-top"><h1 class="stats-hero-title">'+t("stats.heroTitle")+'</h1>'+
+    '<span class="stats-hero-meta">'+quante(n,t("hdr.card"),t("hdr.cardPl"))+' · '+heroRangeText(chrono)+'</span></div>'+
+    '<p class="stats-hero-prosa">'+prosaGusti(all)+'</p></div>';
+
+  /* ---- tab ---- */
+  const TAB_DEFS = [
+    {id:"overview", label:t("stats.tab.overview")},
+    {id:"taste", label:t("stats.tab.taste")},
+    {id:"wines", label:t("stats.tab.wines")},
+    {id:"places", label:t("stats.tab.places")},
+    {id:"value", label:t("stats.tab.value")},
+    {id:"group", label:t("stats.tab.group")}
+  ];
+  if(TAB_DEFS.every(td => td.id !== S.statsTab)) S.statsTab = "overview";
+  html += '<div class="stats-tabs">'+TAB_DEFS.map(td =>
+    '<button type="button" class="stats-tab'+(S.statsTab===td.id?" on":"")+'" data-stats-tab="'+td.id+'">'+td.label+'</button>'
+  ).join("")+'</div>';
+
+  switch(S.statsTab){
+    case "taste": html += tabTaste(all); break;
+    case "wines": html += tabWines(all, ctx); break;
+    case "places": html += tabPlaces(all); break;
+    case "value": html += tabValue(all, ctx); break;
+    case "group": html += tabGroup(all); break;
+    default: html += tabOverview(all, ctx);
+  }
+
   $("statsWrap").innerHTML = html;
 }
 
@@ -3787,6 +4175,11 @@ function normalizeEntry(e){
   // Serve saperlo per non mescolare valori incompatibili nelle statistiche.
   e.scala = Number(e.scala) === 10 ? 10 : 5;
   e.daCieca = !!e.daCieca;
+
+  // evento di gruppo a cui è collegata: solo le schede salvate da quando
+  // esiste questo campo lo hanno, quelle precedenti restano senza (null),
+  // e semplicemente non compaiono nel confronto di gruppo delle statistiche.
+  e.evento = (typeof e.evento === "string" && e.evento.trim()) ? e.evento.trim() : null;
 
   ["nome","produttore","annata","tipologia","denominazione","affinamento",
    "limpidezza","colore","consistenza","zuccheri","stato","note","abbinamento","regione"]
@@ -3926,7 +4319,11 @@ async function saveTasting(){
     score:sc.total, modello:4,
     /* modificando una scheda si conserva la data originale: altrimenti
        l'ordinamento per data e l'andamento nel tempo perderebbero senso */
-    timestamp: S.editingId ? (S.editTimestamp || Date.now()) : Date.now()
+    timestamp: S.editingId ? (S.editTimestamp || Date.now()) : Date.now(),
+    /* stesso principio per l'evento: modificare una scheda non la aggancia
+       all'evento eventualmente selezionato ora nella tendina (che riguarda
+       la prossima scheda nuova), la lascia com'era. */
+    evento: S.editingId ? (S.editEvento || null) : (S.currentEvent || null)
   };
   if(S.editingId && S.editTimestamp) entry.modificato = Date.now();
   if(S.photo){
@@ -3991,6 +4388,7 @@ function apriInModifica(id){
   S.editingId = id;
   S.editTimestamp = w.timestamp || null;
   S.editThumb = w.thumb || null;
+  S.editEvento = w.evento || "";
   S.photo = null; S.photoB64 = null; S.photoName = "";
   $("photoInput").value = "";
 
@@ -4035,7 +4433,7 @@ function apriInModifica(id){
 }
 
 function annullaModifica(){
-  S.editingId = null; S.editThumb = null; S.editTimestamp = null;
+  S.editingId = null; S.editThumb = null; S.editTimestamp = null; S.editEvento = "";
   resetForm(false);
   renderAll();
   setStatus(t("new.editCancelled"));
@@ -4050,7 +4448,7 @@ function resetForm(notify){
   const di = descInit(); S.durezze = di.durezze; S.morbidezze = di.morbidezze; S.intensita = 3; S.corpo = 3;
   const vi = valInit(); S.v = vi.v; S.o = vi.o; S.g = vi.g; S.f = vi.f;
   S.desc = []; S.note = ""; S.abbinamento = "";
-  S.editingId = null; S.editThumb = null; S.editTimestamp = null;
+  S.editingId = null; S.editThumb = null; S.editTimestamp = null; S.editEvento = "";
   $("photoInput").value = "";
   if(notify) setStatus(t("new.cleared"));
 }
@@ -4606,6 +5004,16 @@ $("nav").addEventListener("click", e => {
   // classifica", e nel frattempo l'intestazione mostrava "0 vini in gara"
   // anche quando un voto era già stato registrato.
   if(S.tab === "event" && S.currentEvent && !S.newEventMode) loadLeaderboard();
+});
+
+/* tab interne alle Statistiche (Panoramica/Il tuo gusto/...): il listener sta
+   sul contenitore fisso, così sopravvive ai reflow di innerHTML che ogni
+   renderStats() fa dentro #statsWrap. */
+$("statsWrap").addEventListener("click", e => {
+  const b = e.target.closest("button[data-stats-tab]");
+  if(!b) return;
+  S.statsTab = b.dataset.statsTab;
+  renderStats();
 });
 
 $("themeLight").addEventListener("click", () => setTheme("light", true));
