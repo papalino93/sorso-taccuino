@@ -1,6 +1,6 @@
 # Sorso — Taccuino di degustazione
 
-Versione corrente: **1.0.1**
+Versione corrente: **1.1.0**
 
 App per registrare degustazioni di vino con scheda di valutazione, statistiche personali, degustazioni alla cieca ed eventi condivisi.
 

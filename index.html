@@ -42,6 +42,7 @@
     --rust:#A2532F;
     --head-bg:#0D0D0D; --head-fg:#F5F5F5; --head-dim:rgba(245,245,245,.55); --head-line:rgba(245,245,245,.12);
     --bar:rgba(255,255,255,.94); --chip:#F0EBDF;
+    --desk-wine:rgba(122,18,40,.13); --desk-gold:rgba(156,107,8,.09); --desk-edge:rgba(92,84,76,.13);
     /* Le 4 fasi dell'esame AIS lette come un unico percorso di colore, dal più
        chiaro al più profondo — non 4 tinte arbitrarie: visivo è il colore del
        vino nel bicchiere, il finale è già il bordeaux dell'identità del sito.
@@ -63,6 +64,7 @@
     --rust:#E8875A;
     --head-bg:#000000; --head-fg:#FFFFFF; --head-dim:rgba(255,255,255,.55); --head-line:rgba(255,255,255,.12);
     --bar:rgba(10,10,10,.94); --chip:#232323;
+    --desk-wine:rgba(158,28,46,.26); --desk-gold:rgba(255,183,3,.10); --desk-edge:rgba(255,255,255,.09);
     --ph-v:#E8C547; --ph-o:#FFA94D; --ph-g:var(--rust); --ph-f:var(--sel-bg);
     --positive:#5FB37D;
   }
@@ -77,6 +79,13 @@
 
   .shell{min-height:100vh;background:var(--shell);font-family:'Inter',system-ui,sans-serif;color:var(--ink);display:flex;justify-content:center;transition:background .25s;}
   .panel{width:100%;max-width:560px;background:var(--panel);min-height:100vh;position:relative;box-shadow:0 0 80px rgba(0,0,0,.35);transition:background .25s;}
+  /* Su schermi ampi il taccuino resta intenzionalmente stretto e leggibile,
+     ma non galleggia più in un vuoto uniforme: due luci molto soffuse danno
+     profondità da cantina senza introdurre immagini, distrazioni o nuovi elementi UI. */
+  @media (min-width:900px){
+    .shell{background:radial-gradient(680px 620px at calc(50% - 410px) 18%,var(--desk-wine),transparent 72%),radial-gradient(600px 540px at calc(50% + 420px) 76%,var(--desk-gold),transparent 72%),var(--shell);}
+    .panel{box-shadow:0 28px 90px rgba(0,0,0,.38),0 0 0 1px var(--desk-edge);}
+  }
 
   .hdr{position:relative;overflow:hidden;background:var(--head-bg);padding:18px 22px 26px;transition:background .25s;}
   .hdr::before{content:'';position:absolute;inset:0;background:radial-gradient(380px 220px at 80% -10%, rgba(228,192,122,.18), transparent 72%);pointer-events:none;}
@@ -941,7 +950,7 @@
       <div id="lbList"></div>
     </section>
 
-    <footer class="app-version" aria-label="Versione dell'app">Sorso · v1.0.1</footer>
+    <footer class="app-version" aria-label="Versione dell'app">Sorso · v1.1.0</footer>
   </main>
 
   <div class="ac-box hidden" id="acBox" role="listbox"></div>
