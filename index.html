@@ -95,11 +95,11 @@
      sulla riga lo avrebbe lasciato lì dov'è, cioè all'inizio. */
   .hdr-ctrl{display:flex;align-items:center;gap:8px;margin-left:auto;}
   .theme-switch{display:flex;border:1px solid rgba(244,240,232,.22);border-radius:100px;overflow:hidden;}
-  .theme-switch button{width:40px;height:38px;border:0;background:transparent;color:rgba(244,240,232,.6);font:400 12px/1 'Inter';cursor:pointer;transition:all .18s;}
+  .theme-switch button{width:44px;height:44px;border:0;background:transparent;color:rgba(244,240,232,.6);font:400 12px/1 'Inter';cursor:pointer;transition:all .18s;}
   .theme-switch button.on{background:var(--head-gold);color:var(--head-bg);}
-  /* Commutatore lingua: stessa forma del commutatore tema, stesso bersaglio da 40x38px al tocco. */
+  /* Commutatore lingua: stessa forma del commutatore tema, con bersagli da 44px anche su touch. */
   .lang-switch{display:flex;border:1px solid rgba(244,240,232,.22);border-radius:100px;overflow:hidden;}
-  .lang-switch button{width:40px;height:38px;border:0;background:transparent;color:rgba(244,240,232,.6);font:500 11px/1 'Inter';letter-spacing:.02em;cursor:pointer;transition:all .18s;}
+  .lang-switch button{width:44px;height:44px;border:0;background:transparent;color:rgba(244,240,232,.6);font:500 11px/1 'Inter';letter-spacing:.02em;cursor:pointer;transition:all .18s;}
   .lang-switch button.on{background:var(--head-gold);color:var(--head-bg);}
   /* Dentro il login-card lo sfondo è chiaro (var(--panel)), non lo scuro dell'header:
      qui il commutatore usa i toni della carta invece di quelli dell'header. */
@@ -596,6 +596,7 @@
   .storage-warn{margin-top:10px;padding:10px 12px;border-radius:6px;background:var(--chip);
                 border-left:2px solid var(--rust);font:400 11.5px/1.55 'Inter';color:var(--ink-2);}
   .note-line{font:400 12px/1.55 'Inter';color:var(--ink-3);}
+  .app-version{margin:8px 0 0;text-align:center;font:500 9px/1 'Inter';letter-spacing:.12em;text-transform:uppercase;color:var(--ink-4);}
 
   /* barra di navigazione in alto, resta visibile allo scroll */
   .nav{position:sticky;top:0;z-index:20;display:grid;grid-template-columns:repeat(5,1fr);
@@ -940,6 +941,7 @@
       <div id="lbList"></div>
     </section>
 
+    <footer class="app-version" aria-label="Versione dell'app">Sorso · v1.0.1</footer>
   </main>
 
   <div class="ac-box hidden" id="acBox" role="listbox"></div>
