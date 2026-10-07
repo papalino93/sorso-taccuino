@@ -1,6 +1,6 @@
 # Sorso — Taccuino di degustazione
 
-Versione corrente: **1.2.0**
+Versione corrente: **1.3.0**
 
 App per registrare degustazioni di vino con scheda di valutazione, statistiche personali, degustazioni alla cieca ed eventi condivisi.
 
@@ -13,6 +13,8 @@ App per registrare degustazioni di vino con scheda di valutazione, statistiche p
 - `api/_session.js` — creazione/verifica della sessione, usata da tutti gli endpoint di autenticazione.
 - `api/db.js` — archivio chiave-valore per utente, usato dal frontend per salvare schede, profilo ed eventi.
 - `api/_redis.js` — connessione al database (Vercel KV / Upstash Redis).
+- Spazio di team per siti partner (vedi sotto): `api/embed.js`, `api/embed-page.js`, `api/v1.js` e i moduli `api/_jwt.js`, `_partner.js`, `_team.js`, `_limit.js`, `_quota.js`, `_http.js`; interfaccia in `public/embed.js` e `public/embed.css`; configurazione in `vercel.json`.
+- `scripts/partner.js` (gestione dei partner), `scripts/usage.js` (consumo di Redis), `scripts/confronto-scala.js`.
 
 ## Punteggio
 
@@ -23,7 +25,20 @@ Il punteggio sta sempre tra **50 e 100**, in entrambe le modalità di valutazion
 
 Il 100 si ottiene solo con ogni giudizio al massimo. Le schede salvate prima della scala nuova vengono ricalcolate al primo caricamento; il vecchio totale lineare resta nel campo `legacyTotal`.
 
-Test: `npm test` (funzioni di punteggio) e `test/e2e/scala.e2e.js` (flussi nel browser). `scripts/confronto-scala.js` confronta i punteggi prima e dopo su un file di "Salva copia".
+Test: `npm test` (punteggio, token, partner, spazio di team, API, script: usa un finto server Upstash, nessun database vero) e `test/e2e/*.e2e.js` (flussi nel browser, richiedono Playwright). `scripts/confronto-scala.js` confronta i punteggi prima e dopo su un file di "Salva copia".
+
+## Spazio di team per siti partner
+
+Un sito esterno può incorporare Sorso come spazio di team: i suoi utenti votano i vini di una degustazione, ognuno vede i propri voti e, **solo dopo aver votato**, la media del team.
+
+- **Accesso**: il backend del partner firma un JWT HS256 per l'utente (claim `iss` = id partner, `sub`, `name`, `team`, `role` = `member` o `organizer`, `jti` e `exp` entro 10 minuti) e apre l'iframe `https://<dominio>/embed?p=<partner>&token=<JWT>`. Il token è monouso e viene scambiato subito con una sessione tenuta solo in memoria.
+- **Ruoli**: l'organizzatore crea e chiude le degustazioni e aggiunge i vini; i partecipanti votano.
+- **Voti**: voto rapido (occhio, naso, bocca da 50 a 100) o scheda completa; il punteggio lo ricalcola sempre il server.
+- **Sicurezza**: la pagina si può incorporare solo dai domini registrati dal partner (`frame-ancestors`); nessuno script inline; il tema del partner è fatto di soli valori controllati.
+- **API di sola lettura** per il server del partner, con `Authorization: Bearer sk_<partner>_<chiave>`: `GET /api/v1/tastings`, `GET /api/v1/tastings/{id}/results[?format=csv]`, `DELETE /api/v1/users/{sub}`. Solo aggregati; la media compare dal secondo voto.
+- **Partner**: si creano a mano con `node scripts/partner.js create <id> --name "..." --origin https://...` (servono le variabili del database nell'ambiente). Il segreto e la chiave compaiono una volta sola.
+- **Costo**: pensato per il piano gratuito di Redis (500.000 comandi al mese). Un voto costa circa 10 comandi, un caricamento della degustazione circa 8. Il consumo si legge con `node scripts/usage.js`; all'80% le risposte portano `X-Sorso-Quota: warn`, al 95% le scritture si fermano (sola lettura).
+- **Prova in locale**: `node test/helpers/dev-server.js` avvia il tutto con un Redis finto; `node test/e2e/team.e2e.js` prova il flusso nel browser con un finto sito partner.
 
 ## Account e sincronizzazione
 

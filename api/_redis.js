@@ -25,4 +25,7 @@ function getRedis() {
   return client;
 }
 
-module.exports = { getRedis };
+/* solo per i test: forza una nuova connessione alla prossima richiesta */
+function reset() { client = null; }
+
+module.exports = { getRedis, reset };

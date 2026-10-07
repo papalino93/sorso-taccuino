@@ -24,6 +24,17 @@
   const K = 2;
   const VAL_MAX = 10;
 
+  /* Le voci della scheda completa: [chiave, titolo, aiuto, peso] come VALUTA in
+     public/index.html (titoli e aiuti sono lì, nelle traduzioni). Qui servono
+     chiavi e pesi, per calcolare il punteggio anche sul server. Un test
+     verifica che i due elenchi coincidano. */
+  const ITEMS = {
+    v: [["qualita", "", "", 1]],
+    o: [["intensita", "", "", 1], ["complessita", "", "", 1], ["qualita", "", "", 1]],
+    g: [["equilibrio", "", "", 1], ["intensita", "", "", 1], ["persistenza", "", "", 1], ["qualita", "", "", 1]],
+    f: [["armonia", "", "", 2]]
+  };
+
   const PHASES = ["v", "o", "g", "f"];
   const PHASE_W = { v: 10, o: 30, g: 40, f: 20 };
   const SMART_KEYS = ["occhio", "naso", "bocca"];
@@ -163,7 +174,7 @@
 
   return {
     BAND_MIN: BAND_MIN, BAND_MAX: BAND_MAX, K: K, VAL_MAX: VAL_MAX,
-    PHASES: PHASES, PHASE_W: PHASE_W, SMART_KEYS: SMART_KEYS, SMART_W: SMART_W,
+    ITEMS: ITEMS, PHASES: PHASES, PHASE_W: PHASE_W, SMART_KEYS: SMART_KEYS, SMART_W: SMART_W,
     clampBand: clampBand, band: band, phaseQuality: phaseQuality,
     fullFromQ: fullFromQ, fullScore: fullScore, qualityOfRecord: qualityOfRecord,
     smartScore: smartScore, legacyLinear: legacyLinear, fromLegacyTotal: fromLegacyTotal,
