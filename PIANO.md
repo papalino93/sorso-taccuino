@@ -7,9 +7,10 @@ Obiettivo: migliorare l'app in modo definitivo e renderla integrabile come **spa
 
 - **Fase 1** — scala 50–100, voto rapido, ricalcolo dei dati: fatta e online (v1.2.0).
 - **Fase 2** — spazio di team, embed e API di sola lettura: scritta e provata con un Redis finto e nel browser (v1.3.0). Mancano il primo partner reale e la prova con il database vero: servono le credenziali nell'ambiente.
-- **Design** — due direzioni proposte in `design/` (nel branch di lavoro, non ancora nell'app); da scegliere.
+- **Design** — scelta la **direzione B** ("Numero e inchiostro"), in `design/`; da portare nell'app con la fase 3.
+- **Arrotondamento** — regola classica su ogni numero mostrato o salvato: da 0,5 in su per eccesso (da 1 a 4 per difetto, da 5 a 9 per eccesso). Va applicata con un'aritmetica che non sbaglia sui casi esatti a metà (es. 82,5 non deve diventare 82,49999).
 - **Fase 3** — redesign: da fare dopo la scelta della direzione.
-- **Fase 4** — guida di integrazione in PDF: da fare sull'API stabile.
+- **Fase 4** — guida di integrazione in PDF: fatta (`docs/guida-integrazione-sorso.pdf`, 13 pagine). Gli esempi di codice sono provati dai test e le risposte dell'API sono quelle vere; si rigenera con `python3 docs/build-guida.py`. Da riguardare dopo la scelta del design solo se cambia il tema dei partner.
 
 ## 1. Cosa si costruisce
 
@@ -39,7 +40,7 @@ Vincolo trasversale: **nessun costo**. Vercel Hobby + Upstash Redis gratuito, us
 
 In entrambi i casi il minimo è 50, quindi un 30 non esiste.
 
-Lettura dei punteggi: 50–59 difettoso, 60–69 sufficiente, 70–79 discreto, 80–89 buono/molto buono, 90–95 eccellente, 96–99 eccezionale, 100 irripetibile.
+Lettura dei punteggi: 50–59 insufficiente, 60–69 sufficiente, 70–79 discreto, 80–89 buono/molto buono, 90–95 eccellente, 96–99 eccezionale, 100 irripetibile.
 
 La media del team si mostra con un decimale, perché i voti si concentrano in 75–92.
 
@@ -63,24 +64,24 @@ La media del team si mostra con un decimale, perché i voti si concentrano in 75
 - L'organizzatore può chiudere una degustazione: dopo la chiusura i voti sono definitivi.
 
 ### Autenticazione (SSO con token firmato)
-1. Il backend del partner firma un JWT **HS256** con il segreto condiviso. Claim: `iss` (id partner), `sub` (id utente opaco), `name`, `team`, `role`, `exp` (massimo 10 minuti), `jti`.
-2. L'iframe carica `/embed?token=...`; Sorso verifica la firma e `exp`, consuma il `jti` (monouso) e crea una sessione.
+1. Il backend del partner firma un JWT **HS256** con il segreto condiviso. Claim: `iss` (id partner), `sub` (id utente opaco), `name`, `team`, `role`, `exp` (massimo 15 minuti), `jti`.
+2. L'iframe carica `/embed?p=<partner>#token=...` (il token nel frammento non viaggia in rete); Sorso verifica la firma e `exp`, consuma il `jti` (monouso) e crea una sessione.
 3. La sessione vive **solo in memoria** nell'iframe (niente cookie né localStorage di terze parti, che i browser bloccano).
 4. L'embed risponde con `Content-Security-Policy: frame-ancestors <domini del partner>`: funziona solo dal dominio registrato.
 
 ### Onboarding del partner
-Creato a mano con uno script nel repo (`scripts/create-partner.js`): genera `partnerId`, segreto di firma e chiave API di sola lettura, e salva in Redis domini autorizzati, tema e impostazioni (modalità consentite, lingua). Rotazione dei segreti manuale. Nessun pannello né self-service finché non arriva un secondo partner.
+Creato a mano con uno script nel repo (`scripts/partner.js`): genera `partnerId`, segreto di firma e chiave API di sola lettura, e salva in Redis domini autorizzati, tema e impostazioni (modalità consentite, lingua). Rotazione dei segreti manuale. Nessun pannello né self-service finché non arriva un secondo partner.
 
 ### Archiviazione (pensata per i 500.000 comandi/mese del piano gratuito)
-Niente `KEYS` né scansioni. Strutture Redis:
+Niente `KEYS` nel percorso normale (solo `purge`, a mano). Strutture Redis (nomi reali del codice, vedi `api/_team.js`):
 
 - `p:{partner}` — configurazione del partner.
-- `tastings:{partner}:{team}` — set delle degustazioni; `tasting:{id}` — hash con metadati e stato.
-- `wines:{tasting}` — hash `wineId → JSON`.
-- `votes:{tasting}:{wine}` — hash `userId → JSON compatto`.
-- `agg:{tasting}` — hash `wineId → somma:conteggio`, aggiornato a ogni voto (lettura del voto precedente + correzione, in un solo `EVAL`).
+- `tl:{partner}:{team}` — hash delle degustazioni del team (`id → JSON`); `ti:{partner}` — `id → team`; `tm:{partner}` — set dei team; `cn:{partner}` — contatori dei tetti.
+- `wn:{partner}:{degustazione}` — hash dei vini.
+- `vt:{partner}:{degustazione}:{vino}:{utente}` — il voto (stringa JSON); `vs:…` — i votanti di un vino; `uv:{partner}:{utente}` — i voti di un utente (per la cancellazione).
+- `sm:` e `ct:` — somma e conteggio per vino, aggiornati con incrementi commutativi: il voto si scrive con un solo `SET … GET` che restituisce il precedente (niente Lua).
 
-Stima: un voto costa circa 4 comandi, il caricamento di una degustazione circa 4. Anche con centinaia di utenti si resta ben sotto il limite. Limitazione delle richieste con Upstash Ratelimit sui soli endpoint di scrittura e di creazione sessione.
+Misurato: un voto costa circa 12 comandi, il caricamento di una degustazione circa 7. Anche con centinaia di utenti si resta ben sotto il limite. Limitazione delle richieste con un contatore proprio (`api/_limit.js`).
 
 ### Eventi personali (app personale)
 Gli eventi dell'app personale diventano **privati**: un evento è un'etichetta sulle schede dell'utente (es. "cena del 12 ottobre"), e la classifica mostra solo i suoi vini di quell'evento. Le degustazioni di gruppo passano dagli spazi di team dei partner.
@@ -97,7 +98,7 @@ L'attuale `api/db.js` espone uno spazio `shared:` leggibile e scrivibile da qual
 Autenticazione: `Authorization: Bearer <chiave API del partner>` (diversa dal segreto di firma). Solo lettura.
 
 - `GET /api/v1/tastings` — degustazioni del partner (filtro per team e stato).
-- `GET /api/v1/tastings/{id}/results` — vini con media del team, numero di voti, distribuzione.
+- `GET /api/v1/tastings/{id}/results` — vini con media del team e numero di voti.
 - `GET /api/v1/tastings/{id}/results?format=csv` — export.
 - `DELETE /api/v1/users/{sub}` — cancellazione dei dati di un utente (richiesta GDPR del partner).
 
@@ -123,7 +124,7 @@ Ogni fase si chiude con deploy e verifica sul sito in produzione.
 
 ## 7. Guida di integrazione (PDF)
 
-Capitoli: panoramica; ottenere credenziali; firmare il token (esempi in Node e PHP); incorporare l'iframe (parametri, tema, CSP); ruoli; API di lettura con esempi `curl`; codici di errore; limiti e quote; sicurezza (segreti, scadenza token, rotazione); privacy e cancellazione dati; elenco di verifica prima del go-live. Consegnata dopo la fase 4.
+Capitoli: panoramica; ottenere credenziali; firmare il token (esempi in Node, Python e PHP); incorporare l'iframe (parametri, tema, CSP); ruoli; API di lettura con esempi `curl`; codici di errore; limiti e quote; sicurezza (segreti, scadenza token, rotazione); privacy e cancellazione dati; elenco di verifica prima del go-live. Consegnata dopo la fase 4.
 
 ## 8. Decisioni
 
@@ -147,7 +148,7 @@ Capitoli: panoramica; ottenere credenziali; firmare il token (esempi in Node e P
 | Soglia aggregati API | Media solo da 2 voti | Scelta dell'utente |
 | Eventi | Personali: etichetta sulle schede dell'utente | Scelta dell'utente; il gruppo passa dai team dei partner |
 | Foto nel team | Rimandate | Scelta dell'utente; si rivaluta in futuro |
-| Limiti gratuiti | Avviso all'80% dei comandi, sola lettura al 100% | Evita sorprese e blocchi bruschi |
+| Limiti gratuiti | Avviso all'80% dei comandi, sola lettura al 90% | Evita sorprese e blocchi bruschi |
 | Ordine | Scala → API/embed → redesign → PDF | Il partner prova prima; il redesign non si rifà due volte |
 
 ## 9. Domande aperte

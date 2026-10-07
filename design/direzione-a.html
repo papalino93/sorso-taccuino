@@ -1,0 +1,1114 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Sorso · Direzione A — Cantina editoriale</title>
+<meta name="theme-color" content="#F6EEDF">
+<meta name="description" content="Mockup statico della direzione A di Sorso: editoriale, carta, bordeaux e ottone.">
+<!-- Unica richiesta esterna, facoltativa: i font. Senza, restano Iowan Old Style / Palatino / Georgia e Segoe UI / system-ui. -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..700;1,9..144,300..700&amp;family=Source+Sans+3:wght@400;600;700&amp;display=swap">
+<style>
+/* ==========================================================================
+   SORSO · Direzione A — "Cantina editoriale"
+   Design tokens. Stesso contratto di nomi di tokens-b.css: cambiare file
+   significa cambiare direzione, senza toccare i componenti.
+
+   Struttura
+     1. INPUT PARTNER  (l'unico sottoinsieme che un partner può sovrascrivere)
+     2. Tema di base chiaro / scuro   (--c-*: valori "grezzi", mai usati nei componenti)
+     3. Mappatura + valori derivati   (--bg, --ink, --surface ... usati dai componenti)
+     4. Tipografia, spazio, raggi, ombre, movimento
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   1. PARTNER-OVERRIDABLE  — solo queste 5 custom property, e solo su
+      :root o su un elemento .themeable. Tutto il resto deriva da loro.
+
+        --p-logo    url("data:image/svg+xml,...") oppure url(https://…/logo.svg)
+                    (altezza fissa 28px, larghezza max 140px, background-size: contain)
+        --p-accent  colore pieno per bottoni, tracce, anello. Il testo sopra
+                    (--on-accent) è scelto in automatico, nero o bianco.
+        --p-bg      sfondo pagina
+        --p-ink     colore del testo
+        --p-font    UNA famiglia della lista di sistema (vedi sotto); vale per titoli,
+                    testo e numeri del team
+
+      Lista font ammessa (nessun caricamento esterno):
+        system-ui, sans-serif                     "Avenir Next", Avenir, "Segoe UI", sans-serif
+        Georgia, "Times New Roman", serif         "Iowan Old Style", Palatino, "Palatino Linotype", serif
+        "Trebuchet MS", sans-serif                Verdana, Geneva, sans-serif
+        ui-rounded, "SF Pro Rounded", system-ui, sans-serif
+
+      Vincoli (validati in onboarding, non da CSS):
+        ink su bg ≥ 7:1 · accent su bg ≥ 3:1 (componenti grafici, WCAG 1.4.11)
+   -------------------------------------------------------------------------- */
+
+/* --------------------------------------------------------------------------
+   2. Tema di base — chiaro (carta)
+   -------------------------------------------------------------------------- */
+:root {
+  color-scheme: light dark;
+  --c-bg: #F6EEDF;            /* carta da lettere */
+  --c-ink: #2A1A1D;           /* quasi-nero bordeaux */
+  --c-accent: #6B1424;        /* bordeaux */
+  --c-brass: #755210;         /* ottone scuro, per testo e bordi (>= 4.5:1 su bg e su surface) */
+  --c-brass-hi: #D4A93C;      /* ottone acceso, solo riempimenti decorativi */
+  --c-brass-lo: #8A6514;
+  --c-positive: #2F6B3F;
+  --c-font-display: "Fraunces", "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
+  --c-font-text: "Source Sans 3", "Source Sans Pro", "Segoe UI", system-ui, sans-serif;
+  --c-font-num: "Fraunces", "Iowan Old Style", Georgia, serif;
+  /* marchio Sorso (calice), colore cotto nel file perché un'immagine non eredita currentColor */
+  --c-logo: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 28 28'%3E%3Cpath fill='%236B1424' d='M7 2h14c0 7-1.6 11.4-5.6 12.3V23h4.1c.5 0 .9.4.9.9s-.4.9-.9.9h-11c-.5 0-.9-.4-.9-.9s.4-.9.9-.9h4.1v-8.7C8.600 13.400 7 9 7 2zm1.900 1.900c.2 4.900 1.300 7.700 5.100 7.700s4.900-2.800 5.100-7.700z'/%3E%3C/svg%3E");
+  --grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .42 0 0 0 0 .3 0 0 0 0 .2 0 0 0 .55 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.22'/%3E%3C/svg%3E");
+  --grain-opacity: .5;
+}
+/* scuro: cantina di notte (due selettori: scelta manuale e preferenza di sistema) */
+:root[data-theme="dark"] {
+  --c-bg: #1A0F12;
+  --c-ink: #F2E7D6;
+  --c-accent: #B8334F;
+  --c-brass: #D9B45E;
+  --c-brass-hi: #F0D58A;
+  --c-brass-lo: #B58E33;
+  --c-positive: #7FC28F;
+  --c-logo: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 28 28'%3E%3Cpath fill='%23E8A0AE' d='M7 2h14c0 7-1.6 11.4-5.6 12.3V23h4.1c.5 0 .9.4.9.9s-.4.9-.9.9h-11c-.5 0-.9-.4-.9-.9s.4-.9.9-.9h4.1v-8.7C8.600 13.400 7 9 7 2zm1.900 1.900c.2 4.900 1.300 7.700 5.100 7.700s4.900-2.800 5.100-7.700z'/%3E%3C/svg%3E");
+  --grain-opacity: .35;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --c-bg: #1A0F12;
+    --c-ink: #F2E7D6;
+    --c-accent: #B8334F;
+    --c-brass: #D9B45E;
+    --c-brass-hi: #F0D58A;
+    --c-brass-lo: #B58E33;
+    --c-positive: #7FC28F;
+    --c-logo: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 28 28'%3E%3Cpath fill='%23E8A0AE' d='M7 2h14c0 7-1.6 11.4-5.6 12.3V23h4.1c.5 0 .9.4.9.9s-.4.9-.9.9h-11c-.5 0-.9-.4-.9-.9s.4-.9.9-.9h4.1v-8.7C8.600 13.400 7 9 7 2zm1.900 1.900c.2 4.900 1.300 7.700 5.100 7.700s4.900-2.800 5.100-7.700z'/%3E%3C/svg%3E");
+    --grain-opacity: .35;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   3. Mappatura e derivati. Su :root E su .themeable, così una sezione con
+      --p-* propri (un iframe partner, o un riquadro demo) si ricalcola da sé.
+      I componenti usano SOLO questi nomi.
+   -------------------------------------------------------------------------- */
+:root, .themeable {
+  /* ← qui entrano gli input del partner (fallback = tema di base) */
+  --bg: var(--p-bg, var(--c-bg));
+  --ink: var(--p-ink, var(--c-ink));
+  --accent: var(--p-accent, var(--c-accent));
+  --logo: var(--p-logo, var(--c-logo));
+  --font-display: var(--p-font, var(--c-font-display));
+  --font-text: var(--p-font, var(--c-font-text));
+  --font-num: var(--p-font, var(--c-font-num));
+
+  /* derivati: NON sovrascrivere */
+  --surface: color-mix(in srgb, var(--bg), var(--ink) 4%);       /* carta più scura: inserti, schede */
+  --surface-2: color-mix(in srgb, var(--bg), var(--ink) 9%);
+  --line: color-mix(in srgb, var(--bg), var(--ink) 20%);
+  --line-strong: color-mix(in srgb, var(--bg), var(--ink) 38%);
+  --ink-2: color-mix(in srgb, var(--ink), var(--bg) 14%);       /* testo secondario (>= 4.5:1) */
+  --ink-3: color-mix(in srgb, var(--ink), var(--bg) 42%);       /* solo testo grande / decorativo */
+  --accent-text: color-mix(in srgb, var(--accent) 66%, var(--ink));
+  --accent-soft: color-mix(in srgb, var(--accent) 12%, var(--bg));
+  --on-accent: #fff;
+  --brass: var(--c-brass);
+  --brass-hi: var(--c-brass-hi);
+  --brass-lo: var(--c-brass-lo);
+  --positive: var(--c-positive);
+  --focus: color-mix(in srgb, var(--accent) 70%, var(--ink));
+}
+@supports (color: oklch(from red l c h)) {
+  :root, .themeable {
+    /* nero o bianco a seconda della luminosità dell'accento del partner */
+    --on-accent: oklch(from var(--accent) clamp(0, (l - 0.62) * -1000, 1) 0 0);
+  }
+}
+
+/* --------------------------------------------------------------------------
+   4. Scale (non overridable)
+   -------------------------------------------------------------------------- */
+:root {
+  /* tipografia: Fraunces per titoli e cifre, Source Sans 3 per interfaccia */
+  --fs-1: .75rem;    /* 12  etichette in maiuscoletto */
+  --fs-2: .875rem;   /* 14  testo di servizio */
+  --fs-3: 1rem;      /* 16  testo base (mai sotto 16 nei campi) */
+  --fs-4: 1.1875rem; /* 19  titoli di riga */
+  --fs-5: 1.5rem;    /* 24  titoli di schermata */
+  --fs-6: 2.125rem;  /* 34  cifre medie */
+  --fs-7: 3.5rem;    /* 56  punteggio nell'anello */
+  --fs-hero: 4.5rem; /* 72  punteggio solo */
+  --lh-tight: 1.1;  --lh-base: 1.5;
+  --ls-caps: .14em;
+  --fw-display: 400;   /* Fraunces: peso leggero, ottico alto */
+  --fw-display-strong: 600;
+  --opsz-display: 120;
+
+  /* spazio (base 4) */
+  --s-1: 4px;  --s-2: 8px;  --s-3: 12px; --s-4: 16px; --s-5: 24px; --s-6: 32px; --s-7: 48px; --s-8: 72px;
+  --gutter: 16px;
+  --touch: 44px;
+
+  /* raggi: angoli quasi vivi, come un biglietto stampato */
+  --r-sm: 2px;  --r-md: 4px;  --r-lg: 8px;  --r-pill: 999px;
+
+  /* ombre: caldo, basso, da carta appoggiata */
+  --sh-1: 0 1px 0 color-mix(in srgb, var(--ink) 10%, transparent), 0 1px 2px color-mix(in srgb, var(--ink) 8%, transparent);
+  --sh-2: 0 1px 0 color-mix(in srgb, var(--ink) 8%, transparent), 0 8px 24px -8px color-mix(in srgb, var(--ink) 28%, transparent);
+  --rule-double: 3px double var(--line-strong);
+
+  /* movimento: lento, da liquido nel bicchiere */
+  --dur-1: 160ms; --dur-2: 360ms; --dur-3: 900ms;
+  --ease: cubic-bezier(.2, .7, .2, 1);
+}
+@media (prefers-reduced-motion: reduce) {
+  :root { --dur-1: 0ms; --dur-2: 0ms; --dur-3: 0ms; }
+}
+
+/* ===== Direzione A · componenti (usano solo i token di tokens-a.css) ===== */
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; scroll-padding-top: 112px; }
+body { margin: 0; background: var(--surface-2); color: var(--ink); font: 400 var(--fs-3)/var(--lh-base) var(--font-text); -webkit-font-smoothing: antialiased; }
+body::before { content: ""; position: fixed; inset: 0; z-index: -1; pointer-events: none; background: var(--grain); opacity: var(--grain-opacity); mix-blend-mode: multiply; }
+:root[data-theme="dark"] body::before { mix-blend-mode: screen; opacity: .12; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) body::before { mix-blend-mode: screen; opacity: .12; } }
+h1, h2, h3, h4, p, ol, ul, dl, dd, figure { margin: 0; padding: 0; }
+ol, ul { list-style: none; }
+button, input, summary { font: inherit; color: inherit; }
+button { cursor: pointer; }
+.vh { position: absolute !important; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.num { font-family: var(--font-num); font-variant-numeric: lining-nums tabular-nums; font-weight: 400; }
+.caps { font-size: var(--fs-1); font-weight: 600; letter-spacing: var(--ls-caps); text-transform: uppercase; color: var(--ink-2); }
+:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; border-radius: 2px; }
+
+.skip { position: absolute; left: 8px; top: -60px; background: var(--accent); color: var(--on-accent); padding: 12px 16px; z-index: 10; }
+.skip:focus { top: 8px; }
+
+/* ---------- cornice della presentazione (non fa parte dell'app) ---------- */
+.deck { position: sticky; top: 0; z-index: 5; background: color-mix(in srgb, var(--bg) 94%, transparent); backdrop-filter: blur(8px); border-bottom: var(--rule-double); }
+.deck-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px var(--gutter) 4px; max-width: 1180px; margin: 0 auto; }
+.deck-title { display: flex; align-items: baseline; gap: 10px; min-width: 0; font-size: var(--fs-2); color: var(--ink-2); }
+.deck-title b { font: italic 600 var(--fs-5)/1 var(--font-display); color: var(--accent-text); letter-spacing: -.01em; }
+.deck-title em { font-style: normal; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.btn-theme { display: inline-flex; align-items: center; gap: 8px; min-height: var(--touch); padding: 0 14px; background: transparent; border: 1px solid var(--line-strong); border-radius: var(--r-pill); font-weight: 600; font-size: var(--fs-2); }
+.btn-theme:hover { background: var(--surface); }
+.btn-theme svg { width: 18px; height: 18px; }
+.btn-theme .ic-sun { display: none; } .btn-theme[aria-pressed="true"] .ic-sun { display: block; } .btn-theme[aria-pressed="true"] .ic-moon { display: none; }
+.deck-nav { max-width: 1180px; margin: 0 auto; overflow-x: auto; scrollbar-width: none; }
+.deck-nav ol { display: flex; gap: 4px; padding: 0 calc(var(--gutter) - 8px); width: max-content; }
+.deck-nav a { display: flex; align-items: center; min-height: var(--touch); padding: 0 12px; color: var(--ink-2); text-decoration: none; font-size: var(--fs-2); font-weight: 600; border-bottom: 2px solid transparent; white-space: nowrap; }
+.deck-nav a b { font: italic 400 var(--fs-3)/1 var(--font-display); color: var(--brass); margin-right: 6px; }
+.deck-nav a:hover { color: var(--ink); border-bottom-color: var(--brass); }
+
+main { max-width: 1180px; margin: 0 auto; padding-bottom: 80px; }
+.sec { padding: 56px 0 8px; }
+.sec-head { padding: 0 var(--gutter); max-width: 720px; margin-bottom: 28px; }
+.sec-head .kick { display: flex; align-items: center; gap: 12px; color: var(--brass); font: italic 400 var(--fs-4)/1 var(--font-display); }
+.sec-head .kick::after { content: ""; height: 1px; flex: 1; background: var(--line-strong); }
+.sec-head h2 { font: var(--fw-display) var(--fs-6)/1.05 var(--font-display); letter-spacing: -.015em; margin: 10px 0 8px; font-variation-settings: "opsz" 96; }
+.sec-head p { color: var(--ink-2); max-width: 62ch; }
+.stage { display: flex; flex-wrap: wrap; justify-content: center; gap: 40px 32px; align-items: flex-start; }
+.stage figure { display: grid; gap: 14px; width: 100%; max-width: 390px; }
+.stage figcaption { padding: 0 var(--gutter); color: var(--ink-2); font-size: var(--fs-2); }
+.stage figcaption b { color: var(--ink); }
+.code { margin: 0 var(--gutter); padding: 12px 14px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-md); font: 12.5px/1.55 ui-monospace, "SF Mono", Menlo, Consolas, monospace; overflow-x: auto; color: var(--ink-2); white-space: pre; }
+
+/* ---------- frame app ---------- */
+.app { container-type: inline-size; position: relative; width: 100%; max-width: 390px; background: var(--bg); color: var(--ink); font-family: var(--font-text); border-block: 1px solid var(--line-strong); box-shadow: var(--sh-2); isolation: isolate; }
+.app::before { content: ""; position: absolute; inset: 0; z-index: -1; background: var(--grain); opacity: var(--grain-opacity); mix-blend-mode: multiply; pointer-events: none; }
+:root[data-theme="dark"] .app::before { mix-blend-mode: screen; opacity: .1; }
+@media (min-width: 440px) { .app { border: 1px solid var(--line-strong); border-radius: var(--r-md); } }
+.app-top { display: flex; align-items: center; justify-content: space-between; padding: 14px var(--gutter) 10px; }
+.brand { display: flex; align-items: center; gap: 8px; font: italic 600 var(--fs-5)/1 var(--font-display); color: var(--accent-text); letter-spacing: -.01em; }
+.logo { display: inline-block; width: 28px; height: 28px; background: var(--logo) left center / contain no-repeat; flex: none; }
+.today { font-size: var(--fs-2); color: var(--ink-2); font-style: italic; font-family: var(--font-display); }
+.app-tabs { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; border-top: var(--rule-double); background: color-mix(in srgb, var(--surface) 70%, var(--bg)); }
+.app-tabs a { display: grid; place-items: center; min-height: 56px; padding: 6px 2px; font-size: var(--fs-2); font-weight: 600; letter-spacing: .02em; color: var(--ink-2); text-decoration: none; border-top: 3px solid transparent; margin-top: -3px; }
+.app-tabs a[aria-current="page"] { color: var(--accent-text); border-top-color: var(--brass); }
+
+/* ---------- punteggio: anello ---------- */
+.score { display: grid; grid-template-columns: auto 1fr; align-items: center; gap: 4px 20px; padding: 6px var(--gutter) 22px; border-bottom: var(--rule-double); }
+@container (max-width: 340px) { .score { grid-template-columns: 1fr; justify-items: center; text-align: center; } }
+.ring { position: relative; width: 156px; aspect-ratio: 1; flex: none; }
+.ring svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+.ring-track { fill: none; stroke: var(--line); stroke-width: 5; }
+.ring-arc { fill: none; stroke: var(--accent); stroke-width: 9; stroke-linecap: round; stroke-dasharray: calc(var(--p, .5) * 439.8px) 600px; transition: stroke-dasharray var(--dur-2) var(--ease), stroke var(--dur-2); }
+.ring .ticks line { stroke: var(--line-strong); stroke-width: 2; }
+.ring .ticks line.t96 { stroke: var(--brass); stroke-width: 3; }
+.ring-seal, .rays, .halo { opacity: 0; transition: opacity var(--dur-2); }
+.ring-seal { fill: none; stroke: var(--brass); stroke-width: 1.5; stroke-dasharray: 1 7; stroke-linecap: round; }
+.rays line { stroke: var(--brass-hi); stroke-width: 2; stroke-linecap: round; }
+.halo { fill: none; stroke: url(#gBrass); stroke-width: 1; }
+.ring-num { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; line-height: 1; }
+.ring-num .num { font-size: var(--fs-7); font-weight: 300; letter-spacing: -.02em; font-variation-settings: "opsz" 144; }
+.ring-sub { margin-top: 4px; font-size: var(--fs-1); letter-spacing: var(--ls-caps); text-transform: uppercase; color: var(--ink-2); font-weight: 600; }
+.score-txt { display: grid; gap: 2px; }
+.band-name { font: italic 400 var(--fs-5)/1.1 var(--font-display); font-variation-settings: "opsz" 72; color: var(--ink); }
+.band-range { font-size: var(--fs-2); color: var(--ink-2); font-weight: 600; font-variant-numeric: tabular-nums; }
+.band-desc { font-size: var(--fs-2); color: var(--ink-2); font-style: italic; }
+/* fasce alte: bronzo, sigillo, raggi */
+[data-tier="high"] .ring-arc { stroke: color-mix(in srgb, var(--accent), var(--brass) 25%); }
+[data-tier="high"] .band-name { font-weight: 600; }
+[data-tier="rare"] .ring-arc, [data-tier="peak"] .ring-arc { stroke: url(#gBrass); }
+[data-tier="rare"] .ring-seal, [data-tier="peak"] .ring-seal { opacity: 1; }
+[data-tier="rare"] .ring-num .num, [data-tier="peak"] .ring-num .num { color: var(--brass); font-weight: 400; }
+[data-tier="rare"] .band-name, [data-tier="peak"] .band-name { color: var(--brass); font-weight: 600; }
+[data-tier="rare"] .band-name::before, [data-tier="peak"] .band-name::before { content: "✦ " / ""; font-style: normal; }
+[data-tier="peak"] .band-name::after { content: " ✦" / ""; font-style: normal; }
+[data-tier="peak"] .rays, [data-tier="peak"] .halo { opacity: 1; }
+[data-tier="peak"] .ring { filter: drop-shadow(0 0 14px color-mix(in srgb, var(--brass-hi) 55%, transparent)); }
+[data-tier="peak"] .halo { transform-origin: 94px 94px; animation: spin 40s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { [data-tier="peak"] .halo { animation: none; } .ring-arc { transition: none; } }
+.ring-sm { width: 96px; }
+.ring-sm .ring-num .num { font-size: 1.75rem; }
+.ring-sm .ring-sub { display: none; }
+
+/* ---------- campi vino ---------- */
+.body { padding: 20px var(--gutter) 8px; display: grid; gap: 22px; }
+.wine-fields { display: grid; grid-template-columns: 1fr 88px; gap: 4px 16px; border: 0; padding: 0; margin: 0; min-width: 0; }
+.wine-fields .fld-wide { grid-column: 1 / -1; }
+.fld { display: grid; min-width: 0; }
+.fld span { font-size: var(--fs-1); font-weight: 600; letter-spacing: var(--ls-caps); text-transform: uppercase; color: var(--ink-2); }
+.fld input { width: 100%; min-height: var(--touch); padding: 6px 0; background: transparent; border: 0; border-bottom: 1px solid var(--line-strong); border-radius: 0; font: 400 var(--fs-4)/1.3 var(--font-display); color: var(--ink); }
+.fld input::placeholder { color: var(--ink-3); font-style: italic; }
+.fld input:focus-visible { outline: none; border-bottom-color: var(--accent); box-shadow: 0 1px 0 var(--accent); }
+.wine-fields .fld-wide input { font-size: var(--fs-5); }
+
+/* ---------- selettore modalità ---------- */
+.modes { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.modes button { display: grid; gap: 2px; align-content: center; text-align: left; min-height: 68px; padding: 10px 14px; background: transparent; border: 1px solid var(--line-strong); border-radius: var(--r-md); transition: background var(--dur-1), color var(--dur-1), border-color var(--dur-1); }
+.modes button:hover { border-color: var(--accent); }
+.modes .m-name { font: 600 var(--fs-4)/1.15 var(--font-display); font-variation-settings: "opsz" 24; }
+.modes .m-sub { font-size: var(--fs-2); color: var(--ink-2); }
+.modes button[aria-selected="true"] { background: var(--accent); border-color: var(--accent); color: var(--on-accent); box-shadow: inset 0 0 0 2px var(--bg), inset 0 0 0 3px color-mix(in srgb, var(--on-accent) 55%, transparent); }
+.modes button[aria-selected="true"] .m-sub { color: color-mix(in srgb, var(--on-accent) 86%, var(--accent)); }
+.modes + [role="tabpanel"] { margin-top: -4px; }
+[role="tabpanel"][hidden] { display: none; }
+.formula { font-size: var(--fs-2); color: var(--ink-2); font-style: italic; border-top: 1px solid var(--line); padding-top: 12px; margin-top: 4px; }
+.formula b { font-style: normal; color: var(--ink); }
+
+/* ---------- riga slider ---------- */
+.row { padding: 14px 0 6px; border-top: 1px solid var(--line); }
+.row:first-child { border-top: 0; }
+.row-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; }
+.row-label { display: grid; gap: 1px; }
+.row-name { font: 400 var(--fs-5)/1.1 var(--font-display); font-variation-settings: "opsz" 48; }
+.row-w { font-size: var(--fs-1); font-weight: 600; letter-spacing: var(--ls-caps); text-transform: uppercase; color: var(--ink-2); }
+.row-val { display: grid; justify-items: end; line-height: 1; }
+.row-val .num { font-size: var(--fs-6); font-weight: 300; letter-spacing: -.02em; }
+.row-val .word { margin-top: 3px; font: italic 400 var(--fs-2)/1.1 var(--font-display); color: var(--ink-2); }
+.rng { --thumb: 30px; --rare-mix: calc(clamp(0, (var(--f, 0) - .91) * 1000, 1) * 100%); -webkit-appearance: none; appearance: none; display: block; width: 100%; height: var(--touch); margin: 0; background: transparent; cursor: pointer; touch-action: pan-y; }
+.rng::-webkit-slider-runnable-track { height: 4px; border-radius: 2px; background: linear-gradient(90deg, color-mix(in srgb, var(--brass-lo) var(--rare-mix), var(--accent)) calc(var(--thumb) / 2 + (100% - var(--thumb)) * var(--f, .5)), var(--line-strong) 0); }
+.rng::-moz-range-track { height: 4px; border-radius: 2px; background: linear-gradient(90deg, color-mix(in srgb, var(--brass-lo) var(--rare-mix), var(--accent)) calc(var(--thumb) / 2 + (100% - var(--thumb)) * var(--f, .5)), var(--line-strong) 0); }
+.rng::-webkit-slider-thumb { -webkit-appearance: none; width: var(--thumb); height: var(--thumb); margin-top: calc((4px - var(--thumb)) / 2); border-radius: 50%; background: var(--bg); border: 3px solid color-mix(in srgb, var(--brass) var(--rare-mix), var(--accent)); box-shadow: var(--sh-1), inset 0 0 0 3px var(--bg), inset 0 0 0 9px color-mix(in srgb, var(--brass) var(--rare-mix), var(--accent)); transition: transform var(--dur-1); }
+.rng::-moz-range-thumb { box-sizing: border-box; width: var(--thumb); height: var(--thumb); border-radius: 50%; background: var(--bg); border: 3px solid color-mix(in srgb, var(--brass) var(--rare-mix), var(--accent)); box-shadow: var(--sh-1), inset 0 0 0 3px var(--bg), inset 0 0 0 9px color-mix(in srgb, var(--brass) var(--rare-mix), var(--accent)); }
+.rng:active::-webkit-slider-thumb { transform: scale(1.12); }
+.rng:focus-visible { outline: none; }
+.rng:focus-visible::-webkit-slider-thumb { outline: 3px solid var(--focus); outline-offset: 3px; }
+.rng:focus-visible::-moz-range-thumb { outline: 3px solid var(--focus); outline-offset: 3px; }
+.ruler { position: relative; height: 24px; margin-top: -4px; font-size: var(--fs-1); color: var(--ink-2); font-variant-numeric: lining-nums tabular-nums; }
+.ruler span { position: absolute; top: 5px; left: calc(15px + (100% - 30px) * var(--t)); transform: translateX(-50%); }
+.ruler span::before { content: ""; position: absolute; left: 50%; top: -5px; width: 1px; height: 4px; background: var(--line-strong); }
+.ruler .zone { position: absolute; top: -3px; left: calc(15px + (100% - 30px) * .92); width: calc((100% - 30px) * .08); height: 3px; background: var(--brass); border-radius: 2px; }
+
+/* ---------- fasi della scheda completa ---------- */
+.phase { border-top: 1px solid var(--line); }
+.phase:first-child { border-top: 0; }
+.phase summary { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 56px; cursor: pointer; list-style: none; }
+.phase summary::-webkit-details-marker { display: none; }
+.ph-name { font: 400 var(--fs-5)/1.1 var(--font-display); font-variation-settings: "opsz" 48; display: flex; align-items: center; gap: 10px; }
+.ph-name::before { content: ""; width: 8px; height: 8px; border-right: 2px solid var(--ink-2); border-bottom: 2px solid var(--ink-2); transform: rotate(-45deg); transition: transform var(--dur-1); margin-left: 4px; }
+.phase[open] .ph-name::before { transform: rotate(45deg); }
+.ph-pts { font-variant-numeric: lining-nums tabular-nums; color: var(--ink-2); font-size: var(--fs-2); }
+.ph-pts b { font: 400 var(--fs-5)/1 var(--font-num); color: var(--ink); }
+.ph-body { padding-bottom: 8px; }
+.phase .row { border-top: 1px dashed var(--line); padding-top: 10px; }
+.phase .row-name { font-size: var(--fs-4); }
+.phase .row-val .num { font-size: var(--fs-5); }
+.phase .row-val { grid-auto-flow: column; align-items: baseline; gap: 10px; }
+.phase .row-val .word { margin: 0; }
+
+/* ---------- barra di salvataggio ---------- */
+.savebar { padding: 18px var(--gutter) 22px; }
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 10px; min-height: 52px; padding: 0 22px; background: var(--accent); color: var(--on-accent); border: 0; border-radius: var(--r-md); font: 600 var(--fs-3)/1 var(--font-text); letter-spacing: .03em; box-shadow: inset 0 0 0 2px var(--bg), inset 0 0 0 3px color-mix(in srgb, var(--accent) 60%, transparent); transition: filter var(--dur-1); }
+.btn:hover { filter: brightness(1.12); }
+.btn .num { font-size: var(--fs-4); font-weight: 600; }
+.btn-block { width: 100%; }
+.btn-ghost { display: inline-flex; align-items: center; justify-content: center; min-height: var(--touch); padding: 0 16px; background: transparent; color: var(--ink); border: 1px solid var(--line-strong); border-radius: var(--r-md); font-weight: 600; font-size: var(--fs-2); }
+.btn-ghost:hover { border-color: var(--accent); color: var(--accent-text); }
+[data-tier="rare"] .btn, [data-tier="peak"] .btn { background: linear-gradient(120deg, var(--brass-lo), var(--brass-hi) 45%, var(--brass-lo)); color: #20140a; }
+
+/* ---------- libro ---------- */
+.h-screen { font: italic 400 var(--fs-6)/1.05 var(--font-display); letter-spacing: -.015em; font-variation-settings: "opsz" 96; }
+.l-intro { padding: 6px var(--gutter) 14px; display: grid; gap: 4px; }
+.l-intro p { color: var(--ink-2); font-size: var(--fs-2); }
+.l-tools { padding: 0 var(--gutter) 12px; display: grid; gap: 10px; }
+.search input { width: 100%; min-height: var(--touch); padding: 0 14px; background: var(--surface); border: 1px solid var(--line-strong); border-radius: var(--r-md); font-size: var(--fs-3); color: var(--ink); }
+.search input::placeholder { color: var(--ink-2); font-style: italic; }
+.chips { display: flex; gap: 8px; flex-wrap: wrap; }
+.chip { min-height: var(--touch); padding: 0 16px; background: transparent; border: 1px solid var(--line-strong); border-radius: var(--r-pill); font-size: var(--fs-2); font-weight: 600; }
+.chip[aria-pressed="true"] { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+.wines { border-top: var(--rule-double); }
+.wine { border-bottom: 1px solid var(--line); }
+.wine[hidden] { display: none; }
+.wine-btn { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 12px; width: 100%; min-height: 76px; padding: 14px var(--gutter); background: transparent; border: 0; text-align: left; }
+.wine-btn:hover { background: color-mix(in srgb, var(--surface) 70%, transparent); }
+.w-main { display: grid; gap: 2px; min-width: 0; }
+.w-name { font: 400 var(--fs-4)/1.2 var(--font-display); font-variation-settings: "opsz" 36; overflow-wrap: anywhere; }
+.w-meta { font-size: var(--fs-2); color: var(--ink-2); font-style: italic; }
+.w-badges { display: flex; gap: 8px; align-items: center; margin-top: 4px; }
+.stamp { font-size: 11.5px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; padding: 2px 7px; border: 1px solid var(--line-strong); border-radius: var(--r-sm); color: var(--ink-2); }
+.w-date { font-size: var(--fs-1); color: var(--ink-2); }
+.w-score { display: grid; justify-items: center; gap: 3px; min-width: 76px; }
+.w-score .num { display: grid; place-items: center; width: 58px; height: 58px; font-size: var(--fs-5); font-weight: 400; border-radius: 50%; border: 1px solid var(--line-strong); }
+.w-score .caps { font-size: 10.5px; letter-spacing: .1em; }
+.wine[data-tier="high"] .w-score .num { border: 2px solid var(--accent); color: var(--accent-text); font-weight: 600; }
+.wine[data-tier="rare"] .w-score .num, .wine[data-tier="peak"] .w-score .num { border: 2px solid var(--brass); color: var(--brass); font-weight: 600; box-shadow: 0 0 0 3px var(--bg), 0 0 0 4px var(--brass); }
+.wine[data-tier="rare"] .w-score .caps { color: var(--brass); }
+.scheda { margin: 0 var(--gutter) 18px; padding: 18px 16px; background: var(--surface); border: 1px solid var(--line); border-top: 3px double var(--line-strong); box-shadow: var(--sh-1); display: grid; gap: 14px; }
+.scheda[hidden] { display: none; }
+.s-area { color: var(--brass); }
+.judg { display: grid; gap: 12px; }
+.judg div { display: grid; grid-template-columns: 1fr auto; gap: 4px 12px; align-items: baseline; }
+.judg dt { font: 400 var(--fs-4)/1.1 var(--font-display); }
+.judg dt small { font: 600 var(--fs-1)/1 var(--font-text); letter-spacing: var(--ls-caps); text-transform: uppercase; color: var(--ink-2); margin-left: 8px; }
+.judg dd { font: 400 var(--fs-5)/1 var(--font-num); font-variant-numeric: lining-nums tabular-nums; }
+.judg dd small { font-size: var(--fs-2); color: var(--ink-2); }
+.meter { grid-column: 1 / -1; height: 4px; border-radius: 2px; background: var(--line); overflow: hidden; }
+.meter i { display: block; height: 100%; width: calc(var(--f) * 100%); background: var(--accent); border-radius: 2px; }
+.quote { font: italic 400 var(--fs-3)/1.55 var(--font-display); color: var(--ink); padding-left: 14px; border-left: 2px solid var(--brass); }
+.tags { display: flex; flex-wrap: wrap; gap: 6px; }
+.tags span { font-size: var(--fs-2); padding: 3px 10px; background: var(--accent-soft); border-radius: var(--r-pill); color: var(--ink); }
+.actions { display: flex; gap: 8px; flex-wrap: wrap; }
+
+/* ---------- team ---------- */
+.t-head { display: grid; grid-template-columns: auto 1fr; gap: 4px 14px; align-items: center; padding: 16px var(--gutter) 14px; border-bottom: var(--rule-double); }
+.t-head .logo { width: 44px; height: 44px; grid-row: span 2; }
+.t-head h3 { font: 400 var(--fs-5)/1.1 var(--font-display); letter-spacing: -.01em; }
+.t-sub { display: flex; justify-content: space-between; gap: 8px; align-items: baseline; padding: 12px var(--gutter) 4px; font-size: var(--fs-2); color: var(--ink-2); }
+.t-sub b { color: var(--ink); font-weight: 600; }
+.t-rule { margin: 4px var(--gutter) 6px; padding: 10px 12px; display: flex; gap: 10px; align-items: flex-start; background: var(--accent-soft); border-left: 3px solid var(--accent); font-size: var(--fs-2); }
+.t-rule svg { flex: none; width: 18px; height: 18px; margin-top: 2px; }
+.tws { padding: 8px 0 4px; }
+.tw { margin: 0 var(--gutter); padding: 18px 0; border-bottom: 1px solid var(--line); display: grid; gap: 14px; }
+.tw:last-child { border-bottom: 0; }
+.tw-top { display: flex; justify-content: space-between; gap: 12px; align-items: flex-start; }
+.tw-name { font: 400 var(--fs-4)/1.2 var(--font-display); font-variation-settings: "opsz" 36; }
+.tw-meta { font-size: var(--fs-2); color: var(--ink-2); font-style: italic; }
+.tw-mine { display: grid; justify-items: end; gap: 2px; }
+.tw-mine .num { font-size: var(--fs-6); font-weight: 300; line-height: 1; }
+.tw-mine .caps { font-size: 10.5px; white-space: nowrap; }
+.pills { display: flex; flex-wrap: wrap; gap: 6px; }
+.pills span { font-size: var(--fs-2); padding: 3px 10px; border: 1px solid var(--line-strong); border-radius: var(--r-pill); font-variant-numeric: tabular-nums lining-nums; }
+.pills span b { font-weight: 700; }
+.pills .mode-pill { background: var(--ink); color: var(--bg); border-color: var(--ink); font-weight: 600; letter-spacing: .04em; }
+.avg { display: grid; grid-template-columns: auto 1fr; gap: 4px 16px; align-items: end; padding: 14px; background: var(--surface); border: 1px solid var(--line); border-top: 3px double var(--line-strong); }
+.avg .caps { grid-column: 1 / -1; }
+.avg-n { font-size: var(--fs-hero); font-weight: 300; line-height: .9; letter-spacing: -.03em; font-variation-settings: "opsz" 144; }
+.avg-side { display: grid; gap: 2px; padding-bottom: 6px; font-size: var(--fs-2); color: var(--ink-2); }
+.avg-side b { color: var(--ink); font-weight: 600; font-size: var(--fs-3); }
+.avg-scale { grid-column: 1 / -1; position: relative; height: 30px; margin-top: 8px; }
+.avg-scale::before { content: ""; position: absolute; left: 0; right: 0; top: 12px; height: 2px; background: var(--line-strong); }
+.avg-scale i { position: absolute; top: 13px; width: 14px; height: 14px; margin: -6px 0 0 -7px; left: calc(var(--x) * 100%); border-radius: 50%; }
+.avg-scale .me { background: var(--accent); box-shadow: 0 0 0 3px var(--bg); }
+.avg-scale .tm { background: var(--bg); border: 2px solid var(--ink); border-radius: 2px; transform: rotate(45deg); width: 12px; height: 12px; }
+.avg-scale span { position: absolute; top: 20px; font-size: 11.5px; color: var(--ink-2); transform: translateX(-50%); left: calc(var(--x) * 100%); white-space: nowrap; }
+.avg-scale span.l { transform: none; left: 0; } .avg-scale span.r { transform: none; left: auto; right: 0; }
+.avg-scale { margin-bottom: 14px; }
+.lock { display: flex; gap: 14px; align-items: center; padding: 14px; border: 1px dashed var(--line-strong); border-radius: var(--r-md); color: var(--ink-2); font-size: var(--fs-2); }
+.lock svg { flex: none; width: 24px; height: 24px; color: var(--brass); }
+.lock b { display: block; color: var(--ink); font: 600 var(--fs-3)/1.2 var(--font-text); }
+.lock .blur { font: 300 var(--fs-6)/1 var(--font-num); letter-spacing: .1em; margin-left: auto; color: var(--ink-3); user-select: none; }
+.sheet { display: grid; gap: 16px; padding: 18px 14px 16px; background: var(--surface); border: 1px solid var(--line-strong); border-top: 3px double var(--line-strong); box-shadow: var(--sh-1); }
+.sheet-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.sheet-head h4 { font: italic 400 var(--fs-5)/1 var(--font-display); }
+.sheet-head .num { font-size: var(--fs-6); font-weight: 300; }
+.sheet .modes button { min-height: 56px; padding: 8px 12px; }
+.sheet .modes .m-name { font-size: var(--fs-3); }
+.sheet .modes .m-sub { font-size: var(--fs-1); }
+.sheet-actions { display: grid; grid-template-columns: 1fr auto; gap: 10px; }
+.is-fresh .avg { animation: unfold var(--dur-3) var(--ease) both; }
+.is-fresh .avg-n { color: var(--accent-text); }
+@keyframes unfold { from { clip-path: inset(0 0 100% 0); opacity: 0; transform: translateY(-8px); } to { clip-path: inset(0); opacity: 1; transform: none; } }
+.t-foot { padding: 10px var(--gutter) 16px; text-align: center; font-size: var(--fs-1); color: var(--ink-2); letter-spacing: var(--ls-caps); text-transform: uppercase; }
+@container (max-width: 360px) {
+  .avg-n { font-size: 3.5rem; }
+  .modes { grid-template-columns: 1fr; }
+}
+
+/* ---------- statistiche ---------- */
+.kpis { display: grid; grid-template-columns: repeat(3, 1fr); border-block: var(--rule-double); margin: 8px 0 0; }
+.kpi { padding: 14px var(--gutter) 14px 0; display: grid; gap: 4px; }
+.kpi:first-child { padding-left: var(--gutter); }
+.kpi + .kpi { padding-left: 14px; border-left: 1px solid var(--line); }
+.kpi .num { font-size: var(--fs-6); font-weight: 300; line-height: 1; letter-spacing: -.02em; }
+.kpi .caps { font-size: 10.5px; }
+.kpi.is-best .num { color: var(--brass); font-weight: 500; }
+.card { margin: 18px var(--gutter) 0; padding: 18px 14px 14px; background: var(--surface); border: 1px solid var(--line); border-top: 3px double var(--line-strong); }
+.card h4 { font: italic 400 var(--fs-5)/1.1 var(--font-display); margin-bottom: 2px; }
+.card .cap { font-size: var(--fs-2); color: var(--ink-2); }
+.radar { display: block; width: 100%; max-width: 300px; margin: 6px auto 0; overflow: visible; }
+.rd-ring { fill: none; stroke: var(--line-strong); stroke-width: 1; }
+.rd-ring-suff { stroke: var(--brass); stroke-dasharray: 4 4; stroke-width: 1.5; }
+.rd-axis { stroke: var(--line); }
+.rd-area { fill: color-mix(in srgb, var(--accent) 22%, transparent); stroke: var(--accent); stroke-width: 2; stroke-linejoin: round; }
+.rd-dot { fill: var(--bg); stroke: var(--accent); stroke-width: 2.5; }
+.rd-label { font: 600 12.5px var(--font-text); fill: var(--ink); }
+.rd-val { font: 400 14px var(--font-num); fill: var(--ink-2); }
+.hist { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; align-items: end; height: 190px; margin-top: 18px; }
+.bar { display: grid; grid-template-rows: auto 1fr auto; justify-items: center; gap: 4px; height: 100%; }
+.bar-n { font: 400 var(--fs-3)/1 var(--font-num); font-variant-numeric: lining-nums; }
+.bar i { align-self: end; width: 100%; max-width: 34px; height: calc(var(--h) * 100%); min-height: 2px; background: var(--accent); border-radius: 2px 2px 0 0; }
+.bar[data-tier="high"] i { background: color-mix(in srgb, var(--accent), var(--brass) 30%); }
+.bar[data-tier="rare"] i, .bar[data-tier="peak"] i { background: linear-gradient(var(--brass-hi), var(--brass-lo)); }
+.bar-l { font-size: 11.5px; color: var(--ink-2); white-space: nowrap; font-variant-numeric: tabular-nums; }
+.stats-foot { height: 20px; }
+
+/* ---------- sezione 1: legenda fasce ---------- */
+.score-demo { display: flex; flex-wrap: wrap; gap: 32px; justify-content: center; align-items: flex-start; }
+.bands { width: 100%; max-width: 390px; border-top: var(--rule-double); }
+.bands li { display: grid; grid-template-columns: 84px 1fr; gap: 2px 12px; padding: 12px var(--gutter); border-bottom: 1px solid var(--line); border-left: 3px solid transparent; transition: background var(--dur-1); }
+.bands li.is-current { background: var(--surface); border-left-color: var(--accent); }
+.bands li[data-tier="rare"].is-current, .bands li[data-tier="peak"].is-current { border-left-color: var(--brass); }
+.bands .rg { font: 400 var(--fs-5)/1.1 var(--font-num); font-variant-numeric: lining-nums tabular-nums; grid-row: span 2; align-self: center; }
+.bands .nm { font: italic 400 var(--fs-4)/1.2 var(--font-display); }
+.bands .ds { font-size: var(--fs-2); color: var(--ink-2); }
+.bands li[data-tier="rare"] .rg, .bands li[data-tier="peak"] .rg, .bands li[data-tier="rare"] .nm, .bands li[data-tier="peak"] .nm { color: var(--brass); }
+.scrub { padding: 14px var(--gutter) 6px; }
+.scrub label { display: flex; justify-content: space-between; align-items: baseline; font-size: var(--fs-2); color: var(--ink-2); }
+.scrub label .num { font-size: var(--fs-5); color: var(--ink); }
+.minis { display: flex; flex-wrap: wrap; justify-content: center; gap: 24px 20px; padding: 18px var(--gutter) 22px; border-top: var(--rule-double); }
+.minis figure { display: grid; justify-items: center; gap: 6px; width: auto; }
+.minis figcaption { padding: 0; text-align: center; }
+
+@media (min-width: 900px) {
+  .sec { padding-top: 80px; }
+  .sec-head h2 { font-size: 2.75rem; }
+  .stage { gap: 48px 40px; }
+}
+
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Vai al contenuto</a>
+<header class="deck">
+  <div class="deck-row">
+    <p class="deck-title"><b>Sorso</b><em>Direzione A · Cantina editoriale</em></p>
+    <button class="btn-theme" type="button" data-theme-toggle aria-pressed="false">
+      <svg class="ic-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.500z"/></svg>
+      <svg class="ic-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.900 4.900l1.400 1.400M17.700 17.700l1.400 1.400M2 12h2M20 12h2M4.900 19.100l1.400-1.400M17.700 6.300l1.400-1.400"/></svg>
+      <span>Tema</span>
+    </button>
+  </div>
+  <nav class="deck-nav" aria-label="Sezioni del mockup">
+    <ol>
+      <li><a href="#punteggio"><b>I</b>Punteggio</a></li>
+      <li><a href="#nuova"><b>II</b>Nuova</a></li>
+      <li><a href="#libro"><b>III</b>Libro</a></li>
+      <li><a href="#team"><b>IV</b>Team</a></li>
+      <li><a href="#partner"><b>V</b>Temi partner</a></li>
+      <li><a href="#statistiche"><b>VI</b>Statistiche</a></li>
+    </ol>
+  </nav>
+</header>
+
+<main id="main">
+  <section class="sec" id="punteggio" aria-labelledby="h1">
+    <div class="sec-head"><p class="kick">I</p><h2 id="h1">Il punteggio</h2>
+      <p>Un anello che si riempie da 50 a 100. Le fasce si leggono a parole, e sopra il 96 il segno cambia: ottone al posto del bordeaux, sigillo di puntini, e al 100 i raggi. Trascina il cursore per provarlo.</p></div>
+    <div class="score-demo" id="m-punteggio"></div>
+  </section>
+
+  <section class="sec" id="nuova" aria-labelledby="h2">
+    <div class="sec-head"><p class="kick">II</p><h2 id="h2">Nuova degustazione</h2>
+      <p>Voto rapido e Scheda completa hanno lo stesso peso visivo: due linguette identiche, si sceglie per ogni vino. I due pannelli sono indipendenti: cambiare modalità non cancella ciò che si è inserito. A sinistra parte il voto rapido, a destra la scheda completa; entrambi i selettori funzionano.</p></div>
+    <div class="stage" id="m-nuova"></div>
+  </section>
+
+  <section class="sec" id="libro" aria-labelledby="h3">
+    <div class="sec-head"><p class="kick">III</p><h2 id="h3">Il libro</h2>
+      <p>Un registro da cantina: righe sobrie, nome in corsivo, punteggio in un medaglione. Ogni riga si apre in una scheda con i giudizi e la nota. Il barolo da 97 riceve il sigillo in ottone.</p></div>
+    <div class="stage" id="m-libro"></div>
+  </section>
+
+  <section class="sec" id="team" aria-labelledby="h4">
+    <div class="sec-head"><p class="kick">IV</p><h2 id="h4">Spazio di team</h2>
+      <p>Due vini sono già votati: si vedono i propri giudizi e, solo ora, la media con il numero di voti. Gli altri mostrano un riquadro tratteggiato. Prova a votare il Taurasi: la media si sblocca con un breve dispiegarsi.</p></div>
+    <div class="stage" id="m-team"></div>
+  </section>
+
+  <section class="sec" id="partner" aria-labelledby="h5">
+    <div class="sec-head"><p class="kick">V</p><h2 id="h5">Lo stesso team, due temi partner</h2>
+      <p>Il partner imposta cinque custom property, niente altro: logo, accento, sfondo, testo, font. Superfici, linee, testo secondario e colore sull'accento si ricalcolano da soli. Anche questi riquadri sono interattivi.</p></div>
+    <div class="stage" id="m-partner"></div>
+  </section>
+
+  <section class="sec" id="statistiche" aria-labelledby="h6">
+    <div class="sec-head"><p class="kick">VI</p><h2 id="h6">Statistiche</h2>
+      <p>Tre cifre in testa, il radar delle quattro fasi con la sufficienza tratteggiata, e la distribuzione per fascia: le due barre in ottone sono i voti alti, quelli che contano.</p></div>
+    <div class="stage" id="m-stats"></div>
+  </section>
+</main>
+
+<script>
+/* ==========================================================================
+   Sorso · mockup — logica condivisa dalle due direzioni (nessun framework).
+   Dati finti, formule reali di PIANO.md §2. Le direzioni forniscono solo i
+   template (HTML) e il CSS; qui c'è tutto ciò che è comportamento.
+   Convenzioni DOM (data-attributes) che i template devono rispettare:
+     [data-scorer]          radice di un punteggio vivo (frame Nuova, sheet team, scrubber)
+       data-mode            "smart" | "full" (modalità attiva)
+       [data-mode-btn=m]    bottoni del selettore di modalità (role=tab)
+       [data-panel=m]       pannelli (role=tabpanel)
+       input[type=range][data-k]   slider (chiavi: o n b | v oi oc oq ge gi gp gq f)
+       [data-out=ID] [data-word=ID]  valore e parola associati allo slider con quell'id
+       [data-score] [data-band-label] [data-band-range]  testi del punteggio
+       [data-phase-pts=k]   punti della fase (scheda completa)
+     root.dataset.tier  std | high | rare | peak ; root.dataset.band ; --p (0..1)
+   ========================================================================== */
+(function (global) {
+  'use strict';
+
+  var BANDS = [
+    { min: 50, max: 59, key: 'difettoso', desc: 'Difetti evidenti',   label: 'Difettoso',   tier: 'std' },
+    { min: 60, max: 69, key: 'sufficiente', desc: 'Corretto, senza slanci', label: 'Sufficiente', tier: 'std' },
+    { min: 70, max: 79, key: 'discreto', desc: 'Piacevole e ben fatto',    label: 'Discreto',    tier: 'std' },
+    { min: 80, max: 89, key: 'buono', desc: 'Un vino che convince',       label: 'Buono',       tier: 'std' },
+    { min: 90, max: 95, key: 'eccellente', desc: 'Di grande carattere',  label: 'Eccellente',  tier: 'high' },
+    { min: 96, max: 99, key: 'eccezionale', desc: 'Raro: da ricordare a lungo', label: 'Eccezionale', tier: 'rare' },
+    { min: 100, max: 100, key: 'irripetibile', desc: 'Il vino di una vita', label: 'Irripetibile', tier: 'peak' }
+  ];
+
+  var PHASES = [
+    { k: 'v', name: 'Visivo', w: 10, items: [['v', 'Qualità visiva']] },
+    { k: 'o', name: 'Olfattivo', w: 30, items: [['oi', 'Intensità'], ['oc', 'Complessità'], ['oq', 'Qualità olfattiva']] },
+    { k: 'g', name: 'Gusto-olfattivo', w: 40, items: [['ge', 'Equilibrio'], ['gi', 'Intensità'], ['gp', 'Persistenza'], ['gq', 'Qualità gustativa']] },
+    { k: 'f', name: 'Finale', w: 20, items: [['f', 'Armonia']] }
+  ];
+
+  var WORD10 = ['Grave difetto', 'Scarso', 'Scarso', 'Scarso', 'Insufficiente', 'Insufficiente', 'Sufficiente', 'Discreto', 'Buono', 'Ottimo', 'Eccellente'];
+
+  var K = 1.8; /* curva scheda completa: 50 + 50 * q^k (k da tarare) */
+
+  function band(score) {
+    for (var i = BANDS.length - 1; i >= 0; i--) if (score >= BANDS[i].min) return BANDS[i];
+    return BANDS[0];
+  }
+  function avg(a) { return a.reduce(function (x, y) { return x + y; }, 0) / a.length; }
+
+  /* Voto rapido: media pesata 10/30/60, intero, già nella banda 50-100 */
+  function smart(o, n, b) { return Math.round(0.1 * o + 0.3 * n + 0.6 * b); }
+
+  /* Scheda completa: 9 giudizi 0-10, pesi di fase 10/30/40/20, curva non lineare */
+  function fullQ(j) {
+    return (avg([j.v]) * 10 + avg([j.oi, j.oc, j.oq]) * 30 + avg([j.ge, j.gi, j.gp, j.gq]) * 40 + j.f * 20) / 1000;
+  }
+  function full(j) { return Math.round(50 + 50 * Math.pow(fullQ(j), K)); }
+  function phasePts(j, k) {
+    var p = PHASES.filter(function (x) { return x.k === k; })[0];
+    return Math.round(avg(p.items.map(function (it) { return j[it[0]]; })) / 10 * p.w);
+  }
+
+  function fmt1(n) { return n.toLocaleString('it-IT', { minimumFractionDigits: 1, maximumFractionDigits: 1 }); }
+  var _uid = 0;
+  function uid(p) { return (p || 'id') + (++_uid); }
+  function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+  var reduced = global.matchMedia && global.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* ---------------- dati finti ---------------- */
+  var WINES = [
+    { id: 'w1', name: 'Barolo Riserva Monvigliero', prod: 'Poderi Rivalta', year: 2016, area: 'Barolo DOCG', date: '3 ott', mode: 'smart',
+      j: { o: 95, n: 97, b: 98 }, note: 'Rosa appassita, catrame e liquirizia al naso. In bocca tannino finissimo, sale e agrumi canditi; chiusura che non finisce. Da ricordare.', tags: ['Nebbiolo', '€ 78', 'Langhe'] },
+    { id: 'w2', name: 'Etna Rosso Contrada Rampante', prod: 'Tenuta delle Sciare', year: 2021, area: 'Etna DOC', date: '28 set', mode: 'full',
+      j: { v: 8, oi: 8, oc: 7, oq: 8, ge: 9, gi: 8, gp: 8, gq: 9, f: 9 }, note: 'Ciliegia nera, pietra focaia, un fondo di fumo. Gran bella acidità, tannino ancora vivace: tra due anni sarà un altro vino.', tags: ['Nerello Mascalese', '€ 32', 'Sicilia'] },
+    { id: 'w3', name: 'Verdicchio Classico Salmariano', prod: 'Fattoria San Zeno', year: 2022, area: 'Castelli di Jesi DOC', date: '21 set', mode: 'smart',
+      j: { o: 82, n: 80, b: 84 }, note: 'Mandorla verde e fiori bianchi, bocca sapida e dritta. Ottimo prezzo, perfetto con il pesce crudo.', tags: ['Verdicchio', '€ 14', 'Marche'] },
+    { id: 'w4', name: 'Chianti Classico Riserva', prod: 'Castello di Montecchio', year: 2018, area: 'Chianti Classico DOCG', date: '14 set', mode: 'full',
+      j: { v: 7, oi: 7, oc: 6, oq: 7, ge: 7, gi: 7, gp: 7, gq: 7, f: 7 }, note: 'Corretto ma timido: viola e cuoio, bocca un po’ magra. Onesto, non emoziona.', tags: ['Sangiovese', '€ 24', 'Toscana'] },
+    { id: 'w5', name: 'Lambrusco di Sorbara Rosato', prod: 'Cantina del Frignano', year: 2023, area: 'Sorbara DOC', date: '2 set', mode: 'smart',
+      j: { o: 68, n: 66, b: 70 }, note: 'Fragolina e lampone, perlage grossolano. Beverino ma finisce presto.', tags: ['Lambrusco', '€ 9', 'Emilia'] }
+  ];
+  WINES.forEach(function (w) { w.score = w.mode === 'smart' ? smart(w.j.o, w.j.n, w.j.b) : full(w.j); });
+
+  /* Team: others = voti degli altri (somma e numero). La media mostrata include il voto dell'utente. */
+  var TEAM_WINES = [
+    { id: 't1', name: 'Barbaresco Asili', prod: 'Cantina del Pino', year: 2020, mine: { mode: 'smart', j: { o: 88, n: 90, b: 92 } }, othersN: 11, othersSum: 11 * 88.2 },
+    { id: 't2', name: 'Etna Rosso Contrada Rampante', prod: 'Tenuta delle Sciare', year: 2021, mine: { mode: 'full', j: { v: 8, oi: 8, oc: 8, oq: 8, ge: 8, gi: 8, gp: 9, gq: 8, f: 8 } }, othersN: 8, othersSum: 8 * 84.6 },
+    { id: 't3', name: 'Taurasi Riserva', prod: 'Terre d’Irpinia', year: 2017, mine: null, othersN: 10, othersSum: 10 * 86.1 },
+    { id: 't4', name: 'Vermentino di Gallura', prod: 'Cantina Li Cuppulati', year: 2023, mine: null, othersN: 9, othersSum: 9 * 79.4 }
+  ];
+  TEAM_WINES.forEach(function (w) { if (w.mine) w.mine.score = w.mine.mode === 'smart' ? smart(w.mine.j.o, w.mine.j.n, w.mine.j.b) : full(w.mine.j); });
+
+  var STATS = {
+    n: 37, mean: 82.6, best: { name: 'Barolo Riserva Monvigliero 2016', score: 97 },
+    radar: [{ label: 'Visivo', v: 8.6 }, { label: 'Olfattivo', v: 8.1 }, { label: 'Gusto-olf.', v: 7.9 }, { label: 'Finale', v: 8.3 }],
+    dist: [0, 2, 8, 17, 8, 2, 0] /* una barra per fascia */
+  };
+
+  /* ---------------- tema ---------------- */
+  function initTheme() {
+    var root = document.documentElement, KEY = 'sorso-design-theme', saved = null;
+    try { saved = localStorage.getItem(KEY); } catch (e) {}
+    if (saved === 'light' || saved === 'dark') root.dataset.theme = saved;
+    function isDark() {
+      return root.dataset.theme ? root.dataset.theme === 'dark' : global.matchMedia('(prefers-color-scheme: dark)').matches;
+    }
+    function sync() {
+      document.querySelectorAll('[data-theme-toggle]').forEach(function (b) {
+        b.setAttribute('aria-pressed', String(isDark()));
+        b.setAttribute('aria-label', isDark() ? 'Tema scuro attivo: passa al chiaro' : 'Tema chiaro attivo: passa allo scuro');
+      });
+      var m = document.querySelector('meta[name=theme-color]');
+      if (m) m.content = getComputedStyle(root).getPropertyValue('--bg').trim() || m.content;
+    }
+    document.addEventListener('click', function (e) {
+      var b = e.target.closest('[data-theme-toggle]'); if (!b) return;
+      root.dataset.theme = isDark() ? 'light' : 'dark';
+      try { localStorage.setItem(KEY, root.dataset.theme); } catch (e2) {}
+      sync();
+    });
+    sync();
+  }
+
+  /* ---------------- punteggio vivo ---------------- */
+  function paint(root, score) {
+    var b = band(score);
+    root.dataset.tier = b.tier; root.dataset.band = b.key; root.dataset.total = score;
+    root.style.setProperty('--p', ((score - 50) / 50).toFixed(4));
+    root.querySelectorAll('[data-score]').forEach(function (n) { if (n !== root) n.textContent = score; });
+    root.querySelectorAll('[data-band-row]').forEach(function (r) { r.classList.toggle('is-current', r.dataset.bandRow === b.key); });
+    root.querySelectorAll('[data-band-label]').forEach(function (n) { n.textContent = b.label; });
+    root.querySelectorAll('[data-band-desc]').forEach(function (n) { n.textContent = b.desc; });
+    root.querySelectorAll('[data-band-range]').forEach(function (n) { n.textContent = b.min === b.max ? '100' : b.min + '–' + b.max; });
+    root.querySelectorAll('[data-score-label]').forEach(function (n) { n.setAttribute('aria-label', 'Punteggio ' + score + ' su 100, ' + b.label); });
+  }
+
+  function wireScorer(root) {
+    if (root._wired) return root._apply; root._wired = true;
+    var apply = function () {
+      var mode = root.dataset.mode || 'smart';
+      var panel = root.querySelector('[data-panel="' + mode + '"]') || root;
+      var vals = {};
+      panel.querySelectorAll('input[type=range][data-k]').forEach(function (i) { vals[i.dataset.k] = +i.value; });
+      var score = mode === 'full' ? full(vals) : smart(vals.o, vals.n, vals.b);
+      root.querySelectorAll('input[type=range]').forEach(function (i) {
+        var f = (i.value - i.min) / (i.max - i.min);
+        i.style.setProperty('--f', f.toFixed(4));
+        var out = root.querySelector('[data-out="' + i.id + '"]'), word = root.querySelector('[data-word="' + i.id + '"]');
+        var txt;
+        if (+i.max === 100) { txt = band(+i.value).label; } else { txt = WORD10[+i.value]; }
+        if (out) out.textContent = i.value;
+        if (word) word.textContent = txt;
+        i.setAttribute('aria-valuetext', i.value + (+i.max === 100 ? '' : ' su 10') + ', ' + txt.toLowerCase());
+      });
+      PHASES.forEach(function (p) {
+        root.querySelectorAll('[data-phase-pts="' + p.k + '"]').forEach(function (n) { n.textContent = phasePts(vals, p.k); });
+      });
+      root._vals = vals; root._score = score; root._mode = mode;
+      paint(root, score);
+      root.dispatchEvent(new CustomEvent('scorechange', { detail: { score: score, mode: mode, vals: vals } }));
+    };
+    root._apply = apply;
+    root.addEventListener('input', function (e) { if (e.target.matches('input[type=range]')) apply(); });
+    function setMode(m, focus) {
+      root.dataset.mode = m;
+      root.querySelectorAll('[data-mode-btn]').forEach(function (b) {
+        var on = b.dataset.modeBtn === m;
+        b.setAttribute('aria-selected', String(on)); b.tabIndex = on ? 0 : -1;
+        if (on && focus) b.focus();
+      });
+      root.querySelectorAll('[data-panel]').forEach(function (p) { p.hidden = p.dataset.panel !== m; });
+      apply();
+    }
+    root.addEventListener('click', function (e) {
+      var b = e.target.closest('[data-mode-btn]'); if (b && root.contains(b)) setMode(b.dataset.modeBtn);
+    });
+    root.addEventListener('keydown', function (e) {
+      var b = e.target.closest('[data-mode-btn]'); if (!b) return;
+      if (e.key === 'ArrowLeft' || e.key === 'ArrowRight' || e.key === 'Home' || e.key === 'End') {
+        e.preventDefault();
+        var m = (e.key === 'ArrowLeft' || e.key === 'Home') ? 'smart' : 'full'; setMode(m, true);
+      }
+    });
+    setMode(root.dataset.mode || 'smart');
+    return apply;
+  }
+
+  /* ---------------- disclosure (libro) ---------------- */
+  function wireDisclosure(root) {
+    root.addEventListener('click', function (e) {
+      var b = e.target.closest('[data-disclose]'); if (!b || !root.contains(b)) return;
+      var tgt = document.getElementById(b.getAttribute('aria-controls'));
+      var open = b.getAttribute('aria-expanded') !== 'true';
+      if (root.dataset.single !== undefined && open) {
+        root.querySelectorAll('[data-disclose][aria-expanded=true]').forEach(function (o) {
+          o.setAttribute('aria-expanded', 'false'); var t = document.getElementById(o.getAttribute('aria-controls')); if (t) t.hidden = true;
+          var li = o.closest('li'); if (li) li.classList.remove('is-open');
+        });
+      }
+      b.setAttribute('aria-expanded', String(open)); if (tgt) tgt.hidden = !open;
+      var li2 = b.closest('li'); if (li2) li2.classList.toggle('is-open', open);
+    });
+  }
+
+  /* ---------------- filtro libro ---------------- */
+  function wireFilter(root) {
+    var input = root.querySelector('[data-filter-input]'), list = root.querySelector('[data-filter-list]');
+    var empty = root.querySelector('[data-filter-empty]'), min = 0;
+    function run() {
+      var q = (input && input.value || '').trim().toLowerCase(), n = 0;
+      list.querySelectorAll(':scope > li').forEach(function (li) {
+        var ok = (+li.dataset.min >= min) && (!q || li.textContent.toLowerCase().indexOf(q) > -1);
+        li.hidden = !ok; if (ok) n++;
+      });
+      if (empty) empty.hidden = n > 0;
+    }
+    if (input) input.addEventListener('input', run);
+    root.addEventListener('click', function (e) {
+      var c = e.target.closest('[data-filter-chip]'); if (!c) return;
+      min = +c.dataset.min;
+      root.querySelectorAll('[data-filter-chip]').forEach(function (x) { x.setAttribute('aria-pressed', String(x === c)); });
+      run();
+    });
+  }
+
+  /* ---------------- team ---------------- */
+  function countUp(el, to, dec, ms) {
+    if (reduced) { el.textContent = fmt1(to); return; }
+    var t0 = performance.now(), from = Math.max(50, to - 6);
+    function step(t) {
+      var k = Math.min(1, (t - t0) / ms), e = 1 - Math.pow(1 - k, 3);
+      el.textContent = fmt1(from + (to - from) * e);
+      if (k < 1) requestAnimationFrame(step); else el.textContent = fmt1(to);
+    }
+    requestAnimationFrame(step);
+  }
+  /* tpl.teamWine(ctx) -> stringa <li>; ctx: {w, open, voted, mine, avg, count, fresh} */
+  function mountTeam(root, tpl) {
+    var state = TEAM_WINES.map(function (w) { return { w: w, open: false, mine: w.mine ? JSON.parse(JSON.stringify(w.mine)) : null, fresh: false }; });
+    var list = root.querySelector('[data-team-list]');
+    var live = root.querySelector('[data-team-live]');
+    function ctxOf(s, i) {
+      var voted = !!s.mine;
+      var count = s.w.othersN + (voted ? 1 : 0);
+      var avg = voted ? (s.w.othersSum + s.mine.score) / count : null;
+      return { w: s.w, i: i, open: s.open, voted: voted, mine: s.mine, avg: avg, count: count, fresh: s.fresh };
+    }
+    function render(focusSel) {
+      list.innerHTML = state.map(function (s, i) { return tpl.teamWine(ctxOf(s, i)); }).join('');
+      list.querySelectorAll('[data-scorer]').forEach(function (sc) {
+        var i = +sc.closest('[data-i]').dataset.i, s = state[i];
+        var apply = wireScorer(sc);
+        if (s.mine) { /* modifica: ripristina i valori */
+          sc.dataset.mode = s.mine.mode;
+          var p = sc.querySelector('[data-panel="' + s.mine.mode + '"]');
+          Object.keys(s.mine.j).forEach(function (k) { var inp = p.querySelector('[data-k="' + k + '"]'); if (inp) inp.value = s.mine.j[k]; });
+          sc.querySelector('[data-mode-btn="' + s.mine.mode + '"]').click();
+        } else apply();
+      });
+      var done = state.filter(function (s) { return s.mine; }).length;
+      root.querySelectorAll('[data-team-progress]').forEach(function (n) { n.textContent = done + ' di ' + state.length + ' vini votati'; });
+      root.dispatchEvent(new CustomEvent('teamrender', { bubbles: true, detail: { done: done, total: state.length } }));
+      state.forEach(function (s) {
+        if (s.fresh) {
+          var li = list.querySelector('[data-i="' + state.indexOf(s) + '"]'), el = li && li.querySelector('[data-avg]');
+          if (el) { countUp(el, +el.dataset.avg, 1, 900); }
+          if (live) live.textContent = 'Media del team sbloccata per ' + s.w.name + ': ' + fmt1(+el.dataset.avg) + ' su ' + (s.w.othersN + 1) + ' voti.';
+          s.fresh = false;
+        }
+      });
+      if (focusSel) { var f = list.querySelector(focusSel); if (f) f.focus(); }
+    }
+    root.addEventListener('click', function (e) {
+      var b = e.target.closest('[data-act]'); if (!b || !root.contains(b)) return;
+      var li = b.closest('[data-i]'), i = li ? +li.dataset.i : -1, s = state[i], act = b.dataset.act;
+      if (act === 'open') { s.open = true; render('[data-i="' + i + '"] input[type=range]'); }
+      else if (act === 'cancel') { s.open = false; render('[data-i="' + i + '"] [data-act="open"],[data-i="' + i + '"] [data-act="edit"]'); }
+      else if (act === 'edit') { s.open = true; render('[data-i="' + i + '"] input[type=range]'); }
+      else if (act === 'submit') {
+        var sc = li.querySelector('[data-scorer]');
+        s.mine = { mode: sc._mode, j: Object.assign({}, sc._vals), score: sc._score };
+        s.open = false; s.fresh = true; render('[data-i="' + i + '"] [data-act="edit"]');
+      }
+    });
+    render();
+  }
+
+  /* ---------------- grafici ---------------- */
+  function radarSVG(axes, o) {
+    o = o || {}; var S = o.size || 280, c = S / 2, R = S / 2 - (o.pad || 54), n = axes.length, max = o.max || 10;
+    function pt(i, r) { var a = -Math.PI / 2 + i * 2 * Math.PI / n; return [c + Math.cos(a) * r, c + Math.sin(a) * r]; }
+    var rings = o.rings || [2, 4, 6, 8, 10], out = '';
+    rings.forEach(function (v) {
+      var r = R * v / max, cls = 'rd-ring' + (v === 6 ? ' rd-ring-suff' : '');
+      if (o.grid === 'circle') out += '<circle class="' + cls + '" cx="' + c + '" cy="' + c + '" r="' + r.toFixed(1) + '"/>';
+      else out += '<polygon class="' + cls + '" points="' + axes.map(function (_, i) { return pt(i, r).map(function (x) { return x.toFixed(1); }).join(','); }).join(' ') + '"/>';
+    });
+    axes.forEach(function (_, i) { var p = pt(i, R); out += '<line class="rd-axis" x1="' + c + '" y1="' + c + '" x2="' + p[0].toFixed(1) + '" y2="' + p[1].toFixed(1) + '"/>'; });
+    out += '<polygon class="rd-area" points="' + axes.map(function (a, i) { return pt(i, R * a.v / max).map(function (x) { return x.toFixed(1); }).join(','); }).join(' ') + '"/>';
+    axes.forEach(function (a, i) {
+      var p = pt(i, R * a.v / max); out += '<circle class="rd-dot" cx="' + p[0].toFixed(1) + '" cy="' + p[1].toFixed(1) + '" r="4"/>';
+      var l = pt(i, R + 20), anchor = Math.abs(l[0] - c) < 6 ? 'middle' : (l[0] > c ? 'start' : 'end');
+      var dy = l[1] > c + 6 ? 6 : (l[1] < c - 6 ? -2 : 4);
+      out += '<text class="rd-label" x="' + l[0].toFixed(1) + '" y="' + (l[1] + dy).toFixed(1) + '" text-anchor="' + anchor + '">' + esc(a.label) + '<tspan class="rd-val" x="' + l[0].toFixed(1) + '" dy="15">' + fmt1(a.v) + '</tspan></text>';
+    });
+    var desc = axes.map(function (a) { return a.label + ' ' + fmt1(a.v); }).join(', ');
+    return '<svg class="radar" viewBox="0 0 ' + S + ' ' + S + '" role="img" aria-label="Grafico radar delle medie per fase su 10: ' + desc + '">' + out + '</svg>';
+  }
+
+  global.SORSO = {
+    BANDS: BANDS, PHASES: PHASES, WINES: WINES, TEAM_WINES: TEAM_WINES, STATS: STATS, WORD10: WORD10,
+    band: band, smart: smart, full: full, fullQ: fullQ, phasePts: phasePts, fmt1: fmt1, uid: uid, esc: esc,
+    paint: paint, wireFilter: wireFilter, wireScorer: wireScorer, wireDisclosure: wireDisclosure, mountTeam: mountTeam, radarSVG: radarSVG,
+    initTheme: initTheme, reduced: reduced, K: K
+  };
+})(window);
+
+</script>
+<script>
+/* Direzione A · template e montaggio. Logica in common.js. */
+(function () {
+  'use strict';
+  var S = SORSO, esc = S.esc, fmt1 = S.fmt1;
+
+  document.body.insertAdjacentHTML('afterbegin',
+    '<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs>' +
+    '<linearGradient id="gBrass" x1="0" y1="0" x2="1" y2="1"><stop offset="0" style="stop-color:var(--brass-hi)"/><stop offset=".5" style="stop-color:var(--brass)"/><stop offset="1" style="stop-color:var(--brass-hi)"/></linearGradient>' +
+    '</defs></svg>');
+
+  var ICON_LOCK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="9" rx="1.500"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>';
+
+  /* ---------- componenti ---------- */
+  function ring(cls) {
+    var c = 94, r = 70, ticks = '', rays = '', i;
+    [60, 70, 80, 90, 96].forEach(function (v) {
+      var a = (-90 + (v - 50) / 50 * 360) * Math.PI / 180;
+      ticks += '<line class="t' + v + '" x1="' + (c + Math.cos(a) * (r + 8)).toFixed(1) + '" y1="' + (c + Math.sin(a) * (r + 8)).toFixed(1) + '" x2="' + (c + Math.cos(a) * (r + 14)).toFixed(1) + '" y2="' + (c + Math.sin(a) * (r + 14)).toFixed(1) + '"/>';
+    });
+    for (i = 0; i < 40; i++) {
+      var b = i / 40 * 2 * Math.PI;
+      rays += '<line x1="' + (c + Math.cos(b) * (r + 20)).toFixed(1) + '" y1="' + (c + Math.sin(b) * (r + 20)).toFixed(1) + '" x2="' + (c + Math.cos(b) * (r + (i % 2 ? 24 : 28))).toFixed(1) + '" y2="' + (c + Math.sin(b) * (r + (i % 2 ? 24 : 28))).toFixed(1) + '"/>';
+    }
+    return '<div class="ring ' + (cls || '') + '" role="img" data-score-label aria-label="Punteggio">' +
+      '<svg viewBox="0 0 188 188" aria-hidden="true"><g class="rays">' + rays + '</g>' +
+      '<circle class="halo" cx="94" cy="94" r="' + (r + 31) + '" stroke-dasharray="2 5"/>' +
+      '<circle class="ring-track" cx="94" cy="94" r="' + r + '"/><g class="ticks">' + ticks + '</g>' +
+      '<circle class="ring-seal" cx="94" cy="94" r="' + (r - 9) + '"/>' +
+      '<circle class="ring-arc" cx="94" cy="94" r="' + r + '" transform="rotate(-90 94 94)"/></svg>' +
+      '<div class="ring-num"><span class="num" data-score>70</span><span class="ring-sub">su 100</span></div></div>';
+  }
+  function scoreHead() {
+    return '<header class="score">' + ring() + '<div class="score-txt"><p class="caps">Punteggio</p>' +
+      '<p class="band-name" data-band-label>Discreto</p>' +
+      '<p class="band-range"><span data-band-range>70–79</span> su 100</p><p class="band-desc" data-band-desc></p></div></header>';
+  }
+  function appTop(right) {
+    return '<div class="app-top"><span class="brand"><span class="logo" role="img" aria-label="Logo Sorso"></span>Sorso</span><span class="today">' + (right || 'mercoledì 7 ottobre') + '</span></div>';
+  }
+  function tabs(active) {
+    return '<nav class="app-tabs" aria-label="Navigazione app">' + [['nuova', 'Nuova'], ['libro', 'Libro'], ['team', 'Team'], ['statistiche', 'Statistiche']].map(function (t) {
+      return '<a href="#' + t[0] + '"' + (t[0] === active ? ' aria-current="page"' : '') + '>' + t[1] + '</a>';
+    }).join('') + '</nav>';
+  }
+  function ruler(kind) {
+    var t = kind === 10 ? [[0, '0'], [.6, '6 suff.'], [1, '10']] : [60, 70, 80, 90, 96].map(function (v) { return [(v - 50) / 50, v]; });
+    return '<div class="ruler" aria-hidden="true">' + t.map(function (x) { return '<span style="--t:' + x[0] + '">' + x[1] + '</span>'; }).join('') + (kind === 10 ? '' : '<i class="zone"></i>') + '</div>';
+  }
+  function rowQuick(id, k, label, w, val) {
+    var iid = id + '-' + k;
+    return '<div class="row"><div class="row-head"><label class="row-label" for="' + iid + '"><span class="row-name">' + label + '</span><span class="row-w">peso ' + w + '%</span></label>' +
+      '<div class="row-val"><output class="num" data-out="' + iid + '" for="' + iid + '">' + val + '</output><span class="word" data-word="' + iid + '"></span></div></div>' +
+      '<input class="rng" type="range" id="' + iid + '" data-k="' + k + '" min="50" max="100" step="1" value="' + val + '">' + ruler(100) + '</div>';
+  }
+  function rowFull(id, k, label, val) {
+    var iid = id + '-' + k;
+    return '<div class="row"><div class="row-head"><label class="row-label" for="' + iid + '"><span class="row-name">' + label + '</span></label>' +
+      '<div class="row-val"><output class="num" data-out="' + iid + '" for="' + iid + '">' + val + '</output><span class="word" data-word="' + iid + '"></span></div></div>' +
+      '<input class="rng" type="range" id="' + iid + '" data-k="' + k + '" min="0" max="10" step="1" value="' + val + '">' + ruler(10) + '</div>';
+  }
+  function modeSwitch(id) {
+    return '<div class="modes" role="tablist" aria-label="Modalità di valutazione">' +
+      '<button type="button" role="tab" id="' + id + '-t1" data-mode-btn="smart" aria-controls="' + id + '-p1" aria-selected="true"><span class="m-name">Voto rapido</span><span class="m-sub">Occhio · Naso · Bocca</span></button>' +
+      '<button type="button" role="tab" id="' + id + '-t2" data-mode-btn="full" aria-controls="' + id + '-p2" aria-selected="false" tabindex="-1"><span class="m-name">Scheda completa</span><span class="m-sub">4 fasi · 9 giudizi</span></button></div>';
+  }
+  function panels(id, sv, fv) {
+    var quick = rowQuick(id, 'o', 'Occhio', 10, sv.o) + rowQuick(id, 'n', 'Naso', 30, sv.n) + rowQuick(id, 'b', 'Bocca', 60, sv.b) +
+      '<p class="formula">Media pesata <b>10 · 30 · 60</b>. Il 100 richiede tre 100.</p>';
+    var full = S.PHASES.map(function (p, pi) {
+      return '<details class="phase" name="' + id + '-ph"' + (pi === 1 ? ' open' : '') + '><summary><span class="ph-name">' + p.name + '</span>' +
+        '<span class="ph-pts"><b data-phase-pts="' + p.k + '">0</b> / ' + p.w + '</span></summary><div class="ph-body">' +
+        p.items.map(function (it) { return rowFull(id, it[0], it[1], fv[it[0]]); }).join('') + '</div></details>';
+    }).join('') + '<p class="formula">Punteggio = 50 + 50·q<sup>1,8</sup>. Il 100 richiede ogni giudizio a 10.</p>';
+    return '<div role="tabpanel" id="' + id + '-p1" aria-labelledby="' + id + '-t1" data-panel="smart">' + quick + '</div>' +
+      '<div role="tabpanel" id="' + id + '-p2" aria-labelledby="' + id + '-t2" data-panel="full" hidden>' + full + '</div>';
+  }
+  var DEF_S = { o: 84, n: 88, b: 91 }, DEF_F = { v: 8, oi: 8, oc: 7, oq: 8, ge: 8, gi: 8, gp: 7, gq: 8, f: 8 };
+
+  function nuova(id, mode, name, prod, year) {
+    return '<div class="app" id="' + id + '" data-scorer data-mode="' + mode + '">' + appTop() + scoreHead() +
+      '<div class="body"><fieldset class="wine-fields"><legend class="vh">Il vino</legend>' +
+      '<label class="fld fld-wide"><span>Vino</span><input type="text" value="' + esc(name) + '" autocomplete="off" aria-label="Nome del vino"></label>' +
+      '<label class="fld"><span>Produttore</span><input type="text" value="' + esc(prod) + '" autocomplete="off"></label>' +
+      '<label class="fld"><span>Annata</span><input type="text" inputmode="numeric" value="' + year + '" autocomplete="off"></label></fieldset>' +
+      modeSwitch(id) + panels(id, DEF_S, DEF_F) + '</div>' +
+      '<div class="savebar"><button class="btn btn-block" type="button">Salva il voto · <span class="num" data-score>0</span></button></div>' + tabs('nuova') + '</div>';
+  }
+
+  function libro() {
+    var items = S.WINES.map(function (w, i) {
+      var id = 'wn' + i, b = S.band(w.score), open = i === 0, detail;
+      if (w.mode === 'smart') {
+        detail = '<dl class="judg">' + [['o', 'Occhio', 10], ['n', 'Naso', 30], ['b', 'Bocca', 60]].map(function (r) {
+          return '<div><dt>' + r[1] + '<small>peso ' + r[2] + '%</small></dt><dd>' + w.j[r[0]] + '</dd><span class="meter" style="--f:' + ((w.j[r[0]] - 50) / 50).toFixed(2) + '"><i></i></span></div>';
+        }).join('') + '</dl>';
+      } else {
+        detail = '<dl class="judg">' + S.PHASES.map(function (p) {
+          var pts = S.phasePts(w.j, p.k);
+          return '<div><dt>' + p.name + '</dt><dd>' + pts + '<small> / ' + p.w + '</small></dd><span class="meter" style="--f:' + (pts / p.w).toFixed(2) + '"><i></i></span></div>';
+        }).join('') + '</dl>';
+      }
+      return '<li class="wine' + (open ? ' is-open' : '') + '" data-tier="' + b.tier + '" data-min="' + w.score + '">' +
+        '<button class="wine-btn" type="button" data-disclose aria-expanded="' + open + '" aria-controls="' + id + '">' +
+        '<span class="w-main"><span class="w-name">' + esc(w.name) + '</span><span class="w-meta">' + esc(w.prod) + ' · ' + w.year + '</span>' +
+        '<span class="w-badges"><span class="stamp">' + (w.mode === 'smart' ? 'Rapido' : 'Completa') + '</span><span class="w-date">' + w.date + '</span></span></span>' +
+        '<span class="w-score" role="text" aria-label="Punteggio ' + w.score + ', ' + b.label + '"><span class="num">' + w.score + '</span><span class="caps">' + b.label + '</span></span></button>' +
+        '<div class="scheda" id="' + id + '"' + (open ? '' : ' hidden') + '><p class="caps s-area">' + esc(w.area) + '</p>' + detail +
+        '<p class="quote">' + esc(w.note) + '</p><div class="tags">' + w.tags.map(function (t) { return '<span>' + esc(t) + '</span>'; }).join('') + '</div>' +
+        '<div class="actions"><button class="btn-ghost" type="button">Modifica</button><button class="btn-ghost" type="button">Confronta</button></div></div></li>';
+    }).join('');
+    return '<div class="app" id="app-libro" data-filter-root>' + appTop() +
+      '<div class="l-intro"><h3 class="h-screen">Il Libro</h3><p>37 vini · da settembre a oggi</p></div>' +
+      '<div class="l-tools"><label class="search"><span class="vh">Cerca nel libro</span><input type="search" placeholder="Cerca vino, produttore, vitigno" data-filter-input></label>' +
+      '<div class="chips" role="group" aria-label="Filtra per punteggio"><button class="chip" type="button" data-filter-chip data-min="0" aria-pressed="true">Tutti</button><button class="chip" type="button" data-filter-chip data-min="80" aria-pressed="false">Da 80</button><button class="chip" type="button" data-filter-chip data-min="90" aria-pressed="false">Da 90</button></div></div>' +
+      '<ul class="wines" data-single data-filter-list>' + items + '</ul><p class="t-foot" data-filter-empty hidden>Nessun vino corrisponde</p>' + tabs('libro') + '</div>';
+  }
+
+  /* ---------- team ---------- */
+  var tpl = {
+    teamWine: function (c) {
+      var w = c.w, m = c.mine, h = '<li class="tw ' + (c.fresh ? 'is-fresh' : '') + '" data-i="' + c.i + '">';
+      h += '<div class="tw-top"><div><h4 class="tw-name">' + esc(w.name) + '</h4><p class="tw-meta">' + esc(w.prod) + ' · ' + w.year + '</p></div>';
+      if (c.voted) h += '<div class="tw-mine"><span class="caps">Il tuo voto</span><span class="num">' + m.score + '</span></div>';
+      h += '</div>';
+      if (c.voted && !c.open) {
+        var pills = m.mode === 'smart'
+          ? '<span class="mode-pill">Voto rapido</span><span>Occhio <b>' + m.j.o + '</b></span><span>Naso <b>' + m.j.n + '</b></span><span>Bocca <b>' + m.j.b + '</b></span>'
+          : '<span class="mode-pill">Scheda completa</span>' + S.PHASES.map(function (p) { return '<span>' + p.name.split('-')[0] + ' <b>' + S.phasePts(m.j, p.k) + '</b>/' + p.w + '</span>'; }).join('');
+        var x = function (v) { return Math.max(0, Math.min(1, (v - 50) / 50)); }, d = m.score - c.avg;
+        h += '<div class="pills" aria-label="I tuoi giudizi">' + pills + '</div>' +
+          '<div class="avg" role="group" aria-label="Media del team"><span class="caps">Media del team</span><span class="num avg-n" data-avg="' + c.avg.toFixed(3) + '">' + fmt1(c.avg) + '</span>' +
+          '<span class="avg-side"><b>' + c.count + ' voti</b>' + (Math.abs(d) < .05 ? 'Il tuo voto è nella media' : 'Il tuo voto è ' + fmt1(Math.abs(d)) + (d > 0 ? ' sopra' : ' sotto') + ' la media') + '</span>' +
+          '<div class="avg-scale" aria-hidden="true"><span class="l" style="--x:0">50</span><i class="tm" style="--x:' + x(c.avg).toFixed(3) + '"></i><i class="me" style="--x:' + x(m.score).toFixed(3) + '"></i><span class="r">100</span></div></div>' +
+          '<div><button class="btn-ghost" type="button" data-act="edit">Modifica il mio voto</button></div>';
+      } else if (!c.voted && !c.open) {
+        h += '<div class="lock">' + ICON_LOCK + '<div><b>Media riservata</b>Si sblocca appena hai votato.</div><span class="blur" aria-hidden="true">••,•</span></div>' +
+          '<div><button class="btn" type="button" data-act="open">Vota questo vino</button></div>';
+      }
+      if (c.open) {
+        var id = S.uid('s');
+        h += '<div class="sheet" data-scorer data-mode="smart"><div class="sheet-head"><h4>Il tuo voto</h4><span class="num" data-score>0</span></div>' +
+          '<p class="band-desc"><span data-band-label></span> · <span data-band-desc></span></p>' + modeSwitch(id) + panels(id, { o: 80, n: 80, b: 80 }, { v: 6, oi: 6, oc: 6, oq: 6, ge: 6, gi: 6, gp: 6, gq: 6, f: 6 }) +
+          '<div class="sheet-actions"><button class="btn" type="button" data-act="submit">Conferma il voto</button><button class="btn-ghost" type="button" data-act="cancel">Annulla</button></div></div>';
+      }
+      return h + '</li>';
+    }
+  };
+  function teamApp(opts) {
+    opts = opts || {};
+    return '<div class="app themeable" data-team ' + (opts.attr || '') + '>' +
+      '<div class="t-head"><span class="logo" role="img" aria-label="Logo ' + esc(opts.name || 'Sorso') + '"></span><p class="caps">Degustazione di ottobre</p><h3>Serata Nebbiolo e dintorni</h3></div>' +
+      '<div class="t-sub"><span><b data-team-progress></b></span><span>chiude giovedì 9</span></div>' +
+      '<p class="t-rule">' + ICON_LOCK + '<span>Vota un vino per sbloccare la media del team. I tuoi giudizi restano sempre visibili.</span></p>' +
+      '<ul class="tws" data-team-list></ul><div class="vh" aria-live="polite" data-team-live></div><p class="t-foot">con Sorso</p></div>';
+  }
+
+  /* ---------- statistiche ---------- */
+  function stats() {
+    var st = S.STATS, max = Math.max.apply(null, st.dist);
+    var labels = ['50–59', '60–69', '70–79', '80–89', '90–95', '96–99', '100'];
+    var bars = st.dist.map(function (n, i) {
+      return '<div class="bar" data-tier="' + S.BANDS[i].tier + '"><span class="bar-n">' + n + '</span><i style="--h:' + (n / max).toFixed(3) + '"></i><span class="bar-l">' + labels[i] + '</span></div>';
+    }).join('');
+    return '<div class="app" id="app-stats">' + appTop() + '<div class="l-intro"><h3 class="h-screen">Statistiche</h3><p>Il tuo palato in sintesi</p></div>' +
+      '<div class="kpis"><div class="kpi"><span class="num">' + st.n + '</span><span class="caps">Vini</span></div><div class="kpi"><span class="num">' + fmt1(st.mean) + '</span><span class="caps">Media</span></div>' +
+      '<div class="kpi is-best"><span class="num">' + st.best.score + '</span><span class="caps">Il migliore</span></div></div>' +
+      '<div class="card"><h4>Medie per fase</h4><p class="cap">Su 10. La linea tratteggiata è il 6: la sufficienza.</p>' + S.radarSVG(st.radar, { grid: 'circle' }) + '</div>' +
+      '<div class="card"><h4>Quanti vini per fascia</h4><p class="cap">Il bordeaux sale, l’ottone segna il 96 e oltre.</p>' +
+      '<div class="hist" role="img" aria-label="Vini per fascia: ' + st.dist.map(function (n, i) { return labels[i] + ': ' + n; }).join(', ') + '">' + bars + '</div></div><div class="stats-foot"></div>' + tabs('statistiche') + '</div>';
+  }
+
+  /* ---------- sezione 1: punteggio ---------- */
+  function punteggio(host) {
+    host.innerHTML =
+      '<div style="width:100%;max-width:390px"><div class="app" style="max-width:none"><div id="demo-live">' + scoreHead() +
+      '<div class="scrub"><label for="scrub"><span>Prova un punteggio</span><span class="num" data-score>89</span></label>' +
+      '<input class="rng" id="scrub" type="range" min="50" max="100" step="1" value="89" aria-describedby="scrub-d">' + ruler(100) +
+      '<p id="scrub-d" class="vh">Il punteggio va da 50 a 100</p></div></div>' +
+      '<div class="minis" aria-label="Esempi di fasce alte">' + [91, 97, 100].map(function (v) {
+        return '<figure data-mini="' + v + '">' + ring('ring-sm') + '<figcaption class="caps" data-band-label></figcaption></figure>';
+      }).join('') + '</div></div></div>' +
+      '<ol class="bands" aria-label="Le fasce di punteggio">' + S.BANDS.map(function (b) {
+        return '<li data-tier="' + b.tier + '" data-band-row="' + b.key + '"><span class="rg">' + (b.min === b.max ? '100' : b.min + '–' + b.max) + '</span><span class="nm">' + b.label + '</span><span class="ds">' + b.desc + '</span></li>';
+      }).join('') + '</ol>';
+    var live = host.querySelector('#demo-live'), scrub = host.querySelector('#scrub');
+    var bands = host.querySelector('.bands');
+    function go() {
+      var v = +scrub.value; scrub.style.setProperty('--f', ((v - 50) / 50).toFixed(4));
+      scrub.setAttribute('aria-valuetext', v + ', ' + S.band(v).label.toLowerCase());
+      S.paint(live, v);
+      bands.querySelectorAll('li').forEach(function (li) { li.classList.toggle('is-current', li.dataset.bandRow === S.band(v).key); });
+    }
+    scrub.addEventListener('input', go); go();
+    host.querySelectorAll('[data-mini]').forEach(function (f) { S.paint(f, +f.dataset.mini); });
+  }
+
+  /* ---------- montaggio ---------- */
+  function figure(inner, cap) { return '<figure>' + inner + (cap ? '<figcaption>' + cap + '</figcaption>' : '') + '</figure>'; }
+  punteggio(document.getElementById('m-punteggio'));
+
+  var nHost = document.getElementById('m-nuova');
+  nHost.innerHTML = figure(nuova('nuova-1', 'smart', 'Barolo Cannubi', 'Poderi Rivalta', 2019), '<b>Voto rapido</b>: tre cursori, il totale è la media 10/30/60.') +
+    figure(nuova('nuova-2', 'full', 'Etna Rosso Contrada Rampante', 'Tenuta delle Sciare', 2021), '<b>Scheda completa</b>: le quattro fasi si aprono una alla volta.');
+  nHost.querySelectorAll('[data-scorer]').forEach(S.wireScorer);
+
+  var lHost = document.getElementById('m-libro');
+  lHost.innerHTML = figure(libro(), 'Il filtro e la ricerca funzionano; toccando una riga si apre la scheda.');
+  S.wireDisclosure(lHost.querySelector('[data-single]')); S.wireFilter(lHost.querySelector('[data-filter-root]'));
+
+  var tHost = document.getElementById('m-team');
+  tHost.innerHTML = figure(teamApp({ name: 'Sorso' }), 'Provate: <b>Vota questo vino</b> sul Taurasi, poi sul Vermentino.');
+  S.mountTeam(tHost.querySelector('[data-team]'), tpl);
+
+  var LOGO1 = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 28 28"><path fill="#2F6B3A" d="M14 2c7 3 10 9 6.500 15.500C18 22 14 24 14 26c0-2-4-4-6.500-8.500C4 11 7 5 14 2z"/><path stroke="#F4EFE6" stroke-width="1.600" fill="none" d="M14 8v14"/></svg>';
+  var LOGO2 = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 28 28"><rect x="3" y="3" width="22" height="22" rx="5" fill="#FF7A3D"/><path fill="#101A2B" d="M8 20V8h3l6 8V8h3v12h-3l-6-8v8z"/></svg>';
+  var PARTNERS = [
+    { name: 'Enoteca Rossi', logo: LOGO1, bg: '#F4EFE6', ink: '#1F2A1F', accent: '#2F6B3A', font: 'Georgia, "Times New Roman", serif' },
+    { name: 'Cantina Nera', logo: LOGO2, bg: '#101A2B', ink: '#F3F5F9', accent: '#FF7A3D', font: 'system-ui, sans-serif' }
+  ];
+  var pHost = document.getElementById('m-partner');
+  pHost.innerHTML = PARTNERS.map(function (p) {
+    var css = ':root {\n  --p-logo: url("data:image/svg+xml,…");\n  --p-accent: ' + p.accent + ';\n  --p-bg: ' + p.bg + ';\n  --p-ink: ' + p.ink + ';\n  --p-font: ' + p.font + ';\n}';
+    return '<figure>' + teamApp({ name: p.name }) + '<pre class="code" aria-label="CSS del partner ' + esc(p.name) + '"><code>' + esc(css) + '</code></pre></figure>';
+  }).join('');
+  pHost.querySelectorAll('[data-team]').forEach(function (el, i) {
+    var p = PARTNERS[i];
+    el.style.setProperty('--p-logo', 'url("data:image/svg+xml,' + encodeURIComponent(p.logo).replace(/"/g, '%22') + '")');
+    el.style.setProperty('--p-accent', p.accent); el.style.setProperty('--p-bg', p.bg);
+    el.style.setProperty('--p-ink', p.ink); el.style.setProperty('--p-font', p.font);
+    el.querySelector('.t-head .caps').textContent = 'Degustazione di ottobre · ' + p.name;
+    S.mountTeam(el, tpl);
+  });
+
+  document.getElementById('m-stats').innerHTML = figure(stats(), 'Radar e istogramma sono SVG/HTML con alternativa testuale (aria-label).');
+  S.initTheme();
+})();
+
+</script>
+</body>
+</html>

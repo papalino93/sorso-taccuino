@@ -1,7 +1,7 @@
 const test = require("node:test");
 const assert = require("node:assert/strict");
 const crypto = require("crypto");
-const { setup, call } = require("./helpers/env");
+const { setup, call, finestraSicura } = require("./helpers/env");
 const jwt = require("../api/_jwt");
 const P = require("../api/_partner");
 const quota = require("../api/_quota");
@@ -15,6 +15,7 @@ const now = () => Math.floor(Date.now() / 1000);
 
 async function putPartner(id, extra) {
   const apiKey = P.newApiKey(id);
+  await redis.sadd("partners", id);
   await redis.set("p:" + id, JSON.stringify(Object.assign({ id, name: id, active: true, secret: SECRET, apiKeyHash: P.sha256(apiKey), origins: [], modes: ["smart", "full"] }, extra)));
   P.clearCache();
   return apiKey;
@@ -139,15 +140,16 @@ test("percorsi e metodi: 404 e 405", async () => {
   assert.equal((await call(v1, { method: "GET", url: "/api/v1?path=users%2Fx", headers: { authorization: "Bearer " + KEY } })).statusCode, 405);
 });
 test("limite di richieste per chiave", async () => {
+  await finestraSicura();
   let last;
   for (let i = 0; i < 122; i++) last = await get("tastings");
   assert.equal(last.statusCode, 429);
   assert.ok(last.headers["retry-after"]);
 });
-test("quota in sola lettura: lettura sì, cancellazione no", async () => {
+test("quota in sola lettura: lettura e cancellazione dei dati sì", async () => {
   await redis.set(quota.monthKey(), String(Math.round(quota.LIMIT * 0.97)));
   quota.reset();
   assert.equal((await get("tastings")).statusCode, 200);
   const r = await call(v1, { method: "DELETE", url: "/api/v1?path=users%2Fx", headers: { authorization: "Bearer " + KEY } });
-  assert.equal(r.statusCode, 503);
+  assert.equal(r.statusCode, 200, "la cancellazione (richiesta di privacy) non si blocca mai");
 });

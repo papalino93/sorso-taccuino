@@ -42,6 +42,19 @@
 
   function clamp01(x) { return Math.min(1, Math.max(0, Number(x) || 0)); }
 
+  /* Arrotondamento classico: da 5 in su per eccesso, da 1 a 4 per difetto
+     (82,5 diventa 83; 82,4 diventa 82; 79,45 con un decimale diventa 79,5).
+     L'arrotondamento predefinito di JavaScript e toFixed sbagliano i casi esatti a metà
+     quando il decimale non è rappresentabile in binario (1,005 con due decimali, o
+     82,49999999999999 che in realtà è 82,5): il piccolo margine li riporta alla regola. */
+  function roundHalfUp(x, decimals) {
+    const n = Number(x);
+    if (!isFinite(n)) return 0;
+    const f = Math.pow(10, decimals || 0);
+    const r = Math.floor(Math.abs(n) * f + 0.5 + 1e-9) / f;
+    return n < 0 ? -r : r;
+  }
+
   /* 100 è riservato al caso in cui ogni giudizio è al massimo: una media come
      99,9 non deve arrotondarsi a 100. */
   function cap100(total, tuttoAlMassimo) {
@@ -50,8 +63,8 @@
 
   /* Un giudizio smart è un intero tra 50 e 100. */
   function clampBand(x) {
-    const n = Math.round(Number(x));
-    if (!isFinite(n)) return BAND_MIN;
+    if (x === null || x === "" || isNaN(Number(x))) return BAND_MIN;
+    const n = roundHalfUp(x);
     return Math.min(BAND_MAX, Math.max(BAND_MIN, n));
   }
 
@@ -78,11 +91,11 @@
     const phases = {};
     PHASES.forEach(function (p) {
       const b = band(q[p], k);
-      phases[p] = Math.round(b);
+      phases[p] = roundHalfUp(b);
       total += PHASE_W[p] * b / 100;
       if (clamp01(q[p]) < 1) tuttoAlMassimo = false;
     });
-    return { total: cap100(Math.round(total), tuttoAlMassimo), phases: phases, q: q };
+    return { total: cap100(roundHalfUp(total), tuttoAlMassimo), phases: phases, q: q };
   }
 
   /* Dalla scheda in compilazione: T ha i gruppi v, o, g, f con i giudizi. */
@@ -117,26 +130,28 @@
 
   /* Voto smart: g = {occhio, naso, bocca}, ciascuno 50-100. */
   function smartScore(g) {
-    let total = 0, tuttoAlMassimo = true;
+    /* I giudizi sono interi e i pesi interi: la somma pesata è un intero esatto, e
+       l'arrotondamento a metà si fa senza passare dai decimali binari. */
+    let num = 0, tuttoAlMassimo = true;
     const phases = {};
     SMART_KEYS.forEach(function (k) {
       const v = clampBand(g && g[k] != null ? g[k] : BAND_MIN);
       phases[k] = v;
-      total += SMART_W[k] * v / 100;
+      num += SMART_W[k] * v;
       if (v < BAND_MAX) tuttoAlMassimo = false;
     });
-    return { total: cap100(Math.round(total), tuttoAlMassimo), phases: phases };
+    return { total: cap100(Math.floor((num + 50) / 100), tuttoAlMassimo), phases: phases };
   }
 
   /* Il vecchio totale lineare 0-100 (somma di quattro fasi arrotondate): serve
      a verificare il ricalcolo e a conservare `legacyTotal`. */
   function legacyLinear(q) {
-    return PHASES.reduce(function (s, p) { return s + Math.round(clamp01(q[p]) * PHASE_W[p]); }, 0);
+    return PHASES.reduce(function (s, p) { return s + roundHalfUp(clamp01(q[p]) * PHASE_W[p]); }, 0);
   }
 
   /* Un totale lineare vecchio, senza altro dato, sulla scala nuova. */
   function fromLegacyTotal(total, k) {
-    return Math.round(band(clamp01((Number(total) || 0) / 100), k));
+    return roundHalfUp(band(clamp01((Number(total) || 0) / 100), k));
   }
 
   /* Un record si può ricalcolare da dati propri (giudizi smart, giudizi
@@ -175,7 +190,7 @@
   return {
     BAND_MIN: BAND_MIN, BAND_MAX: BAND_MAX, K: K, VAL_MAX: VAL_MAX,
     ITEMS: ITEMS, PHASES: PHASES, PHASE_W: PHASE_W, SMART_KEYS: SMART_KEYS, SMART_W: SMART_W,
-    clampBand: clampBand, band: band, phaseQuality: phaseQuality,
+    clampBand: clampBand, roundHalfUp: roundHalfUp, band: band, phaseQuality: phaseQuality,
     fullFromQ: fullFromQ, fullScore: fullScore, qualityOfRecord: qualityOfRecord,
     smartScore: smartScore, legacyLinear: legacyLinear, fromLegacyTotal: fromLegacyTotal,
     scoreOfRecord: scoreOfRecord, canRecompute: canRecompute, bandKey: bandKey

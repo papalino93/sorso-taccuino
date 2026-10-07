@@ -1,7 +1,7 @@
 const test = require("node:test");
 const assert = require("node:assert/strict");
 const crypto = require("crypto");
-const { setup } = require("./helpers/env");
+const { setup, finestraSicura } = require("./helpers/env");
 const jwt = require("../api/_jwt");
 const P = require("../api/_partner");
 const limit = require("../api/_limit");
@@ -17,6 +17,7 @@ async function putPartner(extra) {
   const apiKey = P.newApiKey("demo");
   const cfg = Object.assign({ id: "demo", name: "Demo", active: true, secret: SECRET, apiKeyHash: P.sha256(apiKey),
     origins: ["https://sito.example"], modes: ["smart", "full"] }, extra);
+  await redis.sadd("partners", "demo");
   await redis.set("p:demo", JSON.stringify(cfg));
   P.clearCache();
   return { cfg, apiKey };
@@ -80,6 +81,22 @@ test("themeCss: nessun testo libero dentro il CSS", () => {
   assert.ok(!/display:none/.test(css));
   assert.ok(/--font:/.test(css));
 });
+test("origini: nessun carattere che possa allargare la politica di sicurezza", () => {
+  for (const o of ["https://*", "https://*.com", "https://*.example.com", "https://a.com;sandbox", "https://a.com,default-src", "https://a.com default-src *",
+    "https://com", "https://a", "https://user:pass@a.com", "https://a.com?x=1", "https://a.com#x", "ftp://a.com", "//a.com", "a.com", "https://", "https://-a.com",
+    "https://a..com", "https://a.com:99999", "https://a.com:0", "https://1.2.3.4", "https://[::1]", "https://a.com\nX", "", " ", null, undefined, 5, {}]) {
+    assert.equal(P.normalizeOrigin(o, true), null, JSON.stringify(o));
+  }
+  assert.equal(P.normalizeOrigin("HTTPS://WWW.Club.Example"), "https://www.club.example");
+  assert.equal(P.normalizeOrigin("https://club.example:443"), "https://club.example");
+  assert.equal(P.normalizeOrigin("https://club.example:8443"), "https://club.example:8443");
+  assert.equal(P.normalizeOrigin("  https://club.example/  "), "https://club.example");
+});
+test("origini: localhost solo se il partner lo ha chiesto, anche nella politica di sicurezza", () => {
+  assert.equal(P.frameAncestors({ origins: ["http://localhost:3000", "https://a.example"] }), "'self' https://a.example");
+  assert.equal(P.frameAncestors({ origins: ["http://localhost:3000", "https://a.example"], allowLocalhost: true }), "'self' http://localhost:3000 https://a.example");
+  assert.equal(P.frameAncestors({ origins: ["https://a.example", "https://A.example/"] }), "'self' https://a.example", "senza doppioni");
+});
 test("origini: solo https (http solo localhost se consentito), niente percorsi", () => {
   assert.equal(P.normalizeOrigin("https://sito.example"), "https://sito.example");
   assert.equal(P.normalizeOrigin("https://sito.example/"), "https://sito.example");
@@ -109,18 +126,49 @@ test("loadPartner: sconosciuto, disattivato, id non valido", async () => {
   assert.equal(await P.loadPartner(redis, "../x"), null);
   assert.equal(await P.loadPartner(redis, undefined), null);
 });
-test("loadPartner: usa la cache (un solo comando Redis)", async () => {
+test("loadPartner: l'elenco dei partner si legge una volta (2 comandi) e poi sta in memoria", async () => {
   await putPartner();
   srv.log.length = 0;
   await P.loadPartner(redis, "demo");
   await P.loadPartner(redis, "demo");
   await P.loadPartner(redis, "demo");
-  assert.equal(srv.log.filter(c => c === "GET").length, 1);
+  assert.deepEqual(srv.log, ["SMEMBERS", "MGET"]);
+});
+test("loadPartner: un identificativo sconosciuto non costa comandi, e l'elenco non si ricarica di continuo", async () => {
+  await putPartner();
+  await P.loadPartner(redis, "demo");
+  srv.log.length = 0;
+  for (let i = 0; i < 500; i++) assert.equal(await P.loadPartner(redis, "inventato-" + i), null);
+  assert.equal(srv.log.length, 0, "500 partner inventati: nessun comando Redis");
+});
+test("loadPartner: un partner creato dopo compare entro 10 secondi", async () => {
+  await putPartner();
+  await P.loadPartner(redis, "demo");
+  const adesso = Date.now;
+  try {
+    await redis.sadd("partners", "nuovo");
+    await redis.set("p:nuovo", JSON.stringify({ id: "nuovo", name: "N", active: true, secret: "s".repeat(64) }));
+    assert.equal(await P.loadPartner(redis, "nuovo"), null, "subito dopo: ancora l'elenco vecchio");
+    Date.now = () => adesso() + 11000;
+    assert.equal((await P.loadPartner(redis, "nuovo")).id, "nuovo");
+  } finally { Date.now = adesso; }
+});
+test("loadPartner: configurazioni incomplete o malformate = partner inesistente, non errore", async () => {
+  for (const [id, cfg] of [["senza-segreto", { id: "senza-segreto", active: true }], ["segreto-corto", { id: "segreto-corto", active: true, secret: "abc" }],
+    ["id-diverso", { id: "altro", active: true, secret: "s".repeat(64) }], ["segreto-numero", { id: "segreto-numero", active: true, secret: 12345678901234567890123456789012 }]]) {
+    await redis.sadd("partners", id);
+    await redis.set("p:" + id, JSON.stringify(cfg));
+  }
+  await redis.sadd("partners", "rotto"); await redis.set("p:rotto", "{non json");
+  P.clearCache();
+  for (const id of ["senza-segreto", "segreto-corto", "id-diverso", "segreto-numero", "rotto"]) assert.equal(await P.loadPartner(redis, id), null, id);
 });
 test("partnerFromApiKey: chiave giusta, sbagliata, di un altro partner", async () => {
   const { apiKey } = await putPartner();
   assert.equal((await P.partnerFromApiKey(redis, apiKey)).id, "demo");
-  await assert.rejects(P.partnerFromApiKey(redis, apiKey.slice(0, -1) + "0"), e => e.code === "api_key");
+  // l'ultimo carattere della chiave è casuale: lo cambio sicuro in uno diverso
+  const sbagliata = apiKey.slice(0, -1) + (apiKey.endsWith("0") ? "1" : "0");
+  await assert.rejects(P.partnerFromApiKey(redis, sbagliata), e => e.code === "api_key");
   await assert.rejects(P.partnerFromApiKey(redis, "sk_altro_" + "a".repeat(48)), e => e.code === "api_key");
   await assert.rejects(P.partnerFromApiKey(redis, ""), e => e.code === "api_key");
 });
@@ -200,42 +248,73 @@ test("sessione: il token del partner non è una sessione e viceversa", async () 
 
 /* ---- limiti e quota ---- */
 test("limite di richieste: scatta alla soglia", async () => {
+  await finestraSicura();
   for (let i = 1; i <= 3; i++) assert.equal((await limit.hit(redis, "x", 3, 60)).ok, true);
   const r = await limit.hit(redis, "x", 3, 60);
   assert.equal(r.ok, false);
   assert.ok(r.retryAfter >= 1 && r.retryAfter <= 60);
   assert.equal((await limit.hit(redis, "altro", 3, 60)).ok, true);
 });
-test("limite di richieste: costa 2 comandi la prima volta, 1 le altre", async () => {
+test("limite di richieste: 2 comandi, in un'unica transazione", async () => {
+  await finestraSicura();
   srv.log.length = 0;
   await limit.hit(redis, "c", 10, 60);
-  assert.equal(srv.log.length, 2);
+  assert.deepEqual(srv.log, ["SET", "INCR"]);
   srv.log.length = 0;
   await limit.hit(redis, "c", 10, 60);
-  assert.equal(srv.log.length, 1);
+  assert.deepEqual(srv.log, ["SET", "INCR"]);
+});
+test("limite di richieste: il contatore ha sempre una scadenza (non resta mai una chiave eterna)", async () => {
+  await finestraSicura();
+  await limit.hit(redis, "scad", 10, 60);
+  const chiavi = await redis.keys("rl:scad:*");
+  assert.equal(chiavi.length, 1);
+  assert.ok((await redis.ttl(chiavi[0])) > 0);
+});
+test("limite di richieste: richieste simultanee contate tutte", async () => {
+  await finestraSicura();
+  const r = await Promise.all(Array.from({ length: 50 }, () => limit.hit(redis, "par", 30, 60)));
+  assert.equal(r.filter(x => x.ok).length, 30);
+  assert.equal(r.filter(x => !x.ok).length, 20);
 });
 test("quota: conta i comandi, li somma al contatore mensile e passa le soglie", async () => {
-  const q = quota.track(redis);
-  await quota.ensure(redis);
-  for (let i = 0; i < 30; i++) await q.set("k" + i, "v");
+  // `redis` è il client di getRedis(): conta già da solo ogni comando
+  await quota.ensure(redis);                              // 1 comando
+  for (let i = 0; i < 30; i++) await redis.set("k" + i, "v");
   await quota.flush(redis);
-  assert.equal(Number(await redis.get(quota.monthKey())), 30);
+  assert.equal(Number(await redis.get(quota.monthKey())), 31);
   assert.equal(quota.level(), "ok");
   await redis.set(quota.monthKey(), String(Math.round(quota.LIMIT * 0.85)));
   quota.reset(); await quota.ensure(redis);
   assert.equal(quota.level(), "warn");
   assert.doesNotThrow(() => quota.assertWritable());
-  await redis.set(quota.monthKey(), String(Math.round(quota.LIMIT * 0.97)));
+  await redis.set(quota.monthKey(), String(Math.round(quota.LIMIT * 0.91)));
   quota.reset(); await quota.ensure(redis);
   assert.equal(quota.level(), "readonly");
   assert.throws(() => quota.assertWritable(), e => e.status === 503 && e.code === "read_only");
+  await redis.set(quota.monthKey(), String(Math.round(quota.LIMIT * 0.89)));
+  quota.reset(); await quota.ensure(redis);
+  assert.equal(quota.level(), "warn", "all'89% si scrive ancora");
 });
-test("quota: conta anche i comandi di una pipeline", async () => {
-  const q = quota.track(redis);
+test("quota: conta anche i comandi di una pipeline e di una transazione", async () => {
   await quota.ensure(redis);
-  const p = q.pipeline();
+  const p = redis.pipeline();
   for (let i = 0; i < 40; i++) p.set("p" + i, "v");
   await p.exec();
+  await redis.multi().set("m", 1).incr("m").exec();
   await quota.flush(redis);
-  assert.equal(Number(await redis.get(quota.monthKey())), 40);
+  assert.equal(Number(await redis.get(quota.monthKey())), 1 + 40 + 2);
+});
+test("quota: il conteggio coincide con i comandi realmente ricevuti dal database (anche quelli del contatore)", async () => {
+  srv.log.length = 0;
+  await quota.ensure(redis);
+  for (let i = 0; i < 40; i++) await redis.set("c" + i, "v");
+  await redis.pipeline().set("a", 1).set("b", 2).exec();
+  await quota.flush(redis);
+  assert.equal(quota.used(), srv.log.length, "conteggio " + quota.used() + " contro " + srv.log.length + " comandi veri");
+});
+test("quota: Quota.wrap somma i comandi anche per gli endpoint che non lo fanno da soli", async () => {
+  const gestore = quota.wrap(async (req, res) => { for (let i = 0; i < 30; i++) await redis.get("x" + i); });
+  await gestore({}, {});
+  assert.ok(Number(await redis.get(quota.monthKey())) >= 30);
 });

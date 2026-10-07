@@ -1,9 +1,10 @@
+const Quota = require("./_quota");
 const { getRedis } = require("./_redis");
 
 /* Traduce il codice di scambio monouso (ricevuto in querystring dopo
    il login con Google) nel vero token di sessione. Il codice si
    consuma alla prima lettura. */
-module.exports = async (req, res) => {
+module.exports = Quota.wrap(async (req, res) => {
   if (req.method !== "POST") {
     res.status(405).json({ error: "Metodo non consentito" });
     return;
@@ -41,4 +42,4 @@ module.exports = async (req, res) => {
   } catch (e) {
     res.status(500).json({ error: "Errore del server." });
   }
-};
+});

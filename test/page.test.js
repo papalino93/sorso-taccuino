@@ -9,6 +9,7 @@ const page = require("../api/embed-page");
 
 let srv, redis;
 async function putPartner(extra) {
+  await redis.sadd("partners", "demo");
   await redis.set("p:demo", JSON.stringify(Object.assign({ id: "demo", name: "Demo", active: true, secret: "s".repeat(64), origins: ["https://sito.example", "https://www.sito.example"], theme: {}, lang: "it" }, extra)));
   P.clearCache();
 }
@@ -58,7 +59,12 @@ test("pagina: il tema è solo CSS controllato, con nonce", async () => {
   await putPartner({ theme: { accent: "#0a7a3c", bg: "#fafff8", font: "serif", title: "Club" } });
   const r = await get("?p=demo");
   const nonce = /nonce-([^']+)'/.exec(r.headers["content-security-policy"])[1];
-  assert.ok(r.body.includes('<style nonce="' + nonce + '">:root{--accent:#0a7a3c;--bg:#fafff8;--font:Georgia'));
+  const css = new RegExp('<style nonce="' + nonce.replace(/[.*+?^${}()|[\]\\\/]/g, "\\$&") + '">(:root\\{[^<]*\\})</style>').exec(r.body)[1];
+  assert.ok(css.includes("--accent:#0a7a3c"), css);
+  assert.ok(css.includes("--bg:#fafff8"), css);
+  assert.ok(css.includes("--font:Georgia"), css);
+  assert.ok(css.includes("color-scheme:light"), css);
+  assert.ok(/--on-accent:#/.test(css) && /--surface:#/.test(css) && /--muted:#/.test(css), "palette completa");
   assert.ok(!/<script[^>]*>[^<]/.test(r.body), "nessuno script inline");
 });
 test("pagina: tema con valori malevoli non finisce nel CSS", async () => {

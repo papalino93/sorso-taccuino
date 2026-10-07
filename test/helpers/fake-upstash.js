@@ -38,16 +38,25 @@ function create() {
     switch (name) {
       case "GET": { const e = live(a[0]); return e ? (e.type === "string" ? e.value : (() => { throw new Error("WRONGTYPE"); })()) : null; }
       case "SET": {
-        let nx = false, ex = 0;
+        let nx = false, ex = 0, get = false;
         for (let i = 2; i < a.length; i++) {
           const o = a[i].toUpperCase();
           if (o === "NX") nx = true;
+          else if (o === "GET") get = true;
           else if (o === "EX") ex = Number(a[++i]);
           else if (o === "PX") ex = Number(a[++i]) / 1000;
         }
-        if (nx && live(a[0])) return null;
+        const prev = live(a[0]);
+        if (get && prev && prev.type !== "string") throw new Error("WRONGTYPE");
+        if (nx && prev) return get ? prev.value : null;
         store.set(a[0], { type: "string", value: a[1], exp: ex ? now() + ex * 1000 : 0 });
-        return "OK";
+        return get ? (prev ? prev.value : null) : "OK";
+      }
+      case "GETDEL": { const e = live(a[0]); if (!e) return null; if (e.type !== "string") throw new Error("WRONGTYPE"); store.delete(a[0]); return e.value; }
+      case "MGET": return a.map(k => { const e = live(k); return e && e.type === "string" ? e.value : null; });
+      case "KEYS": {
+        const re = new RegExp("^" + a[0].replace(/[.+^${}()|[\]\\]/g, "\\$&").replace(/\*/g, ".*").replace(/\?/g, ".") + "$");
+        return Array.from(store.keys()).filter(k => live(k) && re.test(k));
       }
       case "DEL": { let n = 0; a.forEach(k => { if (live(k)) { store.delete(k); n++; } }); return n; }
       case "EXISTS": return a.filter(k => live(k)).length;
@@ -65,6 +74,8 @@ function create() {
         for (let i = 1; i < a.length; i += 2) { if (!h.has(a[i])) added++; h.set(a[i], a[i + 1]); }
         return added;
       }
+      case "HEXISTS": { const h = hash(a[0]); return h && h.has(a[1]) ? 1 : 0; }
+      case "EXISTS": { let n = 0; a.forEach(k => { if (live(k)) n++; }); return n; }
       case "HGET": { const h = hash(a[0]); return h && h.has(a[1]) ? h.get(a[1]) : null; }
       case "HGETALL": { const h = hash(a[0]); const out = []; if (h) h.forEach((v, k) => out.push(k, v)); return out; }
       case "HLEN": { const h = hash(a[0]); return h ? h.size : 0; }

@@ -1,4 +1,5 @@
 const { Redis } = require("@upstash/redis");
+const Quota = require("./_quota");
 
 let client = null;
 
@@ -21,7 +22,8 @@ function getRedis() {
       "Nessun database collegato: aggiungi l'integrazione Vercel KV / Upstash Redis al progetto."
     );
   }
-  client = new Redis({ url, token, automaticDeserialization: false });
+  /* il client conta i comandi (vedi _quota.js) */
+  client = Quota.track(new Redis({ url, token, automaticDeserialization: false }));
   return client;
 }
 

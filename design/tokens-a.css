@@ -1,0 +1,158 @@
+/* ==========================================================================
+   SORSO · Direzione A — "Cantina editoriale"
+   Design tokens. Stesso contratto di nomi di tokens-b.css: cambiare file
+   significa cambiare direzione, senza toccare i componenti.
+
+   Struttura
+     1. INPUT PARTNER  (l'unico sottoinsieme che un partner può sovrascrivere)
+     2. Tema di base chiaro / scuro   (--c-*: valori "grezzi", mai usati nei componenti)
+     3. Mappatura + valori derivati   (--bg, --ink, --surface ... usati dai componenti)
+     4. Tipografia, spazio, raggi, ombre, movimento
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   1. PARTNER-OVERRIDABLE  — solo queste 5 custom property, e solo su
+      :root o su un elemento .themeable. Tutto il resto deriva da loro.
+
+        --p-logo    url("data:image/svg+xml,...") oppure url(https://…/logo.svg)
+                    (altezza fissa 28px, larghezza max 140px, background-size: contain)
+        --p-accent  colore pieno per bottoni, tracce, anello. Il testo sopra
+                    (--on-accent) è scelto in automatico, nero o bianco.
+        --p-bg      sfondo pagina
+        --p-ink     colore del testo
+        --p-font    UNA famiglia della lista di sistema (vedi sotto); vale per titoli,
+                    testo e numeri del team
+
+      Lista font ammessa (nessun caricamento esterno):
+        system-ui, sans-serif                     "Avenir Next", Avenir, "Segoe UI", sans-serif
+        Georgia, "Times New Roman", serif         "Iowan Old Style", Palatino, "Palatino Linotype", serif
+        "Trebuchet MS", sans-serif                Verdana, Geneva, sans-serif
+        ui-rounded, "SF Pro Rounded", system-ui, sans-serif
+
+      Vincoli (validati in onboarding, non da CSS):
+        ink su bg ≥ 7:1 · accent su bg ≥ 3:1 (componenti grafici, WCAG 1.4.11)
+   -------------------------------------------------------------------------- */
+
+/* --------------------------------------------------------------------------
+   2. Tema di base — chiaro (carta)
+   -------------------------------------------------------------------------- */
+:root {
+  color-scheme: light dark;
+  --c-bg: #F6EEDF;            /* carta da lettere */
+  --c-ink: #2A1A1D;           /* quasi-nero bordeaux */
+  --c-accent: #6B1424;        /* bordeaux */
+  --c-brass: #755210;         /* ottone scuro, per testo e bordi (>= 4.5:1 su bg e su surface) */
+  --c-brass-hi: #D4A93C;      /* ottone acceso, solo riempimenti decorativi */
+  --c-brass-lo: #8A6514;
+  --c-positive: #2F6B3F;
+  --c-font-display: "Fraunces", "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
+  --c-font-text: "Source Sans 3", "Source Sans Pro", "Segoe UI", system-ui, sans-serif;
+  --c-font-num: "Fraunces", "Iowan Old Style", Georgia, serif;
+  /* marchio Sorso (calice), colore cotto nel file perché un'immagine non eredita currentColor */
+  --c-logo: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 28 28'%3E%3Cpath fill='%236B1424' d='M7 2h14c0 7-1.6 11.4-5.6 12.3V23h4.1c.5 0 .9.4.9.9s-.4.9-.9.9h-11c-.5 0-.9-.4-.9-.9s.4-.9.9-.9h4.1v-8.7C8.600 13.400 7 9 7 2zm1.900 1.900c.2 4.900 1.300 7.700 5.100 7.700s4.900-2.800 5.100-7.700z'/%3E%3C/svg%3E");
+  --grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .42 0 0 0 0 .3 0 0 0 0 .2 0 0 0 .55 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.22'/%3E%3C/svg%3E");
+  --grain-opacity: .5;
+}
+/* scuro: cantina di notte (due selettori: scelta manuale e preferenza di sistema) */
+:root[data-theme="dark"] {
+  --c-bg: #1A0F12;
+  --c-ink: #F2E7D6;
+  --c-accent: #B8334F;
+  --c-brass: #D9B45E;
+  --c-brass-hi: #F0D58A;
+  --c-brass-lo: #B58E33;
+  --c-positive: #7FC28F;
+  --c-logo: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 28 28'%3E%3Cpath fill='%23E8A0AE' d='M7 2h14c0 7-1.6 11.4-5.6 12.3V23h4.1c.5 0 .9.4.9.9s-.4.9-.9.9h-11c-.5 0-.9-.4-.9-.9s.4-.9.9-.9h4.1v-8.7C8.600 13.400 7 9 7 2zm1.900 1.900c.2 4.900 1.300 7.700 5.100 7.700s4.900-2.800 5.100-7.700z'/%3E%3C/svg%3E");
+  --grain-opacity: .35;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --c-bg: #1A0F12;
+    --c-ink: #F2E7D6;
+    --c-accent: #B8334F;
+    --c-brass: #D9B45E;
+    --c-brass-hi: #F0D58A;
+    --c-brass-lo: #B58E33;
+    --c-positive: #7FC28F;
+    --c-logo: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 28 28'%3E%3Cpath fill='%23E8A0AE' d='M7 2h14c0 7-1.6 11.4-5.6 12.3V23h4.1c.5 0 .9.4.9.9s-.4.9-.9.9h-11c-.5 0-.9-.4-.9-.9s.4-.9.9-.9h4.1v-8.7C8.600 13.400 7 9 7 2zm1.900 1.900c.2 4.900 1.300 7.700 5.100 7.700s4.900-2.800 5.100-7.700z'/%3E%3C/svg%3E");
+    --grain-opacity: .35;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   3. Mappatura e derivati. Su :root E su .themeable, così una sezione con
+      --p-* propri (un iframe partner, o un riquadro demo) si ricalcola da sé.
+      I componenti usano SOLO questi nomi.
+   -------------------------------------------------------------------------- */
+:root, .themeable {
+  /* ← qui entrano gli input del partner (fallback = tema di base) */
+  --bg: var(--p-bg, var(--c-bg));
+  --ink: var(--p-ink, var(--c-ink));
+  --accent: var(--p-accent, var(--c-accent));
+  --logo: var(--p-logo, var(--c-logo));
+  --font-display: var(--p-font, var(--c-font-display));
+  --font-text: var(--p-font, var(--c-font-text));
+  --font-num: var(--p-font, var(--c-font-num));
+
+  /* derivati: NON sovrascrivere */
+  --surface: color-mix(in srgb, var(--bg), var(--ink) 4%);       /* carta più scura: inserti, schede */
+  --surface-2: color-mix(in srgb, var(--bg), var(--ink) 9%);
+  --line: color-mix(in srgb, var(--bg), var(--ink) 20%);
+  --line-strong: color-mix(in srgb, var(--bg), var(--ink) 38%);
+  --ink-2: color-mix(in srgb, var(--ink), var(--bg) 14%);       /* testo secondario (>= 4.5:1) */
+  --ink-3: color-mix(in srgb, var(--ink), var(--bg) 42%);       /* solo testo grande / decorativo */
+  --accent-text: color-mix(in srgb, var(--accent) 66%, var(--ink));
+  --accent-soft: color-mix(in srgb, var(--accent) 12%, var(--bg));
+  --on-accent: #fff;
+  --brass: var(--c-brass);
+  --brass-hi: var(--c-brass-hi);
+  --brass-lo: var(--c-brass-lo);
+  --positive: var(--c-positive);
+  --focus: color-mix(in srgb, var(--accent) 70%, var(--ink));
+}
+@supports (color: oklch(from red l c h)) {
+  :root, .themeable {
+    /* nero o bianco a seconda della luminosità dell'accento del partner */
+    --on-accent: oklch(from var(--accent) clamp(0, (l - 0.62) * -1000, 1) 0 0);
+  }
+}
+
+/* --------------------------------------------------------------------------
+   4. Scale (non overridable)
+   -------------------------------------------------------------------------- */
+:root {
+  /* tipografia: Fraunces per titoli e cifre, Source Sans 3 per interfaccia */
+  --fs-1: .75rem;    /* 12  etichette in maiuscoletto */
+  --fs-2: .875rem;   /* 14  testo di servizio */
+  --fs-3: 1rem;      /* 16  testo base (mai sotto 16 nei campi) */
+  --fs-4: 1.1875rem; /* 19  titoli di riga */
+  --fs-5: 1.5rem;    /* 24  titoli di schermata */
+  --fs-6: 2.125rem;  /* 34  cifre medie */
+  --fs-7: 3.5rem;    /* 56  punteggio nell'anello */
+  --fs-hero: 4.5rem; /* 72  punteggio solo */
+  --lh-tight: 1.1;  --lh-base: 1.5;
+  --ls-caps: .14em;
+  --fw-display: 400;   /* Fraunces: peso leggero, ottico alto */
+  --fw-display-strong: 600;
+  --opsz-display: 120;
+
+  /* spazio (base 4) */
+  --s-1: 4px;  --s-2: 8px;  --s-3: 12px; --s-4: 16px; --s-5: 24px; --s-6: 32px; --s-7: 48px; --s-8: 72px;
+  --gutter: 16px;
+  --touch: 44px;
+
+  /* raggi: angoli quasi vivi, come un biglietto stampato */
+  --r-sm: 2px;  --r-md: 4px;  --r-lg: 8px;  --r-pill: 999px;
+
+  /* ombre: caldo, basso, da carta appoggiata */
+  --sh-1: 0 1px 0 color-mix(in srgb, var(--ink) 10%, transparent), 0 1px 2px color-mix(in srgb, var(--ink) 8%, transparent);
+  --sh-2: 0 1px 0 color-mix(in srgb, var(--ink) 8%, transparent), 0 8px 24px -8px color-mix(in srgb, var(--ink) 28%, transparent);
+  --rule-double: 3px double var(--line-strong);
+
+  /* movimento: lento, da liquido nel bicchiere */
+  --dur-1: 160ms; --dur-2: 360ms; --dur-3: 900ms;
+  --ease: cubic-bezier(.2, .7, .2, 1);
+}
+@media (prefers-reduced-motion: reduce) {
+  :root { --dur-1: 0ms; --dur-2: 0ms; --dur-3: 0ms; }
+}

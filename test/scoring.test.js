@@ -183,3 +183,60 @@ test("Scoring.ITEMS coincide con VALUTA di public/index.html (chiavi e pesi)", (
   assert.equal(voci.length, Object.values(S.ITEMS).flat().length);
   assert.equal(totaleHtml, totaleModulo);
 });
+
+/* ---- arrotondamento classico: da 5 in su per eccesso, da 1 a 4 per difetto ---- */
+test("roundHalfUp: la regola classica sui casi a metà", () => {
+  const casi = [[0.5, 0, 1], [1.5, 0, 2], [2.5, 0, 3], [3.5, 0, 4], [82.5, 0, 83], [82.4, 0, 82], [82.49, 0, 82], [82.51, 0, 83],
+    [1.005, 2, 1.01], [2.675, 2, 2.68], [0.285, 2, 0.29], [79.45, 1, 79.5], [79.44, 1, 79.4], [88.05, 1, 88.1], [74.25, 1, 74.3],
+    [-0.5, 0, -1], [-1.5, 0, -2], [-2.4, 0, -2], [0, 0, 0], [100, 0, 100], [49.5, 0, 50]];
+  casi.forEach(([x, d, atteso]) => assert.equal(S.roundHalfUp(x, d), atteso, x + " con " + d + " decimali"));
+});
+test("roundHalfUp: l'errore dei decimali binari non decide il risultato", () => {
+  assert.equal(S.roundHalfUp(82.49999999999999), 83);   // è 82,5 con un errore di calcolo
+  assert.equal(S.roundHalfUp(0.1 * 3 * 5 + 0.0), 2);    // 1,5000000000000002
+  assert.equal(S.roundHalfUp(8.5 + 27.6 + 52.8 - 0.4), 89);
+  assert.equal(S.roundHalfUp(1.45, 1), 1.5);
+  assert.equal(S.roundHalfUp(8.345, 2), 8.35);
+});
+test("roundHalfUp: valori non numerici", () => {
+  [NaN, Infinity, undefined, "x", {}].forEach(v => assert.equal(S.roundHalfUp(v), 0));
+  assert.equal(S.roundHalfUp("12.5"), 13);
+  assert.equal(S.roundHalfUp(null), 0);
+});
+test("voto rapido: tutte le 132.651 combinazioni coincidono con il calcolo esatto in interi", () => {
+  let verificate = 0;
+  for (let a = 50; a <= 100; a++) for (let b = 50; b <= 100; b++) for (let c = 50; c <= 100; c++) {
+    let atteso = Math.floor((10 * a + 30 * b + 60 * c + 50) / 100);
+    if (atteso === 100 && !(a === 100 && b === 100 && c === 100)) atteso = 99;
+    const r = S.smartScore({ occhio: a, naso: b, bocca: c }).total;
+    if (r !== atteso) assert.fail("occhio " + a + " naso " + b + " bocca " + c + ": " + r + " invece di " + atteso);
+    verificate++;
+  }
+  assert.equal(verificate, 51 ** 3);
+});
+test("scheda completa (k = 2): 200.000 combinazioni casuali coincidono con il calcolo esatto in interi", () => {
+  assert.equal(S.K, 2, "il test esatto vale per k = 2");
+  // totale = 50 + N / 28800, con N = somma dei pesi per r² · 14400 / m²; punteggio di fase = 50 + 50 r² / m²
+  const M = { v: 10, o: 30, g: 40, f: 20 };
+  let seed = 12345;
+  const rnd = n => { seed = (seed * 1103515245 + 12345) & 0x7fffffff; return seed % n; };
+  for (let i = 0; i < 200000; i++) {
+    const T = { v: { qualita: rnd(11) }, o: { intensita: rnd(11), complessita: rnd(11), qualita: rnd(11) },
+      g: { equilibrio: rnd(11), intensita: rnd(11), persistenza: rnd(11), qualita: rnd(11) }, f: { armonia: rnd(11) } };
+    const raw = { v: T.v.qualita, o: T.o.intensita + T.o.complessita + T.o.qualita,
+      g: T.g.equilibrio + T.g.intensita + T.g.persistenza + T.g.qualita, f: T.f.armonia * 2 };
+    let N = 0, tutto = true;
+    const fasi = {};
+    for (const k of ["v", "o", "g", "f"]) {
+      N += S.PHASE_W[k] * raw[k] * raw[k] * (14400 / (M[k] * M[k]));
+      fasi[k] = 50 + Math.floor((100 * raw[k] * raw[k] + M[k] * M[k]) / (2 * M[k] * M[k]));
+      if (raw[k] < M[k]) tutto = false;
+    }
+    let atteso = 50 + Math.floor((N + 14400) / 28800);
+    if (atteso === 100 && !tutto) atteso = 99;
+    const r = S.fullScore(T, S.ITEMS);
+    if (r.total !== atteso || ["v", "o", "g", "f"].some(k => r.phases[k] !== fasi[k])) {
+      assert.fail(JSON.stringify(T) + " → " + r.total + " " + JSON.stringify(r.phases) + " ma atteso " + atteso + " " + JSON.stringify(fasi));
+    }
+  }
+});

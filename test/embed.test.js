@@ -1,7 +1,7 @@
 const test = require("node:test");
 const assert = require("node:assert/strict");
 const crypto = require("crypto");
-const { setup, call } = require("./helpers/env");
+const { setup, call, finestraSicura } = require("./helpers/env");
 const jwt = require("../api/_jwt");
 const P = require("../api/_partner");
 const quota = require("../api/_quota");
@@ -15,6 +15,7 @@ const now = () => Math.floor(Date.now() / 1000);
 
 async function putPartner(id, extra) {
   const cfg = Object.assign({ id, name: id, active: true, secret: SECRET, apiKeyHash: "x", origins: [], modes: ["smart", "full"] }, extra);
+  await redis.sadd("partners", id);
   await redis.set("p:" + id, JSON.stringify(cfg));
   P.clearCache();
   return cfg;
@@ -76,8 +77,9 @@ test("sessione: partner disattivato", async () => {
   assert.equal((await post({ op: "session", token: token() })).statusCode, 401);
 });
 test("sessione: tentativi limitati per indirizzo", async () => {
+  await finestraSicura();
   let last;
-  for (let i = 0; i < 31; i++) last = await post({ op: "session", token: "x" });
+  for (let i = 0; i < 201; i++) last = await post({ op: "session", token: "x" });
   assert.equal(last.statusCode, 429);
   assert.ok(last.headers["retry-after"]);
 });
@@ -123,7 +125,7 @@ test("voto smart: il server calcola il punteggio; la media si vede solo dopo ave
   const r = await post(Object.assign({ op: "vote", tasting: t.id, wine: w1.id, score: 100 }, smart(80, 90, 70)), m);
   assert.equal(r.statusCode, 200);
   assert.equal(r.body.score, 77, "il punteggio inviato dal client (100) è ignorato");
-  assert.deepEqual(r.body.team, { avg: 77, count: 1 });
+  assert.equal(r.body.team, undefined, "la risposta al voto non porta la media: si legge dallo stato");
   st = (await post({ op: "state", tasting: t.id }, m)).body;
   const w = st.wines.find(x => x.id === w1.id);
   assert.equal(w.mine.score, 77);
@@ -141,8 +143,9 @@ test("media di più voti, smart e completa insieme, con un decimale", async () =
   const a = await login({ sub: "a" }), b = await login({ sub: "b" }), c = await login({ sub: "c" });
   await post(Object.assign({ op: "vote", tasting: t.id, wine: w1.id }, smart(80, 90, 70)), a);   // 77
   await post(Object.assign({ op: "vote", tasting: t.id, wine: w1.id }, full(8)), b);             // 82
-  const r = await post(Object.assign({ op: "vote", tasting: t.id, wine: w1.id }, smart(100, 100, 99)), c); // 99
-  assert.deepEqual(r.body.team, { avg: round1((77 + 82 + 99) / 3), count: 3 });
+  await post(Object.assign({ op: "vote", tasting: t.id, wine: w1.id }, smart(100, 100, 99)), c); // 99
+  const st = (await post({ op: "state", tasting: t.id }, c)).body;
+  assert.deepEqual(st.wines.find(x => x.id === w1.id).team, { avg: round1((77 + 82 + 99) / 3), count: 3 });
   function round1(x) { return Math.round(x * 10) / 10; }
 });
 test("voto completo: punteggio calcolato dal server con la stessa scala dell'app", async () => {
@@ -159,7 +162,8 @@ test("rivotare sostituisce il voto: somma e conteggio restano esatti", async () 
   await post(Object.assign({ op: "vote", tasting: t.id, wine: w1.id }, smart(90, 90, 90)), b);
   const r = await post(Object.assign({ op: "vote", tasting: t.id, wine: w1.id }, smart(80, 80, 80)), a);
   assert.equal(r.body.replaced, true);
-  assert.deepEqual(r.body.team, { avg: 85, count: 2 });
+  const st = (await post({ op: "state", tasting: t.id }, a)).body;
+  assert.deepEqual(st.wines.find(x => x.id === w1.id).team, { avg: 85, count: 2 });
 });
 test("voti non validi", async () => {
   const { t, w1 } = await scenario();
@@ -257,13 +261,15 @@ test("elenco delle degustazioni del team, dalla più recente", async () => {
 });
 test("tetto di vini per degustazione", async () => {
   const { org, t } = await scenario();
-  const fields = {};
-  for (let i = 0; i < Team.MAX_WINES; i++) fields["w" + i] = JSON.stringify({ id: "w" + i, name: "n", createdAt: i });
-  await redis.hset("wn:demo:" + t.id, fields);
+  await redis.hset("cn:demo", { ["w:" + t.id]: String(Team.MAX_WINES - 2) });   // restano due posti
+  assert.equal((await post({ op: "wine.add", tasting: t.id, wine: { name: "Penultimo" } }, org)).statusCode, 200);
+  assert.equal((await post({ op: "wine.add", tasting: t.id, wine: { name: "Ultimo" } }, org)).statusCode, 200);
   const r = await post({ op: "wine.add", tasting: t.id, wine: { name: "Uno di troppo" } }, org);
   assert.equal(r.statusCode, 409); assert.equal(r.body.error.code, "limit");
+  assert.equal(Number((await redis.hget("cn:demo", "w:" + t.id))), Team.MAX_WINES, "il rifiuto non sposta il contatore");
 });
 test("limite di richieste per utente", async () => {
+  await finestraSicura();
   const s = await login();
   let last;
   for (let i = 0; i < 92; i++) last = await post({ op: "state" }, s);
@@ -290,9 +296,10 @@ test("avviso agli organizzatori oltre l'80% dei comandi", async () => {
   assert.equal((await post({ op: "state" }, m)).body.quota, "ok", "i membri non vedono l'avviso");
 });
 test("costo in comandi Redis: stato e voto restano economici", async () => {
+  await finestraSicura();
   const { t, w1 } = await scenario();
   const m = await login({ sub: "m" });
-  P.clearCache();
+  await post({ op: "state", tasting: t.id }, m);          // a caldo: elenco dei partner già in memoria
   srv.log.length = 0;
   await post({ op: "state", tasting: t.id }, m);
   const stato = srv.log.length;
@@ -300,7 +307,7 @@ test("costo in comandi Redis: stato e voto restano economici", async () => {
   await post(Object.assign({ op: "vote", tasting: t.id, wine: w1.id }, smart(70, 70, 70)), m);
   const voto = srv.log.length;
   console.log("   comandi: stato =", stato, ", voto =", voto);
-  assert.ok(stato <= 9, "stato: " + stato);
+  assert.ok(stato <= 8, "stato: " + stato);
   assert.ok(voto <= 13, "voto: " + voto);
 });
 
@@ -319,6 +326,6 @@ test("cancellazione utente: voti rimossi, medie corrette", async () => {
   assert.equal((await Team.deleteUser(redis, "demo", "a")).votesRemoved, 0, "idempotente");
   const st = (await post({ op: "state", tasting: t.id }, await login({ sub: "a" }))).body;
   assert.equal(st.wines[0].mine, null);
-  assert.equal(await redis.hget("vt:demo:" + t.id + ":" + w1.id, "a"), null);
-  assert.equal(await redis.hget("vt:demo:" + t.id + ":" + w1.id, "b") !== null, true);
+  assert.equal(await redis.get("vt:demo:" + t.id + ":" + w1.id + ":a"), null);
+  assert.equal(await redis.get("vt:demo:" + t.id + ":" + w1.id + ":b") !== null, true);
 });

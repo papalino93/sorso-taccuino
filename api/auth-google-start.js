@@ -1,4 +1,5 @@
 const crypto = require("crypto");
+const Quota = require("./_quota");
 const { getRedis } = require("./_redis");
 
 const STATE_TTL_SECONDS = 10 * 60;
@@ -11,7 +12,7 @@ function redirectUri(req) {
 
 /* Avvia il login con Google: genera uno "state" anti-CSRF, lo
    registra a tempo, e reindirizza alla schermata di consenso Google. */
-module.exports = async (req, res) => {
+module.exports = Quota.wrap(async (req, res) => {
   const clientId = process.env.GOOGLE_CLIENT_ID;
   if (!clientId) {
     res.status(503).send("Login con Google non configurato: manca GOOGLE_CLIENT_ID.");
@@ -46,4 +47,4 @@ module.exports = async (req, res) => {
 
   res.writeHead(302, { Location: "https://accounts.google.com/o/oauth2/v2/auth?" + params.toString() });
   res.end();
-};
+});

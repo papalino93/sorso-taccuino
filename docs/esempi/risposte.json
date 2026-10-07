@@ -1,0 +1,92 @@
+{
+  "tastings": {
+    "tastings": [
+      {
+        "id": "3a9d45ad54",
+        "team": "giovedi",
+        "name": "Serata di ottobre",
+        "status": "closed",
+        "createdAt": "2026-10-07T21:33:19.516Z"
+      }
+    ]
+  },
+  "results": {
+    "tasting": {
+      "id": "3a9d45ad54",
+      "team": "giovedi",
+      "name": "Serata di ottobre",
+      "status": "closed",
+      "createdAt": "2026-10-07T21:33:19.516Z"
+    },
+    "minVotes": 2,
+    "wines": [
+      {
+        "id": "efe248b456",
+        "producer": "Poderi Rivalta",
+        "name": "Barolo Cannubi",
+        "vintage": "2019",
+        "votes": 3,
+        "average": 88,
+        "hidden": false
+      },
+      {
+        "id": "23cb60b4e2",
+        "producer": "Tenuta delle Sciare",
+        "name": "Etna Rosso Contrada Rampante",
+        "vintage": "2021",
+        "votes": 2,
+        "average": 74.5,
+        "hidden": false
+      },
+      {
+        "id": "7611471784",
+        "producer": "Casa Marchigiana",
+        "name": "Verdicchio Classico",
+        "vintage": "2022",
+        "votes": 1,
+        "average": null,
+        "hidden": true
+      }
+    ]
+  },
+  "csv": "tasting_id,tasting,wine_id,producer,name,vintage,votes,average\r\n3a9d45ad54,Serata di ottobre,efe248b456,Poderi Rivalta,Barolo Cannubi,2019,3,88\r\n3a9d45ad54,Serata di ottobre,23cb60b4e2,Tenuta delle Sciare,Etna Rosso Contrada Rampante,2021,2,74.5\r\n3a9d45ad54,Serata di ottobre,7611471784,Casa Marchigiana,Verdicchio Classico,2022,1,\r\n",
+  "deleteUser": {
+    "votesRemoved": 1
+  },
+  "errUnauthorized": {
+    "error": {
+      "code": "unauthorized",
+      "message": "Chiave API mancante o non valida."
+    }
+  },
+  "errNotFound": {
+    "error": {
+      "code": "not_found",
+      "message": "Degustazione non trovata."
+    }
+  },
+  "session": {
+    "user": {
+      "name": "Anna",
+      "role": "organizer",
+      "team": "giovedi"
+    },
+    "config": {
+      "modes": [
+        "smart",
+        "full"
+      ],
+      "defaultMode": "smart",
+      "lang": "it",
+      "title": "Club Demo",
+      "logo": ""
+    },
+    "quota": "ok"
+  },
+  "errTokenUsed": {
+    "error": {
+      "code": "token_used",
+      "message": "Token già usato: ricarica la pagina dal sito per ottenerne uno nuovo."
+    }
+  }
+}

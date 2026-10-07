@@ -1,0 +1,141 @@
+/* ==========================================================================
+   SORSO · Direzione B — "Numero e inchiostro"
+   Design tokens. Stesso contratto di nomi di tokens-a.css: cambiare file
+   significa cambiare direzione, senza toccare i componenti.
+
+   Struttura
+     1. INPUT PARTNER  (l'unico sottoinsieme che un partner può sovrascrivere)
+     2. Tema di base chiaro / scuro   (--c-*: valori "grezzi", mai usati nei componenti)
+     3. Mappatura + valori derivati   (--bg, --ink, --surface ... usati dai componenti)
+     4. Tipografia, spazio, raggi, ombre, movimento
+   Idea: inchiostro su carta bianca + UN solo colore pieno (vinaccia/uva). Il
+   colore compare solo dove succede qualcosa: azione, selezione, e — inondando
+   tutto lo schermo — i punteggi dal 96 in su.
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   1. PARTNER-OVERRIDABLE  — solo queste 5 custom property, e solo su
+      :root o su un elemento .themeable. Tutto il resto deriva da loro.
+
+        --p-logo    url("data:image/svg+xml,...") oppure url(https://…/logo.svg)
+                    (altezza fissa 28px, larghezza max 140px, background-size: contain)
+        --p-accent  colore pieno per azioni, selezioni, tracce, fascia alta. Il testo
+                    sopra (--on-accent) è scelto in automatico, nero o bianco.
+        --p-bg      sfondo pagina
+        --p-ink     colore del testo
+        --p-font    UNA famiglia della lista di sistema (vedi sotto); vale per titoli,
+                    testo e numeri del team
+
+      Lista font ammessa (nessun caricamento esterno):
+        system-ui, sans-serif                     "Avenir Next", Avenir, "Segoe UI", sans-serif
+        Georgia, "Times New Roman", serif         "Iowan Old Style", Palatino, "Palatino Linotype", serif
+        "Trebuchet MS", sans-serif                Verdana, Geneva, sans-serif
+        ui-rounded, "SF Pro Rounded", system-ui, sans-serif
+
+      Vincoli (validati in onboarding, non da CSS):
+        ink su bg ≥ 7:1 · accent su bg ≥ 3:1 (componenti grafici, WCAG 1.4.11)
+   -------------------------------------------------------------------------- */
+
+/* --------------------------------------------------------------------------
+   2. Tema di base — chiaro
+   -------------------------------------------------------------------------- */
+:root {
+  color-scheme: light dark;
+  --c-bg: #FAFAF7;
+  --c-ink: #0B0B10;
+  --c-accent: #5B2EFF;        /* uva / nebbiolo elettrico */
+  --c-positive: #0E7A3E;
+  --c-font-display: "Geist", "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --c-font-text: "Geist", "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --c-font-num: "Geist", "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+  /* marchio Sorso (goccia), colore cotto nel file perché un'immagine non eredita currentColor */
+  --c-logo: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 28 28'%3E%3Crect width='28' height='28' rx='9' fill='%235B2EFF'/%3E%3Cpath fill='%23fff' d='M14 5c3.800 4.300 6 7.200 6 10.200A6 6 0 0 1 8 15.200C8 12.200 10.200 9.300 14 5z'/%3E%3C/svg%3E");
+}
+:root[data-theme="dark"] {
+  --c-bg: #08080B;
+  --c-ink: #F6F6F3;
+  --c-accent: #A58BFF;
+  --c-positive: #5FD38D;
+  --c-logo: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 28 28'%3E%3Crect width='28' height='28' rx='9' fill='%23A58BFF'/%3E%3Cpath fill='%2308080B' d='M14 5c3.800 4.300 6 7.200 6 10.200A6 6 0 0 1 8 15.200C8 12.200 10.200 9.300 14 5z'/%3E%3C/svg%3E");
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --c-bg: #08080B;
+    --c-ink: #F6F6F3;
+    --c-accent: #A58BFF;
+    --c-positive: #5FD38D;
+    --c-logo: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 28 28'%3E%3Crect width='28' height='28' rx='9' fill='%23A58BFF'/%3E%3Cpath fill='%2308080B' d='M14 5c3.800 4.300 6 7.200 6 10.200A6 6 0 0 1 8 15.200C8 12.200 10.200 9.300 14 5z'/%3E%3C/svg%3E");
+  }
+}
+
+/* --------------------------------------------------------------------------
+   3. Mappatura e derivati. Su :root E su .themeable (vedi tokens-a.css).
+      I componenti usano SOLO questi nomi.
+   -------------------------------------------------------------------------- */
+:root, .themeable {
+  /* ← qui entrano gli input del partner (fallback = tema di base) */
+  --bg: var(--p-bg, var(--c-bg));
+  --ink: var(--p-ink, var(--c-ink));
+  --accent: var(--p-accent, var(--c-accent));
+  --logo: var(--p-logo, var(--c-logo));
+  --font-display: var(--p-font, var(--c-font-display));
+  --font-text: var(--p-font, var(--c-font-text));
+  --font-num: var(--p-font, var(--c-font-num));
+
+  /* derivati: NON sovrascrivere */
+  --surface: color-mix(in srgb, var(--bg), var(--ink) 5%);       /* card piatte, tono su tono */
+  --surface-2: color-mix(in srgb, var(--bg), var(--ink) 10%);
+  --line: color-mix(in srgb, var(--bg), var(--ink) 14%);
+  --line-strong: color-mix(in srgb, var(--bg), var(--ink) 34%);  /* bordi di campi: >= 3:1 */
+  --ink-2: color-mix(in srgb, var(--ink), var(--bg) 24%);       /* testo secondario (>= 4.5:1) */
+  --ink-3: color-mix(in srgb, var(--ink), var(--bg) 46%);       /* solo testo grande / decorativo */
+  --accent-soft: color-mix(in srgb, var(--accent) 14%, var(--bg));
+  --on-accent: #fff;
+  --positive: var(--c-positive);
+  --focus: var(--ink);
+}
+@supports (color: oklch(from red l c h)) {
+  :root, .themeable {
+    /* nero o bianco a seconda della luminosità dell'accento del partner */
+    --on-accent: oklch(from var(--accent) clamp(0, (l - 0.62) * -1000, 1) 0 0);
+  }
+}
+
+/* --------------------------------------------------------------------------
+   4. Scale (non overridable)
+   -------------------------------------------------------------------------- */
+:root {
+  /* tipografia: una sola famiglia (Geist), pesi 400/600/700/800 e numeri enormi */
+  --fs-1: .75rem;    /* 12  etichette */
+  --fs-2: .875rem;   /* 14  testo di servizio */
+  --fs-3: 1rem;      /* 16  testo base */
+  --fs-4: 1.125rem;  /* 18  titoli di riga */
+  --fs-5: 1.5rem;    /* 24  titoli di sezione */
+  --fs-6: 2.5rem;    /* 40  cifre di card */
+  --fs-7: 4rem;      /* 64  cifre medie */
+  --fs-hero: 7.5rem; /* 120 punteggio */
+  --lh-tight: .9;  --lh-base: 1.45;
+  --ls-caps: .08em;
+  --ls-num: -.05em;     /* i numeri grandi si stringono */
+  --fw-text: 450; --fw-strong: 650; --fw-display: 700; --fw-num: 750;
+
+  /* spazio (base 4) */
+  --s-1: 4px;  --s-2: 8px;  --s-3: 12px; --s-4: 16px; --s-5: 24px; --s-6: 32px; --s-7: 48px; --s-8: 72px;
+  --gutter: 20px;
+  --touch: 48px;
+
+  /* raggi: grandi e morbidi */
+  --r-sm: 10px;  --r-md: 16px;  --r-lg: 28px;  --r-pill: 999px;
+
+  /* ombre: quasi assenti; solo l'elemento flottante (tab bar) ne ha una */
+  --sh-1: none;
+  --sh-2: 0 12px 32px -12px color-mix(in srgb, var(--ink) 40%, transparent);
+
+  /* movimento: secco, con un filo di rimbalzo */
+  --dur-1: 120ms; --dur-2: 240ms; --dur-3: 700ms;
+  --ease: cubic-bezier(.3, 1.3, .5, 1);
+  --ease-out: cubic-bezier(.2, .8, .2, 1);
+}
+@media (prefers-reduced-motion: reduce) {
+  :root { --dur-1: 0ms; --dur-2: 0ms; --dur-3: 0ms; }
+}
