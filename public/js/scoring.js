@@ -19,8 +19,9 @@
   const BAND_MIN = 50;
   const BAND_MAX = 100;
   /* Esponente della curva della scheda completa: più è alto, più è difficile
-     arrivare in alto. Provvisorio, da tarare sulle schede reali. */
-  const K = 1.8;
+     arrivare in alto. Con 2 le parole dei giudizi 0-10 coincidono con le fasce
+     (6 sufficiente = 68, 7 discreto = 75, 8 buono = 82, 9 ottimo = 91). */
+  const K = 2;
   const VAL_MAX = 10;
 
   const PHASES = ["v", "o", "g", "f"];

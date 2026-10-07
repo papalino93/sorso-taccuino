@@ -37,8 +37,8 @@ test("scheda completa: 100 solo con ogni giudizio a 10", () => {
   assert.equal(S.fullScore(U, VALUTA).total < 100, true);
 });
 
-test("scheda completa: valori di riferimento con K = 1,8", () => {
-  const atteso = { 4: 60, 5: 64, 6: 70, 7: 76, 8: 83, 9: 91, 10: 100 };
+test("scheda completa: valori di riferimento con K = 2", () => {
+  const atteso = { 4: 58, 5: 63, 6: 68, 7: 75, 8: 82, 9: 91, 10: 100 };
   Object.keys(atteso).forEach(n => {
     assert.equal(S.fullScore(tutti(Number(n)), VALUTA).total, atteso[n], "tutti a " + n);
   });
@@ -92,7 +92,7 @@ test("legacyLinear riproduce il vecchio totale", () => {
 
 test("record salvato modello 4: si ricalcola dai giudizi singoli", () => {
   const rec = { modello: 4, score: 86, voti: tutti(8) };
-  assert.equal(S.scoreOfRecord(rec, VALUTA), 83);
+  assert.equal(S.scoreOfRecord(rec, VALUTA), 82);
   assert.equal(S.qualityOfRecord(rec, VALUTA).g, 0.8);
 });
 
@@ -100,7 +100,7 @@ test("record storico con soli punti di fase (parts)", () => {
   const rec = { score: 78, parts: { v: 8, o: 24, g: 32, f: 16 } };
   const q = S.qualityOfRecord(rec, VALUTA);
   assert.deepEqual(q, { v: 0.8, o: 0.8, g: 0.8, f: 0.8 });
-  assert.equal(S.scoreOfRecord(rec, VALUTA), 83);
+  assert.equal(S.scoreOfRecord(rec, VALUTA), 82);
 });
 
 test("record storico con parts.a al posto di parts.f", () => {
@@ -111,8 +111,8 @@ test("record storico con parts.a al posto di parts.f", () => {
 test("record storico con il solo totale", () => {
   const rec = { score: 41 };
   assert.equal(S.scoreOfRecord(rec, VALUTA), S.fromLegacyTotal(41));
-  assert.equal(S.fromLegacyTotal(41), 60);
-  assert.equal(S.fromLegacyTotal(28), 55);
+  assert.equal(S.fromLegacyTotal(41), 58);
+  assert.equal(S.fromLegacyTotal(28), 54);
   assert.equal(S.fromLegacyTotal(100), 100);
   assert.equal(S.fromLegacyTotal(0), 50);
   assert.equal(S.fromLegacyTotal("non un numero"), 50);

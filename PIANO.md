@@ -25,9 +25,9 @@ Vincolo trasversale: **nessun costo**. Vercel Hobby + Upstash Redis gratuito, us
 - **Voto smart**: nessuna conversione. I tre giudizi sono già su 50–100 e il totale è la loro media pesata. **100 solo con tre 100**; la fascia 96–100 è etichettata "eccezionale" per renderla un atto deliberato.
 - **Scheda completa**: i giudizi restano 0–10 per fedeltà alla scheda AIS. Per ogni fase la qualità normalizzata `q` (0–1) diventa un punteggio di fase con una curva non lineare:
 
-  `punteggio di fase = 50 + 50 · q^k`, con k ≈ 1,8 (da tarare, vedi domande aperte)
+  `punteggio di fase = 50 + 50 · q^k`, con **k = 2**: le parole dei giudizi 0–10 coincidono con le fasce (6 sufficiente = 68, 7 discreto = 75, 8 buono = 82, 9 ottimo = 91). Valore scelto sulla scala verbale, non ancora verificato sulle schede reali dell'utente
 
-  Il totale è la **media pesata delle quattro fasi** (10/30/40/20), quindi anche qui ogni fase sta in 50–100 come nel voto smart. Con tutti i giudizi a 6 il totale è 70, a 8 è 83, a 9 è 91. **100 solo con ogni giudizio a 10**: l'arrotondamento non può mai dare 100 se anche un solo giudizio è sotto il massimo.
+  Il totale è la **media pesata delle quattro fasi** (10/30/40/20), quindi anche qui ogni fase sta in 50–100 come nel voto smart. Con tutti i giudizi a 6 il totale è 68, a 8 è 82, a 9 è 91. **100 solo con ogni giudizio a 10**: l'arrotondamento non può mai dare 100 se anche un solo giudizio è sotto il massimo.
 
 In entrambi i casi il minimo è 50, quindi un 30 non esiste.
 
@@ -144,7 +144,7 @@ Capitoli: panoramica; ottenere credenziali; firmare il token (esempi in Node e P
 
 ## 9. Domande aperte
 
-1. **Taratura della curva.** `k ≈ 1,8` è una proposta. Serve il file di "Salva copia" dell'utente per confrontare prima e dopo con `scripts/confronto-scala.js` e scegliere `k` sulle schede reali. Va controllato anche che lo stesso vino ottenga punteggi simili nelle due modalità.
+1. **Taratura della curva.** `k = 2` è scelto sulla scala verbale. Quando l'utente manderà il file di "Salva copia", si confronta prima e dopo con `scripts/confronto-scala.js` e, se serve, si cambia la sola costante `K` in `public/js/scoring.js`: i punteggi si ricalcolano da soli. Va controllato anche che lo stesso vino ottenga punteggi simili nelle due modalità.
 2. **Il partner.** Ancora sconosciuto: nome, dominio, lingue e tema. Finché non c'è, si crea un partner di prova (`demo`) per sviluppare e verificare il flusso. I dati reali servono prima del go-live.
 3. **Stato commerciale.** Confermato oggi (nessuno guadagna). Da riconfermare prima di consegnare al partner: se qualcuno viene pagato per il lavoro o per l'hosting, Vercel Hobby non è più consentito e la via a costo zero è Cloudflare Pages + Workers.
 4. **Foto dei vini nel team.** Rimandate; da rivalutare in futuro in base a spazio e comandi disponibili.

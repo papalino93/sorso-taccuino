@@ -38,12 +38,12 @@ const seed = {
   /* --- migrazione --- */
   const saved = await page.evaluate(() => S.saved.map(w => ({ nome:w.nome, score:w.score, legacy:w.legacyTotal, scale:w.scoreScale, mod:w.modalita })));
   const byName = n => saved.find(w => w.nome === n);
-  ok(byName("Vecchio completo").score === 83 && byName("Vecchio completo").legacy === 80, "completo: 80 -> 83, legacy 80 (" + JSON.stringify(byName("Vecchio completo")) + ")");
-  ok(byName("Vecchio parts").score === 83 && byName("Vecchio parts").legacy === 80, "con parts: 80 -> 83");
-  ok(byName("Vecchio totale").score === 60 && byName("Vecchio totale").legacy === 41, "solo totale: 41 -> 60");
+  ok(byName("Vecchio completo").score === 82 && byName("Vecchio completo").legacy === 80, "completo: 80 -> 82, legacy 80 (" + JSON.stringify(byName("Vecchio completo")) + ")");
+  ok(byName("Vecchio parts").score === 82 && byName("Vecchio parts").legacy === 80, "con parts: 80 -> 82");
+  ok(byName("Vecchio totale").score === 58 && byName("Vecchio totale").legacy === 41, "solo totale: 41 -> 58");
   ok(saved.every(w => w.scale === 2 && w.mod === "completa"), "tutte scoreScale 2, modalita completa");
   const stored = await page.evaluate(() => JSON.parse(localStorage.getItem("sorso.p.degustazione:3-ccc")));
-  ok(stored.score === 60 && stored.legacyTotal === 41 && stored.scoreScale === 2, "riscritta nell'archivio: " + JSON.stringify({s:stored.score,l:stored.legacyTotal,sc:stored.scoreScale}));
+  ok(stored.score === 58 && stored.legacyTotal === 41 && stored.scoreScale === 2, "riscritta nell'archivio: " + JSON.stringify({s:stored.score,l:stored.legacyTotal,sc:stored.scoreScale}));
   ok(stored.nome === "Vecchio totale" && stored.modello === 1 && stored.parts === undefined, "il resto del record non è stato toccato");
   ok(!(await page.locator("#scaleNote").evaluate(e => e.classList.contains("hidden"))), "nota 'punteggi ricalcolati' visibile");
   await page.click("#scaleNoteOk");
@@ -57,15 +57,15 @@ const seed = {
   ok(await page.locator("#scaleNote").evaluate(e => e.classList.contains("hidden")), "la nota non ricompare");
 
   /* --- scheda completa --- */
-  ok((await page.textContent("#ringNum")) === "70", "completa: default tutto a 6 = 70");
+  ok((await page.textContent("#ringNum")) === "68", "completa: default tutto a 6 = 68");
   ok((await page.textContent("#segs .seg-label >> nth=0")) === "Visivo", "completa: etichette Visivo/Olfattivo/...");
   await page.evaluate(() => { S.v.qualita=8; S.o={intensita:8,complessita:8,qualita:8}; S.g={equilibrio:8,intensita:8,persistenza:8,qualita:8}; S.f.armonia=8; renderHeader(); });
-  ok((await page.textContent("#ringNum")) === "83", "completa: tutto a 8 = 83");
-  ok((await page.textContent("#saveBtn")).includes("83/100"), "completa: pulsante 'Salva · 83/100'");
+  ok((await page.textContent("#ringNum")) === "82", "completa: tutto a 8 = 82");
+  ok((await page.textContent("#saveBtn")).includes("82/100"), "completa: pulsante 'Salva · 82/100'");
   await page.fill("#nomeInput", "Completo nuovo");
   await page.click("#saveBtn"); await page.waitForTimeout(500);
   let nuovo = await page.evaluate(() => S.saved.find(w => w.nome === "Completo nuovo"));
-  ok(nuovo && nuovo.score === 83 && nuovo.scoreScale === 2 && nuovo.modalita === "completa" && nuovo.voti && nuovo.parts, "completa: salvata con score 83, scoreScale 2");
+  ok(nuovo && nuovo.score === 82 && nuovo.scoreScale === 2 && nuovo.modalita === "completa" && nuovo.voti && nuovo.parts, "completa: salvata con score 82, scoreScale 2");
 
   /* --- voto smart --- */
   await page.click('button[data-modalita="smart"]');

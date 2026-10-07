@@ -19,7 +19,7 @@ App per registrare degustazioni di vino con scheda di valutazione, statistiche p
 Il punteggio sta sempre tra **50 e 100**, in entrambe le modalità di valutazione (si sceglie per ogni voto):
 
 - **Voto rapido**: tre giudizi da 50 a 100 — occhio, naso, bocca — con media pesata 10/30/60.
-- **Scheda completa**: nove giudizi da 0 a 10 sulle quattro fasi (visivo 10, olfattivo 30, gusto-olfattivo 40, finale 20). Ogni fase diventa un punteggio `50 + 50 · q^1,8` e il totale è la media pesata delle fasi.
+- **Scheda completa**: nove giudizi da 0 a 10 sulle quattro fasi (visivo 10, olfattivo 30, gusto-olfattivo 40, finale 20). Ogni fase diventa un punteggio `50 + 50 · q²` e il totale è la media pesata delle fasi.
 
 Il 100 si ottiene solo con ogni giudizio al massimo. Le schede salvate prima della scala nuova vengono ricalcolate al primo caricamento; il vecchio totale lineare resta nel campo `legacyTotal`.
 

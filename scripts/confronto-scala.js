@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /* Confronto prima/dopo della nuova scala di voto 50-100.
 
-   Uso:  node scripts/confronto-scala.js <file-esportato.json> [--k 1.8] [--csv]
+   Uso:  node scripts/confronto-scala.js <file-esportato.json> [--k 2] [--csv]
 
    Il file è quello che l'app produce con "Salva copia" nella scheda Libro.
    Per ogni scheda calcola il punteggio lineare di prima (0-100) e quello della
@@ -17,11 +17,11 @@ const Scoring = require("../public/js/scoring.js");
 const args = process.argv.slice(2);
 const file = args.find(a => !a.startsWith("--") && args[args.indexOf(a) - 1] !== "--k");
 const kIdx = args.indexOf("--k");
-const K = kIdx >= 0 ? Number(args[kIdx + 1]) : 1.8;
+const K = kIdx >= 0 ? Number(args[kIdx + 1]) : Scoring.K;
 const CSV = args.includes("--csv");
 
 if (!file || !(K > 0)) {
-  console.error("Uso: node scripts/confronto-scala.js <file.json> [--k 1.8] [--csv]");
+  console.error("Uso: node scripts/confronto-scala.js <file.json> [--k 2] [--csv]");
   process.exit(1);
 }
 
