@@ -45,7 +45,7 @@ function sendError(res, err) {
 /* Caratteri che non si vedono o che cambiano la direzione del testo: tolti, perché
    un nome fatto solo di questi sembrerebbe vuoto e uno con U+202E si leggerebbe al
    contrario (zero-width, controlli bidirezionali, BOM, trattino morbido). */
-const INVISIBILI = /[­؜᠎​-‏‪-‮⁠-⁤⁦-⁩﻿]/g;
+const INVISIBILI = /[\u00ad\u061c\u115f\u1160\u17b4\u17b5\u180b-\u180e\u200b-\u200f\u202a-\u202e\u2060-\u2064\u2066-\u2069\u2800\u3164\ufe00-\ufe0e\ufeff\uffa0\u{e0000}-\u{e0fff}]/gu;
 const CONTROLLI = /[\u0000-\u001f\u007f-\u009f]/g;
 
 /* Stringa pulita: solo testo (mai numeri, oggetti o liste: "[object Object]" non è un

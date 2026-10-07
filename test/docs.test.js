@@ -63,6 +63,8 @@ test("la guida dice gli stessi numeri del codice", () => {
   assert.ok(guida.includes("minVotes</font>") && guida.includes("= " + Team.MIN_VOTES_API + "):"), "soglia della media nell'API");
   assert.equal(Partner.SESSION_TTL_SECONDS, 4 * 3600);
   assert.ok(guida.includes("sessione di 4 ore"), "durata della sessione");
+  assert.match(require('node:fs').readFileSync(path.join(__dirname, '../api/_partner.js'), 'utf8'), /REGISTRY_TTL_MS = 60 \* 1000/);
+  assert.ok(guida.includes("entro 60 secondi"), "tempo di rotazione delle chiavi");
   assert.ok(guida.includes("Al massimo 15 minuti") && guida.includes("al massimo 15 minuti"), "scadenza massima del token");
   assert.ok(guida.includes("Oltre l'" + Quota.WARN_AT * 100 + "%") && guida.includes("oltre il " + Quota.READONLY_AT * 100 + "%"), "soglie della quota");
   const embedSrc = require("node:fs").readFileSync(path.join(__dirname, "../api/embed.js"), "utf8");

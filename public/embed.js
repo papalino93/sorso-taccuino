@@ -34,7 +34,11 @@
       e_timeout: "Il servizio non risponde. Riprova fra poco.",
       e_generic: "Qualcosa non ha funzionato. Riprova.",
       e_rate: "Troppe richieste in poco tempo. Aspetta qualche secondo e riprova.",
-      e_readonly: "Il servizio è in sola lettura: il limite mensile gratuito è quasi raggiunto. Puoi consultare, non votare né creare.",
+      e_readonly: "Il servizio è temporaneamente in sola lettura: puoi consultare, ma non votare né creare.",
+      e_gone: "Questa degustazione non esiste più: è stata eliminata.",
+      e_closed_unsaved: "La degustazione è stata chiusa: il tuo voto non è stato salvato.",
+      reauthAsked: "Richiesta inviata al sito. Se non succede nulla, torna alla pagina del sito e ricaricala.",
+      warnSoon: "Attenzione: il servizio potrebbe presto passare in sola lettura.",
       e_unavailable: "Il servizio non è disponibile in questo momento. Riprova fra poco.",
       e_session: "La sessione non è più valida.",
       e_expired: "La sessione è scaduta.",
@@ -91,7 +95,11 @@
       e_timeout: "The service is not responding. Try again shortly.",
       e_generic: "Something went wrong. Please try again.",
       e_rate: "Too many requests in a short time. Wait a few seconds and try again.",
-      e_readonly: "The service is read-only: the free monthly limit is almost reached. You can browse, not vote or create.",
+      e_readonly: "The service is temporarily read-only: you can browse, but not vote or create.",
+      e_gone: "This tasting no longer exists: it was deleted.",
+      e_closed_unsaved: "The tasting was closed: your vote was not saved.",
+      reauthAsked: "Request sent to the website. If nothing happens, go back to the website page and reload it.",
+      warnSoon: "Heads up: the service may soon become read-only.",
       e_unavailable: "The service is unavailable right now. Try again shortly.",
       e_session: "Your session is no longer valid.",
       e_expired: "Your session has expired.",
@@ -199,9 +207,11 @@
     return fetch("/api/embed", { method: "POST", headers: headers, body: JSON.stringify(body), signal: ctrl ? ctrl.signal : undefined })
       .then(function (r) {
         clearTimeout(timer);
-        return r.json().catch(function () { return {}; }).then(function (j) {
+        return r.json().catch(function () { return null; }).then(function (j) {
           if (r.headers.get("X-Sorso-Quota") === "readonly") S.quota = "readonly";
-          if (!r.ok) throw mkErr((j.error && j.error.code) || (r.status >= 500 ? "unavailable" : "generic"), r.status);
+          if (!r.ok) throw mkErr((j && j.error && j.error.code) || (r.status >= 500 ? "unavailable" : "generic"), r.status);
+          /* una risposta 200 che non è la nostra (portale di accesso, proxy) non è un successo */
+          if (!j || typeof j !== "object" || Array.isArray(j)) throw mkErr("network");
           return j;
         });
       }, function (e) {
@@ -221,27 +231,50 @@
      mostra il messaggio al suo posto (vicino al modulo, o in cima), senza perdere quello che
      l'utente ha scritto. */
   function handleError(e, where) {
-    if (e.status === 401) { S.fatal = { code: e.code, session: true, retry: false }; announce(t("e_session"), true); render(); return; }
+    if (e.status === 401) {
+      /* il voto che si stava compilando resta come bozza e il sito ospite viene avvisato */
+      var hadSheet = !!S.sheet;
+      if (S.sheet) { S.drafts[S.sheet.wine] = S.sheet; S.sheet = null; }
+      S.fatal = { code: e.code, session: true, retry: false, hadSheet: hadSheet };
+      announce(t("e_session"), true); render(); askReauth("session"); return;
+    }
     var text = errText(e);
+    /* degustazione eliminata o chiusa da un altro mentre si lavorava: si torna a uno stato vero */
+    if (e.code === "not_found" && S.view === "tasting" && !(where === "form" && S.form && S.form.kind === "wine" && false)) {
+      S.tasting = null; S.wines = []; S.sheet = null; S.form = null; S.confirm = null;
+      S.view = "list"; S.notice = { kind: "err", text: t("e_gone") };
+      announce(t("e_gone"), true); focusSel("#h-main");
+      return loadState("");
+    }
+    if (e.code === "closed") {
+      if (S.sheet) { S.drafts[S.sheet.wine] = S.sheet; S.sheet = null; text = t("e_closed_unsaved"); }
+      S.form = null; S.notice = { kind: "err", text: text }; announce(text, true);
+      return loadState(S.tasting && S.tasting.id, true);
+    }
     if (where === "sheet" && S.sheet) S.sheet.error = text;
     else if (where === "form" && S.form) S.form.error = text;
     else S.notice = { kind: "err", text: text };
     announce(text, true);
-    if (e.code === "closed" || e.code === "not_found") { S.sheet = null; return loadState(S.tasting && S.tasting.id, true); }
     render();
   }
 
   /* ---------------- dati ---------------- */
+  var loadSeq = 0;
   function loadState(tid, quiet) {
+    var my = ++loadSeq;                              // solo l'ultima richiesta vale: una risposta lenta non ne scavalca una più recente
     if (!quiet) { S.loading = true; S.loadError = null; render(); }
     return api({ op: "state", tasting: tid || undefined }).then(function (st) {
+      if (my !== loadSeq) return;
+      if (!Array.isArray(st.tastings)) throw mkErr("network");
       S.loading = false; S.loadError = null;
       S.tastings = st.tastings || []; S.tasting = st.tasting || null; S.wines = st.wines || []; S.quota = st.quota || S.quota;
       if (S.sheet && !S.wines.some(function (w) { return w.id === S.sheet.wine; })) S.sheet = null;
       render();
-    }, function (e) {
+    }).catch(function (e) {
+      if (my !== loadSeq) return;
       S.loading = false;
       if (e.status === 401) return handleError(e);
+      if (e.code === "not_found" && tid) { return handleError(e); }
       S.loadError = { text: errText(e), tasting: tid || "" };
       render();
     });
@@ -254,7 +287,11 @@
   function login() {
     S.fatal = null; S.loading = true; render();
     return api({ op: "session", token: S.token }).then(function (r) {
-      S.session = r.session; S.user = r.user; S.config = r.config; S.quota = r.quota || "ok"; S.token = "";
+      if (!r.session || !r.user || !r.config || !Array.isArray(r.config.modes)) throw mkErr("network");
+      /* un altro utente (o un altro team) sullo stesso iframe non deve vedere le bozze del precedente */
+      var cambiato = !S.user || S.user.team !== r.user.team || S.user.name !== r.user.name || S.user.role !== r.user.role;
+      if (cambiato) { S.drafts = {}; S.sheet = null; S.form = null; S.confirm = null; S.tasting = null; S.wines = []; S.tastings = []; S.view = "list"; S.notice = null; }
+      S.session = r.session; S.user = r.user; S.config = r.config; S.quota = r.quota || "ok"; S.token = ""; S.fatal = null;
       S.lang = r.config.lang === "en" ? "en" : "it";
       document.documentElement.lang = S.lang;
       cleanUrl();
@@ -263,6 +300,7 @@
       S.loading = false;
       var transient = e.code === "network" || e.code === "timeout" || e.code === "rate_limited" || e.code === "unavailable" || e.status >= 500;
       S.fatal = { code: e.code, session: false, retry: transient };
+      S.user = null;
       announce(errText(e), true);
       render();
       if (!transient) askReauth(e.code);
@@ -278,24 +316,25 @@
   }
   function notices() {
     var h = "";
-    if (S.notice) h += '<p class="notice ' + (S.notice.kind === "err" ? "err" : "") + '">' + esc(S.notice.text) + '</p>';
+    if (S.notice) h += '<p class="notice ' + (S.notice.kind === "err" ? "err" : S.notice.kind === "ok" ? "ok" : "") + '">' + esc(S.notice.text) + '</p>';
     if (readonly()) h += '<p class="notice warn">' + esc(t("e_readonly")) + '</p>';
-    else if (S.quota === "warn" && isOrg()) h += '<p class="notice warn">' + esc(S.lang === "en" ? "Heads up: the service is about to reach its free monthly limit." : "Attenzione: il servizio sta per raggiungere il limite mensile gratuito.") + '</p>';
+    else if (S.quota === "warn" && isOrg()) h += '<p class="notice warn">' + esc(t("warnSoon")) + '</p>';
     return h;
   }
   function btn(act, label, opts) {
     opts = opts || {};
     return '<button type="' + (opts.type || "button") + '" class="btn' + (opts.cls ? " " + opts.cls : "") + '" data-act="' + act + '"' +
       (opts.id ? ' data-id="' + esc(opts.id) + '"' : "") + (opts.fk ? ' data-fk="' + esc(opts.fk) + '"' : "") +
-      (opts.disabled ? ' disabled' : "") + '>' + esc(label) + '</button>';
+      (opts.disabled ? ' aria-disabled="true"' : "") + (opts.describedby ? ' aria-describedby="' + opts.describedby + '"' : "") + '>' + esc(label) + '</button>';
   }
 
   function viewFatal() {
     var f = S.fatal, session = !!f.session;
     var h = head() + '<section class="card fatal"><h2>' + esc(t(session ? "authSessionTitle" : "authTitle")) + '</h2><p>' + esc(errText({ code: f.code })) + '</p>';
-    if (session && S.sheet) h += '<p>' + esc(t("authUnsaved")) + '</p>';
+    if (session && f.hadSheet) h += '<p>' + esc(t("authUnsaved")) + '</p>';
     if (f.retry) h += '<div class="row">' + btn("retry-login", t("retry"), { cls: "primary", fk: "retry" }) + '</div>';
-    else h += '<p>' + esc(t("authReload")) + '</p><div class="row">' + btn("reauth", t("authAsk"), { cls: "primary", fk: "reauth" }) + btn("reload", t("authReloadHere"), { cls: "ghost" }) + '</div>';
+    else h += '<p>' + esc(t("authReload")) + '</p><div class="row">' + btn("reauth", t("authAsk"), { cls: "primary", fk: "reauth" }) + '</div>' +
+      (f.asked ? '<p class="muted" role="status">' + esc(t("reauthAsked")) + '</p>' : "");
     return h + '</section>';
   }
 
@@ -391,8 +430,12 @@
     /* chi modifica un voto già dato ha già "toccato" tutti i cursori di quella modalità */
     if (mine && mine.mode === "smart" && mine.data && mine.data.giudizi) { Object.assign(giudizi, mine.data.giudizi); SMART.forEach(function (s) { touched["sm-" + s[0]] = true; }); }
     if (mine && mine.mode === "full" && mine.data && mine.data.voti) { Object.keys(voti).forEach(function (g) { Object.assign(voti[g], mine.data.voti[g] || {}); }); FULL_KEYS.forEach(function (k) { touched["fl-" + k] = true; }); }
-    return { wine: w.id, mode: mode, giudizi: giudizi, voti: voti, touched: touched, note: (mine && mine.note) || "", error: "" };
+    var sh = { wine: w.id, mode: mode, giudizi: giudizi, voti: voti, touched: touched, note: (mine && mine.note) || "", error: "" };
+    sh.orig = mine ? sheetKey(sh) : null;
+    return sh;
   }
+  /* l'impronta di ciò che l'utente può cambiare: serve a sapere se c'è davvero qualcosa da non perdere */
+  function sheetKey(sh) { return JSON.stringify([sh.mode, sh.mode === "smart" ? sh.giudizi : sh.voti, sh.note]); }
   function sheetScore() {
     var sh = S.sheet;
     return sh.mode === "smart" ? Scoring.smartScore(sh.giudizi).total : Scoring.fullScore(sh.voti, Scoring.ITEMS).total;
@@ -415,8 +458,8 @@
     var sh = S.sheet, modes = S.config.modes, busy = !!S.pending.vote, tot = sliderIds().length, ok = givenCount() === tot;
     var h = '<form class="card wine sheet" data-form="vote" novalidate aria-labelledby="sh-title"><h3 class="name" id="sh-title" tabindex="-1" dir="auto">' + esc(w.name) + '</h3><p class="meta" dir="auto">' + wineLine(w) + '</p>';
     if (modes.length > 1) {
-      h += '<div class="modes" role="radiogroup" aria-label="' + esc(t("modeLabel")) + '">' + ["smart", "full"].filter(function (m) { return modes.indexOf(m) > -1; }).map(function (m) {
-        return '<button type="button" role="radio" aria-checked="' + (sh.mode === m) + '" class="' + (sh.mode === m ? "on" : "") + '" data-act="mode" data-mode="' + m + '" data-fk="mode-' + m + '">' + esc(t(m === "smart" ? "modeSmart" : "modeFull")) + '</button>';
+      h += '<div class="modes" role="group" aria-label="' + esc(t("modeLabel")) + '">' + ["smart", "full"].filter(function (m) { return modes.indexOf(m) > -1; }).map(function (m) {
+        return '<button type="button" aria-pressed="' + (sh.mode === m) + '" class="' + (sh.mode === m ? "on" : "") + '" data-act="mode" data-mode="' + m + '" data-fk="mode-' + m + '">' + esc(t(m === "smart" ? "modeSmart" : "modeFull")) + '</button>';
       }).join("") + '</div>';
     }
     h += '<p class="small muted">' + esc(t(sh.mode === "smart" ? "smartHint" : "fullHint")) + ' ' + esc(t("touchHint")) + '</p>';
@@ -433,7 +476,7 @@
     h += '<p class="small muted" id="sh-progress">' + esc(ok ? t("progressDone") : t("progress", { n: givenCount(), tot: tot })) + '</p>';
     h += '<label class="f" for="sh-note">' + esc(t("note")) + '</label><textarea id="sh-note" data-fk="sh-note" rows="2" maxlength="500" dir="auto">' + esc(sh.note) + '</textarea>';
     if (sh.error) h += '<p class="field-error" id="sh-err">' + esc(sh.error) + '</p>';
-    h += '<div class="row">' + btn("save-vote", t(busy ? "savingVote" : "saveVote"), { type: "submit", cls: "primary", disabled: busy || !ok || readonly(), fk: "save-vote" }) + btn("cancel-vote", t("discard"), { cls: "ghost", fk: "cancel-vote" }) + '</div></form>';
+    h += '<div class="row">' + btn("save-vote", t(busy ? "savingVote" : "saveVote"), { type: "submit", cls: "primary", disabled: busy || !ok || readonly(), fk: "save-vote", describedby: "sh-progress" }) + btn("cancel-vote", t("discard"), { cls: "ghost", fk: "cancel-vote" }) + '</div></form>';
     return h;
   }
 
@@ -450,7 +493,7 @@
     document.getElementById("sh-band").textContent = bandWord(sc);
     var tot = sliderIds().length, ok = givenCount() === tot;
     document.getElementById("sh-progress").textContent = ok ? t("progressDone") : t("progress", { n: givenCount(), tot: tot });
-    var save = $('[data-act="save-vote"]'); if (save) save.disabled = !!S.pending.vote || !ok || readonly();
+    var save = $('[data-act="save-vote"]'); if (save) { if (!!S.pending.vote || !ok || readonly()) save.setAttribute("aria-disabled", "true"); else save.removeAttribute("aria-disabled"); }
   }
 
   /* ---------------- render, focus e scorrimento ---------------- */
@@ -470,18 +513,20 @@
     if (title !== lastTitle) { document.title = title; lastTitle = title; }
     /* il focus resta dov'era: un lettore di schermo o chi usa la tastiera non riparte dall'inizio */
     var target = null;
-    if (pendingFocus) {
+    if (pendingFocus && !S.loading) {
       target = pendingFocus.fk ? app.querySelector('[data-fk="' + pendingFocus.fk + '"]') : app.querySelector(pendingFocus.sel);
-      if (target) { try { target.focus(); } catch (e) { /* ok */ } if (pendingFocus.scroll) target.scrollIntoView({ block: pendingFocus.scroll }); }
-      pendingFocus = null;
-    } else if (fk) {
+      if (target) { try { target.focus(); } catch (e) { /* ok */ } if (pendingFocus.scroll) target.scrollIntoView({ block: pendingFocus.scroll }); pendingFocus = null; }
+      /* l'elemento può comparire solo dopo il caricamento: l'intenzione resta per qualche disegno */
+      else if (--pendingFocus.ttl <= 0) pendingFocus = null;
+    }
+    if (!target && fk) {
       target = app.querySelector('[data-fk="' + fk + '"]');
       if (target) { try { target.focus({ preventScroll: true }); if (selStart != null && target.setSelectionRange) target.setSelectionRange(selStart, selEnd); } catch (e) { /* ok */ } }
     }
     reportHeight();
   }
-  function focusAfter(fk, scroll) { pendingFocus = { fk: fk, scroll: scroll || null }; }
-  function focusSel(sel, scroll) { pendingFocus = { sel: sel, scroll: scroll || null }; }
+  function focusAfter(fk, scroll) { pendingFocus = { fk: fk, scroll: scroll || null, ttl: 4 }; }
+  function focusSel(sel, scroll) { pendingFocus = { sel: sel, scroll: scroll || null, ttl: 4 }; }
 
   /* ---------------- eventi ---------------- */
   function formVals(form) {
@@ -521,7 +566,7 @@
   function closeSheet() {
     var sh = S.sheet; if (!sh) return;
     /* una bozza che l'utente ha toccato si tiene in memoria: riaprendo il vino la ritrova */
-    var tocc = Object.keys(sh.touched).length > 0 || sh.note;
+    var tocc = sh.orig != null ? sheetKey(sh) !== sh.orig : (Object.keys(sh.touched).length > 0 || !!sh.note);
     var w = sh.wine; if (tocc) S.drafts[w] = sh; else delete S.drafts[w];
     S.sheet = null; focusAfter("vote-" + w); render();
   }
@@ -529,6 +574,7 @@
   app.addEventListener("submit", function (e) {
     e.preventDefault();
     var form = e.target, kind = form.getAttribute("data-form");
+    if (readonly()) { announce(t("e_readonly"), true); return; }
     if (kind === "vote") return saveVote();
     if (kind === "tasting") return submitTasting(form);
     if (kind === "wine") return submitWine(form);
@@ -555,6 +601,7 @@
       return api({ op: "wine.add", tasting: S.tasting.id, wine: { name: v.name, producer: v.producer, vintage: v.vintage } }).then(function (r) {
         S.form = { kind: "wine", vals: { name: "", producer: "", vintage: "" }, error: "" };
         announce(t("wineAdded", { name: r.wine.name }));
+        S.notice = { kind: "ok", text: "✓ " + t("wineAdded", { name: r.wine.name }) };
         S.saved = null;
         focusAfter("f-name");
         return loadState(S.tasting.id, true);
@@ -568,7 +615,7 @@
     if (sh.mode === "smart") body.giudizi = sh.giudizi; else body.voti = sh.voti;
     return run("vote", function () {
       return api(body).then(function (r) {
-        delete S.drafts[sh.wine]; S.sheet = null; S.saved = sh.wine; S.notice = null;
+        delete S.drafts[sh.wine]; if (S.sheet && S.sheet.wine === sh.wine) S.sheet = null; S.saved = sh.wine; S.notice = null;
         announce(t("savedOk") + " " + r.score + ", " + bandWord(r.score));
         focusAfter("vote-" + sh.wine, "center");
         setTimeout(function () { if (S.saved === sh.wine) { S.saved = null; render(); } }, 6000);
@@ -579,16 +626,16 @@
 
   app.addEventListener("click", function (e) {
     var b = e.target.closest("[data-act]");
+    if (b && b.getAttribute("aria-disabled") === "true") { e.preventDefault(); return; }
     if (!b || b.disabled) return;
     var act = b.getAttribute("data-act"), id = b.getAttribute("data-id");
     switch (act) {
       case "retry-login": return login();
-      case "reauth": return askReauth("user");
-      case "reload": return location.reload();
+      case "reauth": S.fatal.asked = true; askReauth("user"); render(); return;
       case "retry-load": return loadState(S.loadError && S.loadError.tasting);
       case "refresh": S.notice = null; return loadState(S.tasting && S.tasting.id);
       case "open": return openTasting(id, true);
-      case "back": return goList(true);
+      case "back": if (history.state && history.state.v === "tasting") { history.back(); return; } return goList(true);
       case "new-tasting": S.form = { kind: "tasting", vals: { name: "" }, error: "" }; focusAfter("f-name"); return render();
       case "new-wine": S.form = { kind: "wine", vals: { name: "", producer: "", vintage: "" }, error: "" }; focusAfter("f-name"); return render();
       case "cancel-form": { var k = S.form && S.form.kind; S.form = null; focusAfter(k === "tasting" ? "new-tasting" : "new-wine"); return render(); }
@@ -643,7 +690,7 @@
     return loadState("");
   }
   window.addEventListener("popstate", function (e) {
-    if (!S.user || S.fatal) return;
+    if (!S.user || S.fatal || /token=/.test(location.hash)) return;
     var st = e.state;
     if (st && st.v === "tasting") openTasting(st.id, false); else goList(false);
   });
@@ -665,9 +712,9 @@
     var q = new URLSearchParams(location.search);
     S.partner = q.get("p") || "";
     var h = new URLSearchParams(location.hash.replace(/^#/, ""));
-    S.token = h.get("token") || q.get("token") || "";    // il frammento è la forma consigliata; il parametro resta valido per chi lo usa già
+    S.token = h.get("token") || "";    // solo il frammento: un parametro finirebbe nei log del server
     document.documentElement.setAttribute("data-ready", "1");
-    if (!S.token) { S.loading = false; S.fatal = { code: "no_token", session: false, retry: false }; render(); return; }
+    if (!S.token) { S.loading = false; S.fatal = { code: "no_token", session: false, retry: false }; render(); askReauth("no_token"); return; }
     login();
   })();
 })();

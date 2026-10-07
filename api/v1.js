@@ -77,7 +77,7 @@ module.exports = async (req, res) => {
 
     if (req.method === "DELETE" && parts.length === 2 && parts[0] === "users") {
       if (!USER_ID.test(parts[1])) throw new HttpError(400, "invalid_user", "Identificativo utente non valido.");
-      Quota.assertWritable();
+      /* la cancellazione dei dati si può sempre fare, anche in sola lettura: libera spazio */
       sendJson(res, 200, await Team.deleteUser(redis, partner.id, parts[1]));
       return;
     }

@@ -2,26 +2,26 @@
   "tastings": {
     "tastings": [
       {
-        "id": "755649a0c4",
+        "id": "3a9d45ad54",
         "team": "giovedi",
         "name": "Serata di ottobre",
         "status": "closed",
-        "createdAt": "2026-10-07T21:10:51.248Z"
+        "createdAt": "2026-10-07T21:33:19.516Z"
       }
     ]
   },
   "results": {
     "tasting": {
-      "id": "755649a0c4",
+      "id": "3a9d45ad54",
       "team": "giovedi",
       "name": "Serata di ottobre",
       "status": "closed",
-      "createdAt": "2026-10-07T21:10:51.248Z"
+      "createdAt": "2026-10-07T21:33:19.516Z"
     },
     "minVotes": 2,
     "wines": [
       {
-        "id": "79bcf69923",
+        "id": "efe248b456",
         "producer": "Poderi Rivalta",
         "name": "Barolo Cannubi",
         "vintage": "2019",
@@ -30,7 +30,7 @@
         "hidden": false
       },
       {
-        "id": "feeb673cbf",
+        "id": "23cb60b4e2",
         "producer": "Tenuta delle Sciare",
         "name": "Etna Rosso Contrada Rampante",
         "vintage": "2021",
@@ -39,7 +39,7 @@
         "hidden": false
       },
       {
-        "id": "f6dea2501c",
+        "id": "7611471784",
         "producer": "Casa Marchigiana",
         "name": "Verdicchio Classico",
         "vintage": "2022",
@@ -49,7 +49,7 @@
       }
     ]
   },
-  "csv": "tasting_id,tasting,wine_id,producer,name,vintage,votes,average\r\n755649a0c4,Serata di ottobre,79bcf69923,Poderi Rivalta,Barolo Cannubi,2019,3,88\r\n755649a0c4,Serata di ottobre,feeb673cbf,Tenuta delle Sciare,Etna Rosso Contrada Rampante,2021,2,74.5\r\n755649a0c4,Serata di ottobre,f6dea2501c,Casa Marchigiana,Verdicchio Classico,2022,1,\r\n",
+  "csv": "tasting_id,tasting,wine_id,producer,name,vintage,votes,average\r\n3a9d45ad54,Serata di ottobre,efe248b456,Poderi Rivalta,Barolo Cannubi,2019,3,88\r\n3a9d45ad54,Serata di ottobre,23cb60b4e2,Tenuta delle Sciare,Etna Rosso Contrada Rampante,2021,2,74.5\r\n3a9d45ad54,Serata di ottobre,7611471784,Casa Marchigiana,Verdicchio Classico,2022,1,\r\n",
   "deleteUser": {
     "votesRemoved": 1
   },

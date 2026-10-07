@@ -125,6 +125,11 @@ async function setTastingStatus(redis, pid, ctx, tid, status) {
   const t = await getTasting(redis, pid, tid, ctx.team);
   t.status = status;
   await redis.hset(K.tl(pid, ctx.team), { [t.id]: JSON.stringify(t) });
+  /* se nel frattempo è stata eliminata, la scrittura l'avrebbe fatta risorgere: si toglie */
+  if (!(await redis.hexists(K.ti(pid), t.id))) {
+    await redis.hdel(K.tl(pid, ctx.team), t.id);
+    throw notFound("Degustazione");
+  }
   return t;
 }
 
@@ -136,8 +141,10 @@ async function deleteTasting(redis, pid, ctx, tid) {
   const p = redis.pipeline();
   p.hdel(K.tl(pid, ctx.team), t.id);
   p.hdel(K.ti(pid), t.id);
-  p.hincrby(K.cn(pid), "t:" + ctx.team, -1);
-  await p.exec();
+  const res = await p.exec();
+  /* chi la elimina per primo la toglie e libera il posto; due richieste insieme non liberano due volte */
+  if (Number(res[0]) !== 1) throw notFound("Degustazione");
+  await redis.hincrby(K.cn(pid), "t:" + ctx.team, -1);
   const wines = Object.keys(asObject(await redis.hgetall(K.wn(pid, t.id))));
   let votes = 0;
   for (const w of wines) {
@@ -228,6 +235,13 @@ async function castVote(redis, partner, ctx, body) {
   const rec = JSON.stringify({ s: vote.score, m: vote.mode, d: vote.data, n: vote.note, t: Date.now() });
   /* UN'operazione sola scrive il voto e restituisce il precedente: da qui in poi ogni richiesta
      sa esattamente da quale valore parte, comunque arrivino le altre */
+  /* Gli indici (voti dell'utente, votanti del vino) si scrivono PRIMA del voto e di nuovo dopo:
+     l'indice contiene sempre almeno i voti che esistono, quindi una cancellazione che arriva
+     in mezzo non può lasciare un voto che nessuno trova più. */
+  const idx = redis.pipeline();
+  idx.sadd(K.uv(pid, ctx.uid), tid + "|" + wid);
+  idx.sadd(K.vs(pid, tid, wid), ctx.uid);
+  await idx.exec();
   const oldRaw = await redis.set(K.vt(pid, tid, wid, ctx.uid), rec, { get: true });
   const old = oldRaw ? parse(oldRaw) : null;
   const delta = vote.score - (old && Number.isFinite(old.s) ? old.s : 0);
@@ -235,10 +249,17 @@ async function castVote(redis, partner, ctx, body) {
   p.hincrby(K.sm(pid, tid), wid, delta);
   p.hincrby(K.ct(pid, tid), wid, oldRaw ? 0 : 1);
   p.sadd(K.uv(pid, ctx.uid), tid + "|" + wid);
-  p.sadd(K.vs(pid, tid, wid), ctx.uid);
+  p.hexists(K.ti(pid), tid);
   const res = await p.exec();
-  const sum = Number(res[0]), count = Number(res[1]);
-  return { score: vote.score, replaced: !!oldRaw, team: { avg: count > 0 ? round1(sum / count) : null, count } };
+  /* la degustazione è stata eliminata mentre si votava: il voto non deve restare orfano */
+  if (!Number(res[3])) {
+    const c = redis.pipeline();
+    c.del(K.vt(pid, tid, wid, ctx.uid)); c.srem(K.uv(pid, ctx.uid), tid + "|" + wid);
+    c.del(K.sm(pid, tid)); c.del(K.ct(pid, tid)); c.del(K.vs(pid, tid, wid));
+    await c.exec();
+    throw notFound("Degustazione");
+  }
+  return { score: vote.score, replaced: !!oldRaw };
 }
 
 /* ---- stato per l'embed ---- */
@@ -263,7 +284,7 @@ async function getState(redis, partner, ctx, tid) {
   const cts = asObject(ct), sms = asObject(sm);
   state.wines = wines.map((w, i) => {
     const m = mie && mie[i] ? parse(mie[i]) : null;
-    const count = Number(cts[w.id]) || 0, sum = Number(sms[w.id]) || 0;
+    const count = Math.max(0, Number(cts[w.id]) || 0), sum = Number(sms[w.id]) || 0;
     return {
       id: w.id, producer: w.producer, name: w.name, vintage: w.vintage,
       mine: m ? { score: m.s, mode: m.m, data: m.d, note: m.n } : null,
@@ -280,9 +301,11 @@ async function getState(redis, partner, ctx, tid) {
 async function listTastings(redis, pid, filter) {
   const teams = filter.team ? [filter.team] : ((await redis.smembers(K.tm(pid))) || []);
   const rows = [];
-  for (const team of teams) {
-    const h = parseHash(await redis.hgetall(K.tl(pid, team)));
-    Object.values(h).forEach(t => rows.push(t));
+  if (teams.length) {
+    /* una sola richiesta di rete per tutti i team (resta un comando per team: meglio filtrare per team) */
+    const p = redis.pipeline();
+    teams.forEach(team => p.hgetall(K.tl(pid, team)));
+    (await p.exec()).forEach(h => Object.values(parseHash(h)).forEach(t => rows.push(t)));
   }
   return rows
     .filter(t => !filter.status || t.status === filter.status)
@@ -329,23 +352,34 @@ function resultsCsv(r) {
 async function deleteUser(redis, pid, uid) {
   const members = ((await redis.smembers(K.uv(pid, uid))) || []).map(String).filter(m => /^[0-9a-f]{10}\|[0-9a-f]{10}$/.test(m));
   let removed = 0;
-  if (members.length) {
+  for (let i0 = 0; i0 < members.length; i0 += 200) {      // a blocchi: una richiesta enorme non passerebbe
+    const blocco = members.slice(i0, i0 + 200);
     const g = redis.pipeline();
-    members.forEach(m => { const [t, w] = m.split("|"); g.getdel(K.vt(pid, t, w, uid)); });
+    blocco.forEach(m => { const [t, w] = m.split("|"); g.getdel(K.vt(pid, t, w, uid)); });
     const olds = await g.exec();
     const p = redis.pipeline();
-    members.forEach((m, i) => {
+    let fatti = 0;
+    blocco.forEach((m, i) => {
       const [t, w] = m.split("|");
       if (olds[i]) {
+        fatti++;
         const o = parse(olds[i]);
         p.hincrby(K.sm(pid, t), w, -(o && Number.isFinite(o.s) ? o.s : 0));
         p.hincrby(K.ct(pid, t), w, -1);
         p.srem(K.vs(pid, t, w), uid);
         removed++;
       }
-      p.srem(K.uv(pid, uid), m);
     });
-    await p.exec();
+    if (fatti) await p.exec();
+    /* la voce dell'indice si toglie solo se il voto non c'è più: un voto arrivato nel frattempo
+       resta raggiungibile dalla prossima cancellazione */
+    const e = redis.pipeline();
+    blocco.forEach(m => { const [t, w] = m.split("|"); e.exists(K.vt(pid, t, w, uid)); });
+    const esiste = await e.exec();
+    const r = redis.pipeline();
+    let n = 0;
+    blocco.forEach((m, i) => { if (!Number(esiste[i])) { r.srem(K.uv(pid, uid), m); n++; } });
+    if (n) await r.exec();
   }
   return { votesRemoved: removed };
 }

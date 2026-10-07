@@ -11,7 +11,9 @@
      node scripts/partner.js list
      node scripts/partner.js show <id>
      node scripts/partner.js enable|disable <id>
-     node scripts/partner.js origins <id> --origin https://club.example [--origin ...] [--allow-localhost] | --clear
+     node scripts/partner.js origins <id> --origin https://club.example [--origin ...] [--allow-localhost]   IMPOSTA l'elenco (sostituisce le origini attuali)
+     node scripts/partner.js origins <id> --add --origin https://altro.example                            aggiunge alle origini attuali
+     node scripts/partner.js origins <id> --clear                                                        le toglie tutte
      node scripts/partner.js theme <id> [--accent #aabbcc] [--bg #rrggbb] [--ink #rrggbb] [--font system|serif|rounded|mono]
                              [--title "Titolo"] [--logo https://...png] [--clear]
      node scripts/partner.js settings <id> [--name N] [--modes smart,full] [--default-mode smart|full] [--lang it|en]
@@ -35,7 +37,7 @@ function parseArgs(argv) {
     const a = argv[i];
     if (a.startsWith("--")) {
       const k = a.slice(2);
-      if (k === "allow-localhost" || k === "clear" || k === "yes") { opt[k] = true; continue; }
+      if (k === "allow-localhost" || k === "clear" || k === "yes" || k === "add") { opt[k] = true; continue; }
       const v = argv[++i];
       /* "--name --origin x": il valore mancante non deve scambiarsi con l'opzione che segue */
       if (v === undefined || v.startsWith("--")) throw new Error("manca il valore di --" + k);
@@ -85,6 +87,16 @@ async function main(argv, redis, log) {
   P.clearCache();
   const KNOWN = ["create", "list", "show", "enable", "disable", "origins", "theme", "settings", "rotate-secret", "rotate-key", "token", "recount", "purge"];
   if (KNOWN.indexOf(cmd) < 0) throw new Error("comando sconosciuto: " + (cmd || "(nessuno)") + ". Vedi l'intestazione di scripts/partner.js.");
+  /* un'opzione che il comando non conosce (un refuso, o una che non fa nulla) è un errore, non un'azione a vuoto */
+  const AMMESSE = {
+    create: ["name", "origin", "modes", "default-mode", "lang", "allow-localhost"], origins: ["origin", "allow-localhost", "clear", "add"],
+    theme: ["accent", "bg", "ink", "font", "title", "logo", "clear"], settings: ["name", "modes", "default-mode", "lang"],
+    token: ["sub", "team", "role", "name", "lang"], purge: ["yes"]
+  };
+  const ok = AMMESSE[cmd] || [];
+  Object.keys(opt).filter(k => k !== "origin" || opt.origin.length).forEach(k => {
+    if (ok.indexOf(k) < 0) throw new Error("l'opzione --" + k + " non esiste per \"" + cmd + "\"" + (ok.length ? " (valide: " + ok.map(x => "--" + x).join(" ") + ")" : ""));
+  });
 
   if (cmd === "create") {
     if (!P.validId(id)) throw new Error("id non valido: minuscole, cifre e trattini in mezzo, 2-31 caratteri (niente trattino all'inizio, alla fine o doppio)");
@@ -103,7 +115,7 @@ async function main(argv, redis, log) {
     if (scritto !== "OK") throw new Error("il partner esiste già: " + id);
     await redis.sadd("partners", id);
     log("Partner creato: " + id);
-    if (!cfg.origins.length) log("Attenzione: nessuna origine registrata, quindi nessun sito può incorporare lo spazio. Aggiungila con: origins " + id + " --origin https://...");
+    if (!cfg.origins.length) log("Attenzione: nessuna origine registrata, quindi nessun sito può incorporare lo spazio. Aggiungila con: origins " + id + " --add --origin https://...");
     log("");
     log("  ID partner (iss):   " + id);
     log("  Segreto di firma:   " + sig);
@@ -127,9 +139,14 @@ async function main(argv, redis, log) {
   if (cmd === "enable" || cmd === "disable") { cfg.active = cmd === "enable"; await save(redis, cfg); log((cfg.active ? "Attivato: " : "Disattivato: ") + id); return; }
   if (cmd === "origins") {
     if (!opt.origin.length && !opt.clear) throw new Error("serve almeno un --origin (oppure --clear per toglierle tutte: nessun sito potrebbe più incorporare lo spazio)");
+    if (opt.clear && (opt.origin.length || opt.add)) throw new Error("--clear non si combina con --origin né con --add");
     if (opt["allow-localhost"]) cfg.allowLocalhost = true;
-    cfg.origins = checkOrigins(opt.origin, cfg.allowLocalhost === true);
-    await save(redis, cfg); log("Origini: " + (cfg.origins.join(", ") || "(nessuna)")); return;
+    const prima = cfg.origins || [];
+    const nuove = checkOrigins(opt.origin, cfg.allowLocalhost === true);
+    cfg.origins = opt.add ? prima.concat(nuove.filter(o => prima.indexOf(o) < 0)) : nuove;
+    await save(redis, cfg);
+    log("Origini prima: " + (prima.join(", ") || "(nessuna)"));
+    log("Origini ora:   " + (cfg.origins.join(", ") || "(nessuna)") + (opt.add ? "" : "   (elenco sostituito; per aggiungere usa --add)")); return;
   }
   if (cmd === "theme") {
     const t = opt.clear ? {} : Object.assign({}, cfg.theme);
@@ -172,7 +189,7 @@ async function main(argv, redis, log) {
   }
   if (cmd === "purge") {
     if (!opt.yes) throw new Error("operazione irreversibile: cancella tutte le degustazioni, i vini e i voti di " + id + ". Ripeti con --yes per confermare");
-    const modelli = ["tl:" + id + ":*", "wn:" + id + ":*", "vt:" + id + ":*", "vs:" + id + ":*", "sm:" + id + ":*", "ct:" + id + ":*", "uv:" + id + ":*", "jti:" + id + ":*"];
+    const modelli = ["tl:" + id + ":*", "wn:" + id + ":*", "vt:" + id + ":*", "vs:" + id + ":*", "sm:" + id + ":*", "ct:" + id + ":*", "uv:" + id + ":*"];      // i jti non si toccano: scadono da soli, e cancellarli farebbe riusare i token già usati
     const fissi = ["ti:" + id, "tm:" + id, "cn:" + id];
     let chiavi = fissi.slice();
     for (const m of modelli) chiavi = chiavi.concat((await redis.keys(m)) || []);

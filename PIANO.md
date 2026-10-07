@@ -70,18 +70,18 @@ La media del team si mostra con un decimale, perché i voti si concentrano in 75
 4. L'embed risponde con `Content-Security-Policy: frame-ancestors <domini del partner>`: funziona solo dal dominio registrato.
 
 ### Onboarding del partner
-Creato a mano con uno script nel repo (`scripts/create-partner.js`): genera `partnerId`, segreto di firma e chiave API di sola lettura, e salva in Redis domini autorizzati, tema e impostazioni (modalità consentite, lingua). Rotazione dei segreti manuale. Nessun pannello né self-service finché non arriva un secondo partner.
+Creato a mano con uno script nel repo (`scripts/partner.js`): genera `partnerId`, segreto di firma e chiave API di sola lettura, e salva in Redis domini autorizzati, tema e impostazioni (modalità consentite, lingua). Rotazione dei segreti manuale. Nessun pannello né self-service finché non arriva un secondo partner.
 
 ### Archiviazione (pensata per i 500.000 comandi/mese del piano gratuito)
-Niente `KEYS` né scansioni. Strutture Redis:
+Niente `KEYS` nel percorso normale (solo `purge`, a mano). Strutture Redis (nomi reali del codice, vedi `api/_team.js`):
 
 - `p:{partner}` — configurazione del partner.
-- `tastings:{partner}:{team}` — set delle degustazioni; `tasting:{id}` — hash con metadati e stato.
-- `wines:{tasting}` — hash `wineId → JSON`.
-- `votes:{tasting}:{wine}` — hash `userId → JSON compatto`.
-- `agg:{tasting}` — hash `wineId → somma:conteggio`, aggiornato a ogni voto (lettura del voto precedente + correzione, in un solo `EVAL`).
+- `tl:{partner}:{team}` — hash delle degustazioni del team (`id → JSON`); `ti:{partner}` — `id → team`; `tm:{partner}` — set dei team; `cn:{partner}` — contatori dei tetti.
+- `wn:{partner}:{degustazione}` — hash dei vini.
+- `vt:{partner}:{degustazione}:{vino}:{utente}` — il voto (stringa JSON); `vs:…` — i votanti di un vino; `uv:{partner}:{utente}` — i voti di un utente (per la cancellazione).
+- `sm:` e `ct:` — somma e conteggio per vino, aggiornati con incrementi commutativi: il voto si scrive con un solo `SET … GET` che restituisce il precedente (niente Lua).
 
-Stima: un voto costa circa 4 comandi, il caricamento di una degustazione circa 4. Anche con centinaia di utenti si resta ben sotto il limite. Limitazione delle richieste con Upstash Ratelimit sui soli endpoint di scrittura e di creazione sessione.
+Misurato: un voto costa circa 11 comandi, il caricamento di una degustazione circa 7. Anche con centinaia di utenti si resta ben sotto il limite. Limitazione delle richieste con un contatore proprio (`api/_limit.js`).
 
 ### Eventi personali (app personale)
 Gli eventi dell'app personale diventano **privati**: un evento è un'etichetta sulle schede dell'utente (es. "cena del 12 ottobre"), e la classifica mostra solo i suoi vini di quell'evento. Le degustazioni di gruppo passano dagli spazi di team dei partner.
@@ -98,7 +98,7 @@ L'attuale `api/db.js` espone uno spazio `shared:` leggibile e scrivibile da qual
 Autenticazione: `Authorization: Bearer <chiave API del partner>` (diversa dal segreto di firma). Solo lettura.
 
 - `GET /api/v1/tastings` — degustazioni del partner (filtro per team e stato).
-- `GET /api/v1/tastings/{id}/results` — vini con media del team, numero di voti, distribuzione.
+- `GET /api/v1/tastings/{id}/results` — vini con media del team e numero di voti.
 - `GET /api/v1/tastings/{id}/results?format=csv` — export.
 - `DELETE /api/v1/users/{sub}` — cancellazione dei dati di un utente (richiesta GDPR del partner).
 
@@ -124,7 +124,7 @@ Ogni fase si chiude con deploy e verifica sul sito in produzione.
 
 ## 7. Guida di integrazione (PDF)
 
-Capitoli: panoramica; ottenere credenziali; firmare il token (esempi in Node e PHP); incorporare l'iframe (parametri, tema, CSP); ruoli; API di lettura con esempi `curl`; codici di errore; limiti e quote; sicurezza (segreti, scadenza token, rotazione); privacy e cancellazione dati; elenco di verifica prima del go-live. Consegnata dopo la fase 4.
+Capitoli: panoramica; ottenere credenziali; firmare il token (esempi in Node, Python e PHP); incorporare l'iframe (parametri, tema, CSP); ruoli; API di lettura con esempi `curl`; codici di errore; limiti e quote; sicurezza (segreti, scadenza token, rotazione); privacy e cancellazione dati; elenco di verifica prima del go-live. Consegnata dopo la fase 4.
 
 ## 8. Decisioni
 
@@ -148,7 +148,7 @@ Capitoli: panoramica; ottenere credenziali; firmare il token (esempi in Node e P
 | Soglia aggregati API | Media solo da 2 voti | Scelta dell'utente |
 | Eventi | Personali: etichetta sulle schede dell'utente | Scelta dell'utente; il gruppo passa dai team dei partner |
 | Foto nel team | Rimandate | Scelta dell'utente; si rivaluta in futuro |
-| Limiti gratuiti | Avviso all'80% dei comandi, sola lettura al 100% | Evita sorprese e blocchi bruschi |
+| Limiti gratuiti | Avviso all'80% dei comandi, sola lettura al 90% | Evita sorprese e blocchi bruschi |
 | Ordine | Scala → API/embed → redesign → PDF | Il partner prova prima; il redesign non si rifà due volte |
 
 ## 9. Domande aperte

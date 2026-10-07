@@ -56,7 +56,7 @@ function verify(token, secret, opts) {
   if (!payload || typeof payload !== "object") throw new AuthError("malformed", "Token non valido.");
   if (typeof payload.exp !== "number" || !isFinite(payload.exp)) throw new AuthError("exp_missing", "Manca la scadenza (exp).");
   if (now > payload.exp + leeway) throw new AuthError("expired", "Token scaduto.");
-  if (payload.exp - now > maxLifetime) throw new AuthError("exp_too_far", "Scadenza troppo lontana: massimo " + Math.round(maxLifetime / 60) + " minuti.");
+  if (payload.exp - now > maxLifetime + Math.min(leeway, 20)) throw new AuthError("exp_too_far", "Scadenza troppo lontana: massimo " + Math.round(maxLifetime / 60) + " minuti.");
   if (typeof payload.nbf === "number" && now + leeway < payload.nbf) throw new AuthError("not_yet", "Token non ancora valido.");
   return payload;
 }

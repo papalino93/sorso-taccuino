@@ -184,7 +184,7 @@ def main():
                        ["<b>Chiave API</b><br/>inizia con <font name='Mono'>sk_</font>", "Serve a leggere i risultati dal tuo server.", "Solo sul tuo server. Noi ne conserviamo solo l'impronta: se la perdi, se ne genera una nuova."]],
                       [4.6, 7.2, 5.2])]
     story += [Spacer(1, 6), riquadro("<b>Consegna sicura.</b> Il segreto e la chiave ti vengono mostrati una volta sola. Conservali subito in un gestore di segreti "
-                                     "o nelle variabili d'ambiente del tuo server. Se pensi che siano stati esposti, chiedi la rotazione: la vecchia chiave smette di valere entro 30 secondi.")]
+                                     "o nelle variabili d'ambiente del tuo server. Se pensi che siano stati esposti, chiedi la rotazione: la vecchia chiave smette di valere entro 60 secondi.")]
     story += [P("Cosa serve da te", "h2")] + lista([
         "<b>I domini</b> dei siti in cui incorporerai lo spazio, solo con <font name='Mono'>https://</font> (per esempio <font name='Mono'>https://www.club.example</font>). "
         "L'iframe funziona solo da questi: da qualunque altro sito il browser lo blocca.",
@@ -310,7 +310,7 @@ def main():
                        ["404", "<font name='Mono'>not_found</font>", "Degustazione inesistente o di un altro partner; percorso sconosciuto."],
                        ["405", "<font name='Mono'>method_not_allowed</font>", "Metodo HTTP non previsto per quel percorso."],
                        ["429", "<font name='Mono'>rate_limited</font>", "Troppe richieste. L'intestazione <font name='Mono'>Retry-After</font> dice fra quanti secondi riprovare."],
-                       ["503", "<font name='Mono'>read_only</font>", "Servizio in sola lettura per il limite mensile gratuito: le letture funzionano, la cancellazione no."],
+                       ["503", "<font name='Mono'>read_only</font>", "Servizio in sola lettura per il limite mensile: le letture funzionano e anche la cancellazione dei dati di un utente."],
                        ["503", "<font name='Mono'>no_database</font>", "Servizio momentaneamente non disponibile."]],
                       [1.6, 6.2, 9.2]),
               P("Problemi frequenti con l'iframe", "h2"),
@@ -354,7 +354,7 @@ def main():
               P("Sorso gira su un'infrastruttura gratuita. Questo ha due conseguenze che è giusto conoscere:")] + lista([
         "<b>Quota mensile.</b> L'archivio ha un limite di operazioni al mese. Oltre l'80% le risposte portano l'intestazione <font name='Mono'>X-Sorso-Quota: warn</font> "
         "(e gli organizzatori vedono un avviso nell'iframe); oltre il 90% il servizio passa in <b>sola lettura</b> fino al mese successivo: si può consultare ma non votare né creare. "
-        "Per un uso normale (gruppi di qualche decina di persone) il limite è lontano: un voto costa circa 10 operazioni.",
+        "Per un uso normale (gruppi di qualche decina di persone) il limite è lontano: un voto costa circa 11 operazioni.",
         "<b>Nessuna garanzia di disponibilità.</b> Non c'è un impegno formale di continuità. Non è adatto a eventi in cui un'interruzione non sia tollerabile: "
         "scarica il CSV dei risultati al termine di ogni degustazione."])
     story += [P("10. Sicurezza e privacy", "h1"),
@@ -365,7 +365,7 @@ def main():
         "Servi sempre la pagina che incorpora l'iframe in <font name='Mono'>https</font>."])
     story += [P("Cosa fa Sorso", "h2")] + lista([
         "La pagina si incorpora solo dai domini che hai registrato, non ha script inline, e non invia il riferimento della pagina di provenienza.",
-        "Il punteggio lo calcola il server; i voti individuali non sono visibili a nessuno tranne a chi li ha dati, e l'API restituisce solo aggregati.",
+        "Il punteggio lo calcola il server; i voti individuali non sono visibili a nessuno tranne a chi li ha dati, e l'API restituisce solo aggregati. Resta però un limite di ogni media: in un gruppo molto piccolo (2-3 persone) chi vede la media prima e dopo un nuovo voto può dedurre quel voto. Se per te è un problema, mostra i risultati solo a degustazione chiusa.",
         "Chi ha il token non può uscire dal proprio team né dal proprio partner: ogni richiesta controlla che team e partner coincidano."])
     story += [P("Quali dati conserviamo", "h2"),
               tabella([["Dato", "Conservato", "Note"],

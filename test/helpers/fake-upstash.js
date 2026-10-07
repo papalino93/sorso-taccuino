@@ -74,6 +74,8 @@ function create() {
         for (let i = 1; i < a.length; i += 2) { if (!h.has(a[i])) added++; h.set(a[i], a[i + 1]); }
         return added;
       }
+      case "HEXISTS": { const h = hash(a[0]); return h && h.has(a[1]) ? 1 : 0; }
+      case "EXISTS": { let n = 0; a.forEach(k => { if (live(k)) n++; }); return n; }
       case "HGET": { const h = hash(a[0]); return h && h.has(a[1]) ? h.get(a[1]) : null; }
       case "HGETALL": { const h = hash(a[0]); const out = []; if (h) h.forEach((v, k) => out.push(k, v)); return out; }
       case "HLEN": { const h = hash(a[0]); return h ? h.size : 0; }

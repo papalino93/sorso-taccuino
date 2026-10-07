@@ -1,5 +1,6 @@
 const crypto = require("crypto");
 const jwt = require("./_jwt");
+const { cleanText } = require("./_http");
 const { AuthError } = jwt;
 
 /* Configurazione dei siti partner e sessione dell'embed.
@@ -31,7 +32,7 @@ function sanitizeTheme(t) {
   const out = {};
   if (!t || typeof t !== "object") return out;
   ["accent", "bg", "ink"].forEach(k => { if (typeof t[k] === "string" && COLOR_RE.test(t[k])) out[k] = t[k].toLowerCase(); });
-  if (typeof t.font === "string" && FONTS[t.font]) out.font = t.font;
+  if (typeof t.font === "string" && Object.prototype.hasOwnProperty.call(FONTS, t.font)) out.font = t.font;
   if (typeof t.title === "string") out.title = t.title.replace(/[\u0000-\u001f<>"'`]/g, "").trim().slice(0, 40);
   if (typeof t.logo === "string" && /^https:\/\/[^\s"'()<>\\]{1,280}$/.test(t.logo)) out.logo = t.logo;
   return out;
@@ -91,14 +92,16 @@ function resolveTheme(theme) {
   let accent = t.accent ? hex2rgb(t.accent) : ACCENT_BASE;
   if (!t.accent && contrast(accent, bg) < 3) accent = scuro ? hex2rgb("#e0526b") : ACCENT_BASE;
   accent = garantisci(accent, bg, ink, 3);
+  accent = garantisci(accent, surface, ink, 3.2);      // anche sui riquadri, dove sta la media del team e dove si vede il focus
   const onAccent = contrast(BIANCO, accent) >= contrast(NERO, accent) ? BIANCO : NERO;
   const line = mix(bg, ink, 0.22);
+  const lineStrong = garantisci(mix(bg, ink, 0.5), bg, ink, 3);      // bordi dei campi: almeno 3:1 (WCAG 1.4.11)
   const muted = garantisci(mix(bg, ink, 0.66), surface, ink, 4.5);
   const colore = (chiaro, scuroC) => garantisci(hex2rgb(scuro ? scuroC : chiaro), surface, ink, 4.5);
   return {
     "color-scheme": scuro ? "dark" : "light",
     "--bg": rgb2hex(bg), "--ink": rgb2hex(ink), "--accent": rgb2hex(accent), "--on-accent": rgb2hex(onAccent),
-    "--surface": rgb2hex(surface), "--line": rgb2hex(line), "--muted": rgb2hex(muted),
+    "--surface": rgb2hex(surface), "--line": rgb2hex(line), "--line-strong": rgb2hex(lineStrong), "--muted": rgb2hex(muted),
     "--ok": rgb2hex(colore("#1e6b3a", "#6fcf8f")), "--warn": rgb2hex(colore("#8a5a00", "#f0b95a")), "--danger": rgb2hex(colore("#a31d1d", "#ff8a8a"))
   };
 }
@@ -222,7 +225,7 @@ async function verifyPartnerToken(redis, token) {
   if (typeof c.jti !== "string" || !JTI_RE.test(c.jti)) throw new AuthError("claim_jti", "Claim jti mancante o non valido.");
   const role = c.role == null ? "member" : c.role;
   if (role !== "member" && role !== "organizer") throw new AuthError("claim_role", "Ruolo non valido: member oppure organizer.");
-  const name = typeof c.name === "string" ? c.name.replace(/[\u0000-\u001f]/g, " ").trim().slice(0, 60) : "";
+  const name = typeof c.name === "string" ? cleanText(c.name, 60) : "";
   const lang = c.lang === "en" || c.lang === "it" ? c.lang : null;
   return { partner, ctx: { uid: c.sub, name, team: c.team, role, lang }, jti: c.jti, exp: c.exp };
 }

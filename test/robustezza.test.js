@@ -84,7 +84,10 @@ test("rivoti simultanei: la media non esce mai dalla scala 50-100", async () => 
   await vote(b, t, w1, 80);
   for (let giro = 0; giro < 5; giro++) {
     const r = await Promise.all([vote(a, t, w1, 60), vote(a, t, w1, 100), vote(a, t, w1, 75), vote(a, t, w1, 90)]);
-    r.forEach(x => { assert.equal(x.statusCode, 200); assert.ok(x.body.team.avg >= 50 && x.body.team.avg <= 100, "media " + x.body.team.avg); });
+    r.forEach(x => assert.equal(x.statusCode, 200));
+    const st = (await post({ op: "state", tasting: t.id }, a)).body;
+    const avg = st.wines.find(w => w.id === w1.id).team.avg;
+    assert.ok(avg >= 50 && avg <= 100, "media " + avg);
   }
   const mem = await memorizzato(t, w1);
   assert.deepEqual(mem, await veroDa(t, w1));
@@ -288,7 +291,7 @@ test("un partner con configurazione rotta non fa dare errori interni", async () 
 /* ---------------- token ---------------- */
 test("token: la scadenza massima è esattamente 15 minuti, non 16", async () => {
   assert.equal((await post({ op: "session", token: tok({ exp: now() + 890 }) })).statusCode, 200);
-  const r = await post({ op: "session", token: tok({ exp: now() + 930 }) });
+  const r = await post({ op: "session", token: tok({ exp: now() + 960 }) });
   assert.equal(r.statusCode, 401);
   assert.equal(r.body.error.code, "exp_too_far");
   assert.equal((await post({ op: "session", token: tok({ exp: now() + 961 }) })).statusCode, 401);

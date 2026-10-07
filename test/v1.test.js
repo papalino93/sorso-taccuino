@@ -146,10 +146,10 @@ test("limite di richieste per chiave", async () => {
   assert.equal(last.statusCode, 429);
   assert.ok(last.headers["retry-after"]);
 });
-test("quota in sola lettura: lettura sì, cancellazione no", async () => {
+test("quota in sola lettura: lettura e cancellazione dei dati sì", async () => {
   await redis.set(quota.monthKey(), String(Math.round(quota.LIMIT * 0.97)));
   quota.reset();
   assert.equal((await get("tastings")).statusCode, 200);
   const r = await call(v1, { method: "DELETE", url: "/api/v1?path=users%2Fx", headers: { authorization: "Bearer " + KEY } });
-  assert.equal(r.statusCode, 503);
+  assert.equal(r.statusCode, 200, "la cancellazione (richiesta di privacy) non si blocca mai");
 });

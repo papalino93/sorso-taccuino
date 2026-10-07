@@ -177,11 +177,12 @@ test("purge: chiede conferma e cancella solo i dati del partner indicato", async
   await fails(["purge", "pa"], /Ripeti con --yes/);
   assert.ok((await redis.keys("*pa:*")).length > 0, "senza --yes non si cancella nulla");
   const out = await run(["purge", "pa", "--yes"]);
-  assert.match(out, /Cancellate 11 chiavi/);
+  assert.match(out, /Cancellate 10 chiavi/);
   const rimaste = await redis.keys("*");
   assert.ok(!rimaste.some(k => /^[a-z]{2}:pa(:|$)/.test(k)), "dati di pa tutti spariti: " + rimaste.join(","));
   assert.ok(rimaste.some(k => k.startsWith("tl:pa-2:")), "i dati di pa-2 restano (id che inizia allo stesso modo)");
   assert.ok(rimaste.includes("p:pa") && rimaste.includes("p:pa-2"), "le configurazioni restano");
+  assert.ok(rimaste.includes("jti:pa:j1"), "i token già usati restano segnati: non tornano riutilizzabili");
 });
 test("recount: ripara una degustazione da riga di comando", async () => {
   const Team = require("../api/_team");
@@ -195,4 +196,16 @@ test("recount: ripara una degustazione da riga di comando", async () => {
   const out = await run(["recount", "rc", t.id]);
   assert.match(out, /1 voti, somma 80/);
   assert.equal(await redis.hget("sm:rc:" + t.id, w.id), "80");
+});
+
+test("origins: imposta, aggiunge con --add, e mostra prima e dopo; opzioni sconosciute rifiutate", async () => {
+  await run(["create", "og", "--name", "x", "--origin", "https://uno.example"]);
+  let out = await run(["origins", "og", "--origin", "https://due.example"]);
+  assert.match(out, /prima: https:\/\/uno\.example/);
+  assert.match(out, /ora:\s+https:\/\/due\.example/);
+  out = await run(["origins", "og", "--add", "--origin", "https://tre.example"]);
+  assert.match(out, /ora:\s+https:\/\/due\.example, https:\/\/tre\.example/);
+  await fails(["origins", "og", "--clear", "--origin", "https://x.example"], /non si combina/);
+  await fails(["theme", "og", "--nonsense", "1"], /non esiste/);
+  await fails(["settings", "og", "--foo", "bar"], /non esiste/);
 });
