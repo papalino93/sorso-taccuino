@@ -39,7 +39,9 @@ La media del team si mostra con un decimale, perché i voti si concentrano in 75
 - I 9 giudizi 0–10 sono già salvati: il punteggio si **ricalcola automaticamente** con la nuova formula.
 - Il punteggio lineare originale resta in un campo `legacyTotal` (reversibile).
 - Al primo accesso compare una nota "punteggi ricalcolati con la nuova scala" e le schede ricalcolate sono marcate.
+- Le schede più vecchie (modelli 1 e 2) usavano voci diverse e non si possono ricalcolare dai singoli giudizi. Per tutte, comunque, la qualità si ricava da `punteggio/100`, perché il punteggio attuale è già una somma pesata lineare: la nuova scala si applica a quel valore.
 - Il ricalcolo è una funzione pura, con test, e si può rilanciare.
+- `scripts/confronto-scala.js` legge il file di "Salva copia" e stampa il confronto prima/dopo (tabella per vino, statistiche, fasce, tabella di riferimento al variare di `k`).
 
 ## 3. Spazio di team per siti partner
 
