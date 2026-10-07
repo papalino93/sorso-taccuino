@@ -25,7 +25,7 @@ Senza, posso provare l'integrazione solo in locale. Con, faccio la **prova di ac
 Taccuino → in fondo, riquadro "Il tuo archivio" → **Salva copia** → allega il file in chat. Mi serve per confermare i punteggi sulle tue schede vere (oggi la curva è scelta in base alle parole dei giudizi, non ancora verificata sui tuoi dati). Se il file è troppo grande, dimmelo e ti preparo una pagina che fa il confronto nel tuo browser.
 
 ### 3. Guarda le anteprime del design B e dimmi ok o cosa cambiare  ☐
-Ti ho mandato (o ti mando) le schermate reali dell'app con il design B. Dimmi: va bene così? Colore d'accento (ora viola)? Altro? **Solo dopo il tuo ok lo porto online.**
+Ti ho mandato in chat le schermate **reali** (non mockup): lo spazio di team (tema base chiaro/scuro, due temi partner, voto rapido, desktop) e l'app personale (Nuova, Voto rapido, il 100 con l'intestazione a tinta piena, Taccuino, Statistiche; telefono e desktop, chiaro e scuro). Tutte le altre sono nella cartella `design/anteprime/` del repository. Dimmi: va bene così? Colore d'accento (ora viola)? Altro? **Solo dopo il tuo ok lo porto online** (è sul ramo `claude/gifted-darwin-p1991r`, versione 1.4.0; in produzione c'è la 1.3.1).
 
 ### 4. Controlla la tua app dal telefono  ☐
 Apri https://sorso-taccuino.vercel.app/ con il browser che usi di solito:
@@ -86,7 +86,7 @@ Capitolo 11 della guida PDF ("Elenco di verifica prima di andare online"). In br
 
 - **Prova sul database vero** (Upstash/Vercel): non ho le chiavi. È il punto 1 della mattina. Finché non è fatta, non andare online col partner.
 - **Eventi personali** nell'app (la tua decisione "gli eventi devono essere personali"): non toccato. Non riguarda lo spazio di team del partner; è una modifica a parte dell'app personale (campo `evento` sulle schede e chiusura dello spazio condiviso). Dimmi se farla prima o dopo il design.
-- **Nuovo design B**: vedi il punto 3. Resta su un ramo a parte e **non è online**.
+- **Nuovo design B**: portato sullo spazio di team e sull'app personale, con anteprime reali (punto 3). Resta su un ramo a parte e **non è online** finché non lo approvi.
 - **Salvataggio automatico della bozza** dell'app personale se si ricarica la pagina: non fatto (difetto basso). Oggi chiede conferma prima di «Azzera».
 
 **Una cosa da sapere e su cui decidere** (non è un difetto, è un limite delle medie)
