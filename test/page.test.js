@@ -59,7 +59,7 @@ test("pagina: il tema è solo CSS controllato, con nonce", async () => {
   await putPartner({ theme: { accent: "#0a7a3c", bg: "#fafff8", font: "serif", title: "Club" } });
   const r = await get("?p=demo");
   const nonce = /nonce-([^']+)'/.exec(r.headers["content-security-policy"])[1];
-  const css = new RegExp('<style nonce="' + nonce + '">(:root\\{[^<]*\\})</style>').exec(r.body)[1];
+  const css = new RegExp('<style nonce="' + nonce.replace(/[.*+?^${}()|[\]\\\/]/g, "\\$&") + '">(:root\\{[^<]*\\})</style>').exec(r.body)[1];
   assert.ok(css.includes("--accent:#0a7a3c"), css);
   assert.ok(css.includes("--bg:#fafff8"), css);
   assert.ok(css.includes("--font:Georgia"), css);

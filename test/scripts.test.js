@@ -114,3 +114,85 @@ test("usage: legge il contatore dei mesi", async () => {
   assert.match(out[0], /410000 \/ 500000\s+\(82\.0%\)\s+→ attenzione/);
   assert.equal(out.length, 3);
 });
+
+/* ---- difetti della verifica approfondita ---- */
+test("create: due creazioni simultanee dello stesso partner, ne vince una sola", async () => {
+  const r = await Promise.allSettled([run(["create", "gara", "--name", "A"]), run(["create", "gara", "--name", "B"])]);
+  assert.equal(r.filter(x => x.status === "fulfilled").length, 1);
+  assert.equal(r.filter(x => x.status === "rejected").length, 1);
+  assert.match(String(r.find(x => x.status === "rejected").reason.message), /esiste già/);
+  const out = r.find(x => x.status === "fulfilled").value;
+  const secret = /Segreto di firma:\s+([0-9a-f]{64})/.exec(out)[1];
+  assert.equal(JSON.parse(await redis.get("p:gara")).secret, secret, "le credenziali mostrate sono quelle salvate");
+});
+test("identificativi: niente trattini ai bordi o doppi", async () => {
+  for (const id of ["a-", "-a", "a--b", "a_b", "A", "ab c", "x".repeat(32), "a"]) await fails(["create", id, "--name", "x"], /id non valido/);
+  for (const id of ["ab", "a-b", "club-2", "x".repeat(31), "a1-b2-c3"]) await run(["create", id, "--name", "x"]);
+});
+test("argomenti: un valore mancante non si scambia con l'opzione successiva; lingue e modalità solo valide", async () => {
+  await fails(["create", "uno", "--name", "--origin", "https://a.example"], /manca il valore di --name/);
+  await fails(["create", "uno", "--name"], /manca il valore di --name/);
+  assert.equal(await redis.get("p:uno"), null, "nessuna scrittura parziale");
+  await fails(["create", "uno", "--name", "x", "--lang", "xx"], /--lang/);
+  await fails(["create", "uno", "--name", "x", "--default-mode", "boh"], /--default-mode/);
+  await run(["create", "uno", "--name", "x"]);
+  await fails(["settings", "uno", "--lang", "xx"], /--lang/);
+  await fails(["settings", "uno", "--default-mode", "x"], /--default-mode/);
+});
+test("origins: senza --origin non cancella nulla; --clear le toglie, esplicitamente", async () => {
+  await run(["create", "og", "--name", "x", "--origin", "https://a.example"]);
+  await fails(["origins", "og"], /serve almeno un --origin/);
+  assert.deepEqual(JSON.parse(await redis.get("p:og")).origins, ["https://a.example"]);
+  await run(["origins", "og", "--clear"]);
+  assert.deepEqual(JSON.parse(await redis.get("p:og")).origins, []);
+  await fails(["origins", "og", "--origin", "https://*.example"], /origine non valida/);
+});
+test("localhost: l'autorizzazione resta nel partner e vale per la politica di sicurezza", async () => {
+  await run(["create", "loc2", "--name", "x", "--origin", "http://localhost:3000", "--allow-localhost"]);
+  const cfg = JSON.parse(await redis.get("p:loc2"));
+  assert.equal(cfg.allowLocalhost, true);
+  assert.equal(P.frameAncestors(cfg), "'self' http://localhost:3000");
+  await run(["create", "noloc", "--name", "x", "--origin", "https://a.example"]);
+  await fails(["origins", "noloc", "--origin", "http://localhost:3000"], /origine non valida/);
+});
+test("theme: mostra la tavolozza calcolata e avvisa quando corregge un colore illeggibile", async () => {
+  await run(["create", "tm", "--name", "x"]);
+  const out = await run(["theme", "tm", "--accent", "#ffff00", "--bg", "#ffffff"]);
+  assert.match(out, /Tavolozza calcolata/);
+  assert.match(out, /sono stati corretti: accent/);
+  const out2 = await run(["theme", "tm", "--clear", "--accent", "#7a1228", "--bg", "#fbfaf8"]);
+  assert.ok(!/sono stati corretti/.test(out2));
+  assert.match(out2, /non segue più il chiaro\/scuro/);
+});
+test("purge: chiede conferma e cancella solo i dati del partner indicato", async () => {
+  const { setup } = require("./helpers/env");
+  await run(["create", "pa", "--name", "A"]); await run(["create", "pa-2", "--name", "B"]);
+  for (const id of ["pa", "pa-2"]) {
+    await redis.hset("tl:" + id + ":t1", { aaaaaaaaaa: "{}" }); await redis.hset("ti:" + id, { aaaaaaaaaa: "t1" }); await redis.sadd("tm:" + id, "t1");
+    await redis.hset("cn:" + id, { "t:t1": "1" }); await redis.hset("wn:" + id + ":aaaaaaaaaa", { bbbbbbbbbb: "{}" });
+    await redis.set("vt:" + id + ":aaaaaaaaaa:bbbbbbbbbb:u", "{}"); await redis.sadd("vs:" + id + ":aaaaaaaaaa:bbbbbbbbbb", "u");
+    await redis.hset("sm:" + id + ":aaaaaaaaaa", { bbbbbbbbbb: "1" }); await redis.hset("ct:" + id + ":aaaaaaaaaa", { bbbbbbbbbb: "1" });
+    await redis.sadd("uv:" + id + ":u", "aaaaaaaaaa|bbbbbbbbbb"); await redis.set("jti:" + id + ":j1", "1");
+  }
+  await fails(["purge", "pa"], /Ripeti con --yes/);
+  assert.ok((await redis.keys("*pa:*")).length > 0, "senza --yes non si cancella nulla");
+  const out = await run(["purge", "pa", "--yes"]);
+  assert.match(out, /Cancellate 11 chiavi/);
+  const rimaste = await redis.keys("*");
+  assert.ok(!rimaste.some(k => /^[a-z]{2}:pa(:|$)/.test(k)), "dati di pa tutti spariti: " + rimaste.join(","));
+  assert.ok(rimaste.some(k => k.startsWith("tl:pa-2:")), "i dati di pa-2 restano (id che inizia allo stesso modo)");
+  assert.ok(rimaste.includes("p:pa") && rimaste.includes("p:pa-2"), "le configurazioni restano");
+});
+test("recount: ripara una degustazione da riga di comando", async () => {
+  const Team = require("../api/_team");
+  await run(["create", "rc", "--name", "x"]);
+  const ctx = { uid: "o", team: "t", role: "organizer" };
+  const p = (await P.loadPartner(redis, "rc"));
+  const t = await Team.createTasting(redis, "rc", ctx, { name: "T" });
+  const w = await Team.addWine(redis, "rc", ctx, t.id, { name: "V" });
+  await Team.castVote(redis, p, { uid: "a", team: "t", role: "member" }, { tasting: t.id, wine: w.id, mode: "smart", giudizi: { occhio: 80, naso: 80, bocca: 80 } });
+  await redis.hset("sm:rc:" + t.id, { [w.id]: "12345" });
+  const out = await run(["recount", "rc", t.id]);
+  assert.match(out, /1 voti, somma 80/);
+  assert.equal(await redis.hget("sm:rc:" + t.id, w.id), "80");
+});

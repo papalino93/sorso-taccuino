@@ -11,20 +11,23 @@
      node scripts/partner.js list
      node scripts/partner.js show <id>
      node scripts/partner.js enable|disable <id>
-     node scripts/partner.js origins <id> --origin https://club.example [--origin ...] [--allow-localhost]
+     node scripts/partner.js origins <id> --origin https://club.example [--origin ...] [--allow-localhost] | --clear
      node scripts/partner.js theme <id> [--accent #aabbcc] [--bg #rrggbb] [--ink #rrggbb] [--font system|serif|rounded|mono]
                              [--title "Titolo"] [--logo https://...png] [--clear]
      node scripts/partner.js settings <id> [--name N] [--modes smart,full] [--default-mode smart|full] [--lang it|en]
      node scripts/partner.js rotate-secret <id>
      node scripts/partner.js rotate-key <id>
+     node scripts/partner.js recount <id> <degustazione>      ricalcola somma e conteggio dai voti veri (riparazione)
+     node scripts/partner.js purge <id> --yes                 cancella TUTTI i dati di team del partner (non la sua configurazione)
      node scripts/partner.js token <id> --sub <utente> --team <team> [--role member|organizer] [--name N] [--lang it|en]
 
    Il segreto di firma e la chiave API compaiono UNA volta sola, alla creazione
    o alla rotazione: la chiave API si salva solo come hash e non si può rileggere.
-   Le modifiche arrivano alle funzioni in esecuzione entro 30 secondi (cache). */
+   Le modifiche arrivano alle funzioni in esecuzione entro un minuto (elenco dei partner in memoria). */
 const crypto = require("crypto");
 const P = require("../api/_partner");
 const jwt = require("../api/_jwt");
+const Team = require("../api/_team");
 
 function parseArgs(argv) {
   const pos = [], opt = { origin: [] };
@@ -32,9 +35,10 @@ function parseArgs(argv) {
     const a = argv[i];
     if (a.startsWith("--")) {
       const k = a.slice(2);
-      if (k === "allow-localhost" || k === "clear") { opt[k] = true; continue; }
+      if (k === "allow-localhost" || k === "clear" || k === "yes") { opt[k] = true; continue; }
       const v = argv[++i];
-      if (v === undefined) throw new Error("manca il valore di --" + k);
+      /* "--name --origin x": il valore mancante non deve scambiarsi con l'opzione che segue */
+      if (v === undefined || v.startsWith("--")) throw new Error("manca il valore di --" + k);
       if (k === "origin") opt.origin.push(v); else opt[k] = v;
     } else pos.push(a);
   }
@@ -51,6 +55,14 @@ function checkOrigins(list, allowLocalhost) {
     if (out.indexOf(n) < 0) out.push(n);
   });
   return out;
+}
+function checkLang(v) {
+  if (v !== "it" && v !== "en") throw new Error("--lang: it oppure en");
+  return v;
+}
+function checkDefaultMode(v) {
+  if (v !== "smart" && v !== "full") throw new Error("--default-mode: smart oppure full");
+  return v;
 }
 function checkModes(s) {
   const m = String(s).split(",").map(x => x.trim()).filter(Boolean);
@@ -71,21 +83,24 @@ async function main(argv, redis, log) {
   const { pos, opt } = parseArgs(argv);
   const cmd = pos[0], id = pos[1];
   P.clearCache();
-  const KNOWN = ["create", "list", "show", "enable", "disable", "origins", "theme", "settings", "rotate-secret", "rotate-key", "token"];
+  const KNOWN = ["create", "list", "show", "enable", "disable", "origins", "theme", "settings", "rotate-secret", "rotate-key", "token", "recount", "purge"];
   if (KNOWN.indexOf(cmd) < 0) throw new Error("comando sconosciuto: " + (cmd || "(nessuno)") + ". Vedi l'intestazione di scripts/partner.js.");
 
   if (cmd === "create") {
-    if (!P.validId(id)) throw new Error("id non valido: minuscole, cifre e trattini, 2-31 caratteri");
+    if (!P.validId(id)) throw new Error("id non valido: minuscole, cifre e trattini in mezzo, 2-31 caratteri (niente trattino all'inizio, alla fine o doppio)");
     if (!opt.name) throw new Error("serve --name");
-    if (await redis.get("p:" + id)) throw new Error("il partner esiste già: " + id);
     const sig = secret(), apiKey = P.newApiKey(id);
     const cfg = {
       id, name: String(opt.name).slice(0, 60), active: true, secret: sig, apiKeyHash: P.sha256(apiKey),
       origins: checkOrigins(opt.origin, opt["allow-localhost"]), modes: checkModes(opt.modes || "smart,full"),
-      defaultMode: opt["default-mode"] === "full" ? "full" : "smart", lang: opt.lang === "en" ? "en" : "it",
+      defaultMode: opt["default-mode"] ? checkDefaultMode(opt["default-mode"]) : "smart", lang: opt.lang ? checkLang(opt.lang) : "it",
       theme: {}, createdAt: new Date().toISOString()
     };
-    await save(redis, cfg);
+    if (opt["allow-localhost"]) cfg.allowLocalhost = true;
+    /* SET NX: se due persone creano lo stesso partner insieme, ne vince una sola e all'altra viene
+       detto che esiste già (prima l'una sovrascriveva l'altra e restava con credenziali già morte) */
+    const scritto = await redis.set("p:" + id, JSON.stringify(cfg), { nx: true });
+    if (scritto !== "OK") throw new Error("il partner esiste già: " + id);
     await redis.sadd("partners", id);
     log("Partner creato: " + id);
     if (!cfg.origins.length) log("Attenzione: nessuna origine registrata, quindi nessun sito può incorporare lo spazio. Aggiungila con: origins " + id + " --origin https://...");
@@ -95,6 +110,7 @@ async function main(argv, redis, log) {
     log("  Chiave API (sola lettura): " + apiKey);
     log("");
     log("Conservali ora: il segreto e la chiave non si possono rileggere (la chiave è salvata solo come hash).");
+    log("Il nuovo partner compare nelle funzioni entro 10 secondi.");
     return;
   }
   if (cmd === "list") {
@@ -110,7 +126,9 @@ async function main(argv, redis, log) {
   if (cmd === "show") { log(JSON.stringify(publicView(cfg), null, 2)); return; }
   if (cmd === "enable" || cmd === "disable") { cfg.active = cmd === "enable"; await save(redis, cfg); log((cfg.active ? "Attivato: " : "Disattivato: ") + id); return; }
   if (cmd === "origins") {
-    cfg.origins = checkOrigins(opt.origin, opt["allow-localhost"]);
+    if (!opt.origin.length && !opt.clear) throw new Error("serve almeno un --origin (oppure --clear per toglierle tutte: nessun sito potrebbe più incorporare lo spazio)");
+    if (opt["allow-localhost"]) cfg.allowLocalhost = true;
+    cfg.origins = checkOrigins(opt.origin, cfg.allowLocalhost === true);
     await save(redis, cfg); log("Origini: " + (cfg.origins.join(", ") || "(nessuna)")); return;
   }
   if (cmd === "theme") {
@@ -119,24 +137,48 @@ async function main(argv, redis, log) {
     const clean = P.sanitizeTheme(t);
     const scartati = Object.keys(t).filter(k => clean[k] === undefined);
     if (scartati.length) throw new Error("valori non validi per: " + scartati.join(", ") + " (colori #rrggbb, font " + Object.keys(P.FONTS).join("/") + ", logo https)");
-    cfg.theme = clean; await save(redis, cfg); log("Tema: " + JSON.stringify(clean)); return;
+    cfg.theme = clean; await save(redis, cfg); log("Tema: " + JSON.stringify(clean));
+    const r = P.resolveTheme(clean);
+    if (r) {
+      const diversi = ["accent", "bg", "ink"].filter(k => clean[k] && clean[k] !== r[k === "accent" ? "--accent" : k === "bg" ? "--bg" : "--ink"]);
+      log("Tavolozza calcolata (testo ≥ 4,5:1, accento ≥ 3:1): " + ["--bg", "--ink", "--accent", "--on-accent", "--surface", "--muted"].map(k => k + " " + r[k]).join("  "));
+      if (diversi.length) log("Attenzione: per essere leggibili sono stati corretti: " + diversi.join(", ") + ". Con un colore scelto il tema non segue più il chiaro/scuro del dispositivo.");
+      else log("Con un colore scelto il tema non segue più il chiaro/scuro del dispositivo.");
+    }
+    return;
   }
   if (cmd === "settings") {
     if (opt.name) cfg.name = String(opt.name).slice(0, 60);
     if (opt.modes) cfg.modes = checkModes(opt.modes);
-    if (opt["default-mode"]) cfg.defaultMode = opt["default-mode"] === "full" ? "full" : "smart";
-    if (opt.lang) cfg.lang = opt.lang === "en" ? "en" : "it";
+    if (opt["default-mode"]) cfg.defaultMode = checkDefaultMode(opt["default-mode"]);
+    if (opt.lang) cfg.lang = checkLang(opt.lang);
     await save(redis, cfg); log(JSON.stringify(publicView(cfg), null, 2)); return;
   }
   if (cmd === "rotate-secret") {
     cfg.secret = secret(); await save(redis, cfg);
     log("Nuovo segreto di firma: " + cfg.secret);
-    log("Le sessioni aperte e i token firmati col vecchio segreto smettono di valere entro 30 secondi.");
+    log("Le sessioni aperte e i token firmati col vecchio segreto smettono di valere entro un minuto.");
     return;
   }
   if (cmd === "rotate-key") {
     const k = P.newApiKey(id); cfg.apiKeyHash = P.sha256(k); await save(redis, cfg);
-    log("Nuova chiave API: " + k); log("La vecchia chiave smette di valere entro 30 secondi."); return;
+    log("Nuova chiave API: " + k); log("La vecchia chiave smette di valere entro un minuto."); return;
+  }
+  if (cmd === "recount") {
+    const out = await Team.recount(redis, id, pos[2]);
+    out.forEach(r => log("vino " + r.wine + ": " + r.votes + " voti, somma " + r.sum));
+    log(out.length ? "Somma e conteggio ricalcolati dai voti veri." : "Nessun vino in quella degustazione.");
+    return;
+  }
+  if (cmd === "purge") {
+    if (!opt.yes) throw new Error("operazione irreversibile: cancella tutte le degustazioni, i vini e i voti di " + id + ". Ripeti con --yes per confermare");
+    const modelli = ["tl:" + id + ":*", "wn:" + id + ":*", "vt:" + id + ":*", "vs:" + id + ":*", "sm:" + id + ":*", "ct:" + id + ":*", "uv:" + id + ":*", "jti:" + id + ":*"];
+    const fissi = ["ti:" + id, "tm:" + id, "cn:" + id];
+    let chiavi = fissi.slice();
+    for (const m of modelli) chiavi = chiavi.concat((await redis.keys(m)) || []);
+    for (let i = 0; i < chiavi.length; i += 100) await redis.del(...chiavi.slice(i, i + 100));
+    log("Cancellate " + chiavi.length + " chiavi di dati di " + id + ". La configurazione del partner resta.");
+    return;
   }
   if (cmd === "token") {
     if (!opt.sub || !opt.team) throw new Error("servono --sub e --team");

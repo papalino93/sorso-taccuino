@@ -40,7 +40,7 @@ async function start(opts) {
   await getRedis().sadd("partners", "demo");
   await getRedis().set("p:demo", JSON.stringify(Object.assign({
     id: "demo", name: "Club Demo", active: true, secret, apiKeyHash: P.sha256(apiKey),
-    origins: opts.origins || [], modes: ["smart", "full"], defaultMode: "smart", lang: "it", theme: {}
+    origins: opts.origins || [], allowLocalhost: true, modes: ["smart", "full"], defaultMode: "smart", lang: "it", theme: {}
   }, opts.partner)));
   P.clearCache();
 
