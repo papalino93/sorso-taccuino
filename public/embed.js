@@ -72,7 +72,7 @@
       vote: "Vota", editVote: "Modifica il mio voto", yourVote: "Il tuo voto", teamAvg: "Media del team",
       voteSingle: "{n} voto", votePlural: "{n} voti",
       votedSingle: "{n} persona ha votato", votedPlural: "{n} persone hanno votato",
-      voteToSee: "Vota questo vino per vedere la media del team.", savedOk: "Voto salvato.",
+      voteToSee: "Vota questo vino per vedere la media del team.", savedOk: "Voto salvato.", aboveAvg: "+{n} sopra la media", belowAvg: "−{n} sotto la media", onAvg: "In linea con la media",
       modeLabel: "Modalità di voto", modeSmart: "Voto rapido", modeFull: "Scheda completa",
       smartHint: "Tre giudizi da 50 a 100.", fullHint: "Nove giudizi da 0 a 10 sulle quattro fasi.",
       eye: "Occhio", nose: "Naso", mouth: "Bocca",
@@ -133,7 +133,7 @@
       vote: "Vote", editVote: "Edit my vote", yourVote: "Your vote", teamAvg: "Team average",
       voteSingle: "{n} vote", votePlural: "{n} votes",
       votedSingle: "{n} person has voted", votedPlural: "{n} people have voted",
-      voteToSee: "Vote on this wine to see the team average.", savedOk: "Vote saved.",
+      voteToSee: "Vote on this wine to see the team average.", savedOk: "Vote saved.", aboveAvg: "+{n} above average", belowAvg: "−{n} below average", onAvg: "In line with the average",
       modeLabel: "Voting mode", modeSmart: "Quick score", modeFull: "Full sheet",
       smartHint: "Three ratings from 50 to 100.", fullHint: "Nine ratings from 0 to 10 across four stages.",
       eye: "Eye", nose: "Nose", mouth: "Mouth",
@@ -375,9 +375,16 @@
     var h = '<article class="card wine' + (S.saved === w.id ? " just-saved" : "") + '" aria-labelledby="wn-' + esc(w.id) + '">' +
       '<h3 class="name" id="wn-' + esc(w.id) + '" dir="auto">' + esc(w.name) + '</h3><p class="meta" dir="auto">' + wineLine(w) + '</p>';
     if (w.mine) {
-      h += '<div class="score-line"><div><div class="band">' + esc(t("yourVote")) + '</div><div class="big">' + w.mine.score + '</div></div>';
-      if (w.team) h += '<div><div class="band">' + esc(t("teamAvg")) + ' · ' + esc(plural(w.team.count, "voteSingle", "votePlural")) + '</div><div class="big team">' + dec(w.team.avg) + '</div></div>';
-      h += '</div><p class="band">' + esc(bandWord(w.mine.score)) + ' · ' + esc(t(w.mine.mode === "full" ? "modeFull" : "modeSmart")) + '</p>';
+      /* due blocchi affiancati: il tuo voto e la media del team (a colore pieno); dal 96 anche il tuo
+         voto si colora: è l'unico momento in cui il colore occupa lo spazio */
+      h += '<div class="score-line"><div class="tile' + (w.mine.score >= 96 ? " hi" : "") + '"><div class="band">' + esc(t("yourVote")) + '</div><div class="big">' + w.mine.score + '</div><div class="band">' + esc(bandWord(w.mine.score)) + '</div></div>';
+      if (w.team) h += '<div class="tile team"><div class="band">' + esc(t("teamAvg")) + '</div><div class="big team">' + dec(w.team.avg) + '</div><div class="band">' + esc(plural(w.team.count, "voteSingle", "votePlural")) + '</div></div>';
+      h += '</div>';
+      if (w.team) {
+        var diff = Scoring.roundHalfUp(w.mine.score - w.team.avg, 1);
+        h += '<p class="chips"><span class="chip">' + esc(diff === 0 ? t("onAvg") : t(diff > 0 ? "aboveAvg" : "belowAvg", { n: dec(Math.abs(diff)) })) + '</span>' +
+          '<span class="chip">' + esc(t(w.mine.mode === "full" ? "modeFull" : "modeSmart")) + '</span></p>';
+      } else h += '<p class="chips"><span class="chip">' + esc(t(w.mine.mode === "full" ? "modeFull" : "modeSmart")) + '</span></p>';
       if (S.saved === w.id) h += '<p class="saved-note">✓ ' + esc(t("savedOk")) + '</p>';
     } else if (open) {
       h += '<p class="lock">' + esc(t("voteToSee")) + '</p>';
