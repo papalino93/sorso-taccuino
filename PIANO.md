@@ -9,7 +9,7 @@ Obiettivo: migliorare l'app in modo definitivo e renderla integrabile come **spa
 - **Fase 2** — spazio di team, embed e API di sola lettura: scritta e provata con un Redis finto e nel browser (v1.3.0). Mancano il primo partner reale e la prova con il database vero: servono le credenziali nell'ambiente.
 - **Design** — due direzioni proposte in `design/` (nel branch di lavoro, non ancora nell'app); da scegliere.
 - **Fase 3** — redesign: da fare dopo la scelta della direzione.
-- **Fase 4** — guida di integrazione in PDF: da fare sull'API stabile.
+- **Fase 4** — guida di integrazione in PDF: fatta (`docs/guida-integrazione-sorso.pdf`, 13 pagine). Gli esempi di codice sono provati dai test e le risposte dell'API sono quelle vere; si rigenera con `python3 docs/build-guida.py`. Da riguardare dopo la scelta del design solo se cambia il tema dei partner.
 
 ## 1. Cosa si costruisce
 
