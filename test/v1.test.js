@@ -1,7 +1,7 @@
 const test = require("node:test");
 const assert = require("node:assert/strict");
 const crypto = require("crypto");
-const { setup, call } = require("./helpers/env");
+const { setup, call, finestraSicura } = require("./helpers/env");
 const jwt = require("../api/_jwt");
 const P = require("../api/_partner");
 const quota = require("../api/_quota");
@@ -139,6 +139,7 @@ test("percorsi e metodi: 404 e 405", async () => {
   assert.equal((await call(v1, { method: "GET", url: "/api/v1?path=users%2Fx", headers: { authorization: "Bearer " + KEY } })).statusCode, 405);
 });
 test("limite di richieste per chiave", async () => {
+  await finestraSicura();
   let last;
   for (let i = 0; i < 122; i++) last = await get("tastings");
   assert.equal(last.statusCode, 429);

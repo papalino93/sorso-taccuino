@@ -1,7 +1,7 @@
 const test = require("node:test");
 const assert = require("node:assert/strict");
 const crypto = require("crypto");
-const { setup, call } = require("./helpers/env");
+const { setup, call, finestraSicura } = require("./helpers/env");
 const jwt = require("../api/_jwt");
 const P = require("../api/_partner");
 const quota = require("../api/_quota");
@@ -76,6 +76,7 @@ test("sessione: partner disattivato", async () => {
   assert.equal((await post({ op: "session", token: token() })).statusCode, 401);
 });
 test("sessione: tentativi limitati per indirizzo", async () => {
+  await finestraSicura();
   let last;
   for (let i = 0; i < 31; i++) last = await post({ op: "session", token: "x" });
   assert.equal(last.statusCode, 429);
@@ -264,6 +265,7 @@ test("tetto di vini per degustazione", async () => {
   assert.equal(r.statusCode, 409); assert.equal(r.body.error.code, "limit");
 });
 test("limite di richieste per utente", async () => {
+  await finestraSicura();
   const s = await login();
   let last;
   for (let i = 0; i < 92; i++) last = await post({ op: "state" }, s);
@@ -290,6 +292,7 @@ test("avviso agli organizzatori oltre l'80% dei comandi", async () => {
   assert.equal((await post({ op: "state" }, m)).body.quota, "ok", "i membri non vedono l'avviso");
 });
 test("costo in comandi Redis: stato e voto restano economici", async () => {
+  await finestraSicura();
   const { t, w1 } = await scenario();
   const m = await login({ sub: "m" });
   P.clearCache();

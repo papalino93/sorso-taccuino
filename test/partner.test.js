@@ -1,7 +1,7 @@
 const test = require("node:test");
 const assert = require("node:assert/strict");
 const crypto = require("crypto");
-const { setup } = require("./helpers/env");
+const { setup, finestraSicura } = require("./helpers/env");
 const jwt = require("../api/_jwt");
 const P = require("../api/_partner");
 const limit = require("../api/_limit");
@@ -120,7 +120,9 @@ test("loadPartner: usa la cache (un solo comando Redis)", async () => {
 test("partnerFromApiKey: chiave giusta, sbagliata, di un altro partner", async () => {
   const { apiKey } = await putPartner();
   assert.equal((await P.partnerFromApiKey(redis, apiKey)).id, "demo");
-  await assert.rejects(P.partnerFromApiKey(redis, apiKey.slice(0, -1) + "0"), e => e.code === "api_key");
+  // l'ultimo carattere della chiave è casuale: lo cambio sicuro in uno diverso
+  const sbagliata = apiKey.slice(0, -1) + (apiKey.endsWith("0") ? "1" : "0");
+  await assert.rejects(P.partnerFromApiKey(redis, sbagliata), e => e.code === "api_key");
   await assert.rejects(P.partnerFromApiKey(redis, "sk_altro_" + "a".repeat(48)), e => e.code === "api_key");
   await assert.rejects(P.partnerFromApiKey(redis, ""), e => e.code === "api_key");
 });
@@ -200,6 +202,7 @@ test("sessione: il token del partner non è una sessione e viceversa", async () 
 
 /* ---- limiti e quota ---- */
 test("limite di richieste: scatta alla soglia", async () => {
+  await finestraSicura();
   for (let i = 1; i <= 3; i++) assert.equal((await limit.hit(redis, "x", 3, 60)).ok, true);
   const r = await limit.hit(redis, "x", 3, 60);
   assert.equal(r.ok, false);
@@ -207,6 +210,7 @@ test("limite di richieste: scatta alla soglia", async () => {
   assert.equal((await limit.hit(redis, "altro", 3, 60)).ok, true);
 });
 test("limite di richieste: costa 2 comandi la prima volta, 1 le altre", async () => {
+  await finestraSicura();
   srv.log.length = 0;
   await limit.hit(redis, "c", 10, 60);
   assert.equal(srv.log.length, 2);

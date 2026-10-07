@@ -7,7 +7,8 @@ Obiettivo: migliorare l'app in modo definitivo e renderla integrabile come **spa
 
 - **Fase 1** — scala 50–100, voto rapido, ricalcolo dei dati: fatta e online (v1.2.0).
 - **Fase 2** — spazio di team, embed e API di sola lettura: scritta e provata con un Redis finto e nel browser (v1.3.0). Mancano il primo partner reale e la prova con il database vero: servono le credenziali nell'ambiente.
-- **Design** — due direzioni proposte in `design/` (nel branch di lavoro, non ancora nell'app); da scegliere.
+- **Design** — scelta la **direzione B** ("Numero e inchiostro"), in `design/`; da portare nell'app con la fase 3.
+- **Arrotondamento** — regola classica su ogni numero mostrato o salvato: da 0,5 in su per eccesso (da 1 a 4 per difetto, da 5 a 9 per eccesso). Va applicata con un'aritmetica che non sbaglia sui casi esatti a metà (es. 82,5 non deve diventare 82,49999).
 - **Fase 3** — redesign: da fare dopo la scelta della direzione.
 - **Fase 4** — guida di integrazione in PDF: fatta (`docs/guida-integrazione-sorso.pdf`, 13 pagine). Gli esempi di codice sono provati dai test e le risposte dell'API sono quelle vere; si rigenera con `python3 docs/build-guida.py`. Da riguardare dopo la scelta del design solo se cambia il tema dei partner.
 

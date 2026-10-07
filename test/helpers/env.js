@@ -30,4 +30,12 @@ async function call(handler, o) {
   return res;
 }
 
-module.exports = { setup, makeReq, makeRes, call };
+/* I limiti di richieste contano in finestre di un minuto: un test che conta fino alla
+   soglia non deve attraversare il cambio di minuto, o fallirebbe senza che ci sia un
+   difetto. Se mancano meno di `serve` secondi alla fine della finestra, si aspetta. */
+async function finestraSicura(serve) {
+  const sec = (Date.now() / 1000) % 60;
+  if (60 - sec < (serve || 8)) await new Promise(r => setTimeout(r, (60 - sec + 0.3) * 1000));
+}
+
+module.exports = { setup, makeReq, makeRes, call, finestraSicura };
