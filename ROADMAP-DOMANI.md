@@ -53,7 +53,7 @@ Mi servono questi dati per creare il loro spazio:
 - Chi, da loro, riceverà il **segreto di firma e la chiave API**? Mandali **separati e su un canale sicuro** (non per email in chiaro, non in chat condivise).
 
 ### 7. Manda loro la guida PDF  ☐
-`docs/guida-integrazione-sorso.pdf` (13 pagine). **Mandala solo dopo che ti ho scritto che la verifica finale è pulita** (vedi "Stato a fine lavoro").
+`docs/guida-integrazione-sorso.pdf` (14 pagine). **Mandala solo dopo che ti ho scritto che la verifica finale è pulita** (vedi "Stato a fine lavoro").
 
 ### 8. Decisioni che ti spettano (anche dopo)  ☐
 - **Foto dei vini nel team**: oggi non ci sono, per risparmiare spazio gratuito. Va bene aspettare?
@@ -73,4 +73,24 @@ Capitolo 11 della guida PDF ("Elenco di verifica prima di andare online"). In br
 
 ## Stato a fine lavoro (aggiornato da me)
 
-_In aggiornamento: lo riempio quando ho finito le correzioni e i controlli._
+**Cosa ho fatto di notte**
+
+- **Verifica approfondita con sei revisori indipendenti** (due giri: interfaccia del team, app personale, backend/guida). Non hanno trovato difetti bloccanti; hanno trovato molti difetti medi e alti, **tutti corretti** e coperti da test.
+- **Spazio di team (l'iframe del partner)**: interfaccia riscritta. Token nel frammento `#token=` (non finisce nei log), nessun vicolo cieco quando la sessione scade (l'iframe chiede un token nuovo al sito con `sorso:reauth`, il voto compilato non si perde), conferme per chiudere/eliminare, errori sempre tradotti e senza codici tecnici, doppio clic innocuo, focus e tastiera a posto, nomi lunghissimi senza rotture, tema del partner sempre leggibile (contrasto garantito, anche sui riquadri).
+- **Backend**: voti e cancellazioni non possono più lasciare conteggi sbagliati (provato anche con ritardi di rete simulati, 30 esecuzioni su 30), tetti per team (200 degustazioni, 100 vini), la cancellazione dei dati di un utente funziona sempre (anche in sola lettura), script `partner.js` che rifiuta le opzioni sbagliate e dice "prima/dopo" quando cambi le origini.
+- **App personale (v1.3.1)**: una scheda con solo il totale non perde più il punteggio se la modifichi senza toccare i giudizi; conferma prima di cambiare modalità, azzerare o svelare; niente doppi salvataggi; il ripristino da copia riporta anche le prove alla cieca; focus da tastiera; bersagli tattili più grandi; contrasti; **arrotondamento classico su ogni numero** (anche prezzi e medie); testi della scala spiegati nella schermata Nuova.
+- **Guida PDF** (14 pagine), esempi, README e PIANO allineati al codice; un test controlla che la guida dica gli stessi numeri del codice.
+- **Controlli finali**: 164 test automatici (anche 3 esecuzioni in parallelo e con ritardi simulati) e 6 scenari nel browser (scala, cieca, due serie sull'app, team, errori del team): tutti verdi.
+
+**Cosa NON ho fatto (e perché)**
+
+- **Prova sul database vero** (Upstash/Vercel): non ho le chiavi. È il punto 1 della mattina. Finché non è fatta, non andare online col partner.
+- **Eventi personali** nell'app (la tua decisione "gli eventi devono essere personali"): non toccato. Non riguarda lo spazio di team del partner; è una modifica a parte dell'app personale (campo `evento` sulle schede e chiusura dello spazio condiviso). Dimmi se farla prima o dopo il design.
+- **Nuovo design B**: vedi il punto 3. Resta su un ramo a parte e **non è online**.
+- **Salvataggio automatico della bozza** dell'app personale se si ricarica la pagina: non fatto (difetto basso). Oggi chiede conferma prima di «Azzera».
+
+**Una cosa da sapere e su cui decidere** (non è un difetto, è un limite delle medie)
+
+In un gruppo molto piccolo (2-3 persone), chi vede la media prima e dopo un nuovo voto può dedurre quel voto. Succede in qualunque sistema con medie visibili. Alternative: mostrare la media solo da 3 voti, o solo a degustazione chiusa. Oggi la guida lo dice al partner. Dimmi se vuoi cambiare.
+
+**Per rilasciare**: le correzioni sono su un ramo e le porto in produzione appena la verifica è pulita (lo faccio io, non il design).
