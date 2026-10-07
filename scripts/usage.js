@@ -3,13 +3,14 @@
    Il contatore è approssimato (vedi api/_quota.js): per difetto di qualche punto
    percentuale. Serve KV_REST_API_URL e KV_REST_API_TOKEN nell'ambiente. */
 const Quota = require("../api/_quota");
+const Scoring = require("../public/js/scoring.js");
 
 async function main(redis, log) {
   const now = new Date();
   for (let i = 0; i < 3; i++) {
     const d = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() - i, 1));
     const n = Number(await redis.get(Quota.monthKey(d))) || 0;
-    const pct = (n / Quota.LIMIT * 100).toFixed(1);
+    const pct = Scoring.roundHalfUp(n / Quota.LIMIT * 100, 1).toFixed(1);
     const stato = n >= Quota.LIMIT * Quota.READONLY_AT ? "  → SOLA LETTURA" : n >= Quota.LIMIT * Quota.WARN_AT ? "  → attenzione" : "";
     log(d.toISOString().slice(0, 7) + "  " + String(n).padStart(8) + " / " + Quota.LIMIT + "  (" + pct + "%)" + stato);
   }

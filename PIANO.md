@@ -40,7 +40,7 @@ Vincolo trasversale: **nessun costo**. Vercel Hobby + Upstash Redis gratuito, us
 
 In entrambi i casi il minimo è 50, quindi un 30 non esiste.
 
-Lettura dei punteggi: 50–59 difettoso, 60–69 sufficiente, 70–79 discreto, 80–89 buono/molto buono, 90–95 eccellente, 96–99 eccezionale, 100 irripetibile.
+Lettura dei punteggi: 50–59 insufficiente, 60–69 sufficiente, 70–79 discreto, 80–89 buono/molto buono, 90–95 eccellente, 96–99 eccezionale, 100 irripetibile.
 
 La media del team si mostra con un decimale, perché i voti si concentrano in 75–92.
 
@@ -64,8 +64,8 @@ La media del team si mostra con un decimale, perché i voti si concentrano in 75
 - L'organizzatore può chiudere una degustazione: dopo la chiusura i voti sono definitivi.
 
 ### Autenticazione (SSO con token firmato)
-1. Il backend del partner firma un JWT **HS256** con il segreto condiviso. Claim: `iss` (id partner), `sub` (id utente opaco), `name`, `team`, `role`, `exp` (massimo 10 minuti), `jti`.
-2. L'iframe carica `/embed?token=...`; Sorso verifica la firma e `exp`, consuma il `jti` (monouso) e crea una sessione.
+1. Il backend del partner firma un JWT **HS256** con il segreto condiviso. Claim: `iss` (id partner), `sub` (id utente opaco), `name`, `team`, `role`, `exp` (massimo 15 minuti), `jti`.
+2. L'iframe carica `/embed?p=<partner>#token=...` (il token nel frammento non viaggia in rete); Sorso verifica la firma e `exp`, consuma il `jti` (monouso) e crea una sessione.
 3. La sessione vive **solo in memoria** nell'iframe (niente cookie né localStorage di terze parti, che i browser bloccano).
 4. L'embed risponde con `Content-Security-Policy: frame-ancestors <domini del partner>`: funziona solo dal dominio registrato.
 

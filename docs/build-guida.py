@@ -217,15 +217,16 @@ def main():
     # ---------------- 4 ----------------
     story += [P("4. Passo 2 — incorporare lo spazio", "h1"),
               P("L'indirizzo dell'iframe ha questa forma:"),
-              codice("%s/embed?p=ID_PARTNER&token=TOKEN_FIRMATO" % BASE),
-              P("Il tuo server lo costruisce a ogni caricamento della pagina, con un token appena firmato. Nella pagina:"),
+              codice("%s/embed?p=ID_PARTNER#token=TOKEN_FIRMATO" % BASE),
+              P("Il tuo server lo costruisce a ogni caricamento della pagina, con un token appena firmato. Il token va <b>dopo il #</b> (nel frammento): il browser non lo invia mai a nessun server, quindi non compare nei log né nell'intestazione Referer. Nella pagina:"),
               file_esempio("pagina-ospite.html", {"DOMINIO-SORSO": BASE.replace("https://", "")}),
               P("Cosa succede dentro l'iframe", "h2")] + lista([
-        "Sorso verifica il token e lo scambia subito con una <b>sessione di 4 ore</b>, tenuta solo in memoria. Poi toglie il token dall'indirizzo.",
-        "Se l'utente ricarica l'iframe (o dopo 4 ore) serve un token nuovo: l'utente deve ricaricare la tua pagina.",
+        "Sorso verifica il token e lo scambia subito con una <b>sessione di 4 ore</b>, tenuta solo in memoria. Dopo lo scambio riuscito toglie il token dall'indirizzo.",
+        "Se la sessione finisce (dopo 4 ore, o ricaricando solo l'iframe) serve un token nuovo. L'iframe lo dice all'utente e invia al tuo sito il messaggio <font name='Mono'>{ type: \"sorso:reauth\" }</font>: se lo ascolti come nell'esempio, il tuo server firma un token nuovo e ricarichi l'iframe senza che l'utente faccia nulla. Senza questo ascolto l'utente vede un invito a ricaricare la tua pagina.",
+        "Il voto che l'utente stava compilando non è perso se cambia vino o torna all'elenco; se la sessione scade mentre compila, l'iframe lo avvisa che quel voto non è stato salvato.",
         "<b>Altezza automatica.</b> L'iframe invia al tuo sito il messaggio <font name='Mono'>{ type: \"sorso:height\", height: numero }</font>. "
         "Ascoltalo come nell'esempio, controllando sempre <font name='Mono'>event.origin</font>."])
-    story += [P("Se vedi “Questo link è già stato usato”", "h2"),
+    story += [P("Se vedi “Questo accesso è già stato usato”", "h2"),
               P("Il token è monouso, quindi succede quando lo stesso token arriva due volte. Le cause più comuni:")] + lista([
         "la pagina è stata messa in <b>cache</b> (da te, da un CDN o dal browser) e contiene un token vecchio;",
         "un'<b>anteprima automatica</b> (un bot, un controllo dei link, il prefetch del browser) ha caricato la pagina prima dell'utente;",
@@ -238,7 +239,7 @@ def main():
               Paragraph("Il ruolo lo decidi tu, nel claim <font name='Mono'>role</font>. Sorso non ha schermate di amministrazione né inviti: se un utente è organizzatore lo dice il tuo sito.", ParagraphStyle("corpo-k", parent=S["corpo"], keepWithNext=1)),
               tabella([["Azione", "Partecipante (member)", "Organizzatore (organizer)"],
                        ["Vedere le degustazioni del proprio team", "sì", "sì"],
-                       ["Creare una degustazione", "no", "sì"],
+                       ["Creare ed eliminare una degustazione", "no", "sì"],
                        ["Aggiungere vini a una degustazione aperta", "no", "sì"],
                        ["Chiudere o riaprire una degustazione", "no", "sì"],
                        ["Votare, anche più volte lo stesso vino (l'ultimo voto sostituisce il precedente)", "sì", "sì"],
@@ -249,7 +250,7 @@ def main():
               Spacer(1, 6)] + lista([
         "<b>Degustazione chiusa:</b> i voti sono definitivi, non si può più votare né aggiungere vini. L'organizzatore può riaprirla.",
         "<b>Team separati:</b> degustazioni e voti di un team non sono visibili agli altri team. Lo stesso <font name='Mono'>sub</font> in due team ha dati separati.",
-        "<b>Limiti:</b> fino a 500 degustazioni per partner e 100 vini per degustazione. Nome della degustazione fino a 80 caratteri; vino fino a 100, produttore fino a 80, annata di quattro cifre oppure NV; note personali fino a 500 caratteri."])
+        "<b>Limiti:</b> fino a 200 degustazioni per team e 100 vini per degustazione (eliminando una degustazione si libera il posto). Nome della degustazione fino a 80 caratteri; vino fino a 100, produttore fino a 80, annata di quattro cifre oppure NV; note personali fino a 500 caratteri."])
     story += [P("6. Personalizzazione", "h1"),
               P("L'aspetto si adatta al tuo sito con pochi valori, che impostiamo noi per te. Inviaci quelli che vuoi cambiare:"),
               tabella([["Impostazione", "Valori", "Effetto"],
@@ -263,7 +264,7 @@ def main():
                        ["modalità di voto", "rapido, completa o entrambe", "Quali modalità si possono scegliere e quale è proposta per prima."]],
                       [3.4, 6.2, 7.4]),
               Spacer(1, 6),
-              riquadro("Se imposti sia lo sfondo sia il testo, controlla che il contrasto sia sufficiente (almeno 4,5 a 1). Le immagini del logo devono essere servite in <font name='Mono'>https</font>."),
+              riquadro("I colori vengono controllati per la leggibilità: se i tuoi non garantiscono un contrasto sufficiente (almeno 4,5 a 1 per il testo), Sorso li corregge o torna a quelli predefiniti, per non rendere illeggibile lo spazio. Imposta sempre insieme sfondo e testo. Le immagini del logo devono essere servite in <font name='Mono'>https</font>."),
 ]
 
     # ---------------- 7 ----------------
@@ -315,9 +316,9 @@ def main():
               P("Problemi frequenti con l'iframe", "h2"),
               tabella([["Sintomo", "Causa probabile", "Cosa fare"],
                        ["L'iframe è vuoto o mostra un errore del browser", "Il dominio della tua pagina non è tra quelli registrati (il browser lo blocca: “Refused to frame”).", "Comunicaci il dominio esatto, con <font name='Mono'>https://</font> e senza percorso."],
-                       ["“Accesso non valido…”", "Token mancante, firma sbagliata, scaduto o con campi non validi.", "Vedi la tabella dei codici qui sotto."],
-                       ["“Questo link è già stato usato…”", "Lo stesso token è arrivato due volte.", "Capitolo 4: niente cache, un token per caricamento."],
-                       ["“La sessione è scaduta…”", "Sono passate 4 ore, o la configurazione del partner è cambiata.", "Ricarica la pagina del sito."],
+                       ["“L'accesso non è valido o è scaduto”", "Token mancante, firma sbagliata, scaduto o con campi non validi.", "Vedi la tabella dei codici qui sotto."],
+                       ["“Questo accesso è già stato usato…”", "Lo stesso token è arrivato due volte.", "Capitolo 4: niente cache, un token per caricamento."],
+                       ["“Devi rientrare — La sessione è scaduta”", "Sono passate 4 ore, o la configurazione del partner è cambiata.", "L'iframe invia <font name='Mono'>sorso:reauth</font>: ricaricalo con un token nuovo (o l'utente ricarica la pagina)."],
                        ["Un utente non vede le degustazioni degli altri", "Hanno valori diversi nel claim <font name='Mono'>team</font>.", "Usa lo stesso <font name='Mono'>team</font> per chi deve stare insieme."],
                        ["Non compare “Nuova degustazione”", "L'utente è <font name='Mono'>member</font>.", "Metti <font name='Mono'>role: \"organizer\"</font> nel token."]],
                       [4.2, 6.4, 6.4]),
@@ -342,7 +343,7 @@ def main():
     # ---------------- 9 ----------------
     story += [P("9. Limiti e disponibilità", "h1"),
               tabella([["Cosa", "Limite"],
-                       ["Apertura di sessioni (<font name='Mono'>/embed</font>)", "30 al minuto per indirizzo IP"],
+                       ["Apertura di sessioni (<font name='Mono'>/embed</font>)", "200 al minuto per indirizzo IP (una serata di molte persone sulla stessa rete entra senza problemi)"],
                        ["Operazioni di un utente dentro l'iframe", "90 al minuto per utente"],
                        ["API di sola lettura", "120 richieste al minuto per chiave, e 120 al minuto per indirizzo IP"],
                        ["Sessione dell'iframe", "4 ore"],
@@ -352,7 +353,7 @@ def main():
               P("Servizio gratuito: cosa significa per te", "h2"),
               P("Sorso gira su un'infrastruttura gratuita. Questo ha due conseguenze che è giusto conoscere:")] + lista([
         "<b>Quota mensile.</b> L'archivio ha un limite di operazioni al mese. Oltre l'80% le risposte portano l'intestazione <font name='Mono'>X-Sorso-Quota: warn</font> "
-        "(e gli organizzatori vedono un avviso nell'iframe); oltre il 95% il servizio passa in <b>sola lettura</b> fino al mese successivo: si può consultare ma non votare né creare. "
+        "(e gli organizzatori vedono un avviso nell'iframe); oltre il 90% il servizio passa in <b>sola lettura</b> fino al mese successivo: si può consultare ma non votare né creare. "
         "Per un uso normale (gruppi di qualche decina di persone) il limite è lontano: un voto costa circa 10 operazioni.",
         "<b>Nessuna garanzia di disponibilità.</b> Non c'è un impegno formale di continuità. Non è adatto a eventi in cui un'interruzione non sia tollerabile: "
         "scarica il CSV dei risultati al termine di ogni degustazione."])
@@ -391,7 +392,7 @@ def main():
         "Un utente <font name='Mono'>member</font> vota e, solo dopo, vede la media del team.",
         "Un utente <font name='Mono'>organizer</font> crea una degustazione, aggiunge vini e la chiude.",
         "Due utenti di team diversi non vedono le rispettive degustazioni.",
-        "Ricaricando solo l'iframe compare l'invito a ricaricare la pagina e la pagina, ricaricata, funziona.",
+        "Ricaricando solo l'iframe compare il pulsante per chiedere un nuovo accesso; con l'ascolto di <font name='Mono'>sorso:reauth</font> il tuo sito ricarica l'iframe con un token nuovo.",
         "La lettura dei risultati dal server funziona e il CSV si apre correttamente.",
         "Ho provato la cancellazione di un utente di prova e le medie si sono aggiornate.",
         "Ho deciso chi, nel mio sito, è organizzatore e dove scarico il CSV al termine delle serate.",

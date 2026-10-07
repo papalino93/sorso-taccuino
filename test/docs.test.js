@@ -58,14 +58,16 @@ test("la guida dice gli stessi numeri del codice", () => {
   const Team = require("../api/_team");
   const Partner = require("../api/_partner");
   const Quota = require("../api/_quota");
-  assert.ok(guida.includes("fino a " + Team.MAX_TASTINGS + " degustazioni"), "tetto delle degustazioni");
+  assert.ok(guida.includes("fino a " + Team.MAX_TASTINGS_PER_TEAM + " degustazioni per team"), "tetto delle degustazioni");
   assert.ok(guida.includes(Team.MAX_WINES + " vini per degustazione"), "tetto dei vini");
   assert.ok(guida.includes("minVotes</font>") && guida.includes("= " + Team.MIN_VOTES_API + "):"), "soglia della media nell'API");
   assert.equal(Partner.SESSION_TTL_SECONDS, 4 * 3600);
   assert.ok(guida.includes("sessione di 4 ore"), "durata della sessione");
   assert.ok(guida.includes("Al massimo 15 minuti") && guida.includes("al massimo 15 minuti"), "scadenza massima del token");
   assert.ok(guida.includes("Oltre l'" + Quota.WARN_AT * 100 + "%") && guida.includes("oltre il " + Quota.READONLY_AT * 100 + "%"), "soglie della quota");
-  assert.ok(guida.includes("30 al minuto per indirizzo IP") && guida.includes("90 al minuto per utente") && guida.includes("120 richieste al minuto per chiave"), "limiti di richieste");
+  const embedSrc = require("node:fs").readFileSync(path.join(__dirname, "../api/embed.js"), "utf8");
+  const perIp = /SESSIONS_PER_IP = (\d+)/.exec(embedSrc)[1], perUtente = /OPS_PER_USER = (\d+)/.exec(embedSrc)[1];
+  assert.ok(guida.includes(perIp + " al minuto per indirizzo IP") && guida.includes(perUtente + " al minuto per utente") && guida.includes("120 richieste al minuto per chiave"), "limiti di richieste");
   for (const nome of ["firma-token.js", "firma-token.py", "firma-token.php", "api.sh", "pagina-ospite.html", "risposte.json"]) {
     assert.ok(guida.includes(nome), nome + " usato nella guida");
   }

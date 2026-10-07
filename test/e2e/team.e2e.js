@@ -125,6 +125,11 @@ const ok = (c, m) => { console.log((c ? "OK   " : "FAIL ") + m); if (!c) fails++
   const urlFrame = await embedFrame(cattivo.page).evaluate(() => location.search);
   ok(!urlFrame.includes("token"), "il token non resta nell'indirizzo del frame");
 
+  /* il sito ospite risponde a sorso:reauth con un token nuovo nel frammento: l'iframe rientra da solo */
+  await cattivo.page.evaluate(u => { document.getElementById("f").src = u; }, d.url + "/embed?p=demo#token=" + token({ sub: "rita", name: "Rita" }));
+  await cattivo.frame.locator(".title").waitFor();
+  ok((await cattivo.frame.locator(".who").textContent()).includes("Rita"), "con un token nuovo nel frammento l'iframe rientra senza ricaricare la pagina");
+
   /* --- partecipante: nessun controllo da organizzatore, nessuna scorciatoia --- */
   ok(await m1.frame.locator('[data-act="ask-delete"]').count() === 0, "il partecipante non vede Elimina");
 

@@ -1,17 +1,25 @@
 <!-- La pagina del TUO sito che incorpora lo spazio di team. -->
-<!-- L'indirizzo dell'iframe, con il token, lo genera il tuo server a ogni caricamento della pagina. -->
+<!-- L'indirizzo dell'iframe, con il token DOPO il #, lo genera il tuo server a ogni caricamento della pagina. -->
+<!-- Il frammento (#token=...) non viene mai inviato a nessun server: non finisce nei log né nel Referer. -->
 <iframe id="sorso" title="Degustazioni del club"
-        src="https://DOMINIO-SORSO/embed?p=ID_PARTNER&token=TOKEN_FIRMATO_DAL_TUO_SERVER"
+        src="https://DOMINIO-SORSO/embed?p=ID_PARTNER#token=TOKEN_FIRMATO_DAL_TUO_SERVER"
         width="100%" height="700" style="border:0; max-width:640px"
         allow="" referrerpolicy="no-referrer"></iframe>
 
 <script>
-  // Facoltativo: l'iframe comunica la propria altezza, così eviti la barra di scorrimento.
   const ORIGINE_SORSO = "https://DOMINIO-SORSO";
+  const frame = document.getElementById("sorso");
   window.addEventListener("message", (e) => {
     if (e.origin !== ORIGINE_SORSO) return;                 // ignora i messaggi di altri
-    if (e.data && e.data.type === "sorso:height") {
-      document.getElementById("sorso").style.height = e.data.height + "px";
+    const d = e.data || {};
+    // Facoltativo: l'iframe comunica la propria altezza, così eviti la barra di scorrimento.
+    if (d.type === "sorso:height") frame.style.height = d.height + "px";
+    // Consigliato: se l'accesso scade (o il token non è più valido), l'iframe chiede un token nuovo.
+    // Qui il tuo sito ne chiede uno fresco al proprio server e ricarica l'iframe.
+    if (d.type === "sorso:reauth") {
+      fetch("/il-tuo-endpoint/sorso-token", { credentials: "same-origin" })    // il TUO server firma un token nuovo
+        .then((r) => r.json())
+        .then((j) => { frame.src = "https://DOMINIO-SORSO/embed?p=ID_PARTNER#token=" + j.token; });
     }
   });
 </script>

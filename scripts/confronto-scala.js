@@ -81,7 +81,7 @@ if (CSV) {
   process.exit(0);
 }
 
-const f1 = x => x.toFixed(1);
+const f1 = x => Scoring.roundHalfUp(x, 1).toFixed(1);
 console.log("Confronto scala — curva per fase 50 + 50·q^" + K + " — " + righe.length + " schede" + (saltate ? " (" + saltate + " senza punteggio, saltate)" : ""));
 console.log("");
 console.log("PRIMA".padEnd(8) + "DOPO".padEnd(8) + "TIPO".padEnd(10) + "VINO");

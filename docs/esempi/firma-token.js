@@ -25,7 +25,7 @@ function creaTokenSorso({ sub, name, team, role = "member" }) {
 
 // Uso, nel codice che genera la pagina del tuo sito (a ogni caricamento, mai in cache):
 //   const token = creaTokenSorso({ sub: utente.id, name: utente.nome, team: "giovedi" });
-//   const url = `https://DOMINIO-SORSO/embed?p=${PARTNER_ID}&token=${token}`;
+//   const url = `https://DOMINIO-SORSO/embed?p=${PARTNER_ID}#token=${token}`;
 
 module.exports = { creaTokenSorso };
 

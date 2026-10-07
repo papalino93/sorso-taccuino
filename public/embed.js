@@ -258,7 +258,7 @@
       S.lang = r.config.lang === "en" ? "en" : "it";
       document.documentElement.lang = S.lang;
       cleanUrl();
-      return loadState();
+      return loadState(S.tasting && S.tasting.id);
     }, function (e) {
       S.loading = false;
       var transient = e.code === "network" || e.code === "timeout" || e.code === "rate_limited" || e.code === "unavailable" || e.status >= 500;
@@ -649,6 +649,16 @@
   });
 
   if (window.ResizeObserver) { try { new ResizeObserver(reportHeight).observe(app); } catch (e) { /* senza adattamento di altezza */ } }
+
+  /* Il sito ospite, ricevuto sorso:reauth, imposta un nuovo #token=... sull'iframe: per il browser è
+     un cambio di frammento, non un ricaricamento. Si raccoglie qui e si rifà l'accesso, senza perdere
+     la scheda di voto che l'utente stava compilando. */
+  window.addEventListener("hashchange", function () {
+    var tk = new URLSearchParams(location.hash.replace(/^#/, "")).get("token");
+    if (!tk) return;
+    S.token = tk; S.session = "";
+    login();
+  });
 
   /* ---------------- avvio ---------------- */
   (function start() {
