@@ -525,6 +525,23 @@
   .edit-banner{display:flex;align-items:center;gap:12px;padding:11px 14px;border-radius:8px;
                background:var(--sel-bg);color:var(--sel-fg);font:400 12.5px/1.45 'Inter';}
   .edit-banner span{flex:1;min-width:0;}
+  .modes{display:flex;gap:4px;padding:4px;border-radius:100px;background:var(--card-alt);border:1px solid var(--line);margin-bottom:8px;}
+  .modes button{flex:1;min-height:44px;padding:0 14px;border-radius:100px;border:0;background:none;color:var(--ink-3);
+                font:500 12.5px/1 'Inter';cursor:pointer;}
+  .modes button.on{background:var(--sel-bg);color:var(--sel-fg);}
+  .modes button:focus-visible{outline:2px solid var(--gold);outline-offset:2px;}
+  .modes-hint{margin:0 2px 12px;font:400 12px/1.5 'Inter';color:var(--ink-3);}
+  .smart-card{display:flex;flex-direction:column;gap:12px;}
+  .smart-card .vblock{display:flex;flex-direction:column;gap:22px;}
+  .srange{width:100%;height:44px;margin:0;accent-color:var(--gold);cursor:pointer;}
+  .sscale{display:flex;justify-content:space-between;margin-top:-6px;padding:0 2px;font:400 10.5px/1 'Inter';color:var(--ink-4);}
+  .smart-legend{margin:16px 0 0;font:400 11.5px/1.55 'Inter';color:var(--ink-3);}
+  .smart-extra{display:flex;flex-direction:column;gap:10px;}
+  .scale-note{display:flex;align-items:center;gap:12px;padding:12px 14px;margin-bottom:12px;border-radius:8px;
+              background:var(--sel-bg);color:var(--sel-fg);font:400 12.5px/1.5 'Inter';}
+  .scale-note span{flex:1;min-width:0;}
+  .scale-note-ok{flex:none;padding:7px 14px;border-radius:100px;border:1px solid rgba(248,241,230,.4);
+                 background:none;color:var(--sel-fg);font:500 11px/1 'Inter';cursor:pointer;}
   .edit-banner b{font-weight:600;}
   .edit-cancel{flex:none;padding:6px 12px;border-radius:100px;border:1px solid rgba(248,241,230,.4);
                background:none;color:var(--sel-fg);font:500 10.5px/1 'Inter';
@@ -761,6 +778,10 @@
   </header>
 
   <main class="body">
+    <div class="scale-note hidden" id="scaleNote" role="status">
+      <span data-i18n="scale.note">Ho ricalcolato i punteggi con la nuova scala 50–100: un vino ora va da 50 a 100 e il 100 è rarissimo. Il punteggio originale resta salvato in ogni scheda.</span>
+      <button type="button" class="scale-note-ok" id="scaleNoteOk" data-i18n="scale.noteOk">Ho capito</button>
+    </div>
 
     <!-- ============ NUOVA ============ -->
     <section class="tabpane" id="pane-new">
@@ -950,7 +971,7 @@
       <div id="lbList"></div>
     </section>
 
-    <footer class="app-version" aria-label="Versione dell'app">Sorso · v1.1.0</footer>
+    <footer class="app-version" aria-label="Versione dell'app">Sorso · v1.2.0</footer>
   </main>
 
   <div class="ac-box hidden" id="acBox" role="listbox"></div>
@@ -968,6 +989,7 @@
 </div>
 </div>
 
+<script src="js/scoring.js"></script>
 <script>
 /* ============================================================
    DATI DI RIFERIMENTO — terminologia AIS
@@ -1248,18 +1270,28 @@ const LIV_CORPO = ["Leggero","Snello","Medio","Strutturato","Pieno"];
 
 function rawMaxSez(g){ return VALUTA[g].reduce((s,r) => s + r[3]*VAL_MAX, 0); }
 
-/* Il punteggio di una fase: somma pesata riportata sul massimo della fase.
-   Con tutti 10 ogni fase tocca il suo massimo e il totale fa 100 esatti.
-   L'arrotondamento è per fase, così non compaiono mai mezzi punti. */
+/* I punti di una fase sulla scheda: somma pesata riportata sul massimo della
+   fase (0..SEZ_MAX). Restano la base del radar, dei confronti e delle
+   statistiche per voce, e si salvano in `parts`. */
 function sezScore(T, g){
   const raw = VALUTA[g].reduce((s,r) => s + (T[g][r[0]] || 0)*r[3], 0);
   return Math.round(raw / rawMaxSez(g) * SEZ_MAX[g]);
 }
+/* Il punteggio che si vede e si salva è sulla scala 50-100 (vedi js/scoring.js):
+   `total` è il totale, `ph` i punteggi di fase sulla stessa scala, `q` la
+   qualità 0-1 di ogni fase (per le barre). */
+function sezBand(T, g){ return Scoring.fullScore(T, VALUTA).phases[g]; }
 function scoresOf(T){
   const v = sezScore(T,"v"), o = sezScore(T,"o"), g = sezScore(T,"g"), f = sezScore(T,"f");
-  return {v, o, g, f, total: v+o+g+f};
+  const r = Scoring.fullScore(T, VALUTA);
+  return {v, o, g, f, total: r.total, ph: r.phases, q: r.q};
 }
-function scores(){ return scoresOf(S); }
+/* Voto smart: tre giudizi già sulla scala 50-100, `ph` = occhio/naso/bocca */
+function scoresSmart(g){
+  const r = Scoring.smartScore(g);
+  return {total: r.total, ph: r.phases, smart: true};
+}
+function scores(){ return S.modalita === "smart" ? scoresSmart(S.smart) : scoresOf(S); }
 function sc1(n){ return String(Math.round(n)); }
 
 /* Equilibrio fra durezze e morbidezze: una lettura d'aiuto, non un voto */
@@ -1396,6 +1428,9 @@ const S = {
   o:{intensita:6, complessita:6, qualita:6},
   g:{equilibrio:6, intensita:6, persistenza:6, qualita:6},
   f:{armonia:6},
+  /* modalità di valutazione: l'ultima scelta resta tra una scheda e l'altra */
+  modalita:(function(){ try{ return window.localStorage.getItem("sorso-modalita") === "smart" ? "smart" : "completa"; }catch(e){ return "completa"; } })(),
+  smart:{occhio:70, naso:70, bocca:70},
   desc:[], note:"", abbinamento:"",
   saved:[], query:"", filter:"Tutti", sortBy:"score-desc", picked:[], expanded:null,
   editingId:null, editThumb:null, editTimestamp:null, editEvento:"",
@@ -1642,6 +1677,7 @@ const I18N = {
 
     "judge.excellent":"Eccellente", "judge.great":"Ottimo", "judge.good":"Buono",
     "judge.fair":"Discreto", "judge.sufficient":"Sufficiente", "judge.insufficient":"Insufficiente",
+    "judge.exceptional":"Eccezionale", "judge.perfect":"Irripetibile",
     "valword.0":"difetto grave", "valword.1":"gravemente carente", "valword.2":"carente",
     "valword.3":"scarso", "valword.4":"mediocre", "valword.5":"quasi sufficiente",
     "valword.6":"sufficiente", "valword.7":"discreto", "valword.8":"buono",
@@ -1668,6 +1704,22 @@ const I18N = {
     "book.footNote":"Tocca un vino per aprirlo, modificarne le note o eliminarlo.",
     "book.footNoteCmp":" Tocca il punteggio di due vini per confrontarli.",
     "book.dl.score":"Punteggio",
+    "book.dl.scoreDetailSmart":"{total}/100 — occhio {e}, naso {n}, bocca {b}",
+    "book.dl.legacy":"Punteggio precedente", "book.dl.legacyVal":"{n}/100 sulla vecchia scala lineare",
+    "smart.eye":"Occhio", "smart.nose":"Naso", "smart.mouth":"Bocca",
+    "smart.modeLabel":"Modalità di valutazione",
+    "smart.mode.smart":"Voto rapido", "smart.mode.completa":"Scheda completa",
+    "smart.hint.smart":"Tre giudizi da 50 a 100: occhio, naso, bocca. Veloce, senza descrivere il vino nei dettagli.",
+    "smart.hint.completa":"La scheda a punteggio completa, ispirata al metodo AIS: descrivi il vino e dai nove giudizi.",
+    "smart.rangeTag":"da 50 a 100",
+    "smart.eye.help":"Limpidezza, colore e aspetto: quanto convince alla vista, per questo tipo di vino.",
+    "smart.nose.help":"Profumi: intensità, complessità, pulizia e piacevolezza.",
+    "smart.mouth.help":"Gusto e finale: equilibrio, struttura, persistenza, armonia d'insieme.",
+    "smart.eye.weight":"pesa 10%", "smart.nose.weight":"pesa 30%", "smart.mouth.weight":"pesa 60%",
+    "smart.legend":"50 difettoso · 60 sufficiente · 70 discreto · 80 buono · 90 eccellente · 96 eccezionale · 100 irripetibile. Il 100 si dà solo al vino perfetto, con tre 100.",
+    "smart.sliderLabel":"{name}, da 50 a 100",
+    "scale.note":"Ho ricalcolato i punteggi con la nuova scala 50–100: un vino ora va da 50 a 100 e il 100 è rarissimo. Il punteggio originale resta salvato in ogni scheda.",
+    "scale.noteOk":"Ho capito",
     "book.dl.scoreDetail":"{total}/100 — visivo {v}, olfattivo {o}, gusto-olf. {g}, armonia {a}",
     "book.dl.visual":"Visivo",
     "book.dl.denomination":"Denominazione",
@@ -2095,6 +2147,7 @@ const I18N = {
 
     "judge.excellent":"Excellent", "judge.great":"Great", "judge.good":"Good",
     "judge.fair":"Fair", "judge.sufficient":"Sufficient", "judge.insufficient":"Insufficient",
+    "judge.exceptional":"Exceptional", "judge.perfect":"Once in a lifetime",
     "valword.0":"serious flaw", "valword.1":"gravely lacking", "valword.2":"lacking",
     "valword.3":"poor", "valword.4":"mediocre", "valword.5":"nearly sufficient",
     "valword.6":"sufficient", "valword.7":"fair", "valword.8":"good",
@@ -2121,6 +2174,22 @@ const I18N = {
     "book.footNote":"Tap a wine to open it, edit its notes or delete it.",
     "book.footNoteCmp":" Tap the score of two wines to compare them.",
     "book.dl.score":"Score",
+    "book.dl.scoreDetailSmart":"{total}/100 — eye {e}, nose {n}, mouth {b}",
+    "book.dl.legacy":"Previous score", "book.dl.legacyVal":"{n}/100 on the old linear scale",
+    "smart.eye":"Eye", "smart.nose":"Nose", "smart.mouth":"Mouth",
+    "smart.modeLabel":"Rating mode",
+    "smart.mode.smart":"Quick score", "smart.mode.completa":"Full sheet",
+    "smart.hint.smart":"Three ratings from 50 to 100: eye, nose, mouth. Fast, without describing the wine in detail.",
+    "smart.hint.completa":"The full scored sheet, inspired by the AIS method: describe the wine and give nine ratings.",
+    "smart.rangeTag":"50 to 100",
+    "smart.eye.help":"Clarity, color and appearance: how convincing it looks, for this type of wine.",
+    "smart.nose.help":"Aromas: intensity, complexity, cleanliness and pleasantness.",
+    "smart.mouth.help":"Taste and finish: balance, structure, persistence, overall harmony.",
+    "smart.eye.weight":"counts 10%", "smart.nose.weight":"counts 30%", "smart.mouth.weight":"counts 60%",
+    "smart.legend":"50 faulty · 60 sufficient · 70 fair · 80 good · 90 excellent · 96 exceptional · 100 once in a lifetime. 100 is only for the perfect wine, with three 100s.",
+    "smart.sliderLabel":"{name}, from 50 to 100",
+    "scale.note":"I recalculated your scores on the new 50–100 scale: a wine now scores between 50 and 100, and 100 is very rare. The original score stays saved on every entry.",
+    "scale.noteOk":"Got it",
     "book.dl.scoreDetail":"{total}/100 — visual {v}, aroma {o}, taste-aroma {g}, harmony {a}",
     "book.dl.visual":"Visual",
     "book.dl.denomination":"Denomination",
@@ -2356,33 +2425,50 @@ function setLang(lang){
    PUNTEGGIO
    ============================================================ */
 function judge(score){
-  if(score>=95) return t("judge.excellent");
-  if(score>=90) return t("judge.great");
-  if(score>=80) return t("judge.good");
-  if(score>=70) return t("judge.fair");
-  if(score>=60) return t("judge.sufficient");
+  const k = Scoring.bandKey(score);
+  if(k === "perfect") return t("judge.perfect");
+  if(k === "exceptional") return t("judge.exceptional");
+  if(k === "excellent") return t("judge.excellent");
+  if(k === "good") return t("judge.good");
+  if(k === "fair") return t("judge.fair");
+  if(k === "sufficient") return t("judge.sufficient");
   return t("judge.insufficient");
 }
 
 /* ============================================================
    HEADER
    ============================================================ */
+/* le quattro barre sotto il punteggio: lunghezza = qualità della fase,
+   numero = punteggio della fase sulla scala 50-100 */
+function paintSegs(sc){
+  const lab = document.querySelectorAll("#segs .seg-label");
+  ["seg.visual","seg.olfactory","seg.taste","seg.final"].forEach((k,i) => { lab[i].textContent = t(k); });
+  $("segs").querySelector('[data-goto="fin"]').classList.remove("hidden");
+  [["segVis","valVis","v"],["segOlf","valOlf","o"],["segGus","valGus","g"],["segArm","valArm","f"]].forEach(r => {
+    $(r[0]).style.width = (sc.q[r[2]]*100)+"%";
+    $(r[1]).textContent = sc.ph[r[2]];
+  });
+}
+/* nel voto smart le barre sono tre: occhio, naso, bocca */
+function paintSegsSmart(sc){
+  const lab = document.querySelectorAll("#segs .seg-label");
+  ["smart.eye","smart.nose","smart.mouth"].forEach((k,i) => { lab[i].textContent = t(k); });
+  $("segs").querySelector('[data-goto="fin"]').classList.add("hidden");
+  [["segVis","valVis","occhio"],["segOlf","valOlf","naso"],["segGus","valGus","bocca"]].forEach(r => {
+    $(r[0]).style.width = ((sc.ph[r[2]]-50)/50*100)+"%";
+    $(r[1]).textContent = sc.ph[r[2]];
+  });
+}
 function renderHeader(){
   let num, unit, caption, showSegs;
   if(S.tab === "new"){
     const sc = scores();
     num = sc.total; unit = t("hdr.of100"); caption = judge(sc.total); showSegs = true;
-    $("segVis").style.width = (sc.v/SEZ_MAX.v*100)+"%"; $("valVis").textContent = sc.v+"/"+SEZ_MAX.v;
-    $("segOlf").style.width = (sc.o/SEZ_MAX.o*100)+"%"; $("valOlf").textContent = sc.o+"/"+SEZ_MAX.o;
-    $("segGus").style.width = (sc.g/SEZ_MAX.g*100)+"%"; $("valGus").textContent = sc.g+"/"+SEZ_MAX.g;
-    $("segArm").style.width = (sc.f/SEZ_MAX.f*100)+"%"; $("valArm").textContent = sc.f+"/"+SEZ_MAX.f;
+    if(sc.smart) paintSegsSmart(sc); else paintSegs(sc);
   } else if(S.tab === "blind"){
     const bsc = scoresOf(B);
     num = bsc.total; unit = t("hdr.of100"); caption = t("hdr.blindCaption"); showSegs = true;
-    $("segVis").style.width = (bsc.v/SEZ_MAX.v*100)+"%"; $("valVis").textContent = bsc.v+"/"+SEZ_MAX.v;
-    $("segOlf").style.width = (bsc.o/SEZ_MAX.o*100)+"%"; $("valOlf").textContent = bsc.o+"/"+SEZ_MAX.o;
-    $("segGus").style.width = (bsc.g/SEZ_MAX.g*100)+"%"; $("valGus").textContent = bsc.g+"/"+SEZ_MAX.g;
-    $("segArm").style.width = (bsc.f/SEZ_MAX.f*100)+"%"; $("valArm").textContent = bsc.f+"/"+SEZ_MAX.f;
+    paintSegs(bsc);
   } else if(S.tab === "event"){
     const n = S.lb ? S.lb.length : 0;
     num = n; unit = n===1 ? t("hdr.wineInRace") : t("hdr.wineInRacePl");
@@ -2513,19 +2599,19 @@ function sectionDefs(T, pre, tipologia){
     '<div class="zona zona-val"><div class="zona-tit">'+t("zona.valTitle")+' <span>'+t("zona.valTag")+'</span></div>'+inner+'</div>';
 
   return [
-    { id:"vis", title:t("sec.visualTitle"), score:sezScore(T,"v")+"/"+SEZ_MAX.v,
+    { id:"vis", title:t("sec.visualTitle"), score:sezBand(T,"v"),
       body: zonaDesc('<div class="dsel-stack">'+
               selectHTML(T,pre,"limpidezza",LIMPIDEZZA,t("sel.clarity"))+
               selectHTML(T,pre,"colore",COLORI[tipologia]||COLORI.Rosso,t("sel.color"))+
               selectHTML(T,pre,"consistenza",CONSISTENZA,t("sel.consistency"))+'</div>')+
             zonaVal(valBlockHTML(T,pre,"v")) },
 
-    { id:"olf", title:t("sec.olfactoryTitle"), score:sezScore(T,"o")+"/"+SEZ_MAX.o,
+    { id:"olf", title:t("sec.olfactoryTitle"), score:sezBand(T,"o"),
       body: zonaDesc(livelloHTML(T,pre,null,"intensita",t("lvl.intensity"),LIV_INTENSITA)+
               '<div class="dsel-lab-solo" style="margin-top:14px">'+t("lvl.recognizedAromas")+'</div>'+chipsHTML(T,pre))+
             zonaVal(valBlockHTML(T,pre,"o")) },
 
-    { id:"gus", title:t("sec.tasteTitle"), score:sezScore(T,"g")+"/"+SEZ_MAX.g,
+    { id:"gus", title:t("sec.tasteTitle"), score:sezBand(T,"g"),
       body: zonaDesc('<div class="dsel-stack">'+selectHTML(T,pre,"zuccheri",ZUCCHERI,t("sel.sugar"))+'</div>'+
               '<div style="margin-top:12px">'+livelloHTML(T,pre,null,"corpo",t("lvl.body"),LIV_CORPO)+'</div>'+
               '<div class="dsel-lab-solo" style="margin-top:14px">'+t("lvl.hardnessGroup")+'</div>'+
@@ -2535,16 +2621,81 @@ function sectionDefs(T, pre, tipologia){
               bilanciaHTML(T))+
             zonaVal(valBlockHTML(T,pre,"g")) },
 
-    { id:"fin", title:t("sec.finalTitle"), score:sezScore(T,"f")+"/"+SEZ_MAX.f,
+    { id:"fin", title:t("sec.finalTitle"), score:sezBand(T,"f"),
       body: zonaDesc('<div class="dsel-stack">'+selectHTML(T,pre,"stato",STATO,t("sel.evolution"))+'</div>')+
             zonaVal(valBlockHTML(T,pre,"f")+finale) }
   ];
 }
 function esc(s){ return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
 
+/* ---- selettore di modalità e voto smart ---- */
+function modeSwitchHTML(){
+  return '<div class="modes" role="group" aria-label="'+t("smart.modeLabel")+'">'+
+    ["smart","completa"].map(m =>
+      '<button type="button" data-modalita="'+m+'" class="'+(S.modalita===m?"on":"")+'" aria-pressed="'+(S.modalita===m)+'">'+t("smart.mode."+m)+'</button>'
+    ).join("")+'</div>'+
+    '<p class="modes-hint">'+t("smart.hint."+S.modalita)+'</p>';
+}
+function smartTone(v){ return v >= 90 ? "up" : (v < 60 ? "down" : "mid"); }
+function smartRowHTML(key, titleKey, helpKey, weightKey){
+  const v = S.smart[key];
+  return '<div class="srow vrow" data-smart="'+key+'">'+
+    '<div class="vrow-top"><span class="vrow-label">'+t(titleKey)+'</span>'+
+      '<span class="vrow-read"><span class="vrow-word">'+judge(v)+'</span>'+
+      '<span class="vrow-val srow-val '+smartTone(v)+'">'+v+'</span></span></div>'+
+    '<div class="vrow-help">'+t(helpKey)+' <b>· '+t(weightKey)+'</b></div>'+
+    '<input type="range" class="srange" min="50" max="100" step="1" value="'+v+'" data-smart-range="'+key+'" '+
+      'aria-label="'+tf("smart.sliderLabel",{name:t(titleKey)})+'">'+
+    '<div class="sscale" aria-hidden="true"><span>50</span><span>60</span><span>70</span><span>80</span><span>90</span><span>100</span></div>'+
+  '</div>';
+}
+function smartBodyHTML(){
+  return '<div class="smart-card">'+
+    '<div class="zona zona-val">'+
+      '<div class="zona-tit">'+t("zona.valTitle")+' <span>'+t("smart.rangeTag")+'</span></div>'+
+      '<div class="vblock">'+
+        smartRowHTML("occhio","smart.eye","smart.eye.help","smart.eye.weight")+
+        smartRowHTML("naso","smart.nose","smart.nose.help","smart.nose.weight")+
+        smartRowHTML("bocca","smart.mouth","smart.mouth.help","smart.mouth.weight")+
+      '</div>'+
+      '<p class="smart-legend">'+t("smart.legend")+'</p>'+
+    '</div>'+
+    '<div class="smart-extra">'+
+      '<input class="in-sm" id="abbInput" placeholder="'+t("field.pairing.ph")+'" style="width:100%" value="'+esc(S.abbinamento)+'">'+
+      '<textarea class="ta" id="noteInput" rows="3" placeholder="'+t("field.notes.ph")+'">'+esc(S.note)+'</textarea>'+
+    '</div>'+
+  '</div>';
+}
+function impostaModalita(m){
+  S.modalita = m === "smart" ? "smart" : "completa";
+  try{ window.localStorage.setItem("sorso-modalita", S.modalita); }catch(e){}
+  renderSections(); renderHeader();
+}
+/* Il cursore si aggiorna sul posto: ridisegnare la riga mentre lo si trascina
+   farebbe perdere la presa. */
+function aggiornaSmart(key, raw){
+  S.smart[key] = Scoring.clampBand(raw);
+  const v = S.smart[key];
+  const row = $("sectionsWrap").querySelector('.srow[data-smart="'+key+'"]');
+  if(row){
+    const val = row.querySelector(".srow-val");
+    val.textContent = v;
+    val.className = "vrow-val srow-val "+smartTone(v);
+    row.querySelector(".vrow-word").textContent = judge(v);
+  }
+  renderHeader();
+}
+
 function renderSections(){
+  const smart = S.modalita === "smart";
+  const nota = document.querySelector(".guide-note");
+  if(nota) nota.classList.toggle("hidden", smart);
+  if(smart){
+    $("sectionsWrap").innerHTML = modeSwitchHTML()+smartBodyHTML();
+    return;
+  }
   const defs = sectionDefs(S, "s", S.wine.tipologia);
-  $("sectionsWrap").innerHTML = '<div style="display:flex;flex-direction:column;gap:12px">'+defs.map(d =>
+  $("sectionsWrap").innerHTML = modeSwitchHTML()+'<div style="display:flex;flex-direction:column;gap:12px">'+defs.map(d =>
     '<div class="sec'+(S.open===d.id?" open":"")+'">'+
       '<button type="button" class="sec-btn" data-sec="'+d.id+'">'+
         '<span class="sec-title">'+d.title+'</span>'+
@@ -3011,6 +3162,26 @@ function filteredWines(){
   list.sort(ORDINAMENTI[S.sortBy] ? ORDINAMENTI[S.sortBy].cmp : ORDINAMENTI["score-desc"].cmp);
   return list;
 }
+/* Punteggi di fase di una scheda salvata, sulla scala 50-100. Una scheda
+   smart ha occhio/naso/bocca, una completa ha le quattro fasi. */
+function fasiOf(w){
+  if(w.modalita === "smart" && w.giudizi){
+    return {smart:true, occhio:w.giudizi.occhio, naso:w.giudizi.naso, bocca:w.giudizi.bocca};
+  }
+  const ph = Scoring.fullFromQ(Scoring.qualityOfRecord(w, VALUTA)).phases;
+  return {smart:false, v:ph.v, o:ph.o, g:ph.g, f:ph.f};
+}
+/* "bocca" di una scheda completa: gusto-olfattivo e finale, con i loro pesi */
+function boccaOf(f){
+  return f.smart ? f.bocca : Math.round((Scoring.PHASE_W.g*f.g + Scoring.PHASE_W.f*f.f) / (Scoring.PHASE_W.g + Scoring.PHASE_W.f));
+}
+function scoreDetailText(w){
+  const f = fasiOf(w);
+  return f.smart
+    ? tf("book.dl.scoreDetailSmart",{total:w.score, e:f.occhio, n:f.naso, b:f.bocca})
+    : tf("book.dl.scoreDetail",{total:w.score, v:f.v, o:f.o, g:f.g, a:f.f});
+}
+
 function renderBook(){
   $("filterRow").innerHTML =
     ["Tutti"].concat(TYPES).map(f => '<button type="button" class="fchip'+(S.filter===f?" on":"")+'" data-filter="'+f+'">'+(f==="Tutti"?t("book.filterAll"):f)+'</button>').join("")+
@@ -3025,19 +3196,25 @@ function renderBook(){
 
   // pannello confronto
   if(picked.length === 2){
-    const rows = [["v",t("seg.visual"),SEZ_MAX.v],["o",t("seg.olfactory"),SEZ_MAX.o],["g",t("seg.taste"),SEZ_MAX.g],["f",t("seg.final"),SEZ_MAX.f]];
+    const fa = fasiOf(picked[0]), fb = fasiOf(picked[1]);
+    const rows = (!fa.smart && !fb.smart)
+      ? [["v","seg.visual"],["o","seg.olfactory"],["g","seg.taste"],["f","seg.final"]].map(r => [t(r[1]), fa[r[0]], fb[r[0]]])
+      : [[t("smart.eye"), fa.smart?fa.occhio:fa.v, fb.smart?fb.occhio:fb.v],
+         [t("smart.nose"), fa.smart?fa.naso:fa.o, fb.smart?fb.naso:fb.o],
+         [t("smart.mouth"), boccaOf(fa), boccaOf(fb)]];
+    const larg = x => Math.max(0, Math.min(100, (x-50)/50*100));
     $("cmpWrap").innerHTML = '<div class="cmp"><div class="cmp-top"><span class="cmp-eyebrow">'+t("book.cmpTitle")+'</span>'+
       '<button type="button" class="cmp-close" id="cmpClose">'+t("action.close")+'</button></div>'+
       '<div class="cmp-grid">'+picked.map(w =>
         '<div><div class="cmp-name">'+esc(w.nome||t("book.noName"))+'</div><div class="cmp-meta">'+esc(metaOf(w))+'</div><div class="cmp-score">'+w.score+'</div></div>'
       ).join("")+'</div>'+
       '<div class="cmp-rows">'+rows.map(r => {
-        const L = (picked[0].parts&&picked[0].parts[r[0]])||0, R = (picked[1].parts&&picked[1].parts[r[0]])||0;
+        const L = r[1], R = r[2];
         return '<div class="cmp-row">'+
           '<span class="cmp-l">'+L+'</span>'+
-          '<div class="cmp-bar left"><i class="'+(L>=R?"win":"")+'" style="width:'+(L/r[2]*100)+'%"></i></div>'+
-          '<span class="cmp-lab">'+r[1]+'</span>'+
-          '<div class="cmp-bar"><i class="'+(R>=L?"win":"")+'" style="width:'+(R/r[2]*100)+'%"></i></div>'+
+          '<div class="cmp-bar left"><i class="'+(L>=R?"win":"")+'" style="width:'+larg(L)+'%"></i></div>'+
+          '<span class="cmp-lab">'+r[0]+'</span>'+
+          '<div class="cmp-bar"><i class="'+(R>=L?"win":"")+'" style="width:'+larg(R)+'%"></i></div>'+
           '<span class="cmp-r">'+R+'</span></div>';
       }).join("")+'</div></div>';
   } else {
@@ -3068,20 +3245,22 @@ function renderBook(){
     if(S.expanded === w.id){
       h += '<div class="wine-detail">'+
         (w.thumb ? '<img class="detail-thumb" src="'+w.thumb+'" alt="'+t("card.label")+'">' : '')+
-        '<div class="dl"><b>'+t("book.dl.score")+'</b><span>'+tf("book.dl.scoreDetail",{total:w.score, v:(w.parts?w.parts.v:0), o:(w.parts?w.parts.o:0), g:(w.parts?w.parts.g:0), a:(w.parts?w.parts.f:0)})+'</span></div>'+
-        '<div class="dl"><b>'+t("book.dl.visual")+'</b><span>'+esc([w.limpidezza,w.colore,w.consistenza].filter(Boolean).join(" · "))+'</span></div>'+
+        '<div class="dl"><b>'+t("book.dl.score")+'</b><span>'+scoreDetailText(w)+'</span></div>'+
+        (w.legacyTotal != null ? '<div class="dl"><b>'+t("book.dl.legacy")+'</b><span>'+tf("book.dl.legacyVal",{n:w.legacyTotal})+'</span></div>' : "")+
+        ((w.limpidezza||w.colore||w.consistenza) ? '<div class="dl"><b>'+t("book.dl.visual")+'</b><span>'+esc([w.limpidezza,w.colore,w.consistenza].filter(Boolean).join(" · "))+'</span></div>' : "")+
         (w.denominazione ? '<div class="dl"><b>'+t("book.dl.denomination")+'</b><span>'+esc(w.denominazione)+'</span></div>' : "")+
         (uvaggioText(w) ? '<div class="dl"><b>'+t("book.dl.blend")+'</b><span>'+esc(uvaggioText(w))+'</span></div>' : "")+
         (w.affinamento ? '<div class="dl"><b>'+t("book.dl.aging")+'</b><span>'+esc(w.affinamento)+'</span></div>' : "")+
         (w.prezzo != null ? '<div class="dl"><b>'+t("book.dl.price")+'</b><span>'+euro(w.prezzo)+'</span></div>' : "")+
-        '<div class="dl"><b>'+t("book.dl.descriptors")+'</b>'+
+        (w.modalita === "smart" ? "" :
+          '<div class="dl"><b>'+t("book.dl.descriptors")+'</b>'+
           ((w.desc && w.desc.length)
             ? '<div class="desc-pills">'+w.desc.map(d => '<span class="desc-pill">'+esc(d)+'</span>').join("")+'</div>'
             : '<span>—</span>')+
-        '</div>'+
-        '<div class="dl"><b>'+t("book.dl.taste")+'</b><span>'+esc([w.zuccheri,w.stato].filter(Boolean).join(" · "))+'</span></div>'+
+          '</div>')+
+        ((w.zuccheri||w.stato) ? '<div class="dl"><b>'+t("book.dl.taste")+'</b><span>'+esc([w.zuccheri,w.stato].filter(Boolean).join(" · "))+'</span></div>' : "")+
         '<div class="dl"><b>'+t("book.dl.pairing")+'</b><span>'+esc(w.abbinamento||"—")+'</span></div>'+
-        '<div class="dl"><b>'+t("book.dl.pairingAuto")+'</b><span>'+esc(suggerisciAbbinamento(w))+'</span></div>'+
+        (w.modalita === "smart" ? "" : '<div class="dl"><b>'+t("book.dl.pairingAuto")+'</b><span>'+esc(suggerisciAbbinamento(w))+'</span></div>')+
         '<textarea class="ta" data-editnote="'+w.id+'" rows="2" placeholder="'+t("book.notesPh")+'">'+esc(w.note)+'</textarea>'+
         '<div class="detail-actions">'+
           '<button type="button" class="pill-solid" data-edit="'+w.id+'">'+t("book.editWine")+'</button>'+
@@ -3753,6 +3932,46 @@ async function getMany(keys, shared){
   return {values, failed};
 }
 
+/* Scala 50-100. Le schede salvate prima hanno un totale lineare 0-100: qui il
+   punteggio si ricalcola con la scala nuova (vedi js/scoring.js) e il vecchio
+   totale resta in `legacyTotal`, così nulla si perde. Si rifà a ogni
+   caricamento — è idempotente — e le schede che cambiano si riscrivono
+   (salvaMigrate). I campi che iniziano con _ non si salvano mai. */
+function migraPunteggio(e){
+  if(e.modalita === "smart" && !(e.giudizi && typeof e.giudizi === "object")) e.modalita = "completa";
+  if(e.modalita !== "smart") e.modalita = "completa";
+  else e.giudizi = Scoring.smartScore(e.giudizi).phases;
+  /* Con i dati originali (giudizi o punti di fase) il punteggio si ricalcola
+     sempre; con il solo totale lo si converte una volta sola, finché la
+     scheda non porta scoreScale 2. */
+  const nuovo = Scoring.canRecompute(e) ? Scoring.scoreOfRecord(e, VALUTA)
+    : (e.scoreScale === 2 ? e.score : Scoring.fromLegacyTotal(e.score));
+  let cambiato = false;
+  if(e.scoreScale !== 2){
+    if(e.legacyTotal == null) e.legacyTotal = e.score;
+    e.scoreScale = 2; e._migrata = true; cambiato = true;
+  }
+  if(e.score !== nuovo){ e.score = nuovo; cambiato = true; }
+  e._sporca = cambiato;
+}
+
+/* Avviso una tantum: i punteggi sono stati ricalcolati. */
+const NOTA_SCALA_KEY = "sorso-nota-scala2";
+function mostraNotaScala(){
+  try{ if(window.localStorage.getItem(NOTA_SCALA_KEY) === "1") return; }catch(e){}
+  $("scaleNote").classList.remove("hidden");
+}
+
+/* Riscrive nell'archivio solo i campi della scala nuova, sopra il record
+   originale: il resto della scheda non si tocca. */
+async function salvaMigrate(lista, shared){
+  for(const d of lista){
+    const upd = Object.assign({}, d.raw, {score:d.e.score, scoreScale:2, modalita:d.e.modalita});
+    if(d.e.legacyTotal != null) upd.legacyTotal = d.e.legacyTotal;
+    try{ await DB.set(d.key, JSON.stringify(upd), !!shared); }catch(err){}
+  }
+}
+
 /* Le schede salvate con la prima versione usavano altri nomi di campo.
    Qui vengono riallineate, così l'archivio storico non si perde. */
 function normalizeEntry(e){
@@ -3825,6 +4044,7 @@ function normalizeEntry(e){
     e.tipologia = TYPES.indexOf(t) > -1 ? t : e.tipologia;
   }
 
+  migraPunteggio(e);
   return e;
 }
 
@@ -3834,10 +4054,17 @@ async function loadSaved(){
     const keys = (res && res.keys) || [];
     if(keys.length === 0){ S.saved = []; return; }
     const {values} = await getMany(keys, false);
+    const sporche = [];
     S.saved = values.map(v => {
-      try{ return normalizeEntry(Object.assign({id:v.key}, JSON.parse(v.value))); }
-      catch(e){ return null; }
+      try{
+        const raw = JSON.parse(v.value);
+        const e = normalizeEntry(Object.assign({id:v.key}, raw));
+        if(e && e._sporca) sporche.push({key:v.key, raw, e});
+        return e;
+      }catch(err){ return null; }
     }).filter(Boolean);
+    if(sporche.length) salvaMigrate(sporche, false);
+    if(S.saved.some(e => e._migrata)) mostraNotaScala();
   }catch(e){ S.saved = []; }
 }
 
@@ -3934,11 +4161,20 @@ async function saveTasting(){
     desc:S.desc.slice(), note:S.note, abbinamento:S.abbinamento,
     voti:{v:Object.assign({},S.v), o:Object.assign({},S.o), g:Object.assign({},S.g), f:Object.assign({},S.f)},
     parts:{v:sc.v, o:sc.o, g:sc.g, f:sc.f},
-    score:sc.total, modello:4,
+    score:sc.total, modello:4, scoreScale:2, modalita:"completa",
     /* modificando una scheda si conserva la data originale: altrimenti
        l'ordinamento per data e l'andamento nel tempo perderebbero senso */
     timestamp: S.editingId ? (S.editTimestamp || Date.now()) : Date.now()
   };
+  if(S.modalita === "smart"){
+    /* nel voto rapido non si descrive il vino: i campi descrittivi restano vuoti
+       (le statistiche per gusto li ignorano) e al posto dei 9 giudizi ci sono
+       i tre giudizi 50-100 */
+    Object.assign(entry, {limpidezza:"", colore:"", consistenza:"", zuccheri:"", stato:"",
+      durezze:null, morbidezze:null, intensita:null, corpo:null, desc:[],
+      modalita:"smart", giudizi:Object.assign({}, sc.ph)});
+    delete entry.voti; delete entry.parts;
+  }
   if(S.editingId && S.editTimestamp) entry.modificato = Date.now();
   if(S.photo){
     const thumb = await makeThumb(S.photo, 220);
@@ -3966,7 +4202,7 @@ async function saveTasting(){
       const slug = await registerEvent(S.currentEvent);
       const wineLabel = [S.wine.nome, S.wine.produttore, S.wine.annata].filter(Boolean).join(" — ");
       const voteKey = "evento:"+slug+":"+Date.now()+"-"+Math.random().toString(36).slice(2,6);
-      await DB.set(voteKey, JSON.stringify({wineLabel, score:sc.total, ts:Date.now()}), true);
+      await DB.set(voteKey, JSON.stringify({wineLabel, score:sc.total, scale:2, ts:Date.now()}), true);
       eventMsg = tf("event.voteAdded",{name:S.currentEvent});
     }catch(e){
       eventMsg = t("event.voteNotRegistered");
@@ -4037,6 +4273,8 @@ function apriInModifica(id){
     });
   });
   S.v = vi0.v; S.o = vi0.o; S.g = vi0.g; S.f = vi0.f;
+  S.modalita = w.modalita === "smart" ? "smart" : "completa";
+  S.smart = Object.assign({occhio:70, naso:70, bocca:70}, w.modalita === "smart" ? w.giudizi : {});
 
   S.tab = "new";
   S.expanded = null;
@@ -4060,6 +4298,7 @@ function resetForm(notify){
   S.zuccheri = "Secco"; S.stato = "Pronto";
   const di = descInit(); S.durezze = di.durezze; S.morbidezze = di.morbidezze; S.intensita = 3; S.corpo = 3;
   const vi = valInit(); S.v = vi.v; S.o = vi.o; S.g = vi.g; S.f = vi.f;
+  S.smart = {occhio:70, naso:70, bocca:70};
   S.desc = []; S.note = ""; S.abbinamento = "";
   S.editingId = null; S.editThumb = null; S.editTimestamp = null;
   $("photoInput").value = "";
@@ -4197,16 +4436,22 @@ async function bLoad(){
     const keys = (res && res.keys) || [];
     if(!keys.length){ B.prove = []; return; }
     const {values} = await getMany(keys, false);
+    const sporche = [];
     B.prove = values.map(v => {
       try{
+        const raw = JSON.parse(v.value);
         const e = JSON.parse(v.value);
         e.id = v.key;
         e.ipotesi = e.ipotesi || {};
         e.reale = e.reale || {};
         e.score = Number(e.score)||0;
+        e.modello = Number(e.modello) === 4 ? 4 : 2;
+        migraPunteggio(e);
+        if(e._sporca) sporche.push({key:v.key, raw, e});
         return e;
       }catch(err){ return null; }
     }).filter(Boolean);
+    if(sporche.length) salvaMigrate(sporche, false);
   }catch(e){ B.prove = []; }
 }
 
@@ -4226,7 +4471,7 @@ async function bSave(){
     desc:B.desc.slice(), note:B.note,
     voti:{v:Object.assign({},B.v), o:Object.assign({},B.o), g:Object.assign({},B.g), f:Object.assign({},B.f)},
     parts:{v:sc.v, o:sc.o, g:sc.g, f:sc.f},
-    score:sc.total, modello:4,
+    score:sc.total, modello:4, scoreScale:2, modalita:"completa",
     timestamp: B.editingId ? (B.editTimestamp || Date.now()) : Date.now()
   };
   if(B.editingId){
@@ -4331,6 +4576,7 @@ async function portaInTaccuino(pr){
     intensita:pr.intensita||3, corpo:pr.corpo||3,
     desc:(pr.desc||[]).slice(), note:pr.note||"", abbinamento:"",
     voti:pr.voti, parts:pr.parts, score:pr.score, modello:4,
+    scoreScale:2, modalita:"completa", legacyTotal:pr.legacyTotal,
     daCieca:true, timestamp:pr.timestamp || Date.now()
   };
   const key = pr.taccuinoId || ("degustazione:"+Date.now()+"-"+Math.random().toString(36).slice(2,8));
@@ -4525,7 +4771,7 @@ async function loadLeaderboard(){
     const label = (e.wineLabel || t("event.noWineName")).trim();
     const key = normLabel(label);
     if(!byWine[key]) byWine[key] = {total:0, count:0, label};
-    byWine[key].total += e.score;
+    byWine[key].total += e.scale === 2 ? e.score : Scoring.fromLegacyTotal(e.score);
     byWine[key].count += 1;
   });
   const arr = Object.keys(byWine).map(key => ({
@@ -4738,6 +4984,8 @@ dz.addEventListener("drop", e => {
 
 // sezioni: delega eventi
 $("sectionsWrap").addEventListener("click", e => {
+  const mod = e.target.closest("button[data-modalita]");
+  if(mod){ impostaModalita(mod.dataset.modalita); return; }
   const sec = e.target.closest("button[data-sec]");
   if(sec){ S.open = S.open === sec.dataset.sec ? null : sec.dataset.sec; renderSections(); return; }
   const rate = e.target.closest("button[data-rate]");
@@ -4768,6 +5016,8 @@ $("sectionsWrap").addEventListener("change", e => {
   if(sel){ S[sel.dataset.skey.split(":")[1]] = sel.value; renderSections(); }
 });
 $("sectionsWrap").addEventListener("input", e => {
+  const rng = e.target.closest("input[data-smart-range]");
+  if(rng){ aggiornaSmart(rng.dataset.smartRange, rng.value); return; }
   if(e.target.id === "noteInput") S.note = e.target.value;
   if(e.target.id === "abbInput") S.abbinamento = e.target.value;
 });
@@ -4806,6 +5056,7 @@ $("bookList").addEventListener("click", async e => {
     if(w && ta){
       w.note = ta.value;
       const copy = Object.assign({}, w); delete copy.id;
+      Object.keys(copy).forEach(k => { if(k.charAt(0) === "_") delete copy[k]; });
       try{ await DB.set(id, JSON.stringify(copy), false); sv.textContent = t("book.saved"); }
       catch(err){ sv.textContent = t("book.error"); }
     }
@@ -4989,6 +5240,10 @@ $("bList").addEventListener("focusout", e => {
 });
 
 $("exportBtn").addEventListener("click", esportaArchivio);
+$("scaleNoteOk").addEventListener("click", () => {
+  $("scaleNote").classList.add("hidden");
+  try{ window.localStorage.setItem(NOTA_SCALA_KEY, "1"); }catch(e){}
+});
 $("importBtn").addEventListener("click", () => $("importInput").click());
 $("importInput").addEventListener("change", e => {
   const f = e.target.files[0];

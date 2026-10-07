@@ -1,17 +1,29 @@
 # Sorso — Taccuino di degustazione
 
-Versione corrente: **1.1.0**
+Versione corrente: **1.2.0**
 
 App per registrare degustazioni di vino con scheda di valutazione, statistiche personali, degustazioni alla cieca ed eventi condivisi.
 
 ## Contenuto
 
-- `public/index.html` — l'app, HTML standalone in JavaScript vanilla (nessuna dipendenza esterna lato frontend).
+- `public/index.html` — l'app, HTML in JavaScript vanilla (nessuna dipendenza esterna lato frontend).
+- `public/js/scoring.js` — il calcolo del punteggio (scala 50–100), funzioni pure usate dall'app e dai test.
 - `public/` — cartella servita da Vercel come radice del sito (index.html, icona, robots.txt, sitemap.xml, file di verifica Google). Deve contenere tutti i file statici: se esiste, Vercel ignora quelli nella radice del repo.
 - `api/auth-google-start.js`, `api/auth-google-callback.js`, `api/auth-exchange.js` — login con Google (OAuth 2.0).
 - `api/_session.js` — creazione/verifica della sessione, usata da tutti gli endpoint di autenticazione.
 - `api/db.js` — archivio chiave-valore per utente, usato dal frontend per salvare schede, profilo ed eventi.
 - `api/_redis.js` — connessione al database (Vercel KV / Upstash Redis).
+
+## Punteggio
+
+Il punteggio sta sempre tra **50 e 100**, in entrambe le modalità di valutazione (si sceglie per ogni voto):
+
+- **Voto rapido**: tre giudizi da 50 a 100 — occhio, naso, bocca — con media pesata 10/30/60.
+- **Scheda completa**: nove giudizi da 0 a 10 sulle quattro fasi (visivo 10, olfattivo 30, gusto-olfattivo 40, finale 20). Ogni fase diventa un punteggio `50 + 50 · q^1,8` e il totale è la media pesata delle fasi.
+
+Il 100 si ottiene solo con ogni giudizio al massimo. Le schede salvate prima della scala nuova vengono ricalcolate al primo caricamento; il vecchio totale lineare resta nel campo `legacyTotal`.
+
+Test: `npm test` (funzioni di punteggio) e `test/e2e/scala.e2e.js` (flussi nel browser). `scripts/confronto-scala.js` confronta i punteggi prima e dopo su un file di "Salva copia".
 
 ## Account e sincronizzazione
 

@@ -4,14 +4,15 @@
    Uso:  node scripts/confronto-scala.js <file-esportato.json> [--k 1.8] [--csv]
 
    Il file è quello che l'app produce con "Salva copia" nella scheda Libro.
-   Per ogni scheda calcola il punteggio attuale (lineare 0-100) e quello
-   con la nuova curva  50 + 50 * q^k,  dove q è la qualità normalizzata 0-1.
+   Per ogni scheda calcola il punteggio lineare di prima (0-100) e quello della
+   scala nuova, con lo stesso modulo dell'app (public/js/scoring.js): la curva
+   50 + 50 * q^k si applica a ogni fase e il totale è la media pesata delle fasi.
 
-   q si ricava dai singoli giudizi quando la scheda è del modello attuale (4);
-   per le schede più vecchie, che usavano voci diverse, da punteggio/100.
-   I due modi coincidono: il punteggio attuale è già una somma pesata lineare. */
+   I giudizi singoli si usano per le schede del modello attuale (4), i punti di
+   fase per quelle con `parts`, il solo totale per le altre. */
 
 const fs = require("fs");
+const Scoring = require("../public/js/scoring.js");
 
 const args = process.argv.slice(2);
 const file = args.find(a => !a.startsWith("--") && args[args.indexOf(a) - 1] !== "--k");
@@ -24,29 +25,13 @@ if (!file || !(K > 0)) {
   process.exit(1);
 }
 
-/* Stessi pesi e voci dell'app (public/index.html: SEZ_MAX e VALUTA). */
-const SEZ_MAX = { v: 10, o: 30, g: 40, f: 20 };
-const VOCI = {
-  v: [["qualita", 1]],
-  o: [["intensita", 1], ["complessita", 1], ["qualita", 1]],
-  g: [["equilibrio", 1], ["intensita", 1], ["persistenza", 1], ["qualita", 1]],
-  f: [["armonia", 2]]
+/* Stesse voci e pesi di VALUTA in public/index.html: [chiave, titolo, aiuto, peso] */
+const VALUTA = {
+  v: [["qualita", "", "", 1]],
+  o: [["intensita", "", "", 1], ["complessita", "", "", 1], ["qualita", "", "", 1]],
+  g: [["equilibrio", "", "", 1], ["intensita", "", "", 1], ["persistenza", "", "", 1], ["qualita", "", "", 1]],
+  f: [["armonia", "", "", 2]]
 };
-
-function punteggioAttuale(voti) {
-  let tot = 0;
-  for (const g of Object.keys(VOCI)) {
-    const raw = VOCI[g].reduce((s, [k, p]) => s + (Number(voti[g] && voti[g][k]) || 0) * p, 0);
-    const max = VOCI[g].reduce((s, [, p]) => s + p * 10, 0);
-    tot += Math.round(raw / max * SEZ_MAX[g]);
-  }
-  return tot;
-}
-
-function nuovoPunteggio(q, k) {
-  const x = Math.min(1, Math.max(0, q));
-  return Math.round(50 + 50 * Math.pow(x, k));
-}
 
 function statistiche(valori) {
   const v = valori.slice().sort((a, b) => a - b);
@@ -75,14 +60,16 @@ if (!dump || dump.formato !== "sorso-archivio" || !Array.isArray(dump.schede)) {
 const righe = [];
 let saltate = 0;
 for (const s of dump.schede) {
-  const completa = Number(s.modello) === 4 && s.voti && s.voti.g;
-  const vecchio = completa ? punteggioAttuale(s.voti) : Number(s.score);
+  const ricalcolabile = Scoring.canRecompute(s) && s.modalita !== "smart";
+  const vecchio = ricalcolabile ? Scoring.legacyLinear(Scoring.qualityOfRecord(s, VALUTA)) : Number(s.score);
   if (!isFinite(vecchio)) { saltate++; continue; }
+  const nuovo = s.modalita === "smart" ? s.score
+    : ricalcolabile ? Scoring.scoreOfRecord(s, VALUTA, K) : Scoring.fromLegacyTotal(vecchio, K);
   righe.push({
     nome: [s.nome, s.produttore, s.annata].filter(Boolean).join(" — ") || "(senza nome)",
-    modello: completa ? "completa" : "storica",
+    modello: s.modalita === "smart" ? "smart" : (ricalcolabile ? "completa" : "storica"),
     vecchio,
-    nuovo: nuovoPunteggio(vecchio / 100, K)
+    nuovo
   });
 }
 if (!righe.length) { console.error("Nessuna scheda con un punteggio utilizzabile."); process.exit(1); }
@@ -95,7 +82,7 @@ if (CSV) {
 }
 
 const f1 = x => x.toFixed(1);
-console.log("Confronto scala — curva 50 + 50·q^" + K + " — " + righe.length + " schede" + (saltate ? " (" + saltate + " senza punteggio, saltate)" : ""));
+console.log("Confronto scala — curva per fase 50 + 50·q^" + K + " — " + righe.length + " schede" + (saltate ? " (" + saltate + " senza punteggio, saltate)" : ""));
 console.log("");
 console.log("PRIMA".padEnd(8) + "DOPO".padEnd(8) + "TIPO".padEnd(10) + "VINO");
 for (const r of righe) console.log(String(r.vecchio).padEnd(8) + String(r.nuovo).padEnd(8) + r.modello.padEnd(10) + r.nome);
@@ -113,7 +100,7 @@ fa.forEach(([nome, n], i) => console.log(nome.padEnd(22) + String(n).padEnd(8) +
 
 console.log("\nTabella di riferimento (giudizi tutti uguali, scheda completa)");
 console.log("giudizio".padEnd(10) + "k=1.5".padEnd(8) + "k=1.8".padEnd(8) + "k=2.0".padEnd(8) + "k=" + K);
+const tutti = n => { const T = {}; Object.keys(VALUTA).forEach(g => { T[g] = {}; VALUTA[g].forEach(d => { T[g][d[0]] = n; }); }); return T; };
 for (let g = 4; g <= 10; g++) {
-  const q = g / 10;
-  console.log(String(g).padEnd(10) + [1.5, 1.8, 2.0, K].map(k => String(nuovoPunteggio(q, k)).padEnd(8)).join(""));
+  console.log(String(g).padEnd(10) + [1.5, 1.8, 2.0, K].map(k => String(Scoring.fullScore(tutti(g), VALUTA, k).total).padEnd(8)).join(""));
 }

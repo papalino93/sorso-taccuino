@@ -23,11 +23,11 @@ Vincolo trasversale: **nessun costo**. Vercel Hobby + Upstash Redis gratuito, us
 
 ### Banda 50–100 con vertice rarissimo
 - **Voto smart**: nessuna conversione. I tre giudizi sono già su 50–100 e il totale è la loro media pesata. **100 solo con tre 100**; la fascia 96–100 è etichettata "eccezionale" per renderla un atto deliberato.
-- **Scheda completa**: i giudizi restano 0–10 per fedeltà alla scheda AIS. La somma pesata dà una qualità normalizzata `q` (0–1), convertita con una curva non lineare:
+- **Scheda completa**: i giudizi restano 0–10 per fedeltà alla scheda AIS. Per ogni fase la qualità normalizzata `q` (0–1) diventa un punteggio di fase con una curva non lineare:
 
-  `punteggio = 50 + 50 · q^k`, con k ≈ 1,8 (da tarare, vedi domande aperte)
+  `punteggio di fase = 50 + 50 · q^k`, con k ≈ 1,8 (da tarare, vedi domande aperte)
 
-  Con questa curva: tutto a 6 (sufficiente) ≈ 70, tutto a 8 ≈ 83, tutto a 9 ≈ 91, 95 richiede `q` ≈ 0,95 e **100 solo con ogni giudizio a 10**.
+  Il totale è la **media pesata delle quattro fasi** (10/30/40/20), quindi anche qui ogni fase sta in 50–100 come nel voto smart. Con tutti i giudizi a 6 il totale è 70, a 8 è 83, a 9 è 91. **100 solo con ogni giudizio a 10**: l'arrotondamento non può mai dare 100 se anche un solo giudizio è sotto il massimo.
 
 In entrambi i casi il minimo è 50, quindi un 30 non esiste.
 
@@ -40,7 +40,7 @@ La media del team si mostra con un decimale, perché i voti si concentrano in 75
 - Il punteggio lineare originale resta in un campo `legacyTotal` (reversibile).
 - Al primo accesso compare una nota "punteggi ricalcolati con la nuova scala" e le schede ricalcolate sono marcate.
 - Le schede più vecchie (modelli 1 e 2) usavano voci diverse e non si possono ricalcolare dai singoli giudizi. Per tutte, comunque, la qualità si ricava da `punteggio/100`, perché il punteggio attuale è già una somma pesata lineare: la nuova scala si applica a quel valore.
-- Il ricalcolo è una funzione pura, con test, e si può rilanciare.
+- Il ricalcolo è una funzione pura (`public/js/scoring.js`), con test, ed è idempotente: si rifà a ogni caricamento dai dati originali, e le schede con il solo totale si convertono una volta sola (`scoreScale: 2`).
 - `scripts/confronto-scala.js` legge il file di "Salva copia" e stampa il confronto prima/dopo (tabella per vino, statistiche, fasce, tabella di riferimento al variare di `k`).
 
 ## 3. Spazio di team per siti partner
