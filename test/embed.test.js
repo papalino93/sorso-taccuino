@@ -15,6 +15,7 @@ const now = () => Math.floor(Date.now() / 1000);
 
 async function putPartner(id, extra) {
   const cfg = Object.assign({ id, name: id, active: true, secret: SECRET, apiKeyHash: "x", origins: [], modes: ["smart", "full"] }, extra);
+  await redis.sadd("partners", id);
   await redis.set("p:" + id, JSON.stringify(cfg));
   P.clearCache();
   return cfg;
@@ -78,7 +79,7 @@ test("sessione: partner disattivato", async () => {
 test("sessione: tentativi limitati per indirizzo", async () => {
   await finestraSicura();
   let last;
-  for (let i = 0; i < 31; i++) last = await post({ op: "session", token: "x" });
+  for (let i = 0; i < 201; i++) last = await post({ op: "session", token: "x" });
   assert.equal(last.statusCode, 429);
   assert.ok(last.headers["retry-after"]);
 });
@@ -258,11 +259,12 @@ test("elenco delle degustazioni del team, dalla più recente", async () => {
 });
 test("tetto di vini per degustazione", async () => {
   const { org, t } = await scenario();
-  const fields = {};
-  for (let i = 0; i < Team.MAX_WINES; i++) fields["w" + i] = JSON.stringify({ id: "w" + i, name: "n", createdAt: i });
-  await redis.hset("wn:demo:" + t.id, fields);
+  await redis.hset("cn:demo", { ["w:" + t.id]: String(Team.MAX_WINES - 2) });   // restano due posti
+  assert.equal((await post({ op: "wine.add", tasting: t.id, wine: { name: "Penultimo" } }, org)).statusCode, 200);
+  assert.equal((await post({ op: "wine.add", tasting: t.id, wine: { name: "Ultimo" } }, org)).statusCode, 200);
   const r = await post({ op: "wine.add", tasting: t.id, wine: { name: "Uno di troppo" } }, org);
   assert.equal(r.statusCode, 409); assert.equal(r.body.error.code, "limit");
+  assert.equal(Number((await redis.hget("cn:demo", "w:" + t.id))), Team.MAX_WINES, "il rifiuto non sposta il contatore");
 });
 test("limite di richieste per utente", async () => {
   await finestraSicura();
@@ -295,7 +297,7 @@ test("costo in comandi Redis: stato e voto restano economici", async () => {
   await finestraSicura();
   const { t, w1 } = await scenario();
   const m = await login({ sub: "m" });
-  P.clearCache();
+  await post({ op: "state", tasting: t.id }, m);          // a caldo: elenco dei partner già in memoria
   srv.log.length = 0;
   await post({ op: "state", tasting: t.id }, m);
   const stato = srv.log.length;
@@ -303,8 +305,8 @@ test("costo in comandi Redis: stato e voto restano economici", async () => {
   await post(Object.assign({ op: "vote", tasting: t.id, wine: w1.id }, smart(70, 70, 70)), m);
   const voto = srv.log.length;
   console.log("   comandi: stato =", stato, ", voto =", voto);
-  assert.ok(stato <= 9, "stato: " + stato);
-  assert.ok(voto <= 13, "voto: " + voto);
+  assert.ok(stato <= 8, "stato: " + stato);
+  assert.ok(voto <= 10, "voto: " + voto);
 });
 
 /* ---- cancellazione dei dati di un utente ---- */
@@ -322,6 +324,6 @@ test("cancellazione utente: voti rimossi, medie corrette", async () => {
   assert.equal((await Team.deleteUser(redis, "demo", "a")).votesRemoved, 0, "idempotente");
   const st = (await post({ op: "state", tasting: t.id }, await login({ sub: "a" }))).body;
   assert.equal(st.wines[0].mine, null);
-  assert.equal(await redis.hget("vt:demo:" + t.id + ":" + w1.id, "a"), null);
-  assert.equal(await redis.hget("vt:demo:" + t.id + ":" + w1.id, "b") !== null, true);
+  assert.equal(await redis.get("vt:demo:" + t.id + ":" + w1.id + ":a"), null);
+  assert.equal(await redis.get("vt:demo:" + t.id + ":" + w1.id + ":b") !== null, true);
 });

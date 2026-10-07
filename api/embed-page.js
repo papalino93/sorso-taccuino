@@ -22,12 +22,14 @@ const SHELL = nonce => themeCss => lang => `<!doctype html>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="referrer" content="no-referrer">
 <meta name="robots" content="noindex">
+<meta name="color-scheme" content="light dark">
+<link rel="icon" href="data:,">
 <title>Sorso</title>
 <link rel="stylesheet" href="/embed.css">
 <style nonce="${nonce}">${themeCss}</style>
 </head>
 <body>
-<div id="app" aria-live="polite"></div>
+<div id="app"></div>
 <script src="/js/scoring.js"></script>
 <script src="/embed.js"></script>
 </body>
@@ -51,17 +53,17 @@ module.exports = async (req, res) => {
   let pid = "";
   try { pid = new URL(req.url, "http://x").searchParams.get("p") || ""; } catch (e) { pid = ""; }
 
-  let partner = null, raw;
+  let partner = null, redis;
   try {
-    raw = getRedis();
-    await Quota.ensure(raw);
-    partner = await Partner.loadPartner(Quota.track(raw), pid);
+    redis = getRedis();
+    await Quota.ensure(redis);
+    partner = await Partner.loadPartner(redis, pid);
   } catch (e) {
     res.setHeader("Content-Security-Policy", "default-src 'none'; frame-ancestors 'none'");
     res.status(503).send("Servizio non disponibile.");
     return;
   } finally {
-    if (raw) await Quota.flush(raw);
+    if (redis) await Quota.flush(redis);
   }
 
   if (!partner) {

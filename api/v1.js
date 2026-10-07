@@ -1,6 +1,6 @@
 const { getRedis } = require("./_redis");
 const { AuthError } = require("./_jwt");
-const { HttpError, clientIp, bearer, sendJson, sendError, noStore } = require("./_http");
+const { HttpError, clientIp, bearer, sendJson, sendError, noStore, safeDecode } = require("./_http");
 const Partner = require("./_partner");
 const Team = require("./_team");
 const Quota = require("./_quota");
@@ -24,18 +24,19 @@ function route(req) {
   let path = "";
   try { path = new URL(req.url, "http://x").searchParams.get("path") || ""; } catch (e) { path = ""; }
   if (!path && req.query && req.query.path) path = Array.isArray(req.query.path) ? req.query.path.join("/") : String(req.query.path);
-  return path.split("/").filter(Boolean).map(decodeURIComponent);
+  const parts = path.split("/").filter(Boolean).map(safeDecode);
+  /* un % isolato nel percorso non si può decodificare: percorso sconosciuto, non errore interno */
+  return parts.some(p => p === null) ? null : parts;
 }
 
 module.exports = async (req, res) => {
   res.setHeader("X-Sorso-Api-Version", "1");
-  let raw;
-  try { raw = getRedis(); }
+  let redis;
+  try { redis = getRedis(); }
   catch (e) { sendJson(res, 503, { error: { code: "no_database", message: e.message } }); return; }
 
   try {
-    await Quota.ensure(raw);
-    const redis = Quota.track(raw);
+    await Quota.ensure(redis);
     if (Quota.level() !== "ok") res.setHeader("X-Sorso-Quota", Quota.level());
 
     /* limite per indirizzo prima ancora di guardare la chiave: chi prova chiavi a caso si ferma */
@@ -49,6 +50,7 @@ module.exports = async (req, res) => {
     if (!rl.ok) { res.setHeader("Retry-After", String(rl.retryAfter)); throw new HttpError(429, "rate_limited", "Troppe richieste: riprova fra poco."); }
 
     const parts = route(req);
+    if (!parts) throw new HttpError(404, "not_found", "Percorso sconosciuto.");
     const url = new URL(req.url, "http://x");
 
     if (req.method === "GET" && parts.length === 1 && parts[0] === "tastings") {
@@ -86,6 +88,6 @@ module.exports = async (req, res) => {
   } catch (e) {
     sendError(res, e);
   } finally {
-    await Quota.flush(raw);
+    await Quota.flush(redis);
   }
 };

@@ -1,4 +1,5 @@
 const crypto = require("crypto");
+const Quota = require("./_quota");
 const { getRedis } = require("./_redis");
 const { createSession } = require("./_session");
 
@@ -27,7 +28,7 @@ function failRedirect(req, res, reason) {
    codice di scambio monouso, che il frontend traduce nel token vero
    tramite /api/auth-exchange (così il token non finisce nella cronologia
    del browser né negli header Referer). */
-module.exports = async (req, res) => {
+module.exports = Quota.wrap(async (req, res) => {
   const clientId = process.env.GOOGLE_CLIENT_ID;
   const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
   if (!clientId || !clientSecret) {
@@ -114,4 +115,4 @@ module.exports = async (req, res) => {
   } catch (e) {
     failRedirect(req, res, "Errore del server.");
   }
-};
+});

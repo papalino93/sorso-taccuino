@@ -1,3 +1,4 @@
+const Quota = require("./_quota");
 const { getRedis } = require("./_redis");
 
 /* Proxy generico chiave-valore usato dal modulo DB del frontend.
@@ -15,7 +16,7 @@ function nsKey(username, key, shared) {
   return shared ? "shared:" + key : "u:" + username + ":" + key;
 }
 
-module.exports = async (req, res) => {
+module.exports = Quota.wrap(async (req, res) => {
   if (req.method !== "POST") {
     res.status(405).json({ error: "Metodo non consentito" });
     return;
@@ -91,4 +92,4 @@ module.exports = async (req, res) => {
   } catch (e) {
     res.status(500).json({ error: "Errore del server: " + (e && e.message ? e.message : "sconosciuto") });
   }
-};
+});

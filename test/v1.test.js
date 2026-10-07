@@ -15,6 +15,7 @@ const now = () => Math.floor(Date.now() / 1000);
 
 async function putPartner(id, extra) {
   const apiKey = P.newApiKey(id);
+  await redis.sadd("partners", id);
   await redis.set("p:" + id, JSON.stringify(Object.assign({ id, name: id, active: true, secret: SECRET, apiKeyHash: P.sha256(apiKey), origins: [], modes: ["smart", "full"] }, extra)));
   P.clearCache();
   return apiKey;

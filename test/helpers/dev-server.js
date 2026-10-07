@@ -37,6 +37,7 @@ async function start(opts) {
   };
   const secret = opts.secret || "d".repeat(64);
   const apiKey = P.newApiKey("demo");
+  await getRedis().sadd("partners", "demo");
   await getRedis().set("p:demo", JSON.stringify(Object.assign({
     id: "demo", name: "Club Demo", active: true, secret, apiKeyHash: P.sha256(apiKey),
     origins: opts.origins || [], modes: ["smart", "full"], defaultMode: "smart", lang: "it", theme: {}

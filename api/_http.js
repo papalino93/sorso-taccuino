@@ -9,7 +9,7 @@ function parseBody(req) {
   if (typeof body === "string") {
     try { body = JSON.parse(body); } catch (e) { body = {}; }
   }
-  return body && typeof body === "object" ? body : {};
+  return body && typeof body === "object" && !Array.isArray(body) ? body : {};
 }
 
 function clientIp(req) {
@@ -42,9 +42,25 @@ function sendError(res, err) {
   sendJson(res, 500, { error: { code: "internal", message: "Errore del server." } });
 }
 
-/* stringa pulita: tolti spazi ai bordi e caratteri di controllo, lunghezza limitata */
+/* Caratteri che non si vedono o che cambiano la direzione del testo: tolti, perché
+   un nome fatto solo di questi sembrerebbe vuoto e uno con U+202E si leggerebbe al
+   contrario (zero-width, controlli bidirezionali, BOM, trattino morbido). */
+const INVISIBILI = /[­؜᠎​-‏‪-‮⁠-⁤⁦-⁩﻿]/g;
+const CONTROLLI = /[\u0000-\u001f\u007f-\u009f]/g;
+
+/* Stringa pulita: solo testo (mai numeri, oggetti o liste: "[object Object]" non è un
+   nome), senza caratteri di controllo né invisibili, spazi compattati, lunghezza
+   limitata in caratteri veri (non si taglia una coppia surrogata a metà). */
 function cleanText(v, max) {
-  return String(v == null ? "" : v).replace(/[\u0000-\u001f\u007f]/g, " ").replace(/\s+/g, " ").trim().slice(0, max);
+  if (typeof v !== "string") return "";
+  const s = v.replace(INVISIBILI, "").replace(CONTROLLI, " ").replace(/\s+/g, " ").trim();
+  const cp = Array.from(s);
+  return cp.length > max ? cp.slice(0, max).join("").trim() : s;
 }
 
-module.exports = { HttpError, parseBody, clientIp, bearer, noStore, sendJson, sendError, cleanText };
+/* decodeURIComponent senza eccezioni: un % isolato nel percorso non deve dare un 500 */
+function safeDecode(s) {
+  try { return decodeURIComponent(s); } catch (e) { return null; }
+}
+
+module.exports = { HttpError, parseBody, clientIp, bearer, noStore, sendJson, sendError, cleanText, safeDecode };
