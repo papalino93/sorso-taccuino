@@ -6,7 +6,8 @@ App per registrare degustazioni di vino con scheda di valutazione, statistiche p
 
 ## Contenuto
 
-- `index.html` — l'app, HTML standalone in JavaScript vanilla (nessuna dipendenza esterna lato frontend).
+- `public/index.html` — l'app, HTML standalone in JavaScript vanilla (nessuna dipendenza esterna lato frontend).
+- `public/` — cartella servita da Vercel come radice del sito (index.html, icona, robots.txt, sitemap.xml, file di verifica Google). Deve contenere tutti i file statici: se esiste, Vercel ignora quelli nella radice del repo.
 - `api/auth-google-start.js`, `api/auth-google-callback.js`, `api/auth-exchange.js` — login con Google (OAuth 2.0).
 - `api/_session.js` — creazione/verifica della sessione, usata da tutti gli endpoint di autenticazione.
 - `api/db.js` — archivio chiave-valore per utente, usato dal frontend per salvare schede, profilo ed eventi.
