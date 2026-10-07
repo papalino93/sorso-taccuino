@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Sorso · Direzione A — Cantina editoriale</title>
+<meta name="theme-color" content="#F6EEDF">
+<meta name="description" content="Mockup statico della direzione A di Sorso: editoriale, carta, bordeaux e ottone.">
+<!-- Unica richiesta esterna, facoltativa: i font. Senza, restano Iowan Old Style / Palatino / Georgia e Segoe UI / system-ui. -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..700;1,9..144,300..700&amp;family=Source+Sans+3:wght@400;600;700&amp;display=swap">
+<style>
+/*@TOKENS*/
+/*@CSS*/
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Vai al contenuto</a>
+<header class="deck">
+  <div class="deck-row">
+    <p class="deck-title"><b>Sorso</b><em>Direzione A · Cantina editoriale</em></p>
+    <button class="btn-theme" type="button" data-theme-toggle aria-pressed="false">
+      <svg class="ic-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.500z"/></svg>
+      <svg class="ic-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.900 4.900l1.400 1.400M17.700 17.700l1.400 1.400M2 12h2M20 12h2M4.900 19.100l1.400-1.400M17.700 6.300l1.400-1.400"/></svg>
+      <span>Tema</span>
+    </button>
+  </div>
+  <nav class="deck-nav" aria-label="Sezioni del mockup">
+    <ol>
+      <li><a href="#punteggio"><b>I</b>Punteggio</a></li>
+      <li><a href="#nuova"><b>II</b>Nuova</a></li>
+      <li><a href="#libro"><b>III</b>Libro</a></li>
+      <li><a href="#team"><b>IV</b>Team</a></li>
+      <li><a href="#partner"><b>V</b>Temi partner</a></li>
+      <li><a href="#statistiche"><b>VI</b>Statistiche</a></li>
+    </ol>
+  </nav>
+</header>
+
+<main id="main">
+  <section class="sec" id="punteggio" aria-labelledby="h1">
+    <div class="sec-head"><p class="kick">I</p><h2 id="h1">Il punteggio</h2>
+      <p>Un anello che si riempie da 50 a 100. Le fasce si leggono a parole, e sopra il 96 il segno cambia: ottone al posto del bordeaux, sigillo di puntini, e al 100 i raggi. Trascina il cursore per provarlo.</p></div>
+    <div class="score-demo" id="m-punteggio"></div>
+  </section>
+
+  <section class="sec" id="nuova" aria-labelledby="h2">
+    <div class="sec-head"><p class="kick">II</p><h2 id="h2">Nuova degustazione</h2>
+      <p>Voto rapido e Scheda completa hanno lo stesso peso visivo: due linguette identiche, si sceglie per ogni vino. I due pannelli sono indipendenti: cambiare modalità non cancella ciò che si è inserito. A sinistra parte il voto rapido, a destra la scheda completa; entrambi i selettori funzionano.</p></div>
+    <div class="stage" id="m-nuova"></div>
+  </section>
+
+  <section class="sec" id="libro" aria-labelledby="h3">
+    <div class="sec-head"><p class="kick">III</p><h2 id="h3">Il libro</h2>
+      <p>Un registro da cantina: righe sobrie, nome in corsivo, punteggio in un medaglione. Ogni riga si apre in una scheda con i giudizi e la nota. Il barolo da 97 riceve il sigillo in ottone.</p></div>
+    <div class="stage" id="m-libro"></div>
+  </section>
+
+  <section class="sec" id="team" aria-labelledby="h4">
+    <div class="sec-head"><p class="kick">IV</p><h2 id="h4">Spazio di team</h2>
+      <p>Due vini sono già votati: si vedono i propri giudizi e, solo ora, la media con il numero di voti. Gli altri mostrano un riquadro tratteggiato. Prova a votare il Taurasi: la media si sblocca con un breve dispiegarsi.</p></div>
+    <div class="stage" id="m-team"></div>
+  </section>
+
+  <section class="sec" id="partner" aria-labelledby="h5">
+    <div class="sec-head"><p class="kick">V</p><h2 id="h5">Lo stesso team, due temi partner</h2>
+      <p>Il partner imposta cinque custom property, niente altro: logo, accento, sfondo, testo, font. Superfici, linee, testo secondario e colore sull'accento si ricalcolano da soli. Anche questi riquadri sono interattivi.</p></div>
+    <div class="stage" id="m-partner"></div>
+  </section>
+
+  <section class="sec" id="statistiche" aria-labelledby="h6">
+    <div class="sec-head"><p class="kick">VI</p><h2 id="h6">Statistiche</h2>
+      <p>Tre cifre in testa, il radar delle quattro fasi con la sufficienza tratteggiata, e la distribuzione per fascia: le due barre in ottone sono i voti alti, quelli che contano.</p></div>
+    <div class="stage" id="m-stats"></div>
+  </section>
+</main>
+
+<script>
+/*@COMMON*/
+</script>
+<script>
+/*@JS*/
+</script>
+</body>
+</html>
