@@ -74,6 +74,13 @@ Niente `KEYS` né scansioni. Strutture Redis:
 
 Stima: un voto costa circa 4 comandi, il caricamento di una degustazione circa 4. Anche con centinaia di utenti si resta ben sotto il limite. Limitazione delle richieste con Upstash Ratelimit sui soli endpoint di scrittura e di creazione sessione.
 
+### Eventi personali (app personale)
+Gli eventi dell'app personale diventano **privati**: un evento è un'etichetta sulle schede dell'utente (es. "cena del 12 ottobre"), e la classifica mostra solo i suoi vini di quell'evento. Le degustazioni di gruppo passano dagli spazi di team dei partner.
+
+- La scheda salva un campo `evento` (oggi il legame con l'evento esiste solo nel voto condiviso, non sulla scheda).
+- Lo spazio condiviso `shared:` viene chiuso: nessun dato di un utente è leggibile o scrivibile da altri.
+- **Migrazione**: al primo accesso, per ogni voto condiviso creato dall'utente, si cerca la sua scheda con lo stesso punteggio e un orario entro pochi secondi e si assegna `evento`. I voti non abbinabili, e quelli di altri, non si possono attribuire a nessuno: si esportano in un file di archivio e poi si eliminano.
+
 ### Sicurezza dell'esistente da correggere
 L'attuale `api/db.js` espone uno spazio `shared:` leggibile e scrivibile da qualunque utente loggato (voti e eventi di tutti, cancellabili da chiunque). Il nuovo modello lo sostituisce con isolamento per partner e team: nessuna chiave condivisa globalmente.
 
@@ -86,7 +93,7 @@ Autenticazione: `Authorization: Bearer <chiave API del partner>` (diversa dal se
 - `GET /api/v1/tastings/{id}/results?format=csv` — export.
 - `DELETE /api/v1/users/{sub}` — cancellazione dei dati di un utente (richiesta GDPR del partner).
 
-L'API espone **solo aggregati**, mai chi ha votato cosa. Versione `v1`, errori JSON uniformi, limiti di richieste per chiave. Nessuna scrittura né webhook nella prima versione.
+L'API espone **solo aggregati**, mai chi ha votato cosa, e restituisce la media solo da **2 voti** in su (con un solo voto coinciderebbe con quello di una persona). Versione `v1`, errori JSON uniformi, limiti di richieste per chiave. Nessuna scrittura né webhook nella prima versione.
 
 ## 5. Redesign
 
@@ -128,14 +135,16 @@ Capitoli: panoramica; ottenere credenziali; firmare il token (esempi in Node e P
 | Onboarding partner | Script manuale, dati in Redis | Delegato a me; basta per un primo partner |
 | API dati | Sola lettura, aggregati, export | Nessun rischio di voti falsati |
 | Costo | Vercel Hobby + Upstash free, uso non commerciale | Vincolo "zero euro"; verificato: 500K comandi/mese, 256 MB |
+| Stato commerciale | Confermato: nessuno guadagna | Condizione per restare su Vercel Hobby; da ricontrollare prima del go-live |
+| Soglia aggregati API | Media solo da 2 voti | Scelta dell'utente |
+| Eventi | Personali: etichetta sulle schede dell'utente | Scelta dell'utente; il gruppo passa dai team dei partner |
+| Foto nel team | Rimandate | Scelta dell'utente; si rivaluta in futuro |
+| Limiti gratuiti | Avviso all'80% dei comandi, sola lettura al 100% | Evita sorprese e blocchi bruschi |
 | Ordine | Scala → API/embed → redesign → PDF | Il partner prova prima; il redesign non si rifà due volte |
 
 ## 9. Domande aperte
 
-1. **Taratura della curva e confronto tra modalità.** `k ≈ 1,8` (scheda completa) è una proposta: va verificata sulle degustazioni già salvate (distribuzione prima e dopo) e aggiustata finché il 70, l'85 e il 95 "suonano giusti". Va controllato anche che lo stesso vino ottenga punteggi simili nelle due modalità, perché finiscono nella stessa media di team.
-2. **Soglia sugli aggregati nell'API.** Con un solo voto la "media" coincide con il voto di una persona. Proposta: l'API restituisce la media solo da 3 voti in su; da confermare.
-3. **Eventi esistenti.** Gli eventi dell'app attuale (spazio `shared:`) vanno migrati in un team "pubblico" o dismessi? Va deciso prima di chiudere lo spazio condiviso.
-4. **Stato commerciale.** Si resta su Vercel Hobby solo se nessuno guadagna da questo progetto (compreso un compenso per il codice o per l'hosting). Da riconfermare prima del go-live con il partner; se cambia, la strada a costo zero è Cloudflare Pages + Workers.
-5. **Chi è il partner.** Nome, dominio, lingue e tema iniziale: servono per creare il primo partner reale.
-6. **Foto dei vini nel team.** Archiviarle (spazio e comandi limitati) o non supportarle nell'embed? Proposta iniziale: non supportarle.
-7. **Gestione dei limiti gratuiti.** Soglie di allarme sul consumo di comandi Redis (500K/mese) e cosa fare se il partner cresce.
+1. **Taratura della curva.** `k ≈ 1,8` è una proposta. Serve il file di "Salva copia" dell'utente per confrontare prima e dopo con `scripts/confronto-scala.js` e scegliere `k` sulle schede reali. Va controllato anche che lo stesso vino ottenga punteggi simili nelle due modalità.
+2. **Il partner.** Ancora sconosciuto: nome, dominio, lingue e tema. Finché non c'è, si crea un partner di prova (`demo`) per sviluppare e verificare il flusso. I dati reali servono prima del go-live.
+3. **Stato commerciale.** Confermato oggi (nessuno guadagna). Da riconfermare prima di consegnare al partner: se qualcuno viene pagato per il lavoro o per l'hosting, Vercel Hobby non è più consentito e la via a costo zero è Cloudflare Pages + Workers.
+4. **Foto dei vini nel team.** Rimandate; da rivalutare in futuro in base a spazio e comandi disponibili.
