@@ -3,6 +3,14 @@
 App: https://sorso-taccuino.vercel.app/ (repo `papalino93/sorso-taccuino`).
 Obiettivo: migliorare l'app in modo definitivo e renderla integrabile come **spazio di team** su un sito esterno, a costo zero.
 
+## Stato dei lavori
+
+- **Fase 1** — scala 50–100, voto rapido, ricalcolo dei dati: fatta e online (v1.2.0).
+- **Fase 2** — spazio di team, embed e API di sola lettura: scritta e provata con un Redis finto e nel browser (v1.3.0). Mancano il primo partner reale e la prova con il database vero: servono le credenziali nell'ambiente.
+- **Design** — due direzioni proposte in `design/` (nel branch di lavoro, non ancora nell'app); da scegliere.
+- **Fase 3** — redesign: da fare dopo la scelta della direzione.
+- **Fase 4** — guida di integrazione in PDF: da fare sull'API stabile.
+
 ## 1. Cosa si costruisce
 
 1. **Nuova scala di voto 50–100** e **due modalità di valutazione** da scegliere (voto smart e scheda completa), con ricalcolo dei dati esistenti.

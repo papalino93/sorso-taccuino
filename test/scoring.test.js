@@ -166,3 +166,20 @@ test("canRecompute: solo se il record ha dati propri", () => {
   assert.equal(S.canRecompute({ modalita: "smart", giudizi: { occhio: 80, naso: 80, bocca: 80 } }), true);
   assert.equal(S.canRecompute(null), false);
 });
+
+test("Scoring.ITEMS coincide con VALUTA di public/index.html (chiavi e pesi)", () => {
+  const html = require("node:fs").readFileSync(require("node:path").join(__dirname, "../public/index.html"), "utf8");
+  const blocco = html.slice(html.indexOf("const VALUTA = {"), html.indexOf("/* Voci descrittive"));
+  Object.keys(S.ITEMS).forEach(g => {
+    const riga = blocco.split("\n").filter(l => l.includes('["')).join("\n");
+    S.ITEMS[g].forEach(([chiave, , , peso]) => {
+      assert.ok(riga.includes('["' + chiave + '"'), "manca " + g + "." + chiave + " in index.html");
+    });
+  });
+  // pesi: l'ultimo numero di ogni voce in index.html
+  const voci = (blocco.match(/\["[a-z]+","[^"]*","[^"]*",\d\]/g) || []);
+  const totaleHtml = voci.reduce((s, v) => s + Number(v.slice(-2, -1)), 0);
+  const totaleModulo = Object.values(S.ITEMS).flat().reduce((s, d) => s + d[3], 0);
+  assert.equal(voci.length, Object.values(S.ITEMS).flat().length);
+  assert.equal(totaleHtml, totaleModulo);
+});
