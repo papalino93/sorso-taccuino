@@ -81,7 +81,7 @@ Niente `KEYS` nel percorso normale (solo `purge`, a mano). Strutture Redis (nomi
 - `vt:{partner}:{degustazione}:{vino}:{utente}` — il voto (stringa JSON); `vs:…` — i votanti di un vino; `uv:{partner}:{utente}` — i voti di un utente (per la cancellazione).
 - `sm:` e `ct:` — somma e conteggio per vino, aggiornati con incrementi commutativi: il voto si scrive con un solo `SET … GET` che restituisce il precedente (niente Lua).
 
-Misurato: un voto costa circa 11 comandi, il caricamento di una degustazione circa 7. Anche con centinaia di utenti si resta ben sotto il limite. Limitazione delle richieste con un contatore proprio (`api/_limit.js`).
+Misurato: un voto costa circa 12 comandi, il caricamento di una degustazione circa 7. Anche con centinaia di utenti si resta ben sotto il limite. Limitazione delle richieste con un contatore proprio (`api/_limit.js`).
 
 ### Eventi personali (app personale)
 Gli eventi dell'app personale diventano **privati**: un evento è un'etichetta sulle schede dell'utente (es. "cena del 12 ottobre"), e la classifica mostra solo i suoi vini di quell'evento. Le degustazioni di gruppo passano dagli spazi di team dei partner.

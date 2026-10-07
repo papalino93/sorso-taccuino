@@ -542,6 +542,25 @@
   .scale-note{display:flex;align-items:center;gap:12px;padding:12px 14px;margin-bottom:12px;border-radius:8px;
               background:var(--card-alt);color:var(--ink-2);border:1px solid var(--line-strong);font:400 12.5px/1.5 'Inter';}
   .scale-note span{flex:1;min-width:0;}
+
+  /* ---- verifica UX: bersagli tattili, parole lunghe, contrasto del confronto ---- */
+  .dl span, .cmp-name, .cmp-meta, .esito-k, .esito-mio, .esito-vero, .esito-nome, #editBannerText b, #bEditBannerText b, .lb-name, .blind-name{overflow-wrap:anywhere;}
+  .cmp .note-line{color:rgba(244,240,232,.78);}
+  .cmp-close, #cmpClose{min-height:44px;padding-left:14px;padding-right:14px;}
+  .edit-cancel{min-height:44px;}
+  .seg{min-height:44px;}
+  .uv-del{min-width:44px;min-height:44px;}
+  .pill-danger{min-height:40px;}
+  #brandBtn{min-height:44px;}
+  #loginSkip{min-height:44px;}
+  .avatar-btn{min-width:44px;min-height:44px;}
+  @media (max-width:430px){
+    .rgroup{grid-template-columns:repeat(6,1fr);gap:4px;}
+    .rgroup button{font-size:14px;}
+    .lrow-label{width:100%;}
+    .lrow-val{width:auto;}
+    .lgroup button{min-height:44px;}
+  }
   .mode-top{margin-bottom:12px;}
   .scale-help{margin-top:8px;}
   .scale-note-ok{flex:none;padding:9px 14px;border-radius:100px;border:1px solid var(--line-strong);min-height:36px;
@@ -866,7 +885,7 @@
         <div class="card-head"><span class="eyebrow" data-i18n="event.eyebrow">Evento</span><span class="fill"></span>
           <span class="status" data-i18n="event.optional">facoltativo</span></div>
         <p class="evt-intro" data-i18n-html="event.introNew">Serve solo se stai degustando <b>insieme ad altri</b>: tutti compilano la scheda degli stessi vini e alla fine esce la classifica dei più apprezzati — una serata in enoteca, un corso, una fiera. Se stai bevendo per conto tuo lascia com'è: la scheda finisce comunque nel tuo taccuino.</p>
-        <div class="sel-wrap"><select class="sel" id="evtQuickPicker"></select></div>
+        <div class="sel-wrap"><select class="sel" id="evtQuickPicker" data-i18n-aria="event.pickerAria" aria-label="Evento"></select></div>
         <div class="evt-new hidden" id="evtQuickNewWrap">
           <input class="in-sm" id="evtQuickNewInput" data-i18n-placeholder="event.newNamePh" placeholder="Nome del nuovo evento" maxlength="48">
           <button type="button" class="pill-solid" id="evtQuickCreateBtn" data-i18n="action.create">Crea</button>
@@ -967,7 +986,7 @@
         <div class="card-head"><span class="eyebrow" data-i18n="event.leaderboardEyebrow">Classifica evento</span><span class="fill"></span></div>
         <p class="evt-intro" data-i18n="event.introEvent">Qui vedi come sono stati votati i vini di una degustazione di gruppo. Le schede si collegano a un evento dal menu in fondo alla pagina "Nuova".</p>
         <div class="sel-stack">
-          <div class="sel-wrap"><select class="sel" id="eventPicker"></select></div>
+          <div class="sel-wrap"><select class="sel" id="eventPicker" data-i18n-aria="event.pickerAria" aria-label="Evento"></select></div>
           <div id="newEventWrap" class="hidden"><input class="in-sm" id="eventNewInput" data-i18n-placeholder="event.newNamePh" placeholder="Nome del nuovo evento" style="width:100%"></div>
           <button type="button" class="pill-solid" id="lookupBtn" style="width:100%;padding:12px" data-i18n="event.refreshBtn">Aggiorna classifica</button>
         </div>
@@ -977,7 +996,7 @@
       <div id="lbList"></div>
     </section>
 
-    <footer class="app-version" aria-label="Versione dell'app">Sorso · v1.3.1</footer>
+    <footer class="app-version" data-i18n-aria="app.versionAria" aria-label="Versione dell'app">Sorso · v1.3.1</footer>
   </main>
 
   <div class="ac-box hidden" id="acBox" role="listbox"></div>
@@ -1299,7 +1318,7 @@ function scoresSmart(g){
 }
 function scores(){
   /* una scheda con solo il totale, modificata senza toccare i giudizi, tiene il suo punteggio */
-  if(S.editFrozen && !S.editTouched) return {total:S.editFrozen.score, ph:{}, frozen:true};
+  if(S.editFrozen && !S.editTouched && S.modalita === S.editMode0) return {total:S.editFrozen.score, ph:{}, frozen:true};
   return S.modalita === "smart" ? scoresSmart(S.smart) : scoresOf(S);
 }
 /* un giudizio toccato: da qui il punteggio si ricalcola dai giudizi */
@@ -1310,7 +1329,7 @@ function segnaToccato(){
   }
 }
 function frozenNoteHTML(){
-  if(!(S.editFrozen && !S.editTouched)) return "";
+  if(!(S.editFrozen && !S.editTouched && S.modalita === S.editMode0)) return "";
   return '<p class="scale-note" id="frozenNote" role="note">'+tf("new.frozenNote",{n:S.editFrozen.score})+'</p>';
 }
 function sc1(n){ return String(Scoring.roundHalfUp(n)); }
@@ -1741,6 +1760,10 @@ const I18N = {
     "smart.sliderLabel":"{name}, da 50 a 100",
     "scale.note":"Ho ricalcolato i punteggi con la nuova scala 50–100: un vino ora va da 50 a 100 e il 100 è rarissimo. Il punteggio originale resta salvato in ogni scheda.",
     "scale.noteOk":"Ho capito",
+    "event.pickerAria":"Evento",
+    "blend.pctAria":"Percentuale del vitigno",
+    "app.versionAria":"Versione dell'app",
+    "stats.grapeProfileFootOne":"Uvaggio indicato su <b>{con} di {n}</b> scheda, completo al 100% su <b>{completa}</b>.",
     "new.clearConfirm":"Azzerare la scheda? Quello che hai scritto e votato andrà perso.",
     "new.vintageInvalid":"L'annata deve essere di quattro cifre (per esempio 2018) oppure NV.",
     "new.priceInvalid":"Il prezzo non può essere negativo.",
@@ -2225,6 +2248,10 @@ const I18N = {
     "smart.sliderLabel":"{name}, from 50 to 100",
     "scale.note":"I recalculated your scores on the new 50–100 scale: a wine now scores between 50 and 100, and 100 is very rare. The original score stays saved on every entry.",
     "scale.noteOk":"Got it",
+    "event.pickerAria":"Event",
+    "blend.pctAria":"Grape percentage",
+    "app.versionAria":"App version",
+    "stats.grapeProfileFootOne":"Blend indicated on <b>{con} of {n}</b> entry, 100% complete on <b>{completa}</b>.",
     "new.clearConfirm":"Clear the form? What you wrote and rated will be lost.",
     "new.vintageInvalid":"The vintage must be four digits (for example 2018) or NV.",
     "new.priceInvalid":"The price cannot be negative.",
@@ -2519,9 +2546,9 @@ function renderHeader(){
     if(sc.frozen){ /* nessuna fase da disegnare */ }
     else if(sc.smart) paintSegsSmart(sc); else paintSegs(sc);
   } else if(S.tab === "blind"){
-    const bsc = scoresOf(B);
-    num = bsc.total; unit = t("hdr.of100"); caption = t("hdr.blindCaption"); showSegs = true;
-    paintSegs(bsc);
+    const bsc = bScores();
+    num = bsc.total; unit = t("hdr.of100"); caption = t("hdr.blindCaption"); showSegs = !bsc.frozen;
+    if(!bsc.frozen) paintSegs(bsc);
   } else if(S.tab === "event"){
     const n = S.lb ? S.lb.length : 0;
     num = n; unit = n===1 ? t("hdr.wineInRace") : t("hdr.wineInRacePl");
@@ -2726,7 +2753,6 @@ function smartBodyHTML(){
 }
 function impostaModalita(m){
   const nuova = m === "smart" ? "smart" : "completa";
-  if(nuova !== S.modalita) segnaToccato();
   S.modalita = nuova;
   try{ window.localStorage.setItem("sorso-modalita", S.modalita); }catch(e){}
   renderSections(); renderHeader();
@@ -2783,7 +2809,7 @@ function renderUvaggi(){
     const isAltro = r.v === ALTRO;
     return '<div class="uv-row">'+
       '<input type="text" data-uv-v="'+i+'" value="'+esc(r.v)+'" placeholder="'+t("field.grape.ph")+'"'+(isAltro?' readonly':'')+'>'+
-      '<span class="uv-pct"><input type="number" min="0" max="100" step="1" data-uv-p="'+i+'" value="'+(r.p===""||r.p==null?"":r.p)+'" placeholder="—"><span>%</span></span>'+
+      '<span class="uv-pct"><input type="number" min="0" max="100" step="1" data-uv-p="'+i+'" aria-label="'+esc(t("blend.pctAria"))+'" value="'+(r.p===""||r.p==null?"":r.p)+'" placeholder="—"><span>%</span></span>'+
       '<button type="button" class="uv-del" data-uv-del="'+i+'" aria-label="'+t("blend.removeGrape")+'">&times;</button>'+
     '</div>';
   }).join("");
@@ -3076,7 +3102,7 @@ function renderIdentity(){
   $("affinamentoInput").value = S.wine.affinamento;
   renderUvaggi();
   $("typeChips").innerHTML = TYPES.map(t =>
-    '<button type="button" class="type-chip-btn'+(S.wine.tipologia===t?" on":"")+'" data-type="'+t+'">'+t+'</button>').join("");
+    '<button type="button" class="type-chip-btn'+(S.wine.tipologia===t?" on":"")+'" aria-pressed="'+(S.wine.tipologia===t)+'" data-type="'+t+'">'+t+'</button>').join("");
   const has = !!S.photo;
   $("dropZone").classList.toggle("hidden", has);
   $("labelLoaded").classList.toggle("hidden", !has);
@@ -3238,12 +3264,15 @@ function fasiOf(w){
   if(w.modalita === "smart" && w.giudizi){
     return {smart:true, occhio:w.giudizi.occhio, naso:w.giudizi.naso, bocca:w.giudizi.bocca};
   }
-  const ph = Scoring.fullFromQ(Scoring.qualityOfRecord(w, VALUTA)).phases;
-  return {smart:false, v:ph.v, o:ph.o, g:ph.g, f:ph.f};
+  const r = Scoring.fullFromQ(Scoring.qualityOfRecord(w, VALUTA));
+  const ph = r.phases, W = Scoring.PHASE_W;
+  /* "bocca" si calcola dai punteggi esatti e si arrotonda una volta sola */
+  const bocca = Scoring.roundHalfUp((W.g*Scoring.band(r.q.g) + W.f*Scoring.band(r.q.f)) / (W.g + W.f));
+  return {smart:false, v:ph.v, o:ph.o, g:ph.g, f:ph.f, bocca:bocca};
 }
 /* "bocca" di una scheda completa: gusto-olfattivo e finale, con i loro pesi */
 function boccaOf(f){
-  return f.smart ? f.bocca : Scoring.roundHalfUp((Scoring.PHASE_W.g*f.g + Scoring.PHASE_W.f*f.f) / (Scoring.PHASE_W.g + Scoring.PHASE_W.f));
+  return f.bocca;
 }
 function scoreDetailText(w){
   const f = fasiOf(w);
@@ -3255,7 +3284,7 @@ function scoreDetailText(w){
 
 function renderBook(){
   $("filterRow").innerHTML =
-    ["Tutti"].concat(TYPES).map(f => '<button type="button" class="fchip'+(S.filter===f?" on":"")+'" data-filter="'+f+'">'+(f==="Tutti"?t("book.filterAll"):f)+'</button>').join("")+
+    ["Tutti"].concat(TYPES).map(f => '<button type="button" class="fchip'+(S.filter===f?" on":"")+'" aria-pressed="'+(S.filter===f)+'" data-filter="'+f+'">'+(f==="Tutti"?t("book.filterAll"):f)+'</button>').join("")+
     '<span style="flex:1"></span>'+
     '<span class="sel-wrap sort-wrap"><select class="sel sort-sel" id="sortSel" aria-label="'+t("book.sortLabel")+'">'+
       Object.keys(ORDINAMENTI).map(k =>
@@ -3467,7 +3496,7 @@ function radarSVG(pcts){
     const anchor = (i===0||i===2) ? "middle" : (i===1 ? "start" : "end");
     const dy = i===0 ? -2 : (i===2 ? 10 : 4);
     return '<text x="'+x.toFixed(1)+'" y="'+(y+dy).toFixed(1)+'" text-anchor="'+anchor+'" class="rad-lab">'+a.label+'</text>'+
-      '<text x="'+x.toFixed(1)+'" y="'+(y+dy+12).toFixed(1)+'" text-anchor="'+anchor+'" class="rad-val" fill="'+a.c+'">'+Scoring.roundHalfUp(pcts[a.k]*100)+'%</text>';
+      '<text x="'+x.toFixed(1)+'" y="'+(y+dy+12).toFixed(1)+'" text-anchor="'+anchor+'" class="rad-val" fill="var(--ink-2)">'+Scoring.roundHalfUp(pcts[a.k]*100)+'%</text>';
   }).join("");
   /* Il riquadro è più largo del grafico per contenere le etichette laterali,
      che altrimenti sbordano fuori dalla scheda sugli schermi stretti — e più
@@ -3563,10 +3592,11 @@ function dec(n, d){
   d = (d === undefined) ? 1 : d;
   /* arrotondamento classico (da 5 in su si sale) prima della formattazione: il
      formattatore del browser guarda il valore binario e darebbe 79,4 per 79,45 */
-  n = Scoring.roundHalfUp(n, d);
+  n = Scoring.roundHalfUp(n, d) + 0;          // + 0: niente "-0,0"
   return Number(n).toLocaleString(S.lang === "en" ? "en-US" : "it-IT", {minimumFractionDigits:d, maximumFractionDigits:d});
 }
 function euro(n){
+  n = Scoring.roundHalfUp(n, 2) + 0;           // arrotondamento classico al centesimo
   return n.toLocaleString(S.lang === "en" ? "en-US" : "it-IT", {minimumFractionDigits:2, maximumFractionDigits:2})+" \u20ac";
 }
 /* correlazione lineare (Pearson): stessa idea della retta prezzo/punteggio
@@ -3615,7 +3645,7 @@ function prosaGusti(all){
   const avg = media(all.map(w=>w.score));
   frasi.push(tf(nome ? "stats.prosa.avgNamed" : "stats.prosa.avgAnon", {
     name: esc(nome||""), n, schede: n===1?t("hdr.card"):t("hdr.cardPl"),
-    avg: dec(avg), giudizio: judge(Scoring.roundHalfUp(avg)).toLowerCase()
+    avg: dec(avg), giudizio: judge(avg).toLowerCase()
   }));
 
   const migliore = all.reduce((a,w) => w.score > a.score ? w : a, all[0]);
@@ -3696,7 +3726,7 @@ function renderStats(){
   const peggiore = all.reduce((a,w) => w.score < a.score ? w : a, all[0]);
   const cards = [
     { label:t("stat.tastings"), value:n, note:n===1 ? t("stat.note.oneSaved") : t("stat.note.manySaved") },
-    { label:t("stat.average"), value:dec(avg), note:judge(Scoring.roundHalfUp(avg)).toLowerCase() }
+    { label:t("stat.average"), value:dec(avg), note:judge(avg).toLowerCase() }
   ];
   if(best.score !== peggiore.score){
     cards.push({ label:t("stat.best"), value:best.score, note:esc(best.nome||"—") });
@@ -3765,7 +3795,7 @@ function renderStats(){
           '</div>'+
         '</div>'
       ).join("")+'</div>'+
-      '<p class="panel-foot">'+tf("stats.grapeProfileFoot",{con:conUva.length, n:n, completa:completa})+
+      '<p class="panel-foot">'+tf(n === 1 ? "stats.grapeProfileFootOne" : "stats.grapeProfileFoot",{con:conUva.length, n:n, completa:completa})+
         (conUva.length < n ? t("stats.grapeProfileFootMore") : "")+
       '</p>',
       null);
@@ -4101,7 +4131,7 @@ function normalizeEntry(e){
 
   // prezzo: numero valido oppure null
   e.prezzo = (e.prezzo === null || e.prezzo === "" || e.prezzo === undefined) ? null : Number(e.prezzo);
-  if(!isFinite(e.prezzo) || e.prezzo < 0) e.prezzo = null;
+  if(!isFinite(e.prezzo) || e.prezzo <= 0) e.prezzo = null;       // 0 vale "nessun prezzo", dappertutto
 
   // uvaggio: prima era testo libero, ora è un elenco strutturato
   if(!Array.isArray(e.uvaggi)){
@@ -4222,7 +4252,7 @@ async function saveTasting(){
   finally{ S.saving = false; if(b) b.disabled = false; }
 }
 async function salvaScheda(){
-  const sc = scores();
+  let sc = scores();
   if(!S.wine.nome.trim()){
     setStatus(t("new.nameMissing"));
     $("nomeInput").focus();
@@ -4240,15 +4270,17 @@ async function salvaScheda(){
     return;
   }
   /* cambiare modalità in modifica cancella i dati dell'altra: lo si chiede prima */
-  if(S.editingId && S.editMode0 && S.editMode0 !== S.modalita && !(S.editFrozen && !S.editTouched)){
+  if(S.editingId && S.editMode0 && S.editMode0 !== S.modalita){
     if(!confirm(t(S.modalita === "smart" ? "new.modeToSmartConfirm" : "new.modeToFullConfirm"))) return;
+    S.editTouched = true;          // la scheda prende il punteggio della nuova modalità
+    sc = scores();
   }
   setStatus(t("new.saving"));
   const entry = {
     nome:S.wine.nome, produttore:S.wine.produttore, annata:S.wine.annata,
     tipologia:S.wine.tipologia, denominazione:S.wine.denominazione,
     regione:S.wine.regione.trim(),
-    prezzo: S.wine.prezzo === "" ? null : Number(S.wine.prezzo),
+    prezzo: (S.wine.prezzo === "" || Number(S.wine.prezzo) === 0) ? null : Number(S.wine.prezzo),
     affinamento:S.wine.affinamento,
     uvaggi: S.wine.uvaggi
       .map(r => ({v: r.v === ALTRO ? ALTRO : canonVitigno(r.v), p:Number(r.p)||0}))
@@ -4278,9 +4310,11 @@ async function salvaScheda(){
     /* nessun giudizio toccato: il punteggio resta quello originale, senza inventare i voti */
     entry.score = S.editFrozen.score; entry.modalita = "completa";
     delete entry.voti; delete entry.parts; delete entry.giudizi;
+    if(S.editFrozen.orig){ if(S.editFrozen.orig.voti) entry.voti = S.editFrozen.orig.voti; if(S.editFrozen.orig.parts) entry.parts = S.editFrozen.orig.parts; }
     if(S.editFrozen.modello != null) entry.modello = S.editFrozen.modello; else delete entry.modello;
   }
   if(S.editLegacy != null) entry.legacyTotal = S.editLegacy;
+  if(S.editDaCieca) entry.daCieca = true;
   if(S.editingId && S.editTimestamp) entry.modificato = Date.now();
   if(S.photo){
     const thumb = await makeThumb(S.photo, 220);
@@ -4344,6 +4378,7 @@ function apriInModifica(id){
   if(!w) return;
   S.editingId = id;
   S.editMode0 = w.modalita === "smart" ? "smart" : "completa";
+  S.editDaCieca = !!w.daCieca;
   S.editLegacy = w.legacyTotal != null ? w.legacyTotal : null;
   S.editTouched = false;
   S.editFrozen = Scoring.canRecompute(w) ? null : {score:w.score, modello:w.modello != null ? w.modello : null};
@@ -4386,6 +4421,11 @@ function apriInModifica(id){
   S.v = vi0.v; S.o = vi0.o; S.g = vi0.g; S.f = vi0.f;
   S.modalita = w.modalita === "smart" ? "smart" : "completa";
   S.smart = Object.assign({occhio:70, naso:70, bocca:70}, w.modalita === "smart" ? w.giudizi : {});
+  /* i giudizi singoli ricostruiti devono dare il punteggio salvato: se no (schede vecchie con solo i
+     punti di fase, o con voci di altri tempi) ci si ferma e si tiene l'originale */
+  if(!S.editFrozen && S.modalita === "completa" && scoresOf(S).total !== w.score){
+    S.editFrozen = {score:w.score, modello:w.modello != null ? w.modello : null, orig:{voti:w.voti, parts:w.parts}};
+  }
 
   S.tab = "new";
   S.expanded = null;
@@ -4412,7 +4452,7 @@ function resetForm(notify){
   S.smart = {occhio:70, naso:70, bocca:70};
   S.desc = []; S.note = ""; S.abbinamento = "";
   S.editingId = null; S.editThumb = null; S.editTimestamp = null;
-  S.editFrozen = null; S.editTouched = false; S.editLegacy = null; S.editMode0 = null;
+  S.editFrozen = null; S.editTouched = false; S.editLegacy = null; S.editMode0 = null; S.editDaCieca = false;
   $("photoInput").value = "";
   if(notify) setStatus(t("new.cleared"));
 }
@@ -4439,7 +4479,12 @@ const B = {
   svelando:null, prove:[]
 };
 
+function bScores(){
+  if(B.editFrozen && !B.editTouched) return {total:B.editFrozen.score, ph:{}, frozen:true};
+  return scoresOf(B);
+}
 function bReset(){
+  B.editFrozen = null; B.editTouched = false;
   B.ipotesi = {tipologia:"Rosso", vitigno:"", regione:"", annata:"", nome:""};
   B.etichetta = "";
   B.limpidezza = "Limpido"; B.colore = "Rosso rubino"; B.consistenza = "Abbastanza consistente";
@@ -4459,7 +4504,7 @@ function bStatus(msg){
 
 function renderBlindForm(){
   $("bTypeChips").innerHTML = TYPES.map(t =>
-    '<button type="button" class="type-chip-btn'+(B.ipotesi.tipologia===t?" on":"")+'" data-btype="'+t+'">'+t+'</button>').join("");
+    '<button type="button" class="type-chip-btn'+(B.ipotesi.tipologia===t?" on":"")+'" aria-pressed="'+(B.ipotesi.tipologia===t)+'" data-btype="'+t+'">'+t+'</button>').join("");
   $("bVitignoInput").value = B.ipotesi.vitigno;
   $("bAnnataInput").value = B.ipotesi.annata;
   $("bRegioneInput").value = B.ipotesi.regione;
@@ -4477,9 +4522,10 @@ function renderBlindForm(){
       (B.open===d.id ? '<div class="sec-body">'+d.body+'</div>' : '')+
     '</div>').join("")+'</div>';
 
-  const sc = scoresOf(B);
+  const sc = bScores();
   const mod = !!B.editingId;
   if(S.tab === "blind") renderHeader();
+  if(B.editFrozen && !B.editTouched) $("bSectionsWrap").insertAdjacentHTML("afterbegin", '<p class="scale-note" id="bFrozenNote" role="note">'+tf("new.frozenNote",{n:B.editFrozen.score})+'</p>');
   $("bSaveBtn").textContent = (mod ? t("hdr.updatePrefix") : t("blind.saveBtn")+" · ")+sc.total+"/100";
   $("bResetBtn").textContent = mod ? t("action.cancel") : t("action.clear");
   const ban = $("bEditBanner");
@@ -4519,7 +4565,7 @@ function renderBlindList(){
       '<div class="blind-top">'+
         '<span class="blind-score">'+pr.score+'</span>'+
         '<div class="blind-mid"><div class="blind-name">'+esc(titolo)+'</div>'+
-          '<div class="blind-meta">'+esc([pr.ipotesi.tipologia, pr.ipotesi.vitigno, pr.ipotesi.regione, pr.ipotesi.annata].filter(Boolean).join(" · ") || t("blind.noGuess"))+'</div></div>'+
+          '<div class="blind-meta">'+esc([pr.ipotesi.tipologia, pr.ipotesi.vitigno, pr.ipotesi.regione, pr.ipotesi.annata].filter(Boolean).join(" · ") || t("blind.noGuess"))+(pr.legacyTotal != null ? " · "+esc(t("book.dl.legacy")+" "+pr.legacyTotal) : "")+'</div></div>'+
         (pr.svelato ? '<span class="blind-badge'+(giusti===es.length&&es.length?" pieno":"")+'">'+giusti+'/'+es.length+'</span>'
                     : '<span class="blind-badge da-svelare">'+t("blind.toReveal")+'</span>')+
       '</div>'+
@@ -4565,6 +4611,7 @@ async function bLoad(){
       }catch(err){ return null; }
     }).filter(Boolean);
     if(sporche.length) salvaMigrate(sporche, false);
+    if(B.prove.some(e => e._migrata || e.legacyTotal != null)) mostraNotaScala();
   }catch(e){ B.prove = []; }
 }
 
@@ -4576,7 +4623,7 @@ async function bSave(){
   finally{ B.saving = false; if(b) b.disabled = false; }
 }
 async function bSalva(){
-  const sc = scoresOf(B);
+  const sc = bScores();
   const entry = {
     ipotesi:{
       tipologia:B.ipotesi.tipologia,
@@ -4594,6 +4641,11 @@ async function bSalva(){
     score:sc.total, modello:4, scoreScale:2, modalita:"completa",
     timestamp: B.editingId ? (B.editTimestamp || Date.now()) : Date.now()
   };
+  if(sc.frozen){
+    delete entry.voti; delete entry.parts;
+    if(B.editFrozen.orig){ if(B.editFrozen.orig.voti) entry.voti = B.editFrozen.orig.voti; if(B.editFrozen.orig.parts) entry.parts = B.editFrozen.orig.parts; }
+    if(B.editFrozen.modello != null) entry.modello = B.editFrozen.modello; else delete entry.modello;
+  }
   if(B.editingId){
     const vecchia = B.prove.find(x => x.id === B.editingId);
     if(vecchia){
@@ -4613,7 +4665,7 @@ async function bSalva(){
   }
   /* una prova già svelata ha la sua copia nel Taccuino: si aggiorna con il nuovo punteggio */
   if(mod && entry.svelato && entry.taccuinoId){
-    try{ await portaInTaccuino(Object.assign({id:key}, entry)); await loadSaved(); }catch(e){}
+    try{ await portaInTaccuino(Object.assign({id:key}, entry), true); await loadSaved(); }catch(e){}
   }
   await bLoad();
   bReset();
@@ -4649,6 +4701,9 @@ function bEdit(id){
   B.durezze = Object.assign(bdi0.durezze, pr.durezze || {});
   B.morbidezze = Object.assign(bdi0.morbidezze, pr.morbidezze || {});
   B.intensita = Number(pr.intensita) || 3; B.corpo = Number(pr.corpo) || 3;
+  /* come per le schede: se i giudizi ricostruiti non danno il punteggio salvato, si tiene l'originale */
+  B.editTouched = false;
+  B.editFrozen = scoresOf(B).total !== pr.score ? {score:pr.score, modello:pr.modello != null ? pr.modello : null, orig:{voti:pr.voti, parts:pr.parts}} : null;
   renderBlindForm(); renderBlindList();
   window.scrollTo({top:0, behavior:"smooth"});
   bStatus(t("blind.editingNotify"));
@@ -4670,7 +4725,7 @@ function moduloSvelamento(pr){
           '<input class="in-line" id="rvAnnata" inputmode="numeric" placeholder="'+t("blind.reveal.vintage.ph")+'" value="'+pre(r.annata, ip.annata)+'"></label>'+
       '</div>'+
       '<div class="type-chips" id="rvTipi">'+TYPES.map(tp =>
-        '<button type="button" class="type-chip-btn'+((r.tipologia||ip.tipologia)===tp?" on":"")+'" data-rvtype="'+tp+'">'+tp+'</button>').join("")+'</div>'+
+        '<button type="button" class="type-chip-btn'+((r.tipologia||ip.tipologia)===tp?" on":"")+'" aria-pressed="'+((r.tipologia||ip.tipologia)===tp)+'" data-rvtype="'+tp+'">'+tp+'</button>').join("")+'</div>'+
       '<label class="fld" style="margin-top:14px"><span class="fld-lab">'+t("blind.reveal.grape")+'</span>'+
         '<input class="in-line" id="rvVitigno" placeholder="'+t("blind.reveal.grape.ph")+'" value="'+pre(r.vitigno, ip.vitigno)+'"></label>'+
       '<label class="fld"><span class="fld-lab">'+t("blind.reveal.region")+'</span>'+
@@ -4689,14 +4744,23 @@ function moduloSvelamento(pr){
 /* Una prova svelata è a tutti gli effetti una degustazione valida: i voti sono
    stati dati alla cieca, anzi con meno pregiudizio. Quindi finisce anche nel
    taccuino, marcata come tale, e resta qui per il confronto ipotesi/realtà. */
-async function portaInTaccuino(pr){
+async function portaInTaccuino(pr, soloPunteggio){
   const r = pr.reale || {};
   if(!r.nome) return null;
+  const esistente = pr.taccuinoId ? S.saved.find(x => x.id === pr.taccuinoId) : null;
+  if(esistente && soloPunteggio){
+    /* modificando la prova si aggiornano solo i punteggi: quello che si è corretto nella scheda del Taccuino resta */
+    const e = Object.assign({}, esistente); delete e.id;
+    Object.keys(e).forEach(k => { if(k.charAt(0) === "_") delete e[k]; });
+    Object.assign(e, {voti:pr.voti, parts:pr.parts, score:pr.score, modello:pr.modello != null ? pr.modello : 4, scoreScale:2, modalita:"completa", daCieca:true});
+    if(pr.legacyTotal != null) e.legacyTotal = pr.legacyTotal;
+    try{ await DB.set(pr.taccuinoId, JSON.stringify(e), false); return pr.taccuinoId; }catch(err){ return null; }
+  }
   const entry = {
     nome:r.nome, produttore:r.produttore||"", annata:r.annata||"",
     tipologia: TYPES.indexOf(r.tipologia) > -1 ? r.tipologia : "Rosso",
     denominazione:"", regione:r.regione||"", affinamento:"",
-    prezzo: (r.prezzo == null || r.prezzo === "") ? null : Number(r.prezzo),
+    prezzo: (r.prezzo == null || r.prezzo === "" || Number(r.prezzo) <= 0) ? null : Number(r.prezzo),
     uvaggi: r.vitigno ? [{v:canonVitigno(r.vitigno), p:100}] : [],
     limpidezza:pr.limpidezza, colore:pr.colore, consistenza:pr.consistenza,
     zuccheri:pr.zuccheri, stato:pr.stato,
@@ -4708,6 +4772,11 @@ async function portaInTaccuino(pr){
     daCieca:true, timestamp:pr.timestamp || Date.now()
   };
   const key = pr.taccuinoId || ("degustazione:"+Date.now()+"-"+Math.random().toString(36).slice(2,8));
+  /* svelando di nuovo (correzione) si tengono denominazione, affinamento, abbinamento e note scritti nel Taccuino */
+  if(esistente){
+    ["denominazione","affinamento","abbinamento","note"].forEach(k => { if(esistente[k]) entry[k] = esistente[k]; });
+    if(esistente.prezzo != null && entry.prezzo == null) entry.prezzo = esistente.prezzo;
+  }
   try{
     await DB.set(key, JSON.stringify(entry), false);
     return key;
@@ -4715,6 +4784,12 @@ async function portaInTaccuino(pr){
 }
 
 async function bConfermaSvelamento(id){
+  if(B.revealing) return;                // un secondo tocco non crea una seconda copia nel Taccuino
+  B.revealing = true;
+  try{ await bConfermaSvelamento1(id); }
+  finally{ B.revealing = false; }
+}
+async function bConfermaSvelamento1(id){
   const pr = B.prove.find(x => x.id === id);
   if(!pr) return;
   const v = s => { const el = document.getElementById(s); return el ? el.value.trim() : ""; };
@@ -4778,7 +4853,7 @@ async function esportaArchivio(){
       esportato: new Date().toISOString(),
       profilo: {owner:S.owner, brandName:S.brandName},
       schede,
-      cieca: B.prove.map(p => { const q = Object.assign({}, p); delete q.id; return q; })
+      cieca: B.prove.map(p => { const q = Object.assign({}, p); delete q.id; Object.keys(q).forEach(k => { if(k.charAt(0) === "_") delete q[k]; }); return q; })
     };
     const blob = new Blob([JSON.stringify(dump, null, 2)], {type:"application/json"});
     const url = URL.createObjectURL(blob);
@@ -4934,7 +5009,7 @@ async function loadLeaderboard(){
     '<div class="lb-row'+(i===0?" top":"")+'">'+
       '<span class="lb-rank">'+(i+1)+'</span>'+
       '<div class="lb-mid"><div class="lb-name">'+esc(w.label)+'</div>'+
-        '<div class="lb-sub">'+w.count+" "+(w.count===1?t("hdr.card"):t("hdr.cardPl"))+' · '+judge(Scoring.roundHalfUp(w.avg))+'</div></div>'+
+        '<div class="lb-sub">'+w.count+" "+(w.count===1?t("hdr.card"):t("hdr.cardPl"))+' · '+judge(w.avg)+'</div></div>'+
       '<span class="lb-avg">'+dec(w.avg,1)+'</span>'+
     '</div>'
   ).join("")+'</div>';
@@ -4995,7 +5070,7 @@ function renderAll(){
   ["new","book","blind","stats","event"].forEach(t => $("pane-"+t).classList.toggle("hidden", S.tab !== t));
   $("bottomBar").classList.toggle("hidden", S.tab !== "new");
   document.querySelector(".body").style.paddingBottom = S.tab === "new" ? "110px" : "40px";
-  Array.prototype.forEach.call($("nav").children, b => b.classList.toggle("on", b.dataset.tab === S.tab));
+  Array.prototype.forEach.call($("nav").children, b => { b.classList.toggle("on", b.dataset.tab === S.tab); if(b.dataset.tab === S.tab) b.setAttribute("aria-current", "page"); else b.removeAttribute("aria-current"); });
   if(S.tab === "new"){ renderIdentity(); renderSections(); renderEvtQuick(); }
   if(S.tab === "book"){ renderBook(); descriviArchivio(); }
   if(S.tab === "blind"){ renderBlindForm(); renderBlindList(); }
@@ -5131,6 +5206,34 @@ dz.addEventListener("drop", e => {
   const f = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
   if(f) handleFile(f);
 });
+
+/* Le funzioni di disegno riscrivono l'HTML: chi usa la tastiera perderebbe il punto in cui si trovava.
+   Si ricorda il pulsante (o la select) attivo e lo si rimette a fuoco sul suo gemello appena disegnato. */
+function conFocus(fn){
+  return function(){
+    const a = document.activeElement;
+    let sel = null;
+    if(a && a !== document.body && /^(BUTTON|SELECT)$/.test(a.tagName) && a.closest("#root")){
+      const parts = [a.tagName.toLowerCase()];
+      if(a.id) parts.push("#"+a.id);
+      Array.prototype.forEach.call(a.attributes, at => {
+        if(at.name.indexOf("data-") === 0) parts.push("["+at.name+"=\""+String(at.value).replace(/"/g,'\\"')+"\"]");
+      });
+      if(parts.length > 1) sel = parts.join("");
+    }
+    const r = fn.apply(this, arguments);
+    if(sel){
+      let n = null; try{ n = document.querySelector(sel); }catch(e){}
+      if(n && n !== document.activeElement) n.focus({preventScroll:true});
+    }
+    return r;
+  };
+}
+renderSections = conFocus(renderSections);
+renderIdentity = conFocus(renderIdentity);
+renderBook = conFocus(renderBook);
+renderBlindForm = conFocus(renderBlindForm);
+renderUvaggi = conFocus(renderUvaggi);
 
 // selettore di modalità, in cima al modulo
 $("modeTopWrap").addEventListener("click", e => {
@@ -5328,6 +5431,7 @@ $("bSectionsWrap").addEventListener("click", e => {
     const [, path] = rate.dataset.rate.split(":");
     const [group,key] = path.split(".");
     B[group][key] = Number(rate.dataset.n);
+    if(B.editFrozen) B.editTouched = true;
     renderBlindForm(); return;
   }
   const liv = e.target.closest("button[data-liv]");
@@ -5358,7 +5462,7 @@ $("bSaveBtn").addEventListener("click", bSave);
 $("bResetBtn").addEventListener("click", () => {
   const ip = B.ipotesi, vi = valInit();
   const sporco = !!(ip.vitigno.trim() || ip.regione.trim() || ip.annata.trim() || ip.nome.trim() || B.etichetta.trim() || B.note.trim() || B.desc.length ||
-    JSON.stringify([B.v,B.o,B.g,B.f]) !== JSON.stringify([vi.v,vi.o,vi.g,vi.f]));
+    JSON.stringify([B.v,B.o,B.g,B.f]) !== JSON.stringify([vi.v,vi.o,vi.g,vi.f]) || ip.tipologia !== "Rosso" || descCambiati(B));
   if(!B.editingId && sporco && !confirm(t("new.clearConfirm"))) return;
   bReset(); renderBlindForm(); renderBlindList(); bStatus(t("blind.cleared")); });
 $("bEditCancelBtn").addEventListener("click", () => { bReset(); renderBlindForm(); renderBlindList(); bStatus(t("blind.editCancelled")); });
@@ -5432,7 +5536,15 @@ function modulosporco(){
     String(w.prezzo).trim() || w.affinamento.trim() || w.uvaggi.length || S.desc.length || S.note.trim() ||
     S.abbinamento.trim() || S.photo ||
     JSON.stringify([S.v,S.o,S.g,S.f]) !== JSON.stringify([vi.v,vi.o,vi.g,vi.f]) ||
-    S.smart.occhio !== 70 || S.smart.naso !== 70 || S.smart.bocca !== 70);
+    S.smart.occhio !== 70 || S.smart.naso !== 70 || S.smart.bocca !== 70 ||
+    w.tipologia !== "Rosso" || S.modalita !== "completa" || descCambiati(S));
+}
+/* limpidezza, colore, livelli e select descrittivi: diversi dai valori iniziali? */
+function descCambiati(T){
+  const di = descInit();
+  return !!(T.limpidezza !== "Limpido" || T.colore !== "Rosso rubino" || T.consistenza !== "Abbastanza consistente" ||
+    T.zuccheri !== "Secco" || T.stato !== "Pronto" || T.intensita !== di.intensita || T.corpo !== di.corpo ||
+    JSON.stringify(T.durezze) !== JSON.stringify(di.durezze) || JSON.stringify(T.morbidezze) !== JSON.stringify(di.morbidezze));
 }
 $("resetBtn").addEventListener("click", () => {
   if(S.editingId){ annullaModifica(); return; }

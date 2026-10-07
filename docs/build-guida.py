@@ -354,7 +354,7 @@ def main():
               P("Sorso gira su un'infrastruttura gratuita. Questo ha due conseguenze che è giusto conoscere:")] + lista([
         "<b>Quota mensile.</b> L'archivio ha un limite di operazioni al mese. Oltre l'80% le risposte portano l'intestazione <font name='Mono'>X-Sorso-Quota: warn</font> "
         "(e gli organizzatori vedono un avviso nell'iframe); oltre il 90% il servizio passa in <b>sola lettura</b> fino al mese successivo: si può consultare ma non votare né creare. "
-        "Per un uso normale (gruppi di qualche decina di persone) il limite è lontano: un voto costa circa 11 operazioni.",
+        "Per un uso normale (gruppi di qualche decina di persone) il limite è lontano: un voto costa circa 12 operazioni.",
         "<b>Nessuna garanzia di disponibilità.</b> Non c'è un impegno formale di continuità. Non è adatto a eventi in cui un'interruzione non sia tollerabile: "
         "scarica il CSV dei risultati al termine di ogni degustazione."])
     story += [P("10. Sicurezza e privacy", "h1"),

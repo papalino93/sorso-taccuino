@@ -249,10 +249,11 @@ async function castVote(redis, partner, ctx, body) {
   p.hincrby(K.sm(pid, tid), wid, delta);
   p.hincrby(K.ct(pid, tid), wid, oldRaw ? 0 : 1);
   p.sadd(K.uv(pid, ctx.uid), tid + "|" + wid);
+  p.sadd(K.vs(pid, tid, wid), ctx.uid);
   p.hexists(K.ti(pid), tid);
   const res = await p.exec();
   /* la degustazione è stata eliminata mentre si votava: il voto non deve restare orfano */
-  if (!Number(res[3])) {
+  if (!Number(res[4])) {
     const c = redis.pipeline();
     c.del(K.vt(pid, tid, wid, ctx.uid)); c.srem(K.uv(pid, ctx.uid), tid + "|" + wid);
     c.del(K.sm(pid, tid)); c.del(K.ct(pid, tid)); c.del(K.vs(pid, tid, wid));
@@ -366,7 +367,6 @@ async function deleteUser(redis, pid, uid) {
         const o = parse(olds[i]);
         p.hincrby(K.sm(pid, t), w, -(o && Number.isFinite(o.s) ? o.s : 0));
         p.hincrby(K.ct(pid, t), w, -1);
-        p.srem(K.vs(pid, t, w), uid);
         removed++;
       }
     });
@@ -378,8 +378,19 @@ async function deleteUser(redis, pid, uid) {
     const esiste = await e.exec();
     const r = redis.pipeline();
     let n = 0;
-    blocco.forEach((m, i) => { if (!Number(esiste[i])) { r.srem(K.uv(pid, uid), m); n++; } });
-    if (n) await r.exec();
+    const tolte = [];
+    blocco.forEach((m, i) => { if (!Number(esiste[i])) { const [t, w] = m.split("|"); r.srem(K.uv(pid, uid), m); r.srem(K.vs(pid, t, w), uid); tolte.push(m); n++; } });
+    if (n) {
+      await r.exec();
+      /* un voto scritto proprio tra il controllo e la rimozione: si ricontrolla e, se c'è, la voce si rimette */
+      const e2 = redis.pipeline();
+      tolte.forEach(m => { const [t, w] = m.split("|"); e2.exists(K.vt(pid, t, w, uid)); });
+      const ancora = await e2.exec();
+      const back = redis.pipeline();
+      let nb = 0;
+      tolte.forEach((m, i) => { if (Number(ancora[i])) { const [t, w] = m.split("|"); back.sadd(K.uv(pid, uid), m); back.sadd(K.vs(pid, t, w), uid); nb++; } });
+      if (nb) await back.exec();
+    }
   }
   return { votesRemoved: removed };
 }

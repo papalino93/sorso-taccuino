@@ -37,7 +37,7 @@ Un sito esterno può incorporare Sorso come spazio di team: i suoi utenti votano
 - **Sicurezza**: la pagina si può incorporare solo dai domini registrati dal partner (`frame-ancestors`); nessuno script inline; il tema del partner è fatto di soli valori controllati.
 - **API di sola lettura** per il server del partner, con `Authorization: Bearer sk_<partner>_<chiave>`: `GET /api/v1/tastings`, `GET /api/v1/tastings/{id}/results[?format=csv]`, `DELETE /api/v1/users/{sub}`. Solo aggregati; la media compare dal secondo voto.
 - **Partner**: si creano a mano con `node scripts/partner.js create <id> --name "..." --origin https://...` (servono le variabili del database nell'ambiente). Il segreto e la chiave compaiono una volta sola.
-- **Costo**: pensato per il piano gratuito di Redis (500.000 comandi al mese). Un voto costa circa 11 comandi, un caricamento della degustazione circa 8. Il consumo si legge con `node scripts/usage.js`; all'80% le risposte portano `X-Sorso-Quota: warn`, al 90% le scritture si fermano (sola lettura).
+- **Costo**: pensato per il piano gratuito di Redis (500.000 comandi al mese). Un voto costa circa 12 comandi, un caricamento della degustazione circa 8. Il consumo si legge con `node scripts/usage.js`; all'80% le risposte portano `X-Sorso-Quota: warn`, al 90% le scritture si fermano (sola lettura).
 - **Prova in locale**: `node test/helpers/dev-server.js` avvia il tutto con un Redis finto; `node test/e2e/team.e2e.js` prova il flusso nel browser con un finto sito partner.
 
 ## Account e sincronizzazione
