@@ -3,6 +3,13 @@
 La versione e la data dell'ultimo aggiornamento sono mostrate in fondo all'app e dello spazio di team
 (fonte: `public/js/version.js`, da tenere uguale a `package.json`).
 
+## 1.7.0 — 8 ottobre 2026
+- **Spazio di team: Alla cieca.** L'organizzatore può creare una degustazione «Alla cieca»: i partecipanti vedono «Vino 1, Vino 2…» e, oltre al voto, possono indovinare tipologia, vitigno e annata (1 + 2 + 2 punti). Con «Svela i vini» la serata si chiude per sempre e tutti vedono i nomi e come sono andate le ipotesi; il riepilogo del gruppo è anonimo.
+- **Spazio di team: Classifica e Statistiche.** Classifica dei vini (provvisoria a serata aperta, finale a serata chiusa, con il pari merito) e scheda Statistiche con i dati aggregati delle ultime 30 degustazioni chiuse del team.
+- **API v1**: nuove chiamate `GET /stats?team=`, `GET /events?team=` e `GET /tastings/{id}/guesses`; i risultati ora includono posizione, classifica e stato «alla cieca/svelata»; il CSV ha le colonne `type`, `grape` e `rank`. Sempre e solo aggregati: mai chi ha votato cosa.
+- La cancellazione dei dati di una persona (`DELETE /users/{sub}`) rimuove anche le sue ipotesi alla cieca.
+- **Guida all'uso in PDF** dentro il profilo: Impostazioni → Guida → «Apri la guida» (`/guida-uso-sorso.pdf`, 13 pagine). La guida per chi organizza e quella per l'integrazione sono aggiornate alle novità.
+
 ## 1.6.2 — 8 ottobre 2026
 - Guide PDF molto più leggere e veloci da sfogliare: da 2,8 / 1,8 / 0,5 MB a 1,1 / 0,8 / 0,2 MB. Font statici al posto dei variabili (nel PDF diventavano disegni «Type 3», lenti da mostrare), schermate in JPEG, niente ombre sfocate né sfumature trasparenti.
 

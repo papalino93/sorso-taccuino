@@ -45,7 +45,7 @@ function build() {
       <div>
         <p class="lead">Premi <b>Nuova degustazione</b>, scrivi un nome che riconosceranno tutti e conferma.</p>
         ${passi([["Nuova degustazione", "Il pulsante in alto nell'elenco."], ["Scrivi il nome", "Per esempio «Serata Nebbiolo»."], ["Crea", "La serata compare subito, aperta."]])}
-        ${ul(["Il nome può essere lungo fino a <b>80 caratteri</b>; se lo lasci vuoto te lo ricorda.", "Puoi tenere fino a <b>200 degustazioni</b> per gruppo: se ne hai di vecchie che non servono, eliminale.", "Premendo due volte il pulsante non si crea una serata doppia.", "La serata compare nell'elenco <b>«Degustazioni del team»</b>: la vedono tutti i membri del tuo gruppo, nessun altro gruppo."])}
+        ${ul(["Il nome può essere lungo fino a <b>80 caratteri</b>; se lo lasci vuoto te lo ricorda.", "Puoi tenere fino a <b>200 degustazioni</b> per gruppo: se ne hai di vecchie che non servono, eliminale.", "Premendo due volte il pulsante non si crea una serata doppia.", "Se spunti <b>«Alla cieca»</b> i vini restano nascosti ai partecipanti fino a quando li svelerai (capitolo 09). La scelta si fa solo alla creazione.", "La serata compare nell'elenco <b>«Degustazioni del team»</b>: la vedono tutti i membri del tuo gruppo, nessun altro gruppo."])}
       </div>
       ${fig("team-base-7-org-nuova.png", 1, "Il modulo: un solo campo. <b>Annulla</b> chiude senza creare niente.", "lg")}
     </div>
@@ -121,8 +121,41 @@ function build() {
     ${cards([["Nell'app", "Ogni partecipante vede la propria media di gruppo vino per vino, subito dopo aver votato."], ["Per il tuo sito", "I risultati di ogni serata (e il CSV da aprire in un foglio di calcolo) li legge chi cura il sito, con l'API."], ["Per sempre?", "I dati restano finché non vengono cancellati: eliminare la serata cancella voti e medie."]])}
   `));
 
+  P.push(pg("ink", "Alla cieca", `
+    ${eyebrow("09", "Alla cieca")}
+    <h1 class="d">I vini restano <em>nascosti</em></h1>
+    <div style="display:grid;grid-template-columns:1fr 100mm;gap:7mm;align-items:start">
+      <div>
+        <p class="lead">Spunta <b>«Alla cieca»</b> quando crei la serata. I partecipanti vedranno <b>Vino 1, Vino 2…</b> invece dei nomi: tu li vedi sempre.</p>
+        ${passi([["Crea alla cieca", "Spunta la casella nel modulo."], ["Aggiungi i vini", "Anche tipologia e vitigno, se vuoi."], ["Svela", "Quando tutti hanno votato."]])}
+        ${ul(["Ognuno vota e può <b>provare a indovinare</b>: tipologia, vitigno e annata. Ne basta una.", "Punti: tipologia <b>1</b>, vitigno <b>2</b>, annata <b>2</b> (esatta) o <b>1</b> (±1 anno).", "Con <b>«Svela i vini»</b> la serata si chiude per sempre: tutti vedono i nomi e come sono andate le ipotesi.", "Dopo lo svelamento <b>non si riapre</b>: l'app chiede conferma prima."])}
+        ${call("<b>Privacy.</b> Il riepilogo del gruppo è anonimo: si vede quanti hanno indovinato, non chi.")}
+      </div>
+      <div class="phones">
+        ${fig("team-cieca-org.png", 1, "Tu, organizzatore: vedi i vini e il pulsante <b>Svela i vini</b>.", "sm")}
+        ${fig("team-cieca-2.png", 2, "Un partecipante: <b>Vino 1</b> e la scheda delle ipotesi.", "sm")}
+      </div>
+    </div>
+  `));
+
+  P.push(pg("paper", "Classifica e statistiche", `
+    ${eyebrow("10", "Classifica e statistiche")}
+    <h1 class="d">La classifica, <em>poi i numeri</em></h1>
+    <div style="display:grid;grid-template-columns:1fr 100mm;gap:7mm;align-items:start">
+      <div>
+        <p class="lead">Nella serata compare la <b>Classifica</b>: i vini ordinati per media, con il pari merito dove serve.</p>
+        ${ul(["Mentre la serata è aperta è <b>provvisoria</b>: conta solo ciò che hai già votato e i vini con almeno due voti.", "A serata chiusa diventa <b>finale</b>, uguale per tutti.", "La scheda <b>Statistiche</b> riassume le ultime 30 degustazioni chiuse del gruppo: vini più votati, medie, partecipazione.", "Sono sempre dati aggregati: nessuno vede chi ha votato cosa."])}
+        ${call("<b>Per il tuo sito.</b> Classifica, statistiche ed elenco degli eventi sono disponibili anche con l'API, per chi cura il sito.")}
+      </div>
+      <div class="phones">
+        ${fig("team-classifica.png", 1, "La classifica finale di una serata.", "sm")}
+        ${fig("team-statistiche-1.png", 2, "Le statistiche del gruppo.", "sm")}
+      </div>
+    </div>
+  `));
+
   P.push(pg("paper", "Domande frequenti", `
-    ${eyebrow("09", "Domande frequenti")}
+    ${eyebrow("11", "Domande frequenti")}
     <h1 class="d">Prima che <em>tu me lo chieda</em></h1>
     ${table(["Domanda", "Risposta"], [
       ["Ho sbagliato il nome di un vino.", "Non si modifica. Se nessuno ha ancora votato, elimina la degustazione e ricreala; altrimenti segnala l'errore al gruppo e lascialo com'è."],
@@ -135,18 +168,20 @@ function build() {
       ["Compare «Devi rientrare».", "L'accesso è scaduto (dopo qualche ora). Ricarica la pagina del tuo club: di solito basta."],
       ["La media non compare.", "Vota prima quel vino: la media si sblocca dopo il tuo voto."],
       ["Ho chiuso troppo presto.", "Premi «Riapri la degustazione»: si può votare e aggiungere vini di nuovo."],
+      ["Posso riaprire una serata svelata?", "No: lo svelamento è definitivo. Una serata alla cieca ancora non svelata si può chiudere e riaprire come le altre."],
+      ["Non vedo i nomi dei vini.", "È una serata alla cieca: i nomi compaiono quando l'organizzatore svela i vini."],
       ["Quanto durano i dati?", "Finché non li cancelli: eliminando la serata spariscono vini, voti e medie."]], [0, 1])}
   `));
 
   P.push(pg("ink", "La checklist della serata", `
-    ${eyebrow("10", "La checklist della serata")}
+    ${eyebrow("12", "La checklist della serata")}
     <h1 class="d">Prima, durante, <em>dopo</em></h1>
     <div class="two">
-      <div><h3 class="k">Prima</h3>${check(["Entro dal sito del club e leggo «Organizzatore» sotto il mio nome.", "Creo la degustazione con un nome chiaro.", "Aggiungo tutti i vini, controllando nome, produttore e annata.", "Faccio un voto di prova su un vino per vedere come funziona."])}</div>
+      <div><h3 class="k">Prima</h3>${check(["Entro dal sito del club e leggo «Organizzatore» sotto il mio nome.", "Creo la degustazione con un nome chiaro.", "Aggiungo tutti i vini, controllando nome, produttore e annata.", "Faccio un voto di prova su un vino per vedere come funziona.", "Se è alla cieca, spunto «Alla cieca» prima di creare la serata."])}</div>
       <div><h3 class="k">Durante</h3>${check(["Invito tutti a votare dopo l'assaggio di ogni vino.", "Premo «Aggiorna» e controllo quante persone hanno votato.", "Se qualcuno non vede la pagina, gli faccio ricaricare quella del club."])}</div>
     </div>
     <h3 class="k" style="margin-top:6mm">Dopo</h3>
-    ${check(["Controllo che tutti abbiano votato e chiudo la degustazione.", "Leggo la media di ogni vino e la comunico al gruppo.", "Chiedo a chi cura il sito di salvare il CSV dei risultati: il servizio è gratuito e non garantisce la conservazione per sempre.", "Elimino le serate vecchie che non servono più."])}
+    ${check(["Controllo che tutti abbiano votato e chiudo la degustazione (se è alla cieca, svelo i vini).", "Leggo la media di ogni vino e la comunico al gruppo.", "Chiedo a chi cura il sito di salvare il CSV dei risultati: il servizio è gratuito e non garantisce la conservazione per sempre.", "Elimino le serate vecchie che non servono più."])}
     <div class="bigword">Buona serata.</div>
     <p class="mute">Versione ${L.VERSIONE} · ultimo aggiornamento: ${L.DATA}</p>
   `));

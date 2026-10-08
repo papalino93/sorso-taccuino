@@ -49,7 +49,7 @@ test("esempi curl: girano e rispondono come descritto", { skip: !has("curl") }, 
   const out = await run("sh", [path.join(ESEMPI, "api.sh")], { env: env(), cwd: require("node:os").tmpdir() });
   assert.match(out, /^\{"tastings":\[\]\}/);                       // l'elenco, vuoto
   assert.match(out, /"code":"not_found"/);                         // degustazione di esempio inesistente
-  assert.match(out, /\{"votesRemoved":0\}/);                       // cancellazione utente senza voti
+  assert.match(out, /"votesRemoved":0/);                       // cancellazione utente senza voti
 });
 
 /* Le guide PDF dichiarano limiti e durate: devono coincidere con il codice. */
@@ -79,7 +79,7 @@ test("la guida dice gli stessi numeri del codice", () => {
 test("le guide PDF esistono e portano la versione corrente", () => {
   const fs = require("node:fs"), { execFileSync } = require("node:child_process");
   const V = require("../public/js/version.js");
-  for (const f of ["guida-integrazione-sorso.pdf", "guida-gestione-degustazioni.pdf", "guida-attivazione-api.pdf"]) {
+  for (const f of ["guida-integrazione-sorso.pdf", "guida-gestione-degustazioni.pdf", "guida-attivazione-api.pdf", "guida-uso-sorso.pdf"]) {
     const file = path.join(__dirname, "../docs", f);
     assert.ok(fs.existsSync(file), f);
     let testo = "";

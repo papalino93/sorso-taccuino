@@ -4,8 +4,10 @@ const R = require("../esempi/risposte.json");
 const { phone, fig, stats, cards, table, call, quote, ul, check, code, esempio, eyebrow, anat, BASE } = L;
 const DOC = "Guida all'integrazione";
 let n = 1;
-const BIG = ["Sicurezza e privacy", "Prima di andare online"];
+const BIG = [];
 const pg = (cls, label, inner) => L.page({ cls, label, doc: DOC, n: ++n, big: BIG.includes(label) }, inner);
+/* JSON con una riga per chiave e gli oggetti annidati su una riga sola: gli esempi restano corti */
+const compact = o => "{\n" + Object.keys(o).map(k => "  " + JSON.stringify(k) + ": " + JSON.stringify(o[k]).replace(/","/g, '", "').replace(/,"/g, ', "')).join(",\n") + "\n}";
 const rot = (file, deg, extra = "") => `<div style="transform:rotate(${deg}deg);${extra}">${phone(file)}</div>`;
 
 function build() {
@@ -144,9 +146,12 @@ function build() {
           ["Creare ed eliminare una degustazione", "no", "sì"],
           ["Aggiungere vini", "no", "sì"],
           ["Chiudere o riaprire", "no", "sì"],
+          ["Creare una degustazione alla cieca e svelarla", "no", "sì"],
           ["Votare (anche più volte: l'ultimo vale)", "sì", "sì"],
-          ["Vedere la media del team", "dopo aver votato quel vino", "dopo aver votato quel vino"],
-          ["Vedere quanti hanno votato", "solo dopo aver votato", "sempre"]], [1, 2])}
+          ["Scrivere un'ipotesi (alla cieca)", "sì", "sì"],
+          ["Vedere la media del team", "dopo aver votato quel vino, o a serata chiusa (dal 2° voto)", "come il partecipante"],
+          ["Vedere quanti hanno votato", "solo dopo aver votato", "sempre"],
+          ["Vedere i vini di una cieca non svelata", "no: «Vino 1», «Vino 2»…", "sì"]], [1, 2])}
       </div>
       ${fig("team-base-8-org-degustazione.png", "★", "Lo stesso vino visto da un <b>organizzatore</b>.")}
     </div>
@@ -172,9 +177,32 @@ function build() {
     </div>
   `));
 
-  /* 09 Personalizzazione */
+  /* 09 Statistiche, classifica, alla cieca */
+  P.push(pg("ink", "Altre sezioni", `
+    ${eyebrow("09", "Classifica, statistiche e alla cieca")}
+    <h1 class="d">Non solo il voto: <em>tre sezioni in più</em></h1>
+    <p class="lead" style="max-width:140mm">Lo spazio di team ha tre sezioni in alto: <b>Degustazioni</b>, <b>Classifica</b> e <b>Statistiche</b>. L'«alla cieca» è un modo di creare la degustazione.</p>
+    <div class="phones" style="gap:3mm;margin:4mm 0">
+      ${fig("team-cieca-2.png", 1, "<b>Alla cieca</b>: «Vino 1», e l'ipotesi su tipologia, vitigno, annata.", "sm")}
+      ${fig("team-svelata-2.png", 2, "<b>Svelata</b>: i nomi, il punteggio dell'ipotesi, il gruppo.", "sm")}
+      ${fig("team-classifica.png", 3, "<b>Classifica</b>: le serate chiuse e il vincitore.", "sm")}
+      ${fig("team-statistiche-1.png", 4, "<b>Statistiche</b>: le mie e quelle del team.", "sm")}
+    </div>
+    <div class="two">
+      <div>
+        <h3 class="k">Alla cieca</h3>
+        ${ul(["L'organizzatore spunta «Alla cieca» creando la degustazione e può indicare, per ogni vino, tipologia e vitigno.", "Ai partecipanti il server <b>non manda</b> nome, produttore, annata, tipologia né vitigno: si vede «Vino N» finché l'organizzatore non preme «Svela i vini».", "Ognuno vota e può scrivere un'ipotesi. Dopo lo svelamento la degustazione si chiude per sempre: ognuno vede il proprio punteggio (tipologia 1 punto, vitigno 2, annata 2 se esatta, 1 se ±1) e del gruppo solo un riepilogo anonimo."])}
+      </div>
+      <div>
+        <h3 class="k">Classifica e statistiche</h3>
+        ${ul(["<b>Classifica</b>: nella degustazione, i vini ordinati per media (pari merito compresi); nella sezione Classifica, le serate chiuse con il vincitore.", "<b>Statistiche</b>: dalle ultime 30 degustazioni <b>chiuse</b> del team, con medie, distribuzione, vini migliori, tipologie e, per ognuno, i propri numeri.", "A degustazione chiusa la media di un vino la vedono tutti, ma solo dal <b>secondo voto</b>. Nessuno vede mai chi ha votato cosa."])}
+      </div>
+    </div>
+  `));
+
+  /* 10 Personalizzazione */
   P.push(pg("ink", "Personalizzazione", `
-    ${eyebrow("09", "Personalizzazione")}
+    ${eyebrow("10", "Personalizzazione")}
     <h1 class="d">Nei <em>tuoi</em> colori</h1>
     <p class="lead" style="max-width:130mm">Con pochi valori lo spazio prende il tono del tuo sito. Li impostiamo noi, su tua richiesta.</p>
     <div class="phones" style="margin:5mm 0">
@@ -194,7 +222,7 @@ function build() {
 
   /* 10 API */
   P.push(pg("paper", "API di lettura", `
-    ${eyebrow("10", "API di sola lettura")}
+    ${eyebrow("11", "API di sola lettura")}
     <h1 class="d">I risultati, <em>dal tuo server</em></h1>
     <p>Tutte le richieste vanno fatte <b>dal server</b>, mai dal browser: la chiave non deve uscire dal tuo sistema.</p>
     ${table(["Cosa", "Valore"], [["Indirizzo di base", `<code>${BASE}/api/v1</code>`], ["Autenticazione", "<code>Authorization: Bearer sk_ID_PARTNER_…</code>"], ["Formato", "JSON UTF-8. Ogni risposta porta <code>X-Sorso-Api-Version: 1</code> e <code>Cache-Control: no-store</code>."], ["Dati", "Solo aggregati: mai chi ha votato cosa."]], [1])}
@@ -202,59 +230,81 @@ function build() {
     ${code("GET /api/v1/tastings?team=giovedi&status=closed\n\n" + JSON.stringify(R.tastings, null, 2), "GET")}
     <p class="mute" style="font-size:8pt">I filtri <code>team</code> e <code>status</code> (<code>open</code> o <code>closed</code>) sono facoltativi. Con tanti team conviene sempre filtrare per team.</p>
     <h2 class="s">Risultati di una <em>degustazione</em></h2>
-    ${code("GET /api/v1/tastings/{id}/results\n\n" + JSON.stringify(R.results, null, 2).split("\n").slice(0, 15).join("\n") + "\n  …", "GET")}
+    ${code("GET /api/v1/tastings/{id}/results\n\n" + JSON.stringify(R.results, null, 2).split("\n").slice(0, 13).join("\n") + "\n  …", "GET")}
   `));
   P.push(pg("paper", "API di lettura", `
-    ${eyebrow("10", "API di sola lettura")}
+    ${eyebrow("11", "API di sola lettura")}
     <h2 class="s" style="margin-top:0">Come leggere <em>i risultati</em></h2>
-    ${ul(["<code>votes</code> è il numero di voti; <code>average</code> la media del team, con un decimale.", "La media compare <b>dal secondo voto</b> (<code>minVotes</code> = 2): con un voto solo coinciderebbe con quello di una persona. Finché mancano voti, <code>average</code> è <code>null</code> e <code>hidden</code> è <code>true</code>.", "Voti rapidi e schede complete sono sulla stessa scala 50–100: la media li mescola correttamente."])}
+    ${ul(["<code>votes</code> è il numero di voti; <code>average</code> la media del team, con un decimale.", "La media compare <b>dal secondo voto</b> (<code>minVotes</code> = 2): con un voto solo coinciderebbe con quello di una persona. Finché mancano voti, <code>average</code> è <code>null</code> e <code>hidden</code> è <code>true</code>. <code>position</code> è l'ordine del vino; <code>rank</code> la posizione in classifica (1, 1, 3: i pari merito); <code>type</code> e <code>grape</code> sono quelli indicati dall'organizzatore.", "Una degustazione <b>alla cieca non svelata</b> ha <code>blind: true</code>, <code>revealed: false</code> e <code>name</code>, <code>producer</code>, <code>vintage</code>, <code>type</code>, <code>grape</code> a <code>null</code>: l'API non rivela i vini che i tuoi utenti non devono ancora conoscere.", "Voti rapidi e schede complete sono sulla stessa scala 50–100: la media li mescola correttamente."])}
     ${call("<b>Un limite di ogni media.</b> In un gruppo molto piccolo (2–3 persone), chi vede la media prima e dopo un nuovo voto può dedurre quel voto. Se per te è un problema, mostra i risultati solo a degustazione chiusa.")}
     <h2 class="s">Esportazione in <em>CSV</em></h2>
     ${code("GET /api/v1/tastings/{id}/results?format=csv\n\n" + R.csv.replace(/\r\n/g, "\n").trimEnd(), "CSV")}
     <p class="mute" style="font-size:8pt">Le celle che iniziano con <code>= + - @</code> vengono precedute da un apice: un nome di vino non può essere eseguito come formula.</p>
     <h2 class="s">Cancellare i dati di <em>un utente</em></h2>
-    ${code("DELETE /api/v1/users/{sub}\n\n" + JSON.stringify({ votesRemoved: 2 }, null, 2), "DELETE")}
-    <p>Rimuove tutti i voti dell'utente (il <code>sub</code> del token) e aggiorna le medie. Pensato per le richieste di cancellazione; si può ripetere senza effetti e funziona sempre, anche quando il servizio è in sola lettura.</p>
+    ${code("DELETE /api/v1/users/{sub}\n\n" + JSON.stringify({ votesRemoved: 2, guessesRemoved: 0 }, null, 2), "DELETE")}
+    <p>Rimuove tutti i voti e le ipotesi alla cieca dell'utente (il <code>sub</code> del token) e aggiorna le medie. Pensato per le richieste di cancellazione; si può ripetere senza effetti e funziona sempre, anche quando il servizio è in sola lettura.</p>
     <h2 class="s">Provalo in <em>un minuto</em></h2>
     <p>Dal terminale del tuo server, con la chiave API. Se ricevi un elenco (anche vuoto) la chiave funziona; con <code>401</code> è sbagliata o è stata ruotata.</p>
     ${code("curl -sS -H 'Authorization: Bearer sk_ID_PARTNER_…' \\\n  " + BASE + "/api/v1/tastings", "shell")}
   `));
   P.push(pg("paper", "API di lettura", `
-    ${eyebrow("10", "API di sola lettura — esempi")}
+    ${eyebrow("11", "API di sola lettura — esempi")}
     <h1 class="d" style="font-size:28pt">Quattro comandi, <em>copia e incolla</em></h1>
     ${esempio("api.sh", "shell").replace('class="code"', 'class="code big"')}
     ${call("Esegui sempre queste chiamate <b>dal tuo server</b>, mai da una pagina del browser: la chiave API non deve essere visibile a nessuno.")}
   `));
 
-  /* 11 Cosa c'è e cosa no */
+  const stCompact = { team: R.stats.team, at: R.stats.at, window: R.stats.window, totals: R.stats.totals, average: R.stats.average };
+  const evCompact = e => ({ id: "…", name: e.name, createdAt: e.createdAt, blind: e.blind, revealed: e.revealed, wines: e.wines, votes: e.votes, average: e.average, winner: e.winner && { name: e.winner.name, average: e.winner.average, votes: e.winner.votes, tie: e.winner.tie } });
+  const gu = R.guesses.wines[0];
+  P.push(pg("paper", "API di lettura", `
+    ${eyebrow("11", "API di sola lettura — statistiche e serate")}
+    <h1 class="d" style="font-size:26pt">Statistiche e <em>classifica delle serate</em></h1>
+    <h2 class="s" style="margin-top:0">Statistiche <em>del team</em></h2>
+    ${code("GET /api/v1/stats?team=giovedi\n\n" + compact(Object.assign({}, stCompact, { top: "[ … ]", distribution: "[ … ]", byType: "[ … ]", events: "[ … ]" })).replace(/"\[ … \]"/g, "[ … ]"), "GET")}
+    <p>Il parametro <code>team</code> è obbligatorio (lo stesso valore del claim <code>team</code>). Si basa sulle ultime <b>30 degustazioni chiuse</b> e si aggiorna al massimo ogni due minuti: <code>at</code> dice quando è stata calcolata. Contiene il numero di degustazioni, vini e voti; la media del team; <code>top</code> (i cinque vini migliori); <code>distribution</code> (quanti vini per fascia di media); <code>byType</code> (media per tipologia) ed <code>events</code>. Nessun dato personale.</p>
+    <h2 class="s">Le serate <em>e il vincitore</em></h2>
+    ${code("GET /api/v1/events?team=giovedi\n\n" + "{\n  \"team\": \"giovedi\",\n  \"events\": [\n" + compact(evCompact(R.events.events[0])).split("\n").map(l => "  " + l).join("\n") + "\n  ]\n}", "GET")}
+    <p>Le degustazioni chiuse del team, dalla più recente, ciascuna con il vino vincitore (<code>winner</code>, con <code>tie: true</code> se c'è un pari merito). Servono almeno due voti: altrimenti <code>winner</code> è <code>null</code>. Per una cieca non svelata il vincitore non ha nome (<code>hidden: true</code>).</p>
+  `));
+  P.push(pg("paper", "API di lettura", `
+    ${eyebrow("11", "API di sola lettura — ipotesi alla cieca")}
+    <h2 class="s" style="margin-top:0">Le ipotesi <em>alla cieca</em></h2>
+    ${code("GET /api/v1/tastings/{id}/guesses\n\n" + "{\n  \"tasting\": { \"id\": \"…\", \"revealed\": true, … },\n  \"wines\": [\n" + compact({ id: "…", position: gu.position, name: gu.name, type: gu.type, grape: gu.grape, vintage: gu.vintage, guessers: gu.guessers, answers: gu.answers }).split("\n").map(l => "  " + l).join("\n") + "\n  ]\n}", "GET")}
+    <p>Solo per le degustazioni alla cieca <b>già svelate</b>: prima risponde <code>409 not_revealed</code>, e per una degustazione normale <code>409 not_blind</code>. Dice, per ogni vino, quante persone hanno provato a indovinare e quante hanno risposto giusto su tipologia, vitigno e annata (<code>exact</code> esatta, <code>close</code> con un anno di scarto). Mai chi ha detto cosa.</p>
+    <h2 class="s">Cosa vede <em>l'API di una cieca</em></h2>
+    ${code("GET /api/v1/tastings/{id}/results     (cieca non svelata)\n\n" + compact(Object.assign({}, R.resultsBlindHidden.wines[0], { id: "…" })), "GET")}
+    <p>Finché la degustazione non è svelata, <code>name</code>, <code>producer</code>, <code>vintage</code>, <code>type</code> e <code>grape</code> sono <code>null</code>, anche nel CSV: il tuo sito non può rivelare per sbaglio il vino ai partecipanti. Le medie e la classifica (<code>rank</code>) ci sono comunque.</p>
+  `));
+
+  /* 12 Cosa c'è e cosa no */
   P.push(pg("ink", "Cosa c'è e cosa no", `
-    ${eyebrow("11", "App personale e spazio di team")}
+    ${eyebrow("12", "App personale e spazio di team")}
     <h1 class="d">Taccuino, Statistiche, Evento, Cieca: <em>dove stanno</em></h1>
-    <p class="lead" style="max-width:140mm">Sorso ha due anime. L'app personale (il taccuino di ognuno) e lo spazio di team che incorpori nel tuo sito. L'API serve solo il secondo.</p>
+    <p class="lead" style="max-width:140mm">L'app personale e lo spazio di team che incorpori hanno Statistiche, classifica e alla cieca; l'API serve il secondo.</p>
     <div class="phones" style="gap:4mm;margin:4mm 0">
       ${fig("app-taccuino.png", "A", "<b>Taccuino</b>: l'archivio personale.", "sm")}
-      ${fig("app-statistiche.png", "B", "<b>Statistiche</b>: il profilo del palato.", "sm")}
-      ${fig("app-cieca.png", "C", "<b>Alla cieca</b>: si prova a indovinare.", "sm")}
-      ${fig("app-evento.png", "D", "<b>Evento</b>: la classifica di una serata.", "sm")}
+      ${fig("app-statistiche.png", "B", "<b>Statistiche</b> personali.", "sm")}
+      ${fig("team-statistiche-1.png", "C", "<b>Statistiche</b> del team.", "sm")}
+      ${fig("team-cieca-1.png", "D", "<b>Alla cieca</b> nel team.", "sm")}
     </div>
     ${table(["Nell'app personale", "Nello spazio di team e nell'API"], [
-      ["<b>Taccuino</b> — l'archivio privato di ogni scheda, con foto, uvaggio, descrittori e note.", "Non c'è un archivio personale: ogni utente ritrova le <b>proprie degustazioni di team</b> e, su ogni vino, il proprio voto (punteggio, modalità, note). Le schede si compilano solo dentro l'app."],
-      ["<b>Statistiche</b> — medie, radar delle fasi, prezzo, andamento nel tempo.", "Nessuna statistica personale. L'API dà, per ogni vino di una degustazione, <b>numero di voti e media del team</b> (e il CSV)."],
-      ["<b>Evento</b> — classifica di gruppo di una serata.", "È la <b>degustazione</b>: la crea l'organizzatore, il team vota, la media compare dopo il voto, si chiude e i voti sono definitivi."],
-      ["<b>Alla cieca</b> — si assaggia senza etichetta e poi si svela.", "Non disponibile: i vini di una degustazione sono visibili a tutti fin dall'inizio."]], [0, 1])}
-    ${call("Se per il tuo club servono anche le statistiche del team, la modalità alla cieca o un archivio personale dentro l'iframe, scrivici: sono estensioni possibili, non ancora incluse.")}
+      ["<b>Taccuino</b> — l'archivio privato di ogni scheda, con foto, uvaggio, descrittori e note.", "Nessun archivio personale: ognuno ritrova le <b>degustazioni del team</b> e il proprio voto su ogni vino."],
+      ["<b>Statistiche</b> — medie, radar delle fasi, prezzo, andamento nel tempo.", "<b>Statistiche</b> del team (medie, distribuzione, vini migliori, tipologie) e le proprie di ogni utente; nell'API <code>/stats</code>, senza dati personali."],
+      ["<b>Evento</b> — classifica di gruppo di una serata.", "<b>Classifica</b>: dei vini di ogni degustazione e delle serate chiuse con il vincitore; nell'API <code>rank</code>, <code>/events</code>."],
+      ["<b>Alla cieca</b> — si assaggia senza etichetta, si prova a indovinare e poi si svela.", "<b>Alla cieca</b> di gruppo: nomi nascosti finché l'organizzatore non svela, ipotesi di tipologia, vitigno e annata, riepilogo anonimo (<code>/guesses</code>)."]], [0, 1])}
+    ${call("Fuori dall'iframe restano archivio personale, foto, uvaggio e prezzo: se ti servono, scrivici.")}
   `));
 
   /* 12 Errori e limiti */
   P.push(pg("paper", "Errori e limiti", `
-    ${eyebrow("12", "Errori e limiti")}
+    ${eyebrow("13", "Errori e limiti")}
     <h1 class="d">Se qualcosa <em>non va</em></h1>
     ${table(["Cosa vedi", "Causa probabile", "Cosa fare"], [
       ["Iframe vuoto o errore del browser", "Il dominio della pagina non è tra quelli registrati («Refused to frame»).", "Comunicaci il dominio esatto, con <code>https://</code>."],
       ["«L'accesso non è valido o è scaduto»", "Token con firma sbagliata, scaduto o con campi non validi.", "Controlla <code>iss</code>, <code>sub</code>, <code>team</code>, <code>jti</code>, <code>exp</code> e il segreto."],
       ["«Questo accesso è già stato usato»", "Lo stesso token è arrivato due volte (pagina in cache, anteprima automatica).", "Un token nuovo a ogni caricamento; niente cache."],
       ["«Devi rientrare»", "Sessione di 4 ore finita.", "Rispondi a <code>sorso:reauth</code> con un token nuovo."],
-      ["Un utente non vede le serate degli altri", "Valori diversi nel claim <code>team</code>.", "Stesso <code>team</code> per chi sta insieme."],
       ["Manca «Nuova degustazione»", "L'utente è <code>member</code>.", "<code>role: \"organizer\"</code> nel token."]], [0, 1, 2])}
     <h2 class="s">I codici <em>dell'API</em></h2>
     ${table(["HTTP", "Codice", "Significato"], [
@@ -262,15 +312,16 @@ function build() {
       ["404", "<code>not_found</code>", "Degustazione o percorso inesistente (anche di un altro partner)."],
       ["405", "<code>method_not_allowed</code>", "Metodo non previsto per quel percorso."],
       ["429", "<code>rate_limited</code>", "Troppe richieste: <code>Retry-After</code> dice quando riprovare."],
+      ["400 · 409", "<code>invalid_team</code> · <code>not_blind</code> · <code>not_revealed</code>", "Manca <code>team</code> in <code>/stats</code> e <code>/events</code>; oppure <code>/guesses</code> su una degustazione normale o non ancora svelata."],
       ["503", "<code>read_only</code>", "Sola lettura per il limite mensile: le letture e la cancellazione dati funzionano."]], [1])}
     <h2 class="s">Limiti e <em>disponibilità</em></h2>
-    ${table(["Cosa", "Limite"], [["Aperture di sessione (<code>/embed</code>)", "200 al minuto per indirizzo IP"], ["Operazioni di un utente nell'iframe", "90 al minuto per utente"], ["API di sola lettura", "120 richieste al minuto per chiave e per indirizzo IP"], ["Sessione dell'iframe · token", "4 ore · al massimo 15 minuti, monouso"]], [0])}
-    <p class="mute" style="font-size:8pt">Servizio gratuito, senza garanzia di continuità: scarica il CSV al termine di ogni serata. All'80% dell'uso mensile le risposte portano <code>X-Sorso-Quota: warn</code>; oltre il 90% lo spazio passa in sola lettura fino al mese dopo.</p>
+    ${table(["Cosa", "Limite"], [["Aperture di sessione (<code>/embed</code>)", "200 al minuto per indirizzo IP"], ["Operazioni di un utente nell'iframe", "90 al minuto per utente"], ["API di sola lettura", "120 richieste al minuto per chiave e per IP"]], [0])}
+    <p class="mute" style="font-size:8pt">Sessione dell'iframe 4 ore; token al massimo 15 minuti, monouso. Servizio gratuito, senza garanzia di continuità: scarica il CSV dopo ogni serata. All'80% dell'uso mensile compare <code>X-Sorso-Quota: warn</code>; oltre il 90% si passa in sola lettura fino al mese dopo.</p>
   `));
 
   /* 13 Sicurezza e privacy */
   P.push(pg("paper", "Sicurezza e privacy", `
-    ${eyebrow("13", "Sicurezza e privacy")}
+    ${eyebrow("14", "Sicurezza e privacy")}
     <h1 class="d">Pochi dati, <em>ben custoditi</em></h1>
     <div class="two">
       <div><h3 class="k">Cosa devi fare tu</h3>${ul(["Tieni segreto di firma e chiave API solo sul server; se li esponi, chiedi la rotazione.", "Firma token solo per utenti già autenticati; team e ruolo vengono dai tuoi dati, mai da parametri della richiesta.", "Usa come <code>sub</code> un identificativo opaco invece dell'email.", "Servi la pagina che incorpora l'iframe sempre in <code>https</code>."])}</div>
@@ -280,16 +331,15 @@ function build() {
     ${table(["Dato", "Conservato", "Note"], [
       ["Identificativo utente (<code>sub</code>)", "sì", "Serve a collegare l'utente ai suoi voti. Nessun'altra anagrafica."],
       ["Team, nomi di degustazioni e vini", "sì", "Inseriti dagli organizzatori."],
-      ["Voti, con modalità e giudizi", "sì", "Visibili solo all'autore; l'API espone solo le medie."],
-      ["Note personali sui vini", "sì", "Visibili solo all'autore."],
+      ["Voti, giudizi, note e ipotesi alla cieca", "sì", "Visibili solo all'autore; l'API e il gruppo vedono solo medie e riepiloghi anonimi."],
       ["Nome visualizzato (<code>name</code>)", "no", "Resta nella sessione in memoria."],
       ["Email, telefono, indirizzo IP", "no", "L'IP serve solo al limite di richieste, in un contatore temporaneo."]], [2])}
-    ${ul(["I dati restano finché non vengono cancellati. Per cancellare un utente: <code>DELETE /api/v1/users/{sub}</code>.", "Chi gestisce il servizio ha accesso tecnico al database. Per informativa e basi giuridiche valgono le valutazioni del tuo sito."])}
+    ${ul(["I dati restano finché non vengono cancellati. Per cancellare un utente (voti e ipotesi): <code>DELETE /api/v1/users/{sub}</code>. Il riepilogo anonimo di una cieca già svelata non cambia.", "Chi gestisce il servizio ha accesso tecnico al database. Per informativa e basi giuridiche valgono le valutazioni del tuo sito."])}
   `));
 
   /* 14 Checklist */
   P.push(pg("ink", "Prima di andare online", `
-    ${eyebrow("14", "Prima di andare online")}
+    ${eyebrow("15", "Prima di andare online")}
     <h1 class="d">Spunta ogni voce <em>con una prova vera</em></h1>
     <p class="lead">Non a memoria: apri la pagina, vota, guarda i risultati. Per qualunque dubbio o richiesta (dominio, colori, rotazione dei segreti, cancellazioni) scrivici.</p>
     ${check([
@@ -298,6 +348,8 @@ function build() {
       "Il token è generato a ogni caricamento e la pagina non è in cache.",
       "Un <code>member</code> vota e, solo dopo, vede la media del team.",
       "Un <code>organizer</code> crea una degustazione, aggiunge vini e la chiude.",
+      "Una degustazione alla cieca: i partecipanti vedono «Vino 1», «Vino 2»; dopo «Svela i vini» compaiono i nomi e la classifica.",
+      "Le sezioni Classifica e Statistiche si aprono e mostrano i dati delle degustazioni chiuse.",
       "Due utenti di team diversi non vedono le rispettive degustazioni.",
       "Ricaricando solo l'iframe l'utente rientra (<code>sorso:reauth</code>) o ricarica la pagina.",
       "La lettura dei risultati dal server funziona e il CSV si apre correttamente.",

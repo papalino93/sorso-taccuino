@@ -1,6 +1,6 @@
 # Sorso — Taccuino di degustazione
 
-Versione corrente: **1.6.2** — ultimo aggiornamento: 8 ottobre 2026 (cronologia in `CHANGELOG.md`). La versione e la data si leggono anche in fondo all'app e dello spazio di team.
+Versione corrente: **1.7.0** — ultimo aggiornamento: 8 ottobre 2026 (cronologia in `CHANGELOG.md`). La versione e la data si leggono anche in fondo all'app e dello spazio di team.
 
 App per registrare degustazioni di vino con scheda di valutazione, statistiche personali, degustazioni alla cieca ed eventi condivisi.
 
@@ -35,11 +35,16 @@ Un sito esterno può incorporare Sorso come spazio di team: i suoi utenti votano
 - **Accesso**: il backend del partner firma un JWT HS256 per l'utente (claim `iss` = id partner, `sub`, `name`, `team`, `role` = `member` o `organizer`, `jti` e `exp` entro 15 minuti) e apre l'iframe `https://<dominio>/embed?p=<partner>#token=<JWT>`: il token sta nel frammento, che il browser non invia a nessun server. È monouso e viene scambiato subito con una sessione tenuta solo in memoria; se l'accesso scade l'iframe invia `sorso:reauth` al sito ospite, che ricarica con un token nuovo.
 - **Ruoli**: l'organizzatore crea, chiude ed elimina le degustazioni e aggiunge i vini (tetti: 200 degustazioni per team, 100 vini per degustazione); i partecipanti votano.
 - **Voti**: voto rapido (occhio, naso, bocca da 50 a 100) o scheda completa; il punteggio lo ricalcola sempre il server.
+- **Alla cieca, classifica, statistiche** (1.7.0): l'organizzatore può creare una serata «alla cieca» (i vini sono «Vino 1, Vino 2…» finché non li svela; in più si può indovinare tipologia, vitigno, annata; lo svelamento chiude per sempre). La classifica è provvisoria a serata aperta e finale a serata chiusa; le statistiche aggregano le ultime 30 degustazioni chiuse del team.
 - **Sicurezza**: la pagina si può incorporare solo dai domini registrati dal partner (`frame-ancestors`); nessuno script inline; il tema del partner è fatto di soli valori controllati.
-- **API di sola lettura** per il server del partner, con `Authorization: Bearer sk_<partner>_<chiave>`: `GET /api/v1/tastings`, `GET /api/v1/tastings/{id}/results[?format=csv]`, `DELETE /api/v1/users/{sub}`. Solo aggregati; la media compare dal secondo voto.
+- **API di sola lettura** per il server del partner, con `Authorization: Bearer sk_<partner>_<chiave>`: `GET /api/v1/tastings`, `GET /api/v1/tastings/{id}/results[?format=csv]`, `GET /api/v1/tastings/{id}/guesses`, `GET /api/v1/stats?team=`, `GET /api/v1/events?team=`, `DELETE /api/v1/users/{sub}`. Solo aggregati; la media compare dal secondo voto.
 - **Partner**: si creano a mano con `node scripts/partner.js create <id> --name "..." --origin https://...` (servono le variabili del database nell'ambiente). Il segreto e la chiave compaiono una volta sola.
 - **Costo**: pensato per il piano gratuito di Redis (500.000 comandi al mese). Un voto costa circa 12 comandi, un caricamento della degustazione circa 8. Il consumo si legge con `node scripts/usage.js`; all'80% le risposte portano `X-Sorso-Quota: warn`, al 90% le scritture si fermano (sola lettura).
 - **Prova in locale**: `node test/helpers/dev-server.js` avvia il tutto con un Redis finto; `node test/e2e/team.e2e.js` prova il flusso nel browser con un finto sito partner.
+
+## Guida all'uso
+
+Nell'app: Impostazioni → Guida → «Apri la guida» (`public/guida-uso-sorso.pdf`). Le guide PDF si rigenerano con `node docs/guide/build.js` (servono Playwright e le schermate in `docs/guide/img`; `shots-nuove.js` produce quelle di team e desktop).
 
 ## Account e sincronizzazione
 

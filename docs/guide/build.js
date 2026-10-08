@@ -4,7 +4,7 @@
 const fs = require("fs");
 const path = require("path");
 const { chromium } = require(require("child_process").execSync("npm root -g").toString().trim() + "/playwright");
-const DOCS = { integrazione: ["integrazione.js", "guida-integrazione-sorso.pdf"], gestore: ["gestore.js", "guida-gestione-degustazioni.pdf"], attivazione: ["attivazione.js", "guida-attivazione-api.pdf"] };
+const DOCS = { integrazione: ["integrazione.js", "guida-integrazione-sorso.pdf"], gestore: ["gestore.js", "guida-gestione-degustazioni.pdf"], attivazione: ["attivazione.js", "guida-attivazione-api.pdf"], utente: ["utente.js", "guida-uso-sorso.pdf"] };
 (async () => {
   const quali = process.argv.slice(2).length ? process.argv.slice(2) : Object.keys(DOCS);
   const browser = await chromium.launch({ executablePath: "/opt/pw-browsers/chromium" });
@@ -17,7 +17,7 @@ const DOCS = { integrazione: ["integrazione.js", "guida-integrazione-sorso.pdf"]
     if (fs.existsSync(out) && fs.statSync(out).mtimeMs >= fs.statSync(src).mtimeMs) continue;
     const b64 = await conv.evaluate(async d => {
       const im = new Image(); im.src = d; await im.decode();
-      const w = Math.min(520, im.naturalWidth), h = Math.round(im.naturalHeight * w / im.naturalWidth);
+      const w = Math.min(im.naturalWidth > 1500 ? 1100 : 520, im.naturalWidth), h = Math.round(im.naturalHeight * w / im.naturalWidth);
       const c = document.createElement("canvas"); c.width = w; c.height = h;
       const x = c.getContext("2d"); x.fillStyle = "#fff"; x.fillRect(0, 0, w, h); x.drawImage(im, 0, 0, w, h);
       return c.toDataURL("image/jpeg", 0.78).split(",")[1];
@@ -45,6 +45,8 @@ const DOCS = { integrazione: ["integrazione.js", "guida-integrazione-sorso.pdf"]
     await page.pdf({ path: path.join(__dirname, "..", out), preferCSSPageSize: true, printBackground: true });
     await page.close();
     fs.unlinkSync(tmp);
+    /* la guida all'uso si scarica dall'app (Impostazioni → Guida): ne serve una copia servita da /public */
+    if (k === "utente") fs.copyFileSync(path.join(__dirname, "..", out), path.join(__dirname, "..", "..", "public", out));
     console.log("scritto", out);
   }
   await browser.close();

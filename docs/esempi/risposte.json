@@ -2,56 +2,370 @@
   "tastings": {
     "tastings": [
       {
-        "id": "3a9d45ad54",
+        "id": "4529a7e3f3",
         "team": "giovedi",
         "name": "Serata di ottobre",
         "status": "closed",
-        "createdAt": "2026-10-07T21:33:19.516Z"
+        "blind": false,
+        "revealed": false,
+        "createdAt": "2026-10-08T10:06:36.581Z"
       }
     ]
   },
   "results": {
     "tasting": {
-      "id": "3a9d45ad54",
+      "id": "4529a7e3f3",
       "team": "giovedi",
       "name": "Serata di ottobre",
       "status": "closed",
-      "createdAt": "2026-10-07T21:33:19.516Z"
+      "blind": false,
+      "revealed": false,
+      "createdAt": "2026-10-08T10:06:36.581Z"
     },
     "minVotes": 2,
     "wines": [
       {
-        "id": "efe248b456",
+        "id": "e135640f56",
+        "position": 1,
         "producer": "Poderi Rivalta",
         "name": "Barolo Cannubi",
         "vintage": "2019",
+        "type": null,
+        "grape": null,
         "votes": 3,
         "average": 88,
-        "hidden": false
+        "hidden": false,
+        "rank": 1
       },
       {
-        "id": "23cb60b4e2",
+        "id": "9839911744",
+        "position": 2,
         "producer": "Tenuta delle Sciare",
         "name": "Etna Rosso Contrada Rampante",
         "vintage": "2021",
+        "type": null,
+        "grape": null,
         "votes": 2,
         "average": 74.5,
-        "hidden": false
+        "hidden": false,
+        "rank": 2
       },
       {
-        "id": "7611471784",
+        "id": "07b1c4c96f",
+        "position": 3,
         "producer": "Casa Marchigiana",
         "name": "Verdicchio Classico",
         "vintage": "2022",
+        "type": null,
+        "grape": null,
         "votes": 1,
         "average": null,
-        "hidden": true
+        "hidden": true,
+        "rank": null
       }
     ]
   },
-  "csv": "tasting_id,tasting,wine_id,producer,name,vintage,votes,average\r\n3a9d45ad54,Serata di ottobre,efe248b456,Poderi Rivalta,Barolo Cannubi,2019,3,88\r\n3a9d45ad54,Serata di ottobre,23cb60b4e2,Tenuta delle Sciare,Etna Rosso Contrada Rampante,2021,2,74.5\r\n3a9d45ad54,Serata di ottobre,7611471784,Casa Marchigiana,Verdicchio Classico,2022,1,\r\n",
+  "csv": "tasting_id,tasting,wine_id,producer,name,vintage,votes,average,type,grape,rank\r\n4529a7e3f3,Serata di ottobre,e135640f56,Poderi Rivalta,Barolo Cannubi,2019,3,88,,,1\r\n4529a7e3f3,Serata di ottobre,9839911744,Tenuta delle Sciare,Etna Rosso Contrada Rampante,2021,2,74.5,,,2\r\n4529a7e3f3,Serata di ottobre,07b1c4c96f,Casa Marchigiana,Verdicchio Classico,2022,1,,,,\r\n",
+  "resultsBlindHidden": {
+    "tasting": {
+      "id": "d40564d86c",
+      "team": "giovedi",
+      "name": "Alla cieca di giovedì",
+      "status": "open",
+      "blind": true,
+      "revealed": false,
+      "createdAt": "2026-10-08T10:06:36.744Z"
+    },
+    "minVotes": 2,
+    "wines": [
+      {
+        "id": "4a216cb0c3",
+        "position": 1,
+        "producer": null,
+        "name": null,
+        "vintage": null,
+        "type": null,
+        "grape": null,
+        "votes": 3,
+        "average": 91,
+        "hidden": false,
+        "rank": 1
+      },
+      {
+        "id": "a9a4a90f63",
+        "position": 2,
+        "producer": null,
+        "name": null,
+        "vintage": null,
+        "type": null,
+        "grape": null,
+        "votes": 3,
+        "average": 83,
+        "hidden": false,
+        "rank": 2
+      }
+    ]
+  },
+  "guesses": {
+    "tasting": {
+      "id": "d40564d86c",
+      "team": "giovedi",
+      "name": "Alla cieca di giovedì",
+      "status": "closed",
+      "revealed": true,
+      "createdAt": "2026-10-08T10:06:36.744Z"
+    },
+    "wines": [
+      {
+        "id": "4a216cb0c3",
+        "position": 1,
+        "producer": "Poderi Rivalta",
+        "name": "Barolo Cannubi",
+        "vintage": "2019",
+        "type": "Rosso",
+        "grape": "Nebbiolo",
+        "guessers": 3,
+        "answers": {
+          "type": {
+            "answered": 3,
+            "correct": 3
+          },
+          "grape": {
+            "answered": 3,
+            "correct": 2
+          },
+          "year": {
+            "answered": 3,
+            "exact": 1,
+            "close": 2
+          }
+        }
+      },
+      {
+        "id": "a9a4a90f63",
+        "position": 2,
+        "producer": "Casa Marchigiana",
+        "name": "Verdicchio Classico",
+        "vintage": "2022",
+        "type": "Bianco",
+        "grape": "Verdicchio",
+        "guessers": 3,
+        "answers": {
+          "type": {
+            "answered": 3,
+            "correct": 3
+          },
+          "grape": {
+            "answered": 3,
+            "correct": 0
+          },
+          "year": {
+            "answered": 0,
+            "exact": 0,
+            "close": 0
+          }
+        }
+      }
+    ]
+  },
+  "stats": {
+    "team": "giovedi",
+    "at": "2026-10-08T10:06:36.961Z",
+    "window": {
+      "tastings": 2,
+      "closedTotal": 2,
+      "open": 0
+    },
+    "totals": {
+      "tastings": 2,
+      "open": 0,
+      "closed": 2,
+      "wines": 5,
+      "votes": 12
+    },
+    "average": 85,
+    "distribution": [
+      {
+        "key": "lt60",
+        "wines": 0
+      },
+      {
+        "key": "b60",
+        "wines": 0
+      },
+      {
+        "key": "b70",
+        "wines": 1
+      },
+      {
+        "key": "b80",
+        "wines": 2
+      },
+      {
+        "key": "b90",
+        "wines": 1
+      }
+    ],
+    "top": [
+      {
+        "avg": 91,
+        "votes": 3,
+        "tasting": "d40564d86c",
+        "tastingName": "Alla cieca di giovedì",
+        "name": "Barolo Cannubi",
+        "producer": "Poderi Rivalta",
+        "vintage": "2019",
+        "hidden": false,
+        "index": 1
+      },
+      {
+        "avg": 88,
+        "votes": 3,
+        "tasting": "4529a7e3f3",
+        "tastingName": "Serata di ottobre",
+        "name": "Barolo Cannubi",
+        "producer": "Poderi Rivalta",
+        "vintage": "2019",
+        "hidden": false,
+        "index": 1
+      },
+      {
+        "avg": 83,
+        "votes": 3,
+        "tasting": "d40564d86c",
+        "tastingName": "Alla cieca di giovedì",
+        "name": "Verdicchio Classico",
+        "producer": "Casa Marchigiana",
+        "vintage": "2022",
+        "hidden": false,
+        "index": 2
+      },
+      {
+        "avg": 74.5,
+        "votes": 2,
+        "tasting": "4529a7e3f3",
+        "tastingName": "Serata di ottobre",
+        "name": "Etna Rosso Contrada Rampante",
+        "producer": "Tenuta delle Sciare",
+        "vintage": "2021",
+        "hidden": false,
+        "index": 2
+      }
+    ],
+    "byType": [
+      {
+        "type": "Rosso",
+        "wines": 1,
+        "average": 91
+      },
+      {
+        "type": "Bianco",
+        "wines": 1,
+        "average": 83
+      }
+    ],
+    "events": [
+      {
+        "id": "d40564d86c",
+        "name": "Alla cieca di giovedì",
+        "createdAt": "2026-10-08T10:06:36.744Z",
+        "blind": true,
+        "revealed": true,
+        "wines": 2,
+        "votes": 6,
+        "average": 87,
+        "winner": {
+          "name": "Barolo Cannubi",
+          "producer": "Poderi Rivalta",
+          "vintage": "2019",
+          "hidden": false,
+          "index": 1,
+          "average": 91,
+          "votes": 3,
+          "tie": false
+        }
+      },
+      {
+        "id": "4529a7e3f3",
+        "name": "Serata di ottobre",
+        "createdAt": "2026-10-08T10:06:36.581Z",
+        "blind": false,
+        "revealed": false,
+        "wines": 3,
+        "votes": 6,
+        "average": 82.6,
+        "winner": {
+          "name": "Barolo Cannubi",
+          "producer": "Poderi Rivalta",
+          "vintage": "2019",
+          "hidden": false,
+          "index": 1,
+          "average": 88,
+          "votes": 3,
+          "tie": false
+        }
+      }
+    ]
+  },
+  "events": {
+    "team": "giovedi",
+    "events": [
+      {
+        "id": "d40564d86c",
+        "name": "Alla cieca di giovedì",
+        "createdAt": "2026-10-08T10:06:36.744Z",
+        "blind": true,
+        "revealed": true,
+        "wines": 2,
+        "votes": 6,
+        "average": 87,
+        "winner": {
+          "name": "Barolo Cannubi",
+          "producer": "Poderi Rivalta",
+          "vintage": "2019",
+          "hidden": false,
+          "index": 1,
+          "average": 91,
+          "votes": 3,
+          "tie": false
+        }
+      },
+      {
+        "id": "4529a7e3f3",
+        "name": "Serata di ottobre",
+        "createdAt": "2026-10-08T10:06:36.581Z",
+        "blind": false,
+        "revealed": false,
+        "wines": 3,
+        "votes": 6,
+        "average": 82.6,
+        "winner": {
+          "name": "Barolo Cannubi",
+          "producer": "Poderi Rivalta",
+          "vintage": "2019",
+          "hidden": false,
+          "index": 1,
+          "average": 88,
+          "votes": 3,
+          "tie": false
+        }
+      }
+    ],
+    "window": {
+      "tastings": 2,
+      "closedTotal": 2,
+      "open": 0
+    }
+  },
+  "errNotRevealed": {
+    "error": {
+      "code": "not_revealed",
+      "message": "La degustazione non è ancora stata svelata."
+    }
+  },
   "deleteUser": {
-    "votesRemoved": 1
+    "votesRemoved": 3,
+    "guessesRemoved": 2
   },
   "errUnauthorized": {
     "error": {

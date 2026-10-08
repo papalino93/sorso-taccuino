@@ -18,3 +18,15 @@ curl -sS -H "Authorization: Bearer $SORSO_API_KEY" \
 # 4. Cancellare i dati di un utente: usa l'ID che hai messo nel claim "sub"
 curl -sS -X DELETE -H "Authorization: Bearer $SORSO_API_KEY" \
   "$SORSO_BASE/api/v1/users/ID_UTENTE"
+
+# 5. Statistiche del team (serve il parametro team: lo stesso valore del claim "team")
+curl -sS -H "Authorization: Bearer $SORSO_API_KEY" \
+  "$SORSO_BASE/api/v1/stats?team=ID_TEAM"
+
+# 6. Classifica delle serate chiuse del team, con il vino vincitore
+curl -sS -H "Authorization: Bearer $SORSO_API_KEY" \
+  "$SORSO_BASE/api/v1/events?team=ID_TEAM"
+
+# 7. Riepilogo anonimo delle ipotesi di una degustazione alla cieca già svelata
+curl -sS -H "Authorization: Bearer $SORSO_API_KEY" \
+  "$SORSO_BASE/api/v1/tastings/ID_DEGUSTAZIONE/guesses"

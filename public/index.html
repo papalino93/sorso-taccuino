@@ -166,6 +166,7 @@
   .drop-title{font:500 14px/1.35 'Geist','Inter';color:var(--ink);}
   .drop-sub{margin-top:4px;font:400 12.5px/1.5 'Geist','Inter';color:var(--ink-3);}
   .drop-btns{margin-top:11px;display:flex;gap:8px;flex-wrap:wrap;}
+  a.pill-solid{display:inline-flex;align-items:center;justify-content:center;text-decoration:none}
   .pill-solid{min-height:40px;padding:9px 14px;border-radius:5px;background:var(--sel-bg);color:var(--sel-fg);font:500 11px/1 'Geist','Inter';letter-spacing:.1em;text-transform:uppercase;border:0;cursor:pointer;}
   #loginPromptBtn{display:inline-flex;align-items:center;gap:7px;}
   .pill-danger{padding:9px 14px;border-radius:5px;border:1px solid var(--rust);background:none;color:var(--rust);
@@ -1298,6 +1299,14 @@ try{var _p=localStorage.getItem("sorso-theme");if(_p==="dark"||(_p!=="light"&&wi
           <button type="button" class="pill-solid hidden" id="loginPromptBtn">Accedi o crea un account</button>
         </div>
       </div>
+
+        <div class="card backup-card" id="guideCard">
+        <div class="card-head"><span class="eyebrow" data-i18n="guide.eyebrow">Guida</span><span class="fill"></span><span class="status">PDF</span></div>
+        <p class="note-line" data-i18n="guide.note">Come usare Sorso, passo per passo: punteggio, schede, alla cieca, statistiche, eventi e impostazioni.</p>
+        <div class="backup-actions">
+          <a class="pill-solid" id="guideLink" href="guida-uso-sorso.pdf" target="_blank" rel="noopener" data-i18n="guide.open">Apri la guida</a>
+        </div>
+      </div>
       </div>
     </section>
 
@@ -1930,6 +1939,7 @@ const I18N = {
     "action.delete":"Elimina",
 
     "account.eyebrow":"Account",
+    "guide.eyebrow":"Guida", "guide.note":"Come usare Sorso, passo per passo: punteggio, schede, alla cieca, statistiche, eventi e impostazioni.", "guide.open":"Apri la guida",
     "account.logout":"Esci",
     "account.logoutFull":"Esci dall'account",
     "account.loginPrompt":"Accedi o crea un account",
@@ -2456,6 +2466,7 @@ const I18N = {
     "action.delete":"Delete",
 
     "account.eyebrow":"Account",
+    "guide.eyebrow":"Guide", "guide.note":"How to use Sorso, step by step: scoring, sheets, blind tasting, statistics, events and settings.", "guide.open":"Open the guide",
     "account.logout":"Sign out",
     "account.logoutFull":"Sign out of account",
     "account.loginPrompt":"Sign in or create an account",
