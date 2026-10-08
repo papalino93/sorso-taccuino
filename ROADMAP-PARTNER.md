@@ -2,7 +2,7 @@
 
 Aggiornata l'8 ottobre 2026 · **Sorso 1.6.2**.
 
-**Dove siamo.** Il sito, l'app personale (con la vista da PC) e lo spazio di team per il partner sono pronti e online. Test automatici: tutti verdi. Le tre guide PDF sono aggiornate con la nuova grafica. **Manca una sola cosa tecnica prima di andare dal partner: la prova sul database vero**, che io non posso fare dal mio ambiente.
+**Dove siamo.** Il sito, l'app personale (con la vista da PC) e lo spazio di team per il partner sono pronti e online. Test automatici: tutti verdi. Le tre guide PDF sono aggiornate con la nuova grafica. **La prova sul database vero è stata fatta l'8 ottobre 2026 e non ha trovato difetti** (vedi il punto 2). Mancano solo le cose che dipendono dal partner.
 
 Legenda: ☐ da fare · ✅ fatto
 
@@ -13,41 +13,24 @@ Legenda: ☐ da fare · ✅ fatto
 ### 1. Decidi lo stato commerciale  ☐  *(5 minuti, ma può bloccare tutto)*
 Oggi Sorso sta sul piano gratuito di Vercel, che **consente solo uso non commerciale**. Se qualcuno verrà pagato (per il lavoro, per l'hosting, per il servizio), **dimmelo prima**: va cambiato hosting (resta a costo zero o quasi, ma serve del lavoro). Se è un favore a un club, siamo a posto.
 
-### 2. Vercel e database: passo passo  ☐  *(circa 20 minuti)*
-È l'unico passaggio tecnico che ancora manca: con l'accesso al database faccio la **prova di accettazione** completa (partner di prova, voti, team separati, cancellazione) e poi cancello i dati di prova. I nomi dei menu di Vercel cambiano ogni tanto: se un nome non torna, cerca quello più simile.
+### 2. Prova sul database vero  ✅ fatta l'8 ottobre 2026
+Fatta sul sito e sul database di produzione con un partner di prova, poi cancellato. Esito: **nessun difetto, ogni controllo è andato bene**.
+- Token: valido, già usato (401), scaduto (401), firma errata (401), scadenza troppo lunga (401).
+- Voti: voto rapido e scheda completa, media visibile solo dopo il proprio voto, media del team corretta con arrotondamento classico, voto modificato non contato due volte.
+- Team separati: un altro team non vede, non apre e non vota le serate altrui (404).
+- Chiusura e riapertura: a serata chiusa i voti sono rifiutati (409).
+- API di lettura: elenco, risultati e CSV; chiave sbagliata 401; scrittura con la chiave rifiutata (405).
+- Cancellazione di un utente: i suoi voti spariscono dalla media.
+- Iframe: la pagina si lascia incorporare solo dal dominio registrato.
+- Consumo del database: circa 285 comandi su 500.000 al mese. Pulizia completa, nessun dato di prova rimasto.
 
-**Passo 1 · Entra nel progetto su Vercel**
-1. Vai su https://vercel.com e accedi.
-2. Dalla home apri il progetto **sorso-taccuino**.
-3. Controlla che in alto compaia il deploy di produzione con stato **Ready** e che https://sorso-taccuino.vercel.app/ si apra.
+**Non provato:** il blocco per troppe richieste (429), perché non l'ho saturato, e l'iframe dentro un vero sito del partner, che si prova al punto 8.
 
-**Passo 2 · Trova il database**
-1. Nel progetto apri la scheda **Storage**.
-2. Dovresti vedere un database **Redis** (Upstash). Clicca sul nome: si apre la sua pagina. Se la scheda è vuota, scrivimelo: vuol dire che il database vive altrove e lo ritroviamo insieme.
-3. Nella pagina del database, la sezione **.env.local** o **Quickstart** mostra i due valori che servono: `KV_REST_API_URL` e `KV_REST_API_TOKEN`. In alternativa: **Settings → Environment Variables** del progetto, e clicca l'occhio accanto alla variabile per vederne il valore.
+**Se serve rifarla** (dopo modifiche importanti): le variabili `KV_REST_API_URL` e `KV_REST_API_TOKEN` (da Vercel → progetto → Settings → Environment Variables, occhio per vedere il valore) vanno messe nell'ambiente cloud → **Modifica ambiente cloud** → casella **«Variabili d'ambiente»**, una per riga nel formato `NOME=valore`, **non** nello «Script di configurazione» (quello lancia comandi e, se ci scrivi le variabili, la sessione non parte). Poi una sessione nuova con il messaggio: «Leggi ROADMAP-PARTNER.md e PIANO.md. Fai la prova di accettazione dell'integrazione sul sito vero con un partner di prova, poi cancellalo.» A prova finita **cancella le variabili** dall'ambiente.
 
-**Passo 3 · Scegli come farmi fare la prova**
-- **Via sicura (consigliata se hai dubbi):** non mi dai niente e i due comandi li lanci tu dal tuo computer (vedi sotto, «Sul tuo computer»). Poi mi dici cosa è uscito.
-- **Via veloce:** me le dai nell'ambiente cloud, **senza incollarle in chat**:
-  1. Nella sessione, clicca il **menu dell'ambiente** nella barra del titolo → **Edit**.
-  2. Dove c'è **Network secrets** (o *API credentials*) aggiungi il token; se non c'è, usa **Environment variables**. Crea due variabili: `KV_REST_API_URL` (il valore dell'indirizzo) e `KV_REST_API_TOKEN` (il token).
-  3. Sempre in **Edit → Network access**: se il livello è «Limited», aggiungi il dominio del database (finisce con `.upstash.io`, lo vedi nell'indirizzo `KV_REST_API_URL`) sotto **Allowed domains**.
-  4. Salva e apri una **sessione nuova** (quella attuale non vede le modifiche). Incolla come primo messaggio:
-     > Leggi ROADMAP-PARTNER.md e PIANO.md. Fai la prova di accettazione dell'integrazione sul sito vero con un partner di prova, poi cancellalo.
-  5. Il token permette anche di **scrivere** sul database. Finita la prova torna in **Edit** e **cancella** le due variabili.
+**Ora da fare:** cancella le due variabili dall'ambiente cloud, se non l'hai già fatto.
 
-**Passo 4 · Controlli su Vercel (2 minuti)**
-1. **Settings → General**: guarda il piano. Se è **Hobby**, vale il punto 1 (solo uso non commerciale).
-2. **Settings → Deployment Protection**: la produzione deve poter essere aperta senza accedere a Vercel. Prova ad aprire https://sorso-taccuino.vercel.app/ da una finestra privata del browser: se si apre, sei a posto.
-3. **Settings → Environment Variables**: devono esserci `KV_REST_API_URL` e `KV_REST_API_TOKEN` per **Production**. Sono quelle che usano le funzioni del sito.
-
-**Sul tuo computer (serve solo per la via sicura e per attivare il partner)**
-1. Installa **Node 20 o più recente** da https://nodejs.org (versione LTS), poi apri il Terminale (Mac) o PowerShell (Windows).
-2. Scarica il progetto: `git clone https://github.com/papalino93/sorso-taccuino.git`, poi `cd sorso-taccuino` e `npm install`.
-3. Imposta le due variabili nella stessa finestra del terminale:
-   - Mac: `export KV_REST_API_URL="..."` e `export KV_REST_API_TOKEN="..."`
-   - Windows (PowerShell): `$env:KV_REST_API_URL="..."` e `$env:KV_REST_API_TOKEN="..."`
-4. Lancia i comandi di `node scripts/partner.js ...` indicati ai punti 6 e seguenti. Le variabili valgono solo in quella finestra: chiudendola spariscono.
+**Controlli su Vercel (fatti l'8 ottobre 2026):** il piano è Hobby (solo uso non commerciale, vedi il punto 1); Deployment Protection è «Standard» e la produzione si apre senza accedere. Il partner deve usare sempre https://sorso-taccuino.vercel.app, mai gli indirizzi dei singoli deploy.
 
 ### 3. Guarda Sorso 1.6.1 con i tuoi occhi  ☐  *(10 minuti)*
 Aprilo su telefono e su PC, con il browser che usi di solito: https://sorso-taccuino.vercel.app/
@@ -73,7 +56,7 @@ Aprilo su telefono e su PC, con il browser che usi di solito: https://sorso-tacc
 - Può generare il token **a ogni caricamento della pagina**, senza cache sulla pagina che lo contiene? Il token è monouso: è la causa più frequente di problemi.
 - Chi riceverà il **segreto di firma** e la **chiave API**? Vanno mandati **separati e su un canale sicuro** (non per email in chiaro, non in chat condivise).
 
-### 6. Attiva il partner  ☐  *(5 minuti, dopo il punto 2)*
+### 6. Attiva il partner  ☐  *(5 minuti, appena hai i dati del punto 4)*
 Servono Node 20+, il repository e le due variabili nel terminale:
 ```
 node scripts/partner.js create ID-PARTNER --name "Nome del club" --origin https://www.sito-partner.example --lang it
@@ -85,7 +68,7 @@ node scripts/partner.js token ID-PARTNER --sub prova --team test --role organize
 - Altro dominio: `origins ID-PARTNER --add --origin https://altro.example`. Ruotare le credenziali: `rotate-secret`, `rotate-key`. Sospendere: `disable ID-PARTNER`.
 - Il colore del partner si imposta **solo da qui** (comando `theme`); i colori vengono corretti da soli se non si leggono bene.
 
-### 7. Manda le guide  ☐  *(solo dopo che la prova del punto 2 è andata bene)*
+### 7. Manda le guide  ☐
 | Per chi | File | Cosa contiene |
 |---|---|---|
 | Chi sviluppa il sito del partner | `docs/guida-attivazione-api.pdf` (6 pagine) | Cosa mandare, cosa si riceve, prima prova, messa online |
