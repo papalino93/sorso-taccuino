@@ -11,7 +11,7 @@ const limit = require("./_limit");
    "session", che scambia il token firmato dal partner con una sessione.
    Tutte le altre vogliono  Authorization: Bearer <sessione>. */
 
-const WRITES = Object.assign(Object.create(null), { "tasting.create": 1, "tasting.status": 1, "tasting.delete": 1, "wine.add": 1, "vote": 1, "tasting.reveal": 1, "guess": 1 });
+const WRITES = Object.assign(Object.create(null), { "tasting.create": 1, "tasting.status": 1, "tasting.delete": 1, "wine.add": 1, "vote": 1, "tasting.reveal": 1, "guess": 1, "wine.status": 1 });
 const SESSIONS_PER_IP = 200;   // al minuto: una serata di 40 persone nello stesso locale entra senza problemi
 const OPS_PER_USER = 90;       // al minuto
 
@@ -85,6 +85,9 @@ module.exports = async (req, res) => {
         sendJson(res, 200, { tasting: { id: t.id, name: t.name, status: t.status, blind: !!t.blind, revealed: !!t.revealed } });
         return;
       }
+      case "wine.status":
+        sendJson(res, 200, { wine: await Team.setWineStatus(redis, partner.id, ctx, body.tasting, body.wine, body.status) });
+        return;
       case "guess":
         sendJson(res, 200, await Team.castGuess(redis, partner, ctx, body));
         return;

@@ -412,3 +412,49 @@ test("ipotesi sull'annata: NV è giusto solo per un vino senza annata", () => {
   assert.equal(Team.scoreGuess(y, { a: "NV" }).points, 0);
   assert.equal(Team.scoreGuess(nv, {}).year, "na");
 });
+
+/* ---- chiusura di un singolo vino: lo assaggiano solo alcuni del gruppo ---- */
+test("vino chiuso: la media si calcola sui voti espressi fino a quel momento, la serata resta aperta", async () => {
+  const org = await login({ sub: "org", role: "organizer" });
+  const t = (await post({ op: "tasting.create", name: "Serata" }, org)).body.tasting;
+  const w1 = (await post({ op: "wine.add", tasting: t.id, wine: { name: "Uno" } }, org)).body.wine;
+  const w2 = (await post({ op: "wine.add", tasting: t.id, wine: { name: "Due" } }, org)).body.wine;
+  const us = []; for (const n of ["a", "b", "c", "d"]) us.push(await login({ sub: n }));
+  const voto = (s, w, v) => post(Object.assign({ op: "vote", tasting: t.id, wine: w.id }, smart(v, v, v)), s);
+  await voto(us[0], w1, 80); await voto(us[1], w1, 90);
+  /* prima: chi non ha votato non vede la media */
+  assert.equal((await state(t.id, us[2])).body.wines[0].team, null);
+  /* un partecipante non può chiudere */
+  assert.equal((await post({ op: "wine.status", tasting: t.id, wine: w1.id, status: "closed" }, us[0])).statusCode, 403);
+  const r = await post({ op: "wine.status", tasting: t.id, wine: w1.id, status: "closed" }, org);
+  assert.equal(r.statusCode, 200); assert.equal(r.body.wine.status, "closed");
+  /* il vino chiuso: media di chi ha votato (85) visibile a tutti, nessun nuovo voto; l'altro vino è ancora aperto */
+  const s = (await state(t.id, us[2])).body;
+  assert.equal(s.tasting.status, "open");
+  assert.deepEqual(s.wines[0].team, { avg: 85, count: 2 }); assert.equal(s.wines[0].closed, true);
+  assert.equal(s.wines[1].closed, false);
+  const no = await voto(us[2], w1, 70);
+  assert.equal(no.statusCode, 409); assert.equal(no.body.error.code, "wine_closed");
+  assert.equal((await voto(us[2], w2, 70)).statusCode, 200);
+  /* chi aveva già votato non può cambiare il voto */
+  assert.equal((await voto(us[0], w1, 60)).statusCode, 409);
+  const ris = (await get("tastings/" + t.id + "/results")).body.wines;
+  assert.equal(ris[0].status, "closed"); assert.equal(ris[0].average, 85); assert.equal(ris[1].status, "open");
+  /* si riapre */
+  await post({ op: "wine.status", tasting: t.id, wine: w1.id, status: "open" }, org);
+  assert.equal((await voto(us[2], w1, 70)).statusCode, 200);
+  assert.equal((await post({ op: "wine.status", tasting: t.id, wine: "0000000000", status: "closed" }, org)).statusCode, 404);
+  /* a serata chiusa non si cambia più il singolo vino */
+  await post({ op: "tasting.status", tasting: t.id, status: "closed" }, org);
+  assert.equal((await post({ op: "wine.status", tasting: t.id, wine: w1.id, status: "open" }, org)).statusCode, 409);
+});
+
+test("vino chiuso alla cieca: niente nuove ipotesi e il vino resta nascosto", async () => {
+  const { t, org, w1 } = await blind();
+  const a = await login({ sub: "a" });
+  await post({ op: "wine.status", tasting: t.id, wine: w1.id, status: "closed" }, org);
+  const g = await post({ op: "guess", tasting: t.id, wine: w1.id, type: "Rosso" }, a);
+  assert.equal(g.statusCode, 409); assert.equal(g.body.error.code, "wine_closed");
+  const w = (await state(t.id, a)).body.wines[0];
+  assert.equal(w.name, ""); assert.equal(w.closed, true);
+});

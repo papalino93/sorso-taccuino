@@ -235,8 +235,8 @@ function build() {
   P.push(pg("paper", "API di lettura", `
     ${eyebrow("11", "API di sola lettura")}
     <h2 class="s" style="margin-top:0">Come leggere <em>i risultati</em></h2>
-    ${ul(["<code>votes</code> è il numero di voti; <code>average</code> la media del team, con un decimale.", "La media compare <b>dal secondo voto</b> (<code>minVotes</code> = 2): con un voto solo coinciderebbe con quello di una persona. Finché mancano voti, <code>average</code> è <code>null</code> e <code>hidden</code> è <code>true</code>. <code>position</code> è l'ordine del vino; <code>rank</code> la posizione in classifica (1, 1, 3: i pari merito); <code>type</code> e <code>grape</code> sono quelli indicati dall'organizzatore.", "Una degustazione <b>alla cieca non svelata</b> ha <code>blind: true</code>, <code>revealed: false</code> e <code>name</code>, <code>producer</code>, <code>vintage</code>, <code>type</code>, <code>grape</code> a <code>null</code>: l'API non rivela i vini che i tuoi utenti non devono ancora conoscere.", "Voti rapidi e schede complete sono sulla stessa scala 50–100: la media li mescola correttamente."])}
-    ${call("<b>Un limite di ogni media.</b> In un gruppo molto piccolo (2–3 persone), chi vede la media prima e dopo un nuovo voto può dedurre quel voto. Se per te è un problema, mostra i risultati solo a degustazione chiusa.")}
+    ${ul(["<code>votes</code> è il numero di voti; <code>average</code> la media del team, con un decimale; <code>status</code> è <code>closed</code> se la serata o quel vino è chiuso.", "La media compare <b>dal secondo voto</b> (<code>minVotes</code> = 2): con un voto solo coinciderebbe con quello di una persona. Finché mancano voti, <code>average</code> è <code>null</code> e <code>hidden</code> è <code>true</code>. <code>position</code> è l'ordine del vino; <code>rank</code> la posizione in classifica (1, 1, 3: i pari merito); <code>type</code> e <code>grape</code> sono quelli indicati dall'organizzatore.", "Una degustazione <b>alla cieca non svelata</b> ha <code>blind: true</code>, <code>revealed: false</code> e <code>name</code>, <code>producer</code>, <code>vintage</code>, <code>type</code>, <code>grape</code> a <code>null</code>: l'API non rivela i vini che i tuoi utenti non devono ancora conoscere.", "Voti rapidi e schede complete sono sulla stessa scala 50–100: la media li mescola correttamente."])}
+    ${call("<b>Un limite di ogni media.</b> In un gruppo piccolo (2–3 persone) la media prima e dopo un voto rivela quel voto: se è un problema, mostra i risultati a serata chiusa.")}
     <h2 class="s">Esportazione in <em>CSV</em></h2>
     ${code("GET /api/v1/tastings/{id}/results?format=csv\n\n" + R.csv.replace(/\r\n/g, "\n").trimEnd(), "CSV")}
     <p class="mute" style="font-size:8pt">Le celle che iniziano con <code>= + - @</code> vengono precedute da un apice: un nome di vino non può essere eseguito come formula.</p>
@@ -244,7 +244,7 @@ function build() {
     ${code("DELETE /api/v1/users/{sub}\n\n" + JSON.stringify({ votesRemoved: 2, guessesRemoved: 0 }, null, 2), "DELETE")}
     <p>Rimuove tutti i voti e le ipotesi alla cieca dell'utente (il <code>sub</code> del token) e aggiorna le medie. Pensato per le richieste di cancellazione; si può ripetere senza effetti e funziona sempre, anche quando il servizio è in sola lettura.</p>
     <h2 class="s">Provalo in <em>un minuto</em></h2>
-    <p>Dal terminale del tuo server, con la chiave API. Se ricevi un elenco (anche vuoto) la chiave funziona; con <code>401</code> è sbagliata o è stata ruotata.</p>
+    <p>Un elenco (anche vuoto) = la chiave funziona; <code>401</code> = sbagliata o ruotata.</p>
     ${code("curl -sS -H 'Authorization: Bearer sk_ID_PARTNER_…' \\\n  " + BASE + "/api/v1/tastings", "shell")}
   `));
   P.push(pg("paper", "API di lettura", `

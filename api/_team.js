@@ -227,6 +227,23 @@ async function addWine(redis, pid, ctx, tid, body) {
   return w;
 }
 
+/* Chiude (o riapre) la votazione di UN vino, mentre la serata resta aperta: serve quando un vino lo
+   assaggiano solo alcune persone del gruppo. La media si calcola sui voti espressi fino a quel momento. */
+async function setWineStatus(redis, pid, ctx, tid, wid, status) {
+  requireOrganizer(ctx);
+  if (STATUSES.indexOf(status) < 0) throw bad("invalid_status", "Stato non valido: open oppure closed.");
+  const t = await getTasting(redis, pid, checkId(tid, "Degustazione"), ctx.team);
+  wid = checkId(wid, "Vino");
+  if (t.status !== "open") throw new HttpError(409, "closed", "La degustazione è chiusa: tutti i vini lo sono.");
+  const raw = await redis.hget(K.wn(pid, t.id), wid);
+  const w = raw ? parse(raw) : null;
+  if (!w) throw notFound("Vino");
+  if (status === "closed") { w.closed = true; w.closedAt = Date.now(); } else { delete w.closed; delete w.closedAt; }
+  await redis.hset(K.wn(pid, t.id), { [w.id]: JSON.stringify(w) });
+  await invalidateStats(redis, pid, ctx.team);
+  return { id: w.id, status: w.closed ? "closed" : "open" };
+}
+
 /* ---- voti ---- */
 function isInt(n, min, max) { return Number.isInteger(n) && n >= min && n <= max; }
 
@@ -269,7 +286,9 @@ async function castVote(redis, partner, ctx, body) {
   const tid = checkId(body.tasting, "Degustazione"), wid = checkId(body.wine, "Vino");
   const t = await getTasting(redis, pid, tid, ctx.team);
   if (t.status !== "open") throw new HttpError(409, "closed", "La degustazione è chiusa: i voti sono definitivi.");
-  if (!(await redis.hget(K.wn(pid, tid), wid))) throw notFound("Vino");
+  const wRaw = await redis.hget(K.wn(pid, tid), wid);
+  if (!wRaw) throw notFound("Vino");
+  if ((parse(wRaw) || {}).closed) throw new HttpError(409, "wine_closed", "La votazione di questo vino è chiusa: i voti sono definitivi.");
   const rec = JSON.stringify({ s: vote.score, m: vote.mode, d: vote.data, n: vote.note, t: Date.now() });
   /* UN'operazione sola scrive il voto e restituisce il precedente: da qui in poi ogni richiesta
      sa esattamente da quale valore parte, comunque arrivino le altre */
@@ -358,7 +377,9 @@ async function castGuess(redis, partner, ctx, body) {
   const t = await getTasting(redis, pid, tid, ctx.team);
   if (!t.blind) throw new HttpError(409, "not_blind", "Questa degustazione non è alla cieca.");
   if (t.revealed || t.status !== "open") throw new HttpError(409, "closed", "La degustazione è chiusa: le ipotesi sono definitive.");
-  if (!(await redis.hget(K.wn(pid, tid), wid))) throw notFound("Vino");
+  const gwRaw = await redis.hget(K.wn(pid, tid), wid);
+  if (!gwRaw) throw notFound("Vino");
+  if ((parse(gwRaw) || {}).closed) throw new HttpError(409, "wine_closed", "La votazione di questo vino è chiusa: l'ipotesi è definitiva.");
   const type = body.type == null || body.type === "" ? "" : String(body.type);
   if (type && WINE_TYPES.indexOf(type) < 0) throw bad("invalid_type", "Tipologia non valida: " + WINE_TYPES.join(", ") + ".");
   const grape = cleanText(body.grape, 40);
@@ -479,7 +500,9 @@ async function getState(redis, partner, ctx, tid) {
     /* la media si vede dopo aver votato; a degustazione chiusa la vedono tutti, ma solo dal secondo voto
        (con un voto solo coinciderebbe con quello di una persona). L'organizzatore vede sempre
        quanti hanno votato, per sapere chi manca */
-    out.team = (m && count > 0) || (t.status === "closed" && count >= MIN_VOTES_API) ? { avg: round1(sum / count), count } : null;
+    const chiuso = t.status === "closed" || !!w.closed;
+    out.team = (m && count > 0) || (chiuso && count >= MIN_VOTES_API) ? { avg: round1(sum / count), count } : null;
+    out.closed = chiuso;
     out.votes = (m || ctx.role === "organizer") ? count : null;
     if (t.blind) {
       const g = gue && gue[i] ? parse(gue[i]) : null;
@@ -531,7 +554,7 @@ async function getResults(redis, pid, tid) {
     return Object.assign({ id: w.id, position: i + 1 },
       hide ? { producer: null, name: null, vintage: null, type: null, grape: null }
            : { producer: w.producer, name: w.name, vintage: w.vintage, type: w.type || null, grape: w.grape || null },
-      { votes: count, average: show ? round1(sum / count) : null, hidden: count > 0 && !show });
+      { status: t.status === "closed" || w.closed ? "closed" : "open", votes: count, average: show ? round1(sum / count) : null, hidden: count > 0 && !show });
   });
   const rk = ranks(rows, w => w.average);
   rows.forEach(w => { w.rank = rk.has(w) ? rk.get(w) : null; });
@@ -801,6 +824,6 @@ async function getEventsApi(redis, pid, team) {
 module.exports = {
   MAX_TASTINGS_PER_TEAM, MAX_TEAMS, MAX_WINES, MIN_VOTES_API,
   WINE_TYPES, STATS_TTL, STATS_WINDOW, KEY_PATTERNS, scoreGuess,
-  validateVote, createTasting, setTastingStatus, deleteTasting, addWine, castVote, castGuess, revealTasting, getState, getStats,
+  validateVote, createTasting, setTastingStatus, setWineStatus, deleteTasting, addWine, castVote, castGuess, revealTasting, getState, getStats,
   listTastings, getResults, getGuesses, getTeamStatsApi, getEventsApi, resultsCsv, csvCell, deleteUser, recount, getTasting, K, asObject
 };

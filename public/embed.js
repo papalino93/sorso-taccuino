@@ -71,6 +71,10 @@
       deleteAsk: "Eliminare «{name}» con tutti i suoi vini e voti? Non si può annullare.",
       closedNote: "Degustazione chiusa: i voti sono definitivi.",
       closedNoVote: "Degustazione chiusa e non hai votato questo vino: la media del team non è visibile.",
+      wineClosedNoVote: "La votazione di questo vino è chiusa e non hai votato: la media compare con almeno due voti.",
+      wineClosedChip: "votazione chiusa", wineClose: "Chiudi la votazione di questo vino", wineReopen: "Riapri la votazione di questo vino",
+      wineClosedOk: "Votazione chiusa: la media conta i voti espressi finora.", wineReopenedOk: "Votazione riaperta.",
+      e_wine_closed: "La votazione di questo vino è chiusa: i voti sono definitivi.",
       readonlyNote: "Sola lettura: non si può votare né modificare.",
       vote: "Vota", editVote: "Modifica il mio voto", yourVote: "Il tuo voto", teamAvg: "Media del team",
       voteSingle: "{n} voto", votePlural: "{n} voti",
@@ -170,6 +174,10 @@
       deleteAsk: "Delete “{name}” with all its wines and votes? This cannot be undone.",
       closedNote: "Tasting closed: votes are final.",
       closedNoVote: "The tasting is closed and you did not vote on this wine: the team average is not visible.",
+      wineClosedNoVote: "Voting on this wine is closed and you did not vote: the average appears with at least two votes.",
+      wineClosedChip: "voting closed", wineClose: "Close voting on this wine", wineReopen: "Reopen voting on this wine",
+      wineClosedOk: "Voting closed: the average counts the votes cast so far.", wineReopenedOk: "Voting reopened.",
+      e_wine_closed: "Voting on this wine is closed: votes are final.",
       readonlyNote: "Read-only: voting and editing are disabled.",
       vote: "Vote", editVote: "Edit my vote", yourVote: "Your vote", teamAvg: "Team average",
       voteSingle: "{n} vote", votePlural: "{n} votes",
@@ -290,7 +298,7 @@
   var ERR_KEYS = { network: "e_network", timeout: "e_timeout", rate_limited: "e_rate", read_only: "e_readonly", session: "e_session", session_expired: "e_expired",
     token_used: "e_token_used", closed: "e_closed", limit: "e_limit", forbidden: "e_forbidden", not_found: "e_not_found", invalid_name: "e_invalid_name",
     invalid_vintage: "e_invalid_vintage", invalid_vote: "e_invalid_vote", mode_not_allowed: "e_mode", unavailable: "e_unavailable", no_database: "e_unavailable",
-    internal: "e_unavailable", no_token: "e_noaccess", invalid_guess: "e_invalid_guess", invalid_type: "e_invalid_type", revealed: "e_revealed", not_blind: "e_not_blind" };
+    internal: "e_unavailable", no_token: "e_noaccess", invalid_guess: "e_invalid_guess", invalid_type: "e_invalid_type", revealed: "e_revealed", not_blind: "e_not_blind", wine_closed: "e_wine_closed" };
   function errText(e) {
     if (AUTH_CODES[e.code]) return t("e_access");
     return t(ERR_KEYS[e.code] || "e_generic");
@@ -345,8 +353,8 @@
       announce(t("e_gone"), true); focusSel("#h-main");
       return loadState("");
     }
-    if (e.code === "closed" || e.code === "revealed") {
-      if (S.sheet) { S.drafts[S.sheet.wine] = S.sheet; S.sheet = null; text = t("e_closed_unsaved"); }
+    if (e.code === "closed" || e.code === "revealed" || e.code === "wine_closed") {
+      if (S.sheet) { S.drafts[S.sheet.wine] = S.sheet; S.sheet = null; text = t(e.code === "wine_closed" ? "e_wine_closed" : "e_closed_unsaved"); }
       if (S.gform && where === "gform") text = t("e_closed_guess");
       S.form = null; S.gform = null; S.notice = { kind: "err", text: text }; announce(text, true);
       return loadState(S.tasting && S.tasting.id, true);
@@ -569,7 +577,8 @@
     return '<div class="card"><p class="err-text">' + esc(S.loadError.text) + '</p><div class="row">' + btn("retry-load", t("retry"), { cls: "primary", fk: "retry" }) + '</div></div>';
   }
 
-  function wineCard(w, open) {
+  function wineCard(w, tOpen) {
+    var open = tOpen && !w.closed;           // si può votare: serata aperta e vino non chiuso
     var h = '<article class="card wine' + (S.saved === w.id ? " just-saved" : "") + '" aria-labelledby="wn-' + esc(w.id) + '">' +
       '<h3 class="name" id="wn-' + esc(w.id) + '" dir="auto">' + esc(wineTitle(w)) + '</h3><p class="meta" dir="auto">' + wineLine(w) + '</p>';
     if (w.mine) {
@@ -590,11 +599,15 @@
       /* serata chiusa: la media (da due voti in su) la vedono tutti, anche chi non ha votato quel vino */
       h += '<div class="score-line"><div class="tile team"><div class="band">' + esc(t("teamAvg")) + '</div><div class="big team">' + dec(w.team.avg) + '</div><div class="band">' + esc(plural(w.team.count, "voteSingle", "votePlural")) + '</div></div></div>';
     } else {
-      h += '<p class="lock">' + esc(t("closedNoVote")) + '</p>';
+      h += '<p class="lock">' + esc(t(tOpen ? "wineClosedNoVote" : "closedNoVote")) + '</p>';
     }
+    if (tOpen && w.closed) h += '<p class="chips"><span class="chip">' + esc(t("wineClosedChip")) + '</span></p>';
     if (w.votes != null && !w.mine) h += '<p class="lock">' + esc(plural(w.votes, "votedSingle", "votedPlural")) + '</p>';
     if (S.drafts[w.id] && !(S.sheet && S.sheet.wine === w.id)) h += '<p class="lock">' + esc(t("draftKept")) + '</p>';
-    if (open) h += '<div class="row">' + btn("vote", t(w.mine ? "editVote" : "vote"), { id: w.id, cls: w.mine ? "" : "primary", disabled: readonly(), fk: "vote-" + w.id }) + '</div>';
+    var wrow = "";
+    if (open) wrow += btn("vote", t(w.mine ? "editVote" : "vote"), { id: w.id, cls: w.mine ? "" : "primary", disabled: readonly(), fk: "vote-" + w.id });
+    if (tOpen && isOrg() && !(S.tasting && S.tasting.revealed)) wrow += btn("wine-status", t(w.closed ? "wineReopen" : "wineClose"), { id: w.id, cls: "small ghost", disabled: readonly(), fk: "wstatus-" + w.id });
+    if (wrow) h += '<div class="row">' + wrow + '</div>';
     return h + guessHtml(w) + '</article>';
   }
 
@@ -628,7 +641,7 @@
       return h + '</div>';
     }
     if (S.gform && S.gform.wine === w.id) return guessFormHtml(w);
-    var open = tg.status === "open", h2 = '<div class="guess"><h4 class="grp">' + esc(t("yourGuess")) + '</h4>';
+    var open = tg.status === "open" && !w.closed, h2 = '<div class="guess"><h4 class="grp">' + esc(t("yourGuess")) + '</h4>';
     if (g) h2 += guessChips(g);
     if (S.saved === "g-" + w.id) h2 += '<p class="saved-note">✓ ' + esc(t("guessSaved")) + '</p>';
     if (open) h2 += '<div class="row">' + btn("guess", t(g ? "editGuess" : "writeGuess"), { id: w.id, cls: "small ghost", disabled: readonly(), fk: "guess-" + w.id }) + '</div>';
@@ -927,6 +940,7 @@
       case "retry-load": return loadState(S.loadError && S.loadError.tasting);
       case "tab": S.tab = b.getAttribute("data-tab"); S.notice = null; S.form = null; focusAfter("tab-" + S.tab); render(); if (S.tab !== "tastings") return loadStats(); return loadState("", true);
       case "refresh-stats": return loadStats();
+      case "wine-status": return wineStatus(id);
       case "guess": { var gw = S.wines.filter(function (x) { return x.id === id; })[0]; if (!gw) return; var g0 = gw.guess || {}; stashGuess(); S.gform = { wine: id, vals: S.gdrafts[id] || { type: g0.type || "", grape: g0.grape || "", year: g0.year || "" }, error: "" }; delete S.gdrafts[id]; S.notice = null; S.saved = null; focusAfter("g-type"); return render(); }
       case "cancel-guess": { var gw2 = S.gform && S.gform.wine; S.gform = null; focusAfter("guess-" + gw2); return render(); }
       case "ask-reveal": S.confirm = "reveal"; focusAfter("confirm"); return render();
@@ -968,6 +982,19 @@
         S.confirm = null; S.sheet = null; focusAfter("ask-status");
         return loadState(tid, true);
       }, function (e) { S.confirm = null; return handleError(e); });
+    });
+  }
+
+  /* l'organizzatore chiude (o riapre) la votazione di un solo vino: la serata resta aperta */
+  function wineStatus(wid) {
+    var w = S.wines.filter(function (x) { return x.id === wid; })[0]; if (!w) return;
+    var chiudi = !w.closed, tid = S.tasting.id;
+    return run("wstatus", function () {
+      return api({ op: "wine.status", tasting: tid, wine: wid, status: chiudi ? "closed" : "open" }).then(function () {
+        S.notice = { kind: "ok", text: "✓ " + t(chiudi ? "wineClosedOk" : "wineReopenedOk") };
+        announce(t(chiudi ? "wineClosedOk" : "wineReopenedOk")); focusAfter("wstatus-" + wid);
+        return loadState(tid, true);
+      });
     });
   }
 

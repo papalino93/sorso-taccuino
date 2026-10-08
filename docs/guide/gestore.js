@@ -94,12 +94,13 @@ function build() {
     ${eyebrow("07", "Chiudere, riaprire, eliminare")}
     <h1 class="d">A fine serata, <em>si chiude</em></h1>
     <div class="phones" style="gap:8mm;margin:5mm 0 2mm">
-      ${fig("team-base-9-org-chiudi.png", 1, "<b>Chiudi la degustazione</b>: l'app chiede conferma e spiega cosa succede.", "lg")}
-      ${fig("team-base-10-org-chiusa.png", 2, "A serata chiusa i voti restano visibili ma <b>non si cambiano più</b>.", "lg")}
+      ${fig("team-base-9-org-chiudi.png", 1, "<b>Chiudi la degustazione</b>: l'app chiede conferma e spiega cosa succede.", "sm")}
+      ${fig("team-base-10-org-chiusa.png", 2, "A serata chiusa i voti restano visibili ma <b>non si cambiano più</b>.", "sm")}
     </div>
     ${table(["Azione", "Cosa succede"], [
       ["<b>Chiudi la degustazione</b>", "Nessuno può più votare né aggiungere vini. I voti sono definitivi."],
-      ["<b>Riapri la degustazione</b>", "Si può votare e aggiungere vini di nuovo. Utile se hai chiuso troppo presto."],
+      ["<b>Chiudi un vino</b>", "Sotto il vino: niente più voti su quel vino, media di chi ha votato."],
+      ["<b>Riapri la degustazione</b>", "Si può votare e aggiungere vini di nuovo."],
       ["<b>Elimina la degustazione</b>", "Cancella la serata con tutti i suoi vini e voti. <b>Non si può annullare</b>: l'app chiede conferma e ripete il nome."]], [0])}
   `));
 
@@ -159,7 +160,7 @@ function build() {
     <h1 class="d">Prima che <em>tu me lo chieda</em></h1>
     ${table(["Domanda", "Risposta"], [
       ["Ho sbagliato il nome di un vino.", "Non si modifica. Se nessuno ha ancora votato, elimina la degustazione e ricreala; altrimenti segnala l'errore al gruppo e lascialo com'è."],
-      ["Posso togliere un singolo vino?", "No. Si elimina l'intera serata."],
+      ["Posso togliere un singolo vino?", "No: si elimina l'intera serata (o si chiude la votazione di quel vino)."],
       ["Qualcuno ha votato per sbaglio.", "Può rivotare finché la serata è aperta: conta l'ultimo voto."],
       ["Posso votare anch'io?", "Sì, come tutti. Anche tu vedi la media solo dopo aver votato."],
       ["Posso sapere chi ha votato cosa?", "No, a nessuno: si vede solo quante persone hanno votato."],
@@ -167,9 +168,9 @@ function build() {
       ["Non vedo «Nuova degustazione».", "Il tuo profilo non è organizzatore: chiedilo a chi cura il sito."],
       ["Compare «Devi rientrare».", "L'accesso è scaduto (dopo qualche ora). Ricarica la pagina del tuo club: di solito basta."],
       ["La media non compare.", "Vota prima quel vino: la media si sblocca dopo il tuo voto. A serata chiusa la vedono tutti, dal secondo voto."],
-      ["Ho chiuso troppo presto.", "Premi «Riapri la degustazione»: si può votare e aggiungere vini di nuovo."],
       ["Posso riaprire una serata svelata?", "No: lo svelamento è definitivo. Una serata alla cieca ancora non svelata si può chiudere e riaprire come le altre."],
       ["Non vedo i nomi dei vini.", "È una serata alla cieca: i nomi compaiono quando l'organizzatore svela i vini."],
+      ["Un vino lo assaggiano in cinque o sei.", "Chiudi la votazione di quel vino: la media è di chi ha votato. Può farlo chiunque abbia il profilo «Organizzatore» (titolare e delegati, assegnati da chi cura il sito)."],
       ["Quanto durano i dati?", "Finché non li cancelli: eliminando la serata spariscono vini, voti e medie."]], [0, 1])}
   `));
 

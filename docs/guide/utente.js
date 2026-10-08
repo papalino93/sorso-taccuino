@@ -117,7 +117,7 @@ function build() {
     <p class="lead">Alcuni siti ospitano Sorso al loro interno: nello spazio del tuo club puoi votare insieme agli altri soci.</p>
     <div class="two">
       <div>
-        ${table(["Scheda", "Cosa trovi"], [["<b>Degustazioni</b>", "Le serate del tuo gruppo: apri, vota, vedi la media."], ["<b>Classifica</b>", "I vini ordinati per media; provvisoria finché la serata è aperta, finale a serata chiusa."], ["<b>Statistiche</b>", "I numeri delle ultime degustazioni chiuse del gruppo."]], [1])}
+        ${table(["Scheda", "Cosa trovi"], [["<b>Degustazioni</b>", "Le serate del tuo gruppo: apri, vota, vedi la media. Se un vino lo assaggiano in pochi, l'organizzatore ne chiude la votazione e la media conta chi ha votato."], ["<b>Classifica</b>", "I vini ordinati per media; provvisoria finché la serata è aperta, finale a serata chiusa."], ["<b>Statistiche</b>", "I numeri delle ultime degustazioni chiuse del gruppo."]], [1])}
         <h3 class="k">Alla cieca di gruppo</h3>
         ${ul(["I vini compaiono come <b>Vino 1, Vino 2…</b>.", "Oltre al voto puoi <b>indovinare</b> tipologia, vitigno e annata: 1, 2 e 2 punti.", "Quando l'organizzatore <b>svela</b> i vini, tutti vedono i nomi e il punteggio delle ipotesi."])}
       </div>

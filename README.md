@@ -1,6 +1,6 @@
 # Sorso — Taccuino di degustazione
 
-Versione corrente: **1.7.1** — ultimo aggiornamento: 8 ottobre 2026 (cronologia in `CHANGELOG.md`). La versione e la data si leggono anche in fondo all'app e dello spazio di team.
+Versione corrente: **1.8.0** — ultimo aggiornamento: 8 ottobre 2026 (cronologia in `CHANGELOG.md`). La versione e la data si leggono anche in fondo all'app e dello spazio di team.
 
 App per registrare degustazioni di vino con scheda di valutazione, statistiche personali, degustazioni alla cieca ed eventi condivisi.
 
@@ -33,7 +33,7 @@ Test: `npm test` (punteggio, token, partner, spazio di team, API, script: usa un
 Un sito esterno può incorporare Sorso come spazio di team: i suoi utenti votano i vini di una degustazione, ognuno vede i propri voti e, **solo dopo aver votato**, la media del team.
 
 - **Accesso**: il backend del partner firma un JWT HS256 per l'utente (claim `iss` = id partner, `sub`, `name`, `team`, `role` = `member` o `organizer`, `jti` e `exp` entro 15 minuti) e apre l'iframe `https://<dominio>/embed?p=<partner>#token=<JWT>`: il token sta nel frammento, che il browser non invia a nessun server. È monouso e viene scambiato subito con una sessione tenuta solo in memoria; se l'accesso scade l'iframe invia `sorso:reauth` al sito ospite, che ricarica con un token nuovo.
-- **Ruoli**: l'organizzatore crea, chiude ed elimina le degustazioni e aggiunge i vini (tetti: 200 degustazioni per team, 100 vini per degustazione); i partecipanti votano.
+- **Ruoli**: l'organizzatore (anche più persone: i delegati hanno lo stesso `role`) crea, chiude ed elimina le degustazioni, chiude la votazione di un singolo vino (media su chi ha votato fino a quel momento) e aggiunge i vini (tetti: 200 degustazioni per team, 100 vini per degustazione); i partecipanti votano.
 - **Voti**: voto rapido (occhio, naso, bocca da 50 a 100) o scheda completa; il punteggio lo ricalcola sempre il server.
 - **Alla cieca, classifica, statistiche** (1.7.0): l'organizzatore può creare una serata «alla cieca» (i vini sono «Vino 1, Vino 2…» finché non li svela; in più si può indovinare tipologia, vitigno, annata; lo svelamento chiude per sempre). La classifica è provvisoria a serata aperta e finale a serata chiusa; le statistiche aggregano le ultime 30 degustazioni chiuse del team.
 - **Sicurezza**: la pagina si può incorporare solo dai domini registrati dal partner (`frame-ancestors`); nessuno script inline; il tema del partner è fatto di soli valori controllati.

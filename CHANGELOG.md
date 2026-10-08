@@ -3,6 +3,10 @@
 La versione e la data dell'ultimo aggiornamento sono mostrate in fondo all'app e dello spazio di team
 (fonte: `public/js/version.js`, da tenere uguale a `package.json`).
 
+## 1.8.0 — 8 ottobre 2026
+- **Spazio di team: chiudere la votazione di un solo vino.** Quando un vino lo assaggiano solo alcune persone del club (per esempio cinque o sei su venti), l'organizzatore — o chi ha il profilo «Organizzatore» — può chiudere la votazione di quel vino con «Chiudi la votazione di questo vino», mentre la serata e gli altri vini restano aperti. La media conta solo i voti espressi fino a quel momento e, dal secondo voto, la vedono tutti; non si può più votare né cambiare voto su quel vino (si può riaprire). Sempre solo aggregati: nessuno vede chi ha votato cosa.
+- **API v1**: ogni vino in `GET /tastings/{id}/results` ha ora `status` (`open` o `closed`).
+
 ## 1.7.1 — 8 ottobre 2026
 Giro totale di verifica (backend, spazio di team, app, guide).
 - **Spazio di team, privacy**: in una cieca chiusa e non svelata le statistiche non mostrano più la tipologia vera dei vini; il riepilogo delle ipotesi si vede solo da due persone in su e la cancellazione dei dati di una persona lo aggiorna; le statistiche si aggiornano subito dopo una cancellazione.
