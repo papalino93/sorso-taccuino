@@ -52,25 +52,38 @@ test("esempi curl: girano e rispondono come descritto", { skip: !has("curl") }, 
   assert.match(out, /\{"votesRemoved":0\}/);                       // cancellazione utente senza voti
 });
 
-/* La guida PDF dichiara limiti e durate: devono coincidere con il codice. */
+/* Le guide PDF dichiarano limiti e durate: devono coincidere con il codice. */
 test("la guida dice gli stessi numeri del codice", () => {
-  const guida = require("node:fs").readFileSync(path.join(__dirname, "../docs/build-guida.py"), "utf8");
+  const fs = require("node:fs");
+  const guida = ["integrazione.js", "attivazione.js", "gestore.js"].map(f => fs.readFileSync(path.join(__dirname, "../docs/guide", f), "utf8")).join("\n");
   const Team = require("../api/_team");
   const Partner = require("../api/_partner");
   const Quota = require("../api/_quota");
-  assert.ok(guida.includes("fino a " + Team.MAX_TASTINGS_PER_TEAM + " degustazioni per team"), "tetto delle degustazioni");
+  assert.ok(guida.includes(Team.MAX_TASTINGS_PER_TEAM + " degustazioni per team"), "tetto delle degustazioni");
   assert.ok(guida.includes(Team.MAX_WINES + " vini per degustazione"), "tetto dei vini");
-  assert.ok(guida.includes("minVotes</font>") && guida.includes("= " + Team.MIN_VOTES_API + "):"), "soglia della media nell'API");
+  assert.ok(guida.includes("<code>minVotes</code>") && guida.includes("= " + Team.MIN_VOTES_API + ")"), "soglia della media nell'API");
   assert.equal(Partner.SESSION_TTL_SECONDS, 4 * 3600);
   assert.ok(guida.includes("sessione di 4 ore"), "durata della sessione");
-  assert.match(require('node:fs').readFileSync(path.join(__dirname, '../api/_partner.js'), 'utf8'), /REGISTRY_TTL_MS = 60 \* 1000/);
+  assert.match(fs.readFileSync(path.join(__dirname, "../api/_partner.js"), "utf8"), /REGISTRY_TTL_MS = 60 \* 1000/);
   assert.ok(guida.includes("entro 60 secondi"), "tempo di rotazione delle chiavi");
-  assert.ok(guida.includes("Al massimo 15 minuti") && guida.includes("al massimo 15 minuti"), "scadenza massima del token");
-  assert.ok(guida.includes("Oltre l'" + Quota.WARN_AT * 100 + "%") && guida.includes("oltre il " + Quota.READONLY_AT * 100 + "%"), "soglie della quota");
-  const embedSrc = require("node:fs").readFileSync(path.join(__dirname, "../api/embed.js"), "utf8");
+  assert.ok(guida.includes("al massimo 15 minuti"), "scadenza massima del token");
+  assert.ok(guida.includes("All'" + Quota.WARN_AT * 100 + "%") && guida.includes("oltre il " + Quota.READONLY_AT * 100 + "%"), "soglie della quota");
+  const embedSrc = fs.readFileSync(path.join(__dirname, "../api/embed.js"), "utf8");
   const perIp = /SESSIONS_PER_IP = (\d+)/.exec(embedSrc)[1], perUtente = /OPS_PER_USER = (\d+)/.exec(embedSrc)[1];
   assert.ok(guida.includes(perIp + " al minuto per indirizzo IP") && guida.includes(perUtente + " al minuto per utente") && guida.includes("120 richieste al minuto per chiave"), "limiti di richieste");
   for (const nome of ["firma-token.js", "firma-token.py", "firma-token.php", "api.sh", "pagina-ospite.html", "risposte.json"]) {
     assert.ok(guida.includes(nome), nome + " usato nella guida");
+  }
+  for (const claim of ["iss", "sub", "team", "jti", "exp", "role", "name", "lang", "mode"]) assert.ok(guida.includes("<code>" + claim + "</code>"), "claim " + claim);
+});
+test("le guide PDF esistono e portano la versione corrente", () => {
+  const fs = require("node:fs"), { execFileSync } = require("node:child_process");
+  const V = require("../public/js/version.js");
+  for (const f of ["guida-integrazione-sorso.pdf", "guida-gestione-degustazioni.pdf", "guida-attivazione-api.pdf"]) {
+    const file = path.join(__dirname, "../docs", f);
+    assert.ok(fs.existsSync(file), f);
+    let testo = "";
+    try { testo = execFileSync("pdftotext", [file, "-"], { encoding: "utf8" }); } catch (e) { return; }   // senza pdftotext non si controlla il testo
+    assert.ok(testo.includes("v" + V.version) || testo.includes("Versione " + V.version) || testo.includes(V.version), f + " porta la versione " + V.version);
   }
 });

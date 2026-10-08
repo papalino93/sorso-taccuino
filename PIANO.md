@@ -10,7 +10,7 @@ Obiettivo: migliorare l'app in modo definitivo e renderla integrabile come **spa
 - **Design** — scelta la **direzione B** ("Numero e inchiostro"), in `design/`; da portare nell'app con la fase 3.
 - **Arrotondamento** — regola classica su ogni numero mostrato o salvato: da 0,5 in su per eccesso (da 1 a 4 per difetto, da 5 a 9 per eccesso). Va applicata con un'aritmetica che non sbaglia sui casi esatti a metà (es. 82,5 non deve diventare 82,49999).
 - **Fase 3** — redesign: da fare dopo la scelta della direzione.
-- **Fase 4** — guida di integrazione in PDF: fatta (`docs/guida-integrazione-sorso.pdf`, 13 pagine). Gli esempi di codice sono provati dai test e le risposte dell'API sono quelle vere; si rigenera con `python3 docs/build-guida.py`. Da riguardare dopo la scelta del design solo se cambia il tema dei partner.
+- **Fase 4** — guida di integrazione in PDF: fatta (`docs/guida-integrazione-sorso.pdf`, più la guida di attivazione e la guida per chi organizza; si rigenerano con `node docs/guide/build.js`). Gli esempi di codice sono provati dai test e le risposte dell'API sono quelle vere; si rigenera con `python3 docs/build-guida.py`. Da riguardare dopo la scelta del design solo se cambia il tema dei partner.
 
 ## 1. Cosa si costruisce
 

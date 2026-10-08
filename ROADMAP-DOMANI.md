@@ -53,7 +53,7 @@ Mi servono questi dati per creare il loro spazio:
 - Chi, da loro, riceverà il **segreto di firma e la chiave API**? Mandali **separati e su un canale sicuro** (non per email in chiaro, non in chat condivise).
 
 ### 7. Manda loro la guida PDF  ☐
-`docs/guida-attivazione-api.pdf` (3 pagine: cosa mandare, cosa si riceve, prima prova, messa online) e, per chi sviluppa, `docs/guida-integrazione-sorso.pdf` (14 pagine, tutti i dettagli). **Mandale solo dopo che ti ho scritto che la verifica finale è pulita** (vedi "Stato a fine lavoro").
+`docs/guida-attivazione-api.pdf` (6 pagine: cosa mandare, cosa si riceve, prima prova, messa online), per chi sviluppa `docs/guida-integrazione-sorso.pdf` (20 pagine, tutti i dettagli) e, per chi organizza le serate, `docs/guida-gestione-degustazioni.pdf` (11 pagine, in linguaggio semplice). Si rigenerano con `node docs/guide/build.js`. **Mandale solo dopo che ti ho scritto che la verifica finale è pulita** (vedi "Stato a fine lavoro").
 
 ### 8. Decisioni che ti spettano (anche dopo)  ☐
 - **Foto dei vini nel team**: oggi non ci sono, per risparmiare spazio gratuito. Va bene aspettare?
