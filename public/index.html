@@ -1639,6 +1639,28 @@ function canonVitigno(input){
   return raw.charAt(0).toUpperCase()+raw.slice(1);
 }
 
+/* Il vocabolario di degustazione si SALVA in italiano (è il valore che si confronta e che resta nelle schede
+   già scritte); in inglese si traduce solo quando lo si mostra. */
+const VOC_EN = {
+  Rosso:"Red", Bianco:"White", Rosato:"Rosé", Spumante:"Sparkling", Passito:"Passito",
+  Velato:"Hazy", "Abbastanza limpido":"Fairly clear", Limpido:"Clear", Cristallino:"Crystal clear", Brillante:"Brilliant",
+  Fluido:"Fluid", "Poco consistente":"Slightly viscous", "Abbastanza consistente":"Fairly viscous", Consistente:"Viscous", Viscoso:"Syrupy",
+  Secco:"Dry", Abboccato:"Off-dry", Amabile:"Medium-sweet", Dolce:"Sweet",
+  "Poco tannico":"Low in tannin", "Abbastanza tannico":"Fairly tannic", Tannico:"Tannic", "Molto tannico":"Very tannic",
+  Giovane:"Young", Pronto:"Ready", Maturo:"Mature", Vecchio:"Old",
+  "Rosso porpora":"Purple red", "Rosso rubino":"Ruby red", "Rosso granato":"Garnet red", "Rosso aranciato":"Orange red",
+  "Giallo verdolino":"Greenish yellow", "Giallo paglierino":"Straw yellow", "Giallo dorato":"Golden yellow", "Giallo ambrato":"Amber yellow",
+  "Rosa tenue":"Pale pink", "Rosa cerasuolo":"Cherry pink", "Rosa chiaretto":"Light pink",
+  Fruttato:"Fruity", "Fruttato maturo":"Ripe fruit", Floreale:"Floral", Speziato:"Spicy", Erbaceo:"Herbaceous", Vegetale:"Vegetal",
+  Minerale:"Mineral", Tostato:"Toasted", Balsamico:"Balsamic", Etereo:"Ethereal",
+  Poco:"Little", Abbastanza:"Fairly", Giusto:"Just right", Molto:"Very", Troppo:"Too much",
+  Tenue:"Faint", Leggera:"Light", Media:"Medium", Intensa:"Intense", Esuberante:"Exuberant",
+  Leggero:"Light", Snello:"Lean", Medio:"Medium", Strutturato:"Structured", Pieno:"Full",
+  Altro:"Other"
+};
+const PLURALI_EN = {Rosso:"reds", Bianco:"whites", Rosato:"rosés", Spumante:"sparkling wines", Passito:"passito wines"};
+function tv(s){ return (typeof S !== "undefined" && S.lang === "en" && Object.prototype.hasOwnProperty.call(VOC_EN, s)) ? VOC_EN[s] : s; }
+
 const DESCRITTORI = ["Fruttato","Fruttato maturo","Floreale","Speziato","Erbaceo","Vegetale","Minerale","Tostato","Balsamico","Etereo"];
 
 /* ============================================================
@@ -3148,12 +3170,12 @@ function valBlockHTML(T, pre, group){
 function selectHTML(T, pre, stateKey, options, etichetta){
   return '<label class="dsel"><span class="dsel-lab">'+etichetta+'</span>'+
     '<span class="sel-wrap"><select class="sel" data-skey="'+pre+':'+stateKey+'">'+
-    options.map(o => '<option'+(T[stateKey]===o?" selected":"")+'>'+o+'</option>').join("")+
+    options.map(o => '<option value="'+esc(o)+'"'+(T[stateKey]===o?" selected":"")+'>'+esc(tv(o))+'</option>').join("")+
     '</select></span></label>';
 }
 function chipsHTML(T, pre){
   return '<div class="chips">'+DESCRITTORI.map(d =>
-    '<button type="button" class="chip-btn'+(T.desc.indexOf(d)>-1?" on":"")+'" aria-pressed="'+(T.desc.indexOf(d)>-1)+'" data-desc="'+pre+':'+d+'">'+d+'</button>'
+    '<button type="button" class="chip-btn'+(T.desc.indexOf(d)>-1?" on":"")+'" aria-pressed="'+(T.desc.indexOf(d)>-1)+'" data-desc="'+pre+':'+d+'">'+tv(d)+'</button>'
   ).join("")+'</div>';
 }
 
@@ -3168,7 +3190,7 @@ function livelloAbbrevs(lab){
   return collide ? lab.map(s => s.slice(0,2)) : iniziali;
 }
 function livelloHTML(T, pre, gruppo, key, titolo, etichette){
-  const lab = etichette || LIVELLI;
+  const lab = (etichette || LIVELLI).map(tv);
   const abbr = livelloAbbrevs(lab);
   const v = (gruppo ? (T[gruppo][key] || 3) : (T[key] || 3));
   const path = gruppo ? (gruppo+"."+key) : key;
@@ -3334,7 +3356,7 @@ function renderUvaggi(){
   $("uvRows").innerHTML = list.map((r,i) => {
     const isAltro = r.v === ALTRO;
     return '<div class="uv-row">'+
-      '<input type="text" data-uv-v="'+i+'" value="'+esc(r.v)+'" placeholder="'+t("field.grape.ph")+'"'+(isAltro?' readonly':'')+'>'+
+      '<input type="text" data-uv-v="'+i+'" value="'+esc(isAltro ? tv(r.v) : r.v)+'" placeholder="'+t("field.grape.ph")+'"'+(isAltro?' readonly':'')+'>'+
       '<span class="uv-pct"><input type="number" min="0" max="100" step="1" data-uv-p="'+i+'" aria-label="'+esc(t("blend.pctAria"))+'" value="'+(r.p===""||r.p==null?"":r.p)+'" placeholder="—"><span>%</span></span>'+
       '<button type="button" class="uv-del" data-uv-del="'+i+'" aria-label="'+t("blend.removeGrape")+'">&times;</button>'+
     '</div>';
@@ -3663,7 +3685,7 @@ function renderIdentity(){
   $("affinamentoInput").value = S.wine.affinamento;
   renderUvaggi();
   $("typeChips").innerHTML = TYPES.map(t =>
-    '<button type="button" class="type-chip-btn'+(S.wine.tipologia===t?" on":"")+'" aria-pressed="'+(S.wine.tipologia===t)+'" data-type="'+t+'">'+t+'</button>').join("");
+    '<button type="button" class="type-chip-btn'+(S.wine.tipologia===t?" on":"")+'" aria-pressed="'+(S.wine.tipologia===t)+'" data-type="'+t+'">'+tv(t)+'</button>').join("");
   const has = !!S.photo;
   $("dropZone").classList.toggle("hidden", has);
   $("labelLoaded").classList.toggle("hidden", !has);
@@ -3863,7 +3885,7 @@ function dettaglioTesta(w){
 }
 function renderBook(){
   $("filterRow").innerHTML =
-    ["Tutti"].concat(TYPES).map(f => '<button type="button" class="fchip'+(S.filter===f?" on":"")+'" aria-pressed="'+(S.filter===f)+'" data-filter="'+f+'">'+(f==="Tutti"?t("book.filterAll"):f)+'</button>').join("")+
+    ["Tutti"].concat(TYPES).map(f => '<button type="button" class="fchip'+(S.filter===f?" on":"")+'" aria-pressed="'+(S.filter===f)+'" data-filter="'+f+'">'+(f==="Tutti"?t("book.filterAll"):tv(f))+'</button>').join("")+
     '<span style="flex:1"></span>'+
     '<span class="sel-wrap sort-wrap"><select class="sel sort-sel" id="sortSel" aria-label="'+t("book.sortLabel")+'">'+
       Object.keys(ORDINAMENTI).map(k =>
@@ -3923,7 +3945,7 @@ function renderBook(){
       '<div class="wine-mid" data-expand="'+w.id+'" role="button" tabindex="0" aria-expanded="'+(S.expanded===w.id)+'">'+
         '<div class="wine-name">'+esc(w.nome||t("book.noName"))+'</div>'+
         '<div class="wine-meta">'+esc(metaOf(w))+'</div>'+
-        '<div class="wine-tags"><span class="type-chip">'+esc(w.tipologia||"")+'</span><span class="judge">'+judge(w.score)+'</span>'+
+        '<div class="wine-tags"><span class="type-chip">'+esc(tv(w.tipologia||""))+'</span><span class="judge">'+judge(w.score)+'</span>'+
           (w.daCieca ? '<span class="da-cieca">'+t("book.fromBlind")+'</span>' : '')+'</div>'+
       '</div>'+
     '</div>';
@@ -3932,7 +3954,7 @@ function renderBook(){
         (w.thumb ? '<img class="detail-thumb" src="'+esc(w.thumb)+'" alt="'+t("card.label")+'">' : '')+
         '<div class="dl"><b>'+t("book.dl.score")+'</b><span>'+scoreDetailText(w)+'</span></div>'+
         (w.legacyTotal != null ? '<div class="dl"><b>'+t("book.dl.legacy")+'</b><span>'+tf("book.dl.legacyVal",{n:w.legacyTotal})+'</span></div>' : "")+
-        ((w.limpidezza||w.colore||w.consistenza) ? '<div class="dl"><b>'+t("book.dl.visual")+'</b><span>'+esc([w.limpidezza,w.colore,w.consistenza].filter(Boolean).join(" · "))+'</span></div>' : "")+
+        ((w.limpidezza||w.colore||w.consistenza) ? '<div class="dl"><b>'+t("book.dl.visual")+'</b><span>'+esc([w.limpidezza,w.colore,w.consistenza].filter(Boolean).map(tv).join(" · "))+'</span></div>' : "")+
         (w.denominazione ? '<div class="dl"><b>'+t("book.dl.denomination")+'</b><span>'+esc(w.denominazione)+'</span></div>' : "")+
         (uvaggioText(w) ? '<div class="dl"><b>'+t("book.dl.blend")+'</b><span>'+esc(uvaggioText(w))+'</span></div>' : "")+
         (w.affinamento ? '<div class="dl"><b>'+t("book.dl.aging")+'</b><span>'+esc(w.affinamento)+'</span></div>' : "")+
@@ -3940,10 +3962,10 @@ function renderBook(){
         (w.modalita === "smart" ? "" :
           '<div class="dl"><b>'+t("book.dl.descriptors")+'</b>'+
           ((w.desc && w.desc.length)
-            ? '<div class="desc-pills">'+w.desc.map(d => '<span class="desc-pill">'+esc(d)+'</span>').join("")+'</div>'
+            ? '<div class="desc-pills">'+w.desc.map(d => '<span class="desc-pill">'+esc(tv(d))+'</span>').join("")+'</div>'
             : '<span>—</span>')+
           '</div>')+
-        ((w.zuccheri||w.stato) ? '<div class="dl"><b>'+t("book.dl.taste")+'</b><span>'+esc([w.zuccheri,w.stato].filter(Boolean).join(" · "))+'</span></div>' : "")+
+        ((w.zuccheri||w.stato) ? '<div class="dl"><b>'+t("book.dl.taste")+'</b><span>'+esc([w.zuccheri,w.stato].filter(Boolean).map(tv).join(" · "))+'</span></div>' : "")+
         '<div class="dl"><b>'+t("book.dl.pairing")+'</b><span>'+esc(w.abbinamento||"—")+'</span></div>'+
         (w.modalita === "smart" ? "" : '<div class="dl"><b>'+t("book.dl.pairingAuto")+'</b><span>'+esc(suggerisciAbbinamento(w))+'</span></div>')+
         '<textarea class="ta" data-editnote="'+w.id+'" rows="2" placeholder="'+t("book.notesPh")+'">'+esc(w.note)+'</textarea>'+
@@ -4168,7 +4190,7 @@ function lolliList(params){
 
 /* --- riepilogo in prosa dei gusti, generato dai dati --- */
 const PLURALI = {Rosso:"rossi", Bianco:"bianchi", Rosato:"rosati", Spumante:"spumanti", Passito:"passiti"};
-function plurale(t){ return PLURALI[t] || String(t||"").toLowerCase(); }
+function plurale(t){ if(S.lang === "en" && PLURALI_EN[t]) return PLURALI_EN[t]; return PLURALI[t] || String(t||"").toLowerCase(); }
 /* decimali con la virgola in italiano, col punto in inglese */
 function dec(n, d){
   d = (d === undefined) ? 1 : d;
@@ -4299,7 +4321,7 @@ function renderStats(){
   all.forEach(w => { typeCount[w.tipologia] = (typeCount[w.tipologia]||0)+1; });
   const byType = Object.keys(typeCount).map(t => {
     const rows = all.filter(w => w.tipologia === t);
-    return { label:t, avg:media(rows.map(w=>w.score)), count:rows.length };
+    return { label:tv(t), avg:media(rows.map(w=>w.score)), count:rows.length };
   }).sort((a,b) => b.avg - a.avg);
 
   /* Le schede-numero si scelgono da sole: mostrare "Migliore 60" accanto a
@@ -4573,7 +4595,7 @@ function renderStats(){
     const dMax = Math.max.apply(null, [1].concat(descs.map(d => descCount[d])));
     html += statPanel(t("stats.descriptorsTitle"),
       '<div class="bars">'+descs.slice(0,8).map(d =>
-        '<div class="bar-row"><span class="bar-label">'+esc(d)+'</span>'+
+        '<div class="bar-row"><span class="bar-label">'+esc(tv(d))+'</span>'+
         '<div class="bar-track"><div class="bar-fill" style="width:'+(descCount[d]/dMax*100)+'%"></div></div>'+
         '<span class="bar-val">'+descCount[d]+'</span></div>'
       ).join("")+'</div>', null);
@@ -5097,7 +5119,7 @@ function bStatus(msg){
 
 function renderBlindForm(){
   $("bTypeChips").innerHTML = TYPES.map(t =>
-    '<button type="button" class="type-chip-btn'+(B.ipotesi.tipologia===t?" on":"")+'" aria-pressed="'+(B.ipotesi.tipologia===t)+'" data-btype="'+t+'">'+t+'</button>').join("");
+    '<button type="button" class="type-chip-btn'+(B.ipotesi.tipologia===t?" on":"")+'" aria-pressed="'+(B.ipotesi.tipologia===t)+'" data-btype="'+t+'">'+tv(t)+'</button>').join("");
   $("bVitignoInput").value = B.ipotesi.vitigno;
   $("bAnnataInput").value = B.ipotesi.annata;
   $("bRegioneInput").value = B.ipotesi.regione;
@@ -5133,7 +5155,7 @@ function renderBlindForm(){
 function esito(ip, re){
   const norm = s => normVit(String(s||""));
   const out = [];
-  if(re.tipologia) out.push({k:t("blind.k.type"), mio:ip.tipologia, vero:re.tipologia, ok: ip.tipologia === re.tipologia});
+  if(re.tipologia) out.push({k:t("blind.k.type"), mio:tv(ip.tipologia), vero:tv(re.tipologia), ok: ip.tipologia === re.tipologia});
   if(re.vitigno)  out.push({k:t("blind.k.grape"), mio:ip.vitigno||"—", vero:re.vitigno,
                             ok: !!ip.vitigno && canonVitigno(ip.vitigno) === canonVitigno(re.vitigno)});
   if(re.regione)  out.push({k:t("blind.k.region"), mio:ip.regione||"—", vero:re.regione,
@@ -5158,7 +5180,7 @@ function renderBlindList(){
       '<div class="blind-top">'+
         '<span class="blind-score">'+pr.score+'</span>'+
         '<div class="blind-mid"><div class="blind-name">'+esc(titolo)+'</div>'+
-          '<div class="blind-meta">'+esc([pr.ipotesi.tipologia, pr.ipotesi.vitigno, pr.ipotesi.regione, pr.ipotesi.annata].filter(Boolean).join(" · ") || t("blind.noGuess"))+(pr.legacyTotal != null ? " · "+esc(t("book.dl.legacy")+" "+pr.legacyTotal) : "")+'</div></div>'+
+          '<div class="blind-meta">'+esc([tv(pr.ipotesi.tipologia), pr.ipotesi.vitigno, pr.ipotesi.regione, pr.ipotesi.annata].filter(Boolean).join(" · ") || t("blind.noGuess"))+(pr.legacyTotal != null ? " · "+esc(t("book.dl.legacy")+" "+pr.legacyTotal) : "")+'</div></div>'+
         (pr.svelato ? '<span class="blind-badge'+(giusti===es.length&&es.length?" pieno":"")+'">'+giusti+'/'+es.length+'</span>'
                     : '<span class="blind-badge da-svelare">'+t("blind.toReveal")+'</span>')+
       '</div>'+
@@ -5320,7 +5342,7 @@ function moduloSvelamento(pr){
           '<input class="in-line" id="rvAnnata" inputmode="numeric" placeholder="'+t("blind.reveal.vintage.ph")+'" value="'+pre(r.annata, ip.annata)+'"></label>'+
       '</div>'+
       '<div class="type-chips" id="rvTipi">'+TYPES.map(tp =>
-        '<button type="button" class="type-chip-btn'+((r.tipologia||ip.tipologia)===tp?" on":"")+'" aria-pressed="'+((r.tipologia||ip.tipologia)===tp)+'" data-rvtype="'+tp+'">'+tp+'</button>').join("")+'</div>'+
+        '<button type="button" class="type-chip-btn'+((r.tipologia||ip.tipologia)===tp?" on":"")+'" aria-pressed="'+((r.tipologia||ip.tipologia)===tp)+'" data-rvtype="'+tp+'">'+tv(tp)+'</button>').join("")+'</div>'+
       '<label class="fld" style="margin-top:14px"><span class="fld-lab">'+t("blind.reveal.grape")+'</span>'+
         '<input class="in-line" id="rvVitigno" placeholder="'+t("blind.reveal.grape.ph")+'" value="'+pre(r.vitigno, ip.vitigno)+'"></label>'+
       '<label class="fld"><span class="fld-lab">'+t("blind.reveal.region")+'</span>'+
