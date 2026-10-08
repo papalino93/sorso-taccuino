@@ -3,6 +3,9 @@
 La versione e la data dell'ultimo aggiornamento sono mostrate in fondo all'app e dello spazio di team
 (fonte: `public/js/version.js`, da tenere uguale a `package.json`).
 
+## 1.9.1 — 8 ottobre 2026
+- **In inglese ora si traduce anche il vocabolario di degustazione**: tipologie (Red, White, Rosé, Sparkling), limpidezza, colore, consistenza, zuccheri, tannicità, evoluzione, descrittori, livelli (intensità, corpo, durezze e morbidezze), «Altro» nell'uvaggio, e le stesse voci nel Taccuino, nelle Statistiche e nell'esito della cieca. I valori restano salvati in italiano: le schede già scritte e il cambio di lingua non perdono niente.
+
 ## 1.9.0 — 8 ottobre 2026
 - **Nome del taccuino in Impostazioni**: una nuova card «Nome del taccuino» con il titolo (per esempio «Sorso di vino») e, se vuoi, di chi è («il taccuino di Mario Rossi»), con anteprima e «Ripristina». Si salva nel profilo (con l'account lo ritrovi ovunque) e compare in alto e nel titolo della scheda del browser. Toccando il nome in alto si apre direttamente la card (prima c'erano due finestrelle nascoste).
 - **Niente più bianco e nero**: i controlli selezionati (Chiaro/Scuro/Automatico, lingua, «Come voti di solito», lettere dei livelli, pulsante Impostazioni, avatar, pulsante del calice) usano il colore d'accento invece del nero o del bianco; lo stesso per le schede dello spazio di team.

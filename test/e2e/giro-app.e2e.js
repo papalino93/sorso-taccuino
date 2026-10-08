@@ -41,4 +41,18 @@ for (const w of [320,390,1100]) { const {p}=await mk({width:w,height:900}); cons
  const ov=await pc.p.evaluate(()=>{const A=[...document.querySelectorAll(".set-grid > .card")].map(c=>c.getBoundingClientRect());let o=false;for(let i=0;i<A.length;i++)for(let j=i+1;j<A.length;j++){const a=A[i],c=A[j];if(a.left<c.right-1&&c.left<a.right-1&&a.top<c.bottom-1&&c.top<a.bottom-1)o=true;}return o;});
  ok(!ov,"PC: carta del nome senza sovrapposizioni");
 }
+{ /* in inglese il vocabolario di degustazione è tradotto a video, ma si salva in italiano */
+ const {p,errs}=await mk({width:1366,height:900},"en");
+ await p.click('#nav [data-tab=new]'); await p.waitForTimeout(300);
+ await p.click('[data-mode="completa"], #modeTopWrap button:has-text("Full sheet")').catch(()=>{}); await p.waitForTimeout(300);
+ const chips=await p.evaluate(()=>[...document.querySelectorAll("#typeChips .type-chip-btn")].map(x=>x.textContent.trim()));
+ ok(JSON.stringify(chips)==='["Red","White","Rosé","Sparkling","Passito"]',"tipologie in inglese: "+chips);
+ const opts=await p.evaluate(()=>[...document.querySelectorAll("select[data-skey$=limpidezza] option")].map(o=>[o.value,o.textContent]));
+ ok(opts.length>=5 && opts.some(o=>o[0]==="Limpido"&&o[1]==="Clear"), "limpidezza: valore italiano, etichetta inglese "+JSON.stringify(opts.slice(0,2)));
+ if(opts.length){ await p.selectOption("select[data-skey$=limpidezza]","Cristallino"); await p.waitForTimeout(200);
+  ok(await p.evaluate(()=>S.limpidezza)==="Cristallino","la scelta si salva in italiano"); }
+ const body=await p.evaluate(()=>document.body.innerText);
+ ok(!/Velato|Limpido|Abbastanza consistente|Rosso rubino|Fruttato/.test(body.replace(/Etna Rosso/g,"")),"nessuna parola di degustazione in italiano nella scheda");
+ ok(errs.length===0,"nessun errore JS "+errs);
+}
 await b.close();console.log(f?f+" FALLITI":"TUTTO OK");process.exit(f?1:0);})().catch(e=>{console.error(e);process.exit(1);});

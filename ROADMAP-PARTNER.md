@@ -1,6 +1,6 @@
 # Sorso — cosa devi fare tu per il partner
 
-Aggiornata l'8 ottobre 2026 · **Sorso 1.9.0**.
+Aggiornata l'8 ottobre 2026 · **Sorso 1.9.1**.
 
 **Dove siamo.** Il sito, l'app personale (con la vista da PC) e lo spazio di team per il partner sono pronti e online. Test automatici: tutti verdi. Le tre guide PDF sono aggiornate con la nuova grafica. **La prova sul database vero è stata fatta l'8 ottobre 2026 e non ha trovato difetti** (vedi il punto 2). Mancano solo le cose che dipendono dal partner.
 
