@@ -13,10 +13,12 @@
   var HEX_RE = /^#[0-9a-fA-F]{6}$/;
   var NERO = [0, 0, 0], BIANCO = [255, 255, 255];
 
-  /* ---- predefiniti ---- */
+  /* ---- predefiniti: i colori del vino ----
+     chiaro: crema e bordeaux; scuro: nero con una punta di vino e un bordeaux acceso
+     (il bordeaux profondo, su nero, non si leggerebbe nei testi piccoli). */
   var ACCENTS = [
-    { id: "uva", hex: "#5b2eff" },
     { id: "vinaccia", hex: "#8c1d3f" },
+    { id: "uva", hex: "#5b2eff" },
     { id: "bosco", hex: "#0f7a4d" },
     { id: "oceano", hex: "#0a6bcb" },
     { id: "ambra", hex: "#b45309" },
@@ -24,16 +26,16 @@
     { id: "grafite", hex: "#2b2b33" }
   ];
   var BG_LIGHT = [
-    { id: "carta", hex: "#fafaf7" }, { id: "bianco", hex: "#ffffff" }, { id: "crema", hex: "#fbf4e6" },
+    { id: "crema", hex: "#fbf4e6" }, { id: "carta", hex: "#fafaf7" }, { id: "bianco", hex: "#ffffff" },
     { id: "salvia", hex: "#f2f6f1" }, { id: "nebbia", hex: "#f1f4f9" }
   ];
   var BG_DARK = [
-    { id: "nero", hex: "#08080b" }, { id: "grafite", hex: "#17181c" }, { id: "notte", hex: "#0b1020" },
-    { id: "bosco", hex: "#0e1512" }, { id: "cantina", hex: "#1a0e12" }
+    { id: "cantina", hex: "#0f080b" }, { id: "nero", hex: "#08080b" }, { id: "grafite", hex: "#17181c" },
+    { id: "notte", hex: "#0b1020" }, { id: "bosco", hex: "#0e1512" }
   ];
-  var DEFAULT_ACCENT = "#5b2eff";
-  /* l'accento predefinito, sul fondo scuro, è un viola più chiaro scelto a mano (design B) */
-  var DEFAULT_ACCENT_DARK = "#a58bff";
+  var DEFAULT_ACCENT = "#8c1d3f";
+  /* l'accento predefinito, sul fondo scuro, è un bordeaux più acceso scelto a mano */
+  var DEFAULT_ACCENT_DARK = "#c8385c";
 
   /* ---- colori ---- */
   function hex2rgb(h) { return [1, 3, 5].map(function (i) { return parseInt(h.slice(i, i + 2), 16); }); }
@@ -59,13 +61,11 @@
   function valid(h) { return typeof h === "string" && HEX_RE.test(h); }
 
   /* Tavolozza completa. Opzioni: accent e bg (#rrggbb, facoltativi), dark (booleano).
-     Restituisce { vars, adjusted } oppure null se non c'è nessuna scelta (restano i predefiniti). */
+     Senza scelte restituisce la tavolozza predefinita (a vino); i valori non validi si ignorano. */
   function derive(opt) {
     opt = opt || {};
     var dark = !!opt.dark;
     var accentChosen = valid(opt.accent) && opt.accent.toLowerCase() !== DEFAULT_ACCENT;
-    var bgChosen = valid(opt.bg) && opt.bg.toLowerCase() !== (dark ? BG_DARK[0].hex : BG_LIGHT[0].hex);
-    if (!accentChosen && !bgChosen) return null;
 
     var adjusted = false;
     var bg = hex2rgb(valid(opt.bg) ? opt.bg : (dark ? BG_DARK[0].hex : BG_LIGHT[0].hex));
@@ -75,8 +75,11 @@
     if (!dark && contrast(ink, bg) < 12) { bg = garantisci(bg, ink, BIANCO, 12); adjusted = true; }
     if (contrast(ink, bg) < 9) { ink = polo(bg); }
 
-    var card = mix(bg, ink, dark ? 0.07 : 0.05);
-    var cardAlt = mix(bg, ink, dark ? 0.12 : 0.09);
+    /* nel buio le schede prendono un velo del colore d'accento, così il fondo resta «vino» e non grigio */
+    var acc0 = hex2rgb(accentChosen ? opt.accent : (dark ? DEFAULT_ACCENT_DARK : DEFAULT_ACCENT));
+    var velo = dark ? mix(ink, acc0, 0.3) : ink;
+    var card = mix(bg, velo, dark ? 0.08 : 0.05);
+    var cardAlt = mix(bg, velo, dark ? 0.13 : 0.09);
     var field = dark ? cardAlt : mix(bg, BIANCO, 0.7);
     var line = mix(bg, ink, 0.14);
     var lineSoft = mix(bg, ink, 0.1);

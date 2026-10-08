@@ -6,10 +6,22 @@ const C = (a, b) => Theme.contrast(hex(a), hex(b));
 function rnd(seed) { let s = seed; return () => (s = (s * 1664525 + 1013904223) % 4294967296) / 4294967296; }
 const color = r => "#" + [0, 0, 0].map(() => Math.floor(r() * 256).toString(16).padStart(2, "0")).join("");
 
-test("nessuna scelta: niente da applicare (restano i predefiniti)", () => {
-  assert.equal(Theme.derive({ dark: false }), null);
-  assert.equal(Theme.derive({ dark: true, accent: Theme.DEFAULT_ACCENT, bg: "#08080b" }), null);
-  assert.equal(Theme.derive({ dark: false, accent: "rosso", bg: "x" }), null, "valori non validi ignorati");
+test("nessuna scelta: tavolozza predefinita a vino, leggibile in entrambi i temi", () => {
+  const l = Theme.derive({ dark: false }), d = Theme.derive({ dark: true });
+  assert.equal(l.vars["--accent"], "#8c1d3f"); assert.equal(l.vars["--panel"], "#fbf4e6");
+  assert.equal(d.vars["--accent"], "#c8385c"); assert.equal(d.vars["--panel"], "#0f080b");
+  for (const x of [l, d]) {
+    assert.equal(x.adjusted, false, "i predefiniti non vanno corretti");
+    assert.ok(C(x.vars["--sel-fg"], x.vars["--sel-bg"]) >= 4.5, "testo sul pulsante pieno");
+    assert.ok(C(x.vars["--accent-text"], x.vars["--card"]) >= 4.5, "testo colorato");
+    assert.ok(C(x.vars["--accent"], x.vars["--panel"]) >= 3.2, "riempimento sullo sfondo");
+  }
+  assert.deepEqual(Theme.derive({ dark: false, accent: "rosso", bg: "x" }).vars, l.vars, "valori non validi ignorati");
+  assert.deepEqual(Theme.derive({ dark: true, accent: Theme.DEFAULT_ACCENT, bg: "#0f080b" }).vars, d.vars);
+});
+test("i colori predefiniti scritti in index.html sono quelli di theme.js", () => {
+  const r = require("node:child_process").spawnSync(process.execPath, [require("node:path").join(__dirname, "..", "scripts", "theme-css.js"), "--check"], { encoding: "utf8" });
+  assert.equal(r.status, 0, r.stderr);
 });
 test("qualunque accento e sfondo: testo, riempimenti, bordi e testo sul pulsante restano leggibili", () => {
   const r = rnd(7);
