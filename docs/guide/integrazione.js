@@ -249,7 +249,7 @@ function build() {
   `));
   P.push(pg("paper", "API di lettura", `
     ${eyebrow("11", "API di sola lettura — esempi")}
-    <h1 class="d" style="font-size:28pt">Quattro comandi, <em>copia e incolla</em></h1>
+    <h1 class="d" style="font-size:28pt">Sette comandi, <em>copia e incolla</em></h1>
     ${esempio("api.sh", "shell").replace('class="code"', 'class="code big"')}
     ${call("Esegui sempre queste chiamate <b>dal tuo server</b>, mai da una pagina del browser: la chiave API non deve essere visibile a nessuno.")}
   `));
@@ -264,14 +264,14 @@ function build() {
     ${code("GET /api/v1/stats?team=giovedi\n\n" + compact(Object.assign({}, stCompact, { top: "[ … ]", distribution: "[ … ]", byType: "[ … ]", events: "[ … ]" })).replace(/"\[ … \]"/g, "[ … ]"), "GET")}
     <p>Il parametro <code>team</code> è obbligatorio (lo stesso valore del claim <code>team</code>). Si basa sulle ultime <b>30 degustazioni chiuse</b> e si aggiorna al massimo ogni due minuti: <code>at</code> dice quando è stata calcolata. Contiene il numero di degustazioni, vini e voti; la media del team; <code>top</code> (i cinque vini migliori); <code>distribution</code> (quanti vini per fascia di media); <code>byType</code> (media per tipologia) ed <code>events</code>. Nessun dato personale.</p>
     <h2 class="s">Le serate <em>e il vincitore</em></h2>
-    ${code("GET /api/v1/events?team=giovedi\n\n" + "{\n  \"team\": \"giovedi\",\n  \"events\": [\n" + compact(evCompact(R.events.events[0])).split("\n").map(l => "  " + l).join("\n") + "\n  ]\n}", "GET")}
+    ${code("GET /api/v1/events?team=giovedi\n\n" + "{\n  \"team\": \"giovedi\",\n  \"events\": [\n" + compact(evCompact(R.events.events[0])).split("\n").map(l => "  " + l).join("\n") + "\n  ],\n  \"window\": " + JSON.stringify(R.events.window) + "\n}", "GET")}
     <p>Le degustazioni chiuse del team, dalla più recente, ciascuna con il vino vincitore (<code>winner</code>, con <code>tie: true</code> se c'è un pari merito). Servono almeno due voti: altrimenti <code>winner</code> è <code>null</code>. Per una cieca non svelata il vincitore non ha nome (<code>hidden: true</code>).</p>
   `));
   P.push(pg("paper", "API di lettura", `
     ${eyebrow("11", "API di sola lettura — ipotesi alla cieca")}
     <h2 class="s" style="margin-top:0">Le ipotesi <em>alla cieca</em></h2>
     ${code("GET /api/v1/tastings/{id}/guesses\n\n" + "{\n  \"tasting\": { \"id\": \"…\", \"revealed\": true, … },\n  \"wines\": [\n" + compact({ id: "…", position: gu.position, name: gu.name, type: gu.type, grape: gu.grape, vintage: gu.vintage, guessers: gu.guessers, answers: gu.answers }).split("\n").map(l => "  " + l).join("\n") + "\n  ]\n}", "GET")}
-    <p>Solo per le degustazioni alla cieca <b>già svelate</b>: prima risponde <code>409 not_revealed</code>, e per una degustazione normale <code>409 not_blind</code>. Dice, per ogni vino, quante persone hanno provato a indovinare e quante hanno risposto giusto su tipologia, vitigno e annata (<code>exact</code> esatta, <code>close</code> con un anno di scarto). Mai chi ha detto cosa.</p>
+    <p>Solo per le degustazioni alla cieca <b>già svelate</b>: prima risponde <code>409 not_revealed</code>, e per una degustazione normale <code>409 not_blind</code>. Dice, per ogni vino, quante persone hanno provato a indovinare e quante hanno risposto giusto su tipologia, vitigno e annata (<code>exact</code> esatta, <code>close</code> con un anno di scarto). Mai chi ha detto cosa. Con meno di due persone che hanno risposto, <code>answers</code> è <code>null</code>: un riepilogo di una persona sola svelerebbe le sue risposte.</p>
     <h2 class="s">Cosa vede <em>l'API di una cieca</em></h2>
     ${code("GET /api/v1/tastings/{id}/results     (cieca non svelata)\n\n" + compact(Object.assign({}, R.resultsBlindHidden.wines[0], { id: "…" })), "GET")}
     <p>Finché la degustazione non è svelata, <code>name</code>, <code>producer</code>, <code>vintage</code>, <code>type</code> e <code>grape</code> sono <code>null</code>, anche nel CSV: il tuo sito non può rivelare per sbaglio il vino ai partecipanti. Le medie e la classifica (<code>rank</code>) ci sono comunque.</p>
@@ -281,7 +281,7 @@ function build() {
   P.push(pg("ink", "Cosa c'è e cosa no", `
     ${eyebrow("12", "App personale e spazio di team")}
     <h1 class="d">Taccuino, Statistiche, Evento, Cieca: <em>dove stanno</em></h1>
-    <p class="lead" style="max-width:140mm">L'app personale e lo spazio di team che incorpori hanno Statistiche, classifica e alla cieca; l'API serve il secondo.</p>
+    <p class="lead" style="max-width:140mm">L'app personale e lo spazio di team che incorpori hanno Statistiche, classifica e alla cieca; l'API di sola lettura espone solo i dati dello spazio di team.</p>
     <div class="phones" style="gap:4mm;margin:4mm 0">
       ${fig("app-taccuino.png", "A", "<b>Taccuino</b>: l'archivio personale.", "sm")}
       ${fig("app-statistiche.png", "B", "<b>Statistiche</b> personali.", "sm")}
@@ -312,10 +312,10 @@ function build() {
       ["404", "<code>not_found</code>", "Degustazione o percorso inesistente (anche di un altro partner)."],
       ["405", "<code>method_not_allowed</code>", "Metodo non previsto per quel percorso."],
       ["429", "<code>rate_limited</code>", "Troppe richieste: <code>Retry-After</code> dice quando riprovare."],
-      ["400 · 409", "<code>invalid_team</code> · <code>not_blind</code> · <code>not_revealed</code>", "Manca <code>team</code> in <code>/stats</code> e <code>/events</code>; oppure <code>/guesses</code> su una degustazione normale o non ancora svelata."],
-      ["503", "<code>read_only</code>", "Sola lettura per il limite mensile: le letture e la cancellazione dati funzionano."]], [1])}
+      ["400 · 409", "<code>invalid_team</code> · <code>invalid_status</code> · <code>invalid_user</code> · <code>not_blind</code> · <code>not_revealed</code>", "400: manca <code>team</code> in <code>/stats</code> e <code>/events</code>, oppure <code>status</code> o utente non validi. 409: <code>/guesses</code> su una degustazione normale o non ancora svelata."],
+      ["503", "<code>no_database</code>", "Database non raggiungibile: riprova fra poco. Letture e cancellazione dati restano sempre disponibili."]], [1])}
     <h2 class="s">Limiti e <em>disponibilità</em></h2>
-    ${table(["Cosa", "Limite"], [["Aperture di sessione (<code>/embed</code>)", "200 al minuto per indirizzo IP"], ["Operazioni di un utente nell'iframe", "90 al minuto per utente"], ["API di sola lettura", "120 richieste al minuto per chiave e per IP"]], [0])}
+    ${table(["Cosa", "Limite"], [["Dentro l'iframe", "Sessioni: 200 al minuto per indirizzo IP. Operazioni: 90 al minuto per utente"], ["API di sola lettura", "120 richieste al minuto per chiave e per IP"]], [0])}
     <p class="mute" style="font-size:8pt">Sessione dell'iframe 4 ore; token al massimo 15 minuti, monouso. Servizio gratuito, senza garanzia di continuità: scarica il CSV dopo ogni serata. All'80% dell'uso mensile compare <code>X-Sorso-Quota: warn</code>; oltre il 90% si passa in sola lettura fino al mese dopo.</p>
   `));
 

@@ -102,8 +102,9 @@ test("alla cieca: ipotesi, svelamento, punteggio personale e riepilogo anonimo",
   assert.equal(dopo.wines[0].name, "Barolo Cannubi"); assert.equal(dopo.wines[0].grape, "Nebbiolo");
   assert.deepEqual(dopo.wines[0].guessResult, { points: 5, max: 5, type: "ok", grape: "ok", year: "ok" });
   assert.deepEqual(dopo.wines[1].guessResult, { points: 0, max: 5, type: "ko", grape: "ko", year: "ko" });
-  assert.deepEqual(dopo.wines[0].guessStats, { guessers: 2, type: { answered: 2, correct: 2 }, grape: { answered: 2, correct: 2 }, year: { answered: 2, exact: 2, close: 0 } });
-  assert.equal(dopo.wines[1].guessStats.guessers, 1);
+  assert.deepEqual(dopo.wines[0].guessStats, { guessers: 2, hidden: false, type: { answered: 2, correct: 2 }, grape: { answered: 2, correct: 2 }, year: { answered: 2, exact: 2, close: 0 } });
+  /* con una sola ipotesi il riepilogo coinciderebbe con quella persona: non si mostra */
+  assert.deepEqual(dopo.wines[1].guessStats, { guessers: 1, hidden: true, type: null, grape: null, year: null });
   /* chi non ha provato non ha risultato; il riepilogo non dice chi ha detto cosa */
   const c = await login({ sub: "c" });
   const vc = (await state(t.id, c)).body.wines[0];
@@ -119,7 +120,8 @@ test("alla cieca: punteggio dell'ipotesi, casi limite", () => {
   const w = { type: "Rosso", grape: "Sangiovese", vintage: "2015" };
   assert.deepEqual(Team.scoreGuess(w, { y: "Rosso", g: "sangiovese grosso", a: "2016" }), { points: 4, max: 5, type: "ok", grape: "ok", year: "close" });
   assert.deepEqual(Team.scoreGuess(w, { y: "Bianco" }), { points: 0, max: 5, type: "ko", grape: "na", year: "na" });
-  assert.equal(Team.scoreGuess({ vintage: "NV" }, { a: "2016" }).max, 0, "senza dati veri non si assegnano punti");
+  assert.equal(Team.scoreGuess({}, { a: "2016" }).max, 0, "senza dati veri non si assegnano punti");
+  assert.equal(Team.scoreGuess({ vintage: "NV" }, { a: "2016" }).points, 0, "un vino NV indovinato con un anno è sbagliato");
   assert.equal(Team.scoreGuess({ grape: "Merlot" }, { g: "mer" }).grape, "ko", "troppo corto per valere come 'contenuto'");
 });
 test("alla cieca: l'ipotesi arrivata mentre si svela non resta", async () => {
@@ -258,13 +260,15 @@ test("API: risultati con classifica e pari merito; la cieca non svelata nasconde
 test("API: riepilogo delle ipotesi solo dopo lo svelamento, e solo per le cieche", async () => {
   const { t, org, w1 } = await blind();
   const a = await login({ sub: "a" });
+  const b2 = await login({ sub: "b2" });
   await post({ op: "guess", tasting: t.id, wine: w1.id, type: "Rosso", grape: "Nebbiolo", year: "2018" }, a);
+  await post({ op: "guess", tasting: t.id, wine: w1.id, type: "Rosso", grape: "Nebbiolo", year: "2018" }, b2);
   let r = await get("tastings/" + t.id + "/guesses");
   assert.equal(r.statusCode, 409); assert.equal(r.body.error.code, "not_revealed");
   await post({ op: "tasting.reveal", tasting: t.id }, org);
   r = await get("tastings/" + t.id + "/guesses");
   assert.equal(r.statusCode, 200);
-  assert.equal(r.body.wines[0].guessers, 1); assert.deepEqual(r.body.wines[0].answers.year, { answered: 1, exact: 1, close: 0 });
+  assert.equal(r.body.wines[0].guessers, 2); assert.deepEqual(r.body.wines[0].answers.year, { answered: 2, exact: 2, close: 0 });
   assert.equal(r.body.wines[0].type, "Rosso"); assert.equal(r.body.wines[0].grape, "Nebbiolo");
   assert.equal(r.body.wines[0].name, "Barolo Cannubi");
   assert.ok(!JSON.stringify(r.body).includes('"a"') || true);
@@ -319,4 +323,92 @@ test("cancellare un utente toglie anche le sue ipotesi; eliminare una degustazio
 test("la pulizia del partner conosce tutte le chiavi dei dati", () => {
   const m = Team.KEY_PATTERNS("demo");
   ["tl", "wn", "vt", "vs", "sm", "ct", "uv", "gs", "gr", "st"].forEach(p => assert.ok(m.includes(p + ":demo:*"), p));
+});
+
+test("ipotesi: con una sola persona il riepilogo resta nascosto, e la cancellazione dei suoi dati lo aggiorna", async () => {
+  const { t, org, w1 } = await blind();
+  const a = await login({ sub: "solo" });
+  await post({ op: "guess", tasting: t.id, wine: w1.id, type: "Rosso", grape: "Nebbiolo", year: "2018" }, a);
+  await post({ op: "tasting.reveal", tasting: t.id }, org);
+  let r = (await get("tastings/" + t.id + "/guesses")).body.wines[0];
+  assert.equal(r.guessers, 1); assert.equal(r.answers, null);
+  /* la cancellazione toglie l'ipotesi anche dal riepilogo già scritto */
+  const d = await del("users/solo");
+  assert.equal(d.body.guessesRemoved, 1);
+  r = (await get("tastings/" + t.id + "/guesses")).body.wines[0];
+  assert.equal(r.guessers, 0); assert.equal(r.answers, null);
+});
+
+test("statistiche: in una cieca chiusa e non svelata non compare la tipologia vera", async () => {
+  const { t, org, w1 } = await blind();
+  const a = await login({ sub: "a" }), b = await login({ sub: "b" });
+  for (const s of [a, b]) await post({ op: "vote", tasting: t.id, wine: w1.id, ...smart(85, 85, 85) }, s);
+  await post({ op: "tasting.status", tasting: t.id, status: "closed" }, org);
+  const m = (await post({ op: "stats" }, a)).body.stats;
+  assert.deepEqual(m.byType, []);
+  const api = (await get("stats", "team=t1")).body;
+  assert.deepEqual(api.byType, []);
+  assert.ok(!JSON.stringify([m, api]).includes("Rosso"));
+});
+
+test("cancellazione dati: le statistiche in memoria si aggiornano subito", async () => {
+  const org = await login({ sub: "org", role: "organizer" });
+  const t = (await post({ op: "tasting.create", name: "Serata" }, org)).body.tasting;
+  const w = (await post({ op: "wine.add", tasting: t.id, wine: { name: "Vino" } }, org)).body.wine;
+  const a = await login({ sub: "a" }), b = await login({ sub: "b" });
+  for (const s of [a, b]) await post({ op: "vote", tasting: t.id, wine: w.id, ...smart(85, 85, 85) }, s);
+  await post({ op: "tasting.status", tasting: t.id, status: "closed" }, org);
+  assert.equal((await get("stats", "team=t1")).body.totals.votes, 2);
+  await del("users/a"); await del("users/b");
+  const st = (await get("stats", "team=t1")).body;
+  assert.equal(st.totals.votes, 0); assert.equal(st.top.length, 0);
+});
+
+test("eventi: vincitore e pari merito seguono la classifica, qualunque sia l'ordine dei vini", async () => {
+  const org = await login({ sub: "org", role: "organizer" });
+  const t = (await post({ op: "tasting.create", name: "Pari" }, org)).body.tasting;
+  const A = (await post({ op: "wine.add", tasting: t.id, wine: { name: "A" } }, org)).body.wine;
+  const B = (await post({ op: "wine.add", tasting: t.id, wine: { name: "B" } }, org)).body.wine;
+  const us = [];
+  for (const n of ["a", "b", "c"]) us.push(await login({ sub: n }));
+  /* stessa media al decimale (80,3), ma somme diverse: A su 2 voti, B su 3 */
+  const voto = (s, w, v) => post({ op: "vote", tasting: t.id, wine: w.id, ...smart(v, v, v) }, s);
+  await voto(us[0], A, 80); await voto(us[1], A, 81);
+  await voto(us[0], B, 80); await voto(us[1], B, 80); await voto(us[2], B, 81);
+  await post({ op: "tasting.status", tasting: t.id, status: "closed" }, org);
+  const ev = (await get("events", "team=t1")).body.events[0];
+  const res = (await get("tastings/" + t.id + "/results")).body.wines;
+  const pari = res[0].rank === res[1].rank;
+  assert.equal(ev.winner.tie, pari);
+});
+
+test("voto: dopo la chiusura non entra", async () => {
+  const org = await login({ sub: "org", role: "organizer" });
+  const t = (await post({ op: "tasting.create", name: "Chiusa" }, org)).body.tasting;
+  const w = (await post({ op: "wine.add", tasting: t.id, wine: { name: "Vino" } }, org)).body.wine;
+  await post({ op: "tasting.status", tasting: t.id, status: "closed" }, org);
+  const a = await login({ sub: "a" });
+  const r = await post({ op: "vote", tasting: t.id, wine: w.id, ...smart(90, 90, 90) }, a);
+  assert.equal(r.statusCode, 409);
+  assert.equal((await get("tastings/" + t.id + "/results")).body.wines[0].votes, 0);
+});
+
+test("eliminare una degustazione toglie le sue voci dall'elenco di chi ha votato", async () => {
+  const org = await login({ sub: "org", role: "organizer" });
+  const t = (await post({ op: "tasting.create", name: "Da togliere" }, org)).body.tasting;
+  const w = (await post({ op: "wine.add", tasting: t.id, wine: { name: "Vino" } }, org)).body.wine;
+  const a = await login({ sub: "a" });
+  await post({ op: "vote", tasting: t.id, wine: w.id, ...smart(80, 80, 80) }, a);
+  assert.equal((await redis.smembers(Team.K.uv("demo", "a"))).length, 1);
+  await post({ op: "tasting.delete", tasting: t.id }, org);
+  assert.equal((await redis.smembers(Team.K.uv("demo", "a"))).length, 0);
+});
+
+test("ipotesi sull'annata: NV è giusto solo per un vino senza annata", () => {
+  const nv = { vintage: "NV" }, y = { vintage: "2022" };
+  assert.deepEqual([Team.scoreGuess(nv, { a: "NV" }).year, Team.scoreGuess(nv, { a: "NV" }).points], ["ok", 2]);
+  assert.equal(Team.scoreGuess(nv, { a: "2020" }).year, "ko");
+  assert.equal(Team.scoreGuess(y, { a: "NV" }).year, "ko");
+  assert.equal(Team.scoreGuess(y, { a: "NV" }).points, 0);
+  assert.equal(Team.scoreGuess(nv, {}).year, "na");
 });

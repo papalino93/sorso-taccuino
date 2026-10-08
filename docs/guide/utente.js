@@ -19,7 +19,7 @@ function build() {
     <p class="lead">Sorso è il tuo taccuino: fotografi l'etichetta, dai il voto, e ritrovi ogni vino con le statistiche del tuo palato.</p>
     ${stats([["50–100", "la scala<br>del voto"], ["2", "modi di votare:<br>rapido o completo"], ["5", "sezioni:<br>Nuova · Alla cieca · Taccuino · Statistiche · Evento"], ["0 €", "il costo<br>dell'app"]])}
     ${cards([["Nuova", "Una scheda per ogni vino: etichetta, dati, giudizio. Il punteggio si calcola da solo."], ["Alla cieca", "Assaggi senza guardare l'etichetta e provi a indovinare. Poi confronti."], ["Taccuino", "Tutte le tue schede: cerchi, ordini, confronti due vini, modifichi."], ["Statistiche", "Il tuo profilo: vitigni preferiti, come giudichi, quanto conta il prezzo."], ["Evento", "Una serata con gli amici: tutti votano gli stessi vini e esce la classifica."], ["Impostazioni", "Colori, tema chiaro o scuro, copia dei dati, account e questa guida."]])}
-    <p class="mute">Funziona dal telefono e dal computer. Sul telefono le sezioni sono nella barra in basso; sul computer, nel menu a sinistra.</p>
+    <p class="mute">Funziona dal telefono e dal computer. Sul telefono le sezioni sono nella barra in alto; sul computer, nel menu a sinistra.</p>
   `));
 
   P.push(pg("ink", "Il punteggio", `
@@ -98,9 +98,9 @@ function build() {
     <h1 class="d">Tutto sul tuo profilo, <em>in un posto</em></h1>
     ${lato(`
         <p class="lead">Si apre dall'ingranaggio in alto; sul computer anche dal menu a sinistra.</p>
-        ${table(["Sezione", "A cosa serve"], [["<b>Il tuo archivio</b>", "<b>Salva copia</b> scarica un file con le tue schede; <b>Ripristina da copia</b> le rimette a posto."], ["<b>Come voti di solito</b>", "Con quale modo si apre ogni nuova scheda: l'ultima usata, Voto rapido o Scheda completa."], ["<b>Aspetto</b>", "Tema <b>Chiaro</b>, <b>Scuro</b> o <b>Automatico</b> (segue il tuo dispositivo). Colore d'accento e sfondo a scelta."], ["<b>Account</b>", "Accedi con Google per ritrovare le schede ovunque; esci quando vuoi."], ["<b>Guida</b>", "Questo documento, sempre a portata di mano."]], [1])}
+        ${table(["Sezione", "A cosa serve"], [["<b>Aspetto</b>", "Tema <b>Chiaro</b>, <b>Scuro</b> o <b>Automatico</b> (segue il tuo dispositivo). Colore d'accento e sfondo a scelta."], ["<b>Come voti di solito</b>", "Con quale modo si apre ogni nuova scheda: l'ultima usata, Voto rapido o Scheda completa."], ["<b>Il tuo archivio</b>", "<b>Salva copia</b> scarica un file con le tue schede; <b>Ripristina da copia</b> le rimette a posto."], ["<b>Guida</b>", "Questo documento, sempre a portata di mano."], ["<b>Account</b>", "Accedi con Google per ritrovare le schede ovunque; esci quando vuoi."]], [1])}
         ${call("Il testo resta sempre leggibile: se scegli un colore troppo chiaro o troppo scuro, l'app lo corregge leggermente e te lo dice.")}`,
-      fig("app-impostazioni.png", 1, "Le <b>Impostazioni</b>: archivio, voto, aspetto e account.", "lg"))}
+      fig("app-impostazioni.png", 1, "Le <b>Impostazioni</b>: l'aspetto in alto; voto, archivio, guida e account più sotto.", "lg"))}
   `));
 
   P.push(pg("paper", "Dal computer", `

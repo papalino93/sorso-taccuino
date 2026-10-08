@@ -2,30 +2,30 @@
   "tastings": {
     "tastings": [
       {
-        "id": "4529a7e3f3",
+        "id": "fb115b0553",
         "team": "giovedi",
         "name": "Serata di ottobre",
         "status": "closed",
         "blind": false,
         "revealed": false,
-        "createdAt": "2026-10-08T10:06:36.581Z"
+        "createdAt": "2026-10-08T10:33:17.967Z"
       }
     ]
   },
   "results": {
     "tasting": {
-      "id": "4529a7e3f3",
+      "id": "fb115b0553",
       "team": "giovedi",
       "name": "Serata di ottobre",
       "status": "closed",
       "blind": false,
       "revealed": false,
-      "createdAt": "2026-10-08T10:06:36.581Z"
+      "createdAt": "2026-10-08T10:33:17.967Z"
     },
     "minVotes": 2,
     "wines": [
       {
-        "id": "e135640f56",
+        "id": "28abb3c20e",
         "position": 1,
         "producer": "Poderi Rivalta",
         "name": "Barolo Cannubi",
@@ -38,7 +38,7 @@
         "rank": 1
       },
       {
-        "id": "9839911744",
+        "id": "317e37edf7",
         "position": 2,
         "producer": "Tenuta delle Sciare",
         "name": "Etna Rosso Contrada Rampante",
@@ -51,7 +51,7 @@
         "rank": 2
       },
       {
-        "id": "07b1c4c96f",
+        "id": "3373a35acb",
         "position": 3,
         "producer": "Casa Marchigiana",
         "name": "Verdicchio Classico",
@@ -65,21 +65,21 @@
       }
     ]
   },
-  "csv": "tasting_id,tasting,wine_id,producer,name,vintage,votes,average,type,grape,rank\r\n4529a7e3f3,Serata di ottobre,e135640f56,Poderi Rivalta,Barolo Cannubi,2019,3,88,,,1\r\n4529a7e3f3,Serata di ottobre,9839911744,Tenuta delle Sciare,Etna Rosso Contrada Rampante,2021,2,74.5,,,2\r\n4529a7e3f3,Serata di ottobre,07b1c4c96f,Casa Marchigiana,Verdicchio Classico,2022,1,,,,\r\n",
+  "csv": "tasting_id,tasting,wine_id,producer,name,vintage,votes,average,type,grape,rank\r\nfb115b0553,Serata di ottobre,28abb3c20e,Poderi Rivalta,Barolo Cannubi,2019,3,88,,,1\r\nfb115b0553,Serata di ottobre,317e37edf7,Tenuta delle Sciare,Etna Rosso Contrada Rampante,2021,2,74.5,,,2\r\nfb115b0553,Serata di ottobre,3373a35acb,Casa Marchigiana,Verdicchio Classico,2022,1,,,,\r\n",
   "resultsBlindHidden": {
     "tasting": {
-      "id": "d40564d86c",
+      "id": "f63d1306e3",
       "team": "giovedi",
       "name": "Alla cieca di giovedì",
       "status": "open",
       "blind": true,
       "revealed": false,
-      "createdAt": "2026-10-08T10:06:36.744Z"
+      "createdAt": "2026-10-08T10:33:18.163Z"
     },
     "minVotes": 2,
     "wines": [
       {
-        "id": "4a216cb0c3",
+        "id": "b62c9d9d70",
         "position": 1,
         "producer": null,
         "name": null,
@@ -92,7 +92,7 @@
         "rank": 1
       },
       {
-        "id": "a9a4a90f63",
+        "id": "44b87d23d2",
         "position": 2,
         "producer": null,
         "name": null,
@@ -108,16 +108,16 @@
   },
   "guesses": {
     "tasting": {
-      "id": "d40564d86c",
+      "id": "f63d1306e3",
       "team": "giovedi",
       "name": "Alla cieca di giovedì",
       "status": "closed",
       "revealed": true,
-      "createdAt": "2026-10-08T10:06:36.744Z"
+      "createdAt": "2026-10-08T10:33:18.163Z"
     },
     "wines": [
       {
-        "id": "4a216cb0c3",
+        "id": "b62c9d9d70",
         "position": 1,
         "producer": "Poderi Rivalta",
         "name": "Barolo Cannubi",
@@ -142,7 +142,7 @@
         }
       },
       {
-        "id": "a9a4a90f63",
+        "id": "44b87d23d2",
         "position": 2,
         "producer": "Casa Marchigiana",
         "name": "Verdicchio Classico",
@@ -170,7 +170,7 @@
   },
   "stats": {
     "team": "giovedi",
-    "at": "2026-10-08T10:06:36.961Z",
+    "at": "2026-10-08T10:33:18.339Z",
     "window": {
       "tastings": 2,
       "closedTotal": 2,
@@ -210,7 +210,7 @@
       {
         "avg": 91,
         "votes": 3,
-        "tasting": "d40564d86c",
+        "tasting": "f63d1306e3",
         "tastingName": "Alla cieca di giovedì",
         "name": "Barolo Cannubi",
         "producer": "Poderi Rivalta",
@@ -221,7 +221,7 @@
       {
         "avg": 88,
         "votes": 3,
-        "tasting": "4529a7e3f3",
+        "tasting": "fb115b0553",
         "tastingName": "Serata di ottobre",
         "name": "Barolo Cannubi",
         "producer": "Poderi Rivalta",
@@ -232,7 +232,7 @@
       {
         "avg": 83,
         "votes": 3,
-        "tasting": "d40564d86c",
+        "tasting": "f63d1306e3",
         "tastingName": "Alla cieca di giovedì",
         "name": "Verdicchio Classico",
         "producer": "Casa Marchigiana",
@@ -243,7 +243,7 @@
       {
         "avg": 74.5,
         "votes": 2,
-        "tasting": "4529a7e3f3",
+        "tasting": "fb115b0553",
         "tastingName": "Serata di ottobre",
         "name": "Etna Rosso Contrada Rampante",
         "producer": "Tenuta delle Sciare",
@@ -266,9 +266,9 @@
     ],
     "events": [
       {
-        "id": "d40564d86c",
+        "id": "f63d1306e3",
         "name": "Alla cieca di giovedì",
-        "createdAt": "2026-10-08T10:06:36.744Z",
+        "createdAt": "2026-10-08T10:33:18.163Z",
         "blind": true,
         "revealed": true,
         "wines": 2,
@@ -286,9 +286,9 @@
         }
       },
       {
-        "id": "4529a7e3f3",
+        "id": "fb115b0553",
         "name": "Serata di ottobre",
-        "createdAt": "2026-10-08T10:06:36.581Z",
+        "createdAt": "2026-10-08T10:33:17.967Z",
         "blind": false,
         "revealed": false,
         "wines": 3,
@@ -311,9 +311,9 @@
     "team": "giovedi",
     "events": [
       {
-        "id": "d40564d86c",
+        "id": "f63d1306e3",
         "name": "Alla cieca di giovedì",
-        "createdAt": "2026-10-08T10:06:36.744Z",
+        "createdAt": "2026-10-08T10:33:18.163Z",
         "blind": true,
         "revealed": true,
         "wines": 2,
@@ -331,9 +331,9 @@
         }
       },
       {
-        "id": "4529a7e3f3",
+        "id": "fb115b0553",
         "name": "Serata di ottobre",
-        "createdAt": "2026-10-08T10:06:36.581Z",
+        "createdAt": "2026-10-08T10:33:17.967Z",
         "blind": false,
         "revealed": false,
         "wines": 3,

@@ -23,7 +23,7 @@
     view: "list", tab: "tastings", tastings: [], tasting: null, wines: [], quota: "ok",
     stats: null, statsLoading: false, statsError: null, gform: null,
     loading: true, loadError: null,
-    sheet: null, drafts: {}, form: null, confirm: null, pending: {}, saved: null, notice: null
+    sheet: null, drafts: {}, gdrafts: {}, form: null, confirm: null, pending: {}, saved: null, notice: null
   };
 
   /* ---------------- testi ---------------- */
@@ -39,6 +39,7 @@
       updatedOn: "ultimo aggiornamento: {d}",
       e_gone: "Questa degustazione non esiste più: è stata eliminata.",
       e_closed_unsaved: "La degustazione è stata chiusa: il tuo voto non è stato salvato.",
+      e_closed_guess: "La degustazione è stata chiusa: la tua ipotesi non è stata salvata.",
       reauthAsked: "Richiesta inviata al sito. Se non succede nulla, torna alla pagina del sito e ricaricala.",
       warnSoon: "Attenzione: il servizio potrebbe presto passare in sola lettura.",
       e_unavailable: "Il servizio non è disponibile in questo momento. Riprova fra poco.",
@@ -94,6 +95,8 @@
       blindBadge: "alla cieca", revealedBadge: "svelata", blindLabel: "Vino {n}",
       blindCreate: "Alla cieca: i vini restano nascosti fino allo svelamento",
       blindNote: "Degustazione alla cieca: i vini restano nascosti finché l'organizzatore non li svela. Vota e prova a indovinare.",
+      blindClosedNote: "Degustazione chiusa: i voti sono definitivi. I vini si sapranno quando l'organizzatore li svelerà.",
+      blindClosedNoteOrg: "Degustazione chiusa, non ancora svelata: i partecipanti vedranno i vini solo quando li svelerai.",
       blindNoteOrg: "Degustazione alla cieca: tu vedi i vini, i partecipanti no, finché non li svelerai.",
       revealedNote: "Vini svelati: ecco chi erano. Le ipotesi sono definitive.",
       revealIt: "Svela i vini", revealWorking: "Svelo…",
@@ -135,6 +138,7 @@
       updatedOn: "last updated {d}",
       e_gone: "This tasting no longer exists: it was deleted.",
       e_closed_unsaved: "The tasting was closed: your vote was not saved.",
+      e_closed_guess: "The tasting was closed: your guess was not saved.",
       reauthAsked: "Request sent to the website. If nothing happens, go back to the website page and reload it.",
       warnSoon: "Heads up: the service may soon become read-only.",
       e_unavailable: "The service is unavailable right now. Try again shortly.",
@@ -190,6 +194,8 @@
       blindBadge: "blind", revealedBadge: "revealed", blindLabel: "Wine {n}",
       blindCreate: "Blind: wines stay hidden until the reveal",
       blindNote: "Blind tasting: the wines stay hidden until the organizer reveals them. Vote and try to guess.",
+      blindClosedNote: "Tasting closed: votes are final. The wines will be known when the organizer reveals them.",
+      blindClosedNoteOrg: "Tasting closed, not revealed yet: participants will see the wines only when you reveal them.",
       blindNoteOrg: "Blind tasting: you can see the wines, participants cannot until you reveal them.",
       revealedNote: "Wines revealed: here is who they were. Guesses are final.",
       revealIt: "Reveal the wines", revealWorking: "Revealing…",
@@ -242,7 +248,7 @@
   function isHiddenBlind() { return isBlind() && !S.tasting.revealed; }
   /* classifica con pari merito (1, 2, 2, 4) dei vini che hanno una media da mostrare */
   function ranking(wines) {
-    var rows = wines.filter(function (w) { return w.team; }).sort(function (a, b) { return b.team.avg - a.team.avg || b.team.count - a.team.count; });
+    var rows = wines.filter(function (w) { return w.team && w.team.count >= 2; }).sort(function (a, b) { return b.team.avg - a.team.avg || b.team.count - a.team.count; });
     rows.forEach(function (r) { r.rank = 1 + rows.filter(function (o) { return o.team.avg > r.team.avg; }).length; });
     return rows;
   }
@@ -339,8 +345,9 @@
       announce(t("e_gone"), true); focusSel("#h-main");
       return loadState("");
     }
-    if (e.code === "closed") {
+    if (e.code === "closed" || e.code === "revealed") {
       if (S.sheet) { S.drafts[S.sheet.wine] = S.sheet; S.sheet = null; text = t("e_closed_unsaved"); }
+      if (S.gform && where === "gform") text = t("e_closed_guess");
       S.form = null; S.gform = null; S.notice = { kind: "err", text: text }; announce(text, true);
       return loadState(S.tasting && S.tasting.id, true);
     }
@@ -401,7 +408,7 @@
       if (!r.session || !r.user || !r.config || !Array.isArray(r.config.modes)) throw mkErr("network");
       /* un altro utente (o un altro team) sullo stesso iframe non deve vedere le bozze del precedente */
       var cambiato = !S.user || S.user.team !== r.user.team || S.user.name !== r.user.name || S.user.role !== r.user.role;
-      if (cambiato) { S.drafts = {}; S.sheet = null; S.form = null; S.gform = null; S.confirm = null; S.tasting = null; S.wines = []; S.tastings = []; S.stats = null; S.statsError = null; S.tab = "tastings"; S.view = "list"; S.notice = null; }
+      if (cambiato) { S.drafts = {}; S.gdrafts = {}; S.sheet = null; S.form = null; S.gform = null; S.confirm = null; S.tasting = null; S.wines = []; S.tastings = []; S.stats = null; S.statsError = null; S.tab = "tastings"; S.view = "list"; S.notice = null; }
       S.session = r.session; S.user = r.user; S.config = r.config; S.quota = r.quota || "ok"; S.token = ""; S.fatal = null;
       S.lang = r.config.lang === "en" ? "en" : "it";
       document.documentElement.lang = S.lang;
@@ -513,7 +520,7 @@
     if (S.statsError) return h + statsErrorHtml();
     var st = S.stats;
     if (!st) return h + '<p class="muted" aria-busy="true">' + esc(t("loading")) + '</p>';
-    h += '<p class="muted small">' + esc(t(st.window.tastings === 1 ? "statsHintOne" : "statsHint", { n: st.window.tastings }) + (st.at ? " " + t("statsUpdated", { h: timeText(st.at) }) : "")) + '</p>';
+    if (st.window.tastings) h += '<p class="muted small">' + esc(t(st.window.tastings === 1 ? "statsHintOne" : "statsHint", { n: st.window.tastings }) + (st.at ? " " + t("statsUpdated", { h: timeText(st.at) }) : "")) + '</p>';
     if (!st.window.tastings) return h + '<p class="muted">' + esc(t("statsEmpty")) + '</p>';
     var m = st.mine;
     h += '<h3 class="section">' + esc(t("mineHeading")) + '</h3>';
@@ -579,6 +586,9 @@
       if (S.saved === w.id) h += '<p class="saved-note">✓ ' + esc(t("savedOk")) + '</p>';
     } else if (open) {
       h += '<p class="lock">' + esc(t("voteToSee")) + '</p>';
+    } else if (w.team) {
+      /* serata chiusa: la media (da due voti in su) la vedono tutti, anche chi non ha votato quel vino */
+      h += '<div class="score-line"><div class="tile team"><div class="band">' + esc(t("teamAvg")) + '</div><div class="big team">' + dec(w.team.avg) + '</div><div class="band">' + esc(plural(w.team.count, "voteSingle", "votePlural")) + '</div></div></div>';
     } else {
       h += '<p class="lock">' + esc(t("closedNoVote")) + '</p>';
     }
@@ -614,7 +624,7 @@
         if (r.max) h += '<p class="small"><b>' + esc(t("guessPoints", { p: r.points, m: r.max })) + '</b></p>';
       }
       var gs = w.guessStats;
-      if (gs && gs.guessers > 0) h += '<p class="small muted">' + esc(t("groupGuess", { a: gs.type.correct + "/" + gs.type.answered, b: gs.grape.correct + "/" + gs.grape.answered, c: gs.year.exact + "/" + gs.year.answered })) + '</p>';
+      if (gs && !gs.hidden && gs.guessers > 0) h += '<p class="small muted">' + esc(t("groupGuess", { a: gs.type.correct + "/" + gs.type.answered, b: gs.grape.correct + "/" + gs.grape.answered, c: gs.year.exact + "/" + gs.year.answered })) + '</p>';
       return h + '</div>';
     }
     if (S.gform && S.gform.wine === w.id) return guessFormHtml(w);
@@ -660,7 +670,7 @@
     var org = isOrg(), open = S.tasting.status === "open";
     var h = head() + notices() + '<p>' + btn("back", t("back"), { cls: "small ghost", fk: "back" }) + '</p>';
     h += '<div class="row spread"><h2 id="h-main" tabindex="-1" dir="auto">' + esc(S.tasting.name) + '</h2><span class="badges">' + badgesHtml(S.tasting) + '</span></div>';
-    if (isBlind()) h += '<p class="notice">' + esc(S.tasting.revealed ? t("revealedNote") : t(org ? "blindNoteOrg" : "blindNote")) + '</p>';
+    if (isBlind()) h += '<p class="notice">' + esc(S.tasting.revealed ? t("revealedNote") : t(!open ? (org ? "blindClosedNoteOrg" : "blindClosedNote") : (org ? "blindNoteOrg" : "blindNote"))) + '</p>';
     else if (!open) h += '<p class="notice">' + esc(t("closedNote")) + '</p>';
     if (S.loadError) h += loadErrorHtml();
     h += '<div class="row">' + btn("refresh", t("refresh"), { cls: "small ghost", fk: "refresh" });
@@ -833,12 +843,23 @@
   }
   document.addEventListener("keydown", function (e) { if (e.key === "Escape" && !app.contains(e.target)) escape(e); });
 
-  function closeSheet() {
-    var sh = S.sheet; if (!sh) return;
-    /* una bozza che l'utente ha toccato si tiene in memoria: riaprendo il vino la ritrova */
+  /* una bozza che l'utente ha toccato si tiene in memoria: riaprendo il vino la ritrova */
+  function stashSheet() {
+    var sh = S.sheet; if (!sh) return null;
     var tocc = sh.orig != null ? sheetKey(sh) !== sh.orig : (Object.keys(sh.touched).length > 0 || !!sh.note);
-    var w = sh.wine; if (tocc) S.drafts[w] = sh; else delete S.drafts[w];
-    S.sheet = null; focusAfter("vote-" + w); render();
+    if (tocc) S.drafts[sh.wine] = sh; else delete S.drafts[sh.wine];
+    S.sheet = null; return sh.wine;
+  }
+  /* l'ipotesi che si stava scrivendo non si perde aprendo quella di un altro vino: ritrovandola, torna com'era */
+  function stashGuess() {
+    var g = S.gform; if (!g) return;
+    var base = (S.wines.filter(function (x) { return x.id === g.wine; })[0] || {}).guess || {};
+    var tocc = (g.vals.type || "") !== (base.type || "") || (g.vals.grape || "") !== (base.grape || "") || (g.vals.year || "") !== (base.year || "");
+    if (tocc) S.gdrafts[g.wine] = g.vals; else delete S.gdrafts[g.wine];
+  }
+  function closeSheet() {
+    var w = stashSheet(); if (w == null) return;
+    focusAfter("vote-" + w); render();
   }
 
   app.addEventListener("submit", function (e) {
@@ -906,7 +927,7 @@
       case "retry-load": return loadState(S.loadError && S.loadError.tasting);
       case "tab": S.tab = b.getAttribute("data-tab"); S.notice = null; S.form = null; focusAfter("tab-" + S.tab); render(); if (S.tab !== "tastings") return loadStats(); return loadState("", true);
       case "refresh-stats": return loadStats();
-      case "guess": { var gw = S.wines.filter(function (x) { return x.id === id; })[0]; if (!gw) return; var g0 = gw.guess || {}; S.gform = { wine: id, vals: { type: g0.type || "", grape: g0.grape || "", year: g0.year || "" }, error: "" }; S.notice = null; S.saved = null; focusAfter("g-type"); return render(); }
+      case "guess": { var gw = S.wines.filter(function (x) { return x.id === id; })[0]; if (!gw) return; var g0 = gw.guess || {}; stashGuess(); S.gform = { wine: id, vals: S.gdrafts[id] || { type: g0.type || "", grape: g0.grape || "", year: g0.year || "" }, error: "" }; delete S.gdrafts[id]; S.notice = null; S.saved = null; focusAfter("g-type"); return render(); }
       case "cancel-guess": { var gw2 = S.gform && S.gform.wine; S.gform = null; focusAfter("guess-" + gw2); return render(); }
       case "ask-reveal": S.confirm = "reveal"; focusAfter("confirm"); return render();
       case "refresh": S.notice = null; return loadState(S.tasting && S.tasting.id);
@@ -961,6 +982,7 @@
   /* ---------------- cronologia: il tasto Indietro del browser resta dentro lo spazio ---------------- */
   function pushHistory(tid) { try { history.pushState({ v: "tasting", id: tid }, ""); } catch (e) { /* ok */ } }
   function openTasting(id, push) {
+    stashSheet(); stashGuess();
     S.view = "tasting"; S.sheet = null; S.form = null; S.gform = null; S.confirm = null; S.notice = null; S.saved = null;
     S.tasting = null; S.wines = [];
     if (push) pushHistory(id);
@@ -968,6 +990,7 @@
     return loadState(id);
   }
   function goList(push) {
+    stashSheet(); stashGuess();
     S.view = "list"; S.tasting = null; S.wines = []; S.sheet = null; S.form = null; S.gform = null; S.confirm = null; S.notice = null;
     if (push) { try { history.pushState({ v: "list" }, ""); } catch (e) { /* ok */ } }
     focusSel("#h-main");

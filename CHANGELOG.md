@@ -3,6 +3,14 @@
 La versione e la data dell'ultimo aggiornamento sono mostrate in fondo all'app e dello spazio di team
 (fonte: `public/js/version.js`, da tenere uguale a `package.json`).
 
+## 1.7.1 — 8 ottobre 2026
+Giro totale di verifica (backend, spazio di team, app, guide).
+- **Spazio di team, privacy**: in una cieca chiusa e non svelata le statistiche non mostrano più la tipologia vera dei vini; il riepilogo delle ipotesi si vede solo da due persone in su e la cancellazione dei dati di una persona lo aggiorna; le statistiche si aggiornano subito dopo una cancellazione.
+- **Spazio di team, coerenza**: un voto che arriva a serata già chiusa non entra; uno svelamento in contemporanea a una chiusura non si perde; lo svelamento non lascia più il riepilogo a metà se si interrompe; vincitore e pari merito seguono la classifica; «Il tuo vino migliore» non diventa anonimo per i vini senza media; eliminare una serata ripulisce anche gli elenchi personali (e costa molti meno comandi).
+- **Spazio di team, interfaccia**: nomi molto lunghi non allargano più la pagina; «giusto» e «quasi» leggibili con ogni tema del partner; la classifica provvisoria conta solo i vini con almeno due voti; a serata chiusa la media è visibile anche per i vini non votati; la cieca chiusa non invita più a votare; voto e ipotesi lasciati a metà non si perdono tornando indietro; annata «NV» nelle ipotesi; pulsanti piccoli a 44 px.
+- **App**: su schermo largo la card «Guida» non copre più «Il tuo archivio»; «Spumante» intero in Alla cieca; una copia importata non può più eseguire codice attraverso l'anteprima dell'etichetta; prezzo limitato a 100.000 € e annata tra 1800 e l'anno prossimo (anche alla cieca); pulsanti 0–10 più larghi sui telefoni stretti; focus da tastiera sul link della guida; contrasto del verde nelle statistiche.
+- **Guide**: corretto il comando `curl` della guida di attivazione; barra delle sezioni «in alto»; sette comandi di esempio; codici d'errore e risposta `/events` completi; `answers` nullo con meno di due ipotesi.
+
 ## 1.7.0 — 8 ottobre 2026
 - **Spazio di team: Alla cieca.** L'organizzatore può creare una degustazione «Alla cieca»: i partecipanti vedono «Vino 1, Vino 2…» e, oltre al voto, possono indovinare tipologia, vitigno e annata (1 + 2 + 2 punti). Con «Svela i vini» la serata si chiude per sempre e tutti vedono i nomi e come sono andate le ipotesi; il riepilogo del gruppo è anonimo.
 - **Spazio di team: Classifica e Statistiche.** Classifica dei vini (provvisoria a serata aperta, finale a serata chiusa, con il pari merito) e scheda Statistiche con i dati aggregati delle ultime 30 degustazioni chiuse del team.

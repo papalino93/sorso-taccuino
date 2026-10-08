@@ -98,9 +98,9 @@ function build() {
       ${fig("team-base-10-org-chiusa.png", 2, "A serata chiusa i voti restano visibili ma <b>non si cambiano più</b>.", "lg")}
     </div>
     ${table(["Azione", "Cosa succede"], [
-      ["<b>Chiudi</b>", "Nessuno può più votare né aggiungere vini. I voti sono definitivi."],
-      ["<b>Riapri</b>", "Si può votare e aggiungere vini di nuovo. Utile se hai chiuso troppo presto."],
-      ["<b>Elimina</b>", "Cancella la serata con tutti i suoi vini e voti. <b>Non si può annullare</b>: l'app chiede conferma e ripete il nome."]], [0])}
+      ["<b>Chiudi la degustazione</b>", "Nessuno può più votare né aggiungere vini. I voti sono definitivi."],
+      ["<b>Riapri la degustazione</b>", "Si può votare e aggiungere vini di nuovo. Utile se hai chiuso troppo presto."],
+      ["<b>Elimina la degustazione</b>", "Cancella la serata con tutti i suoi vini e voti. <b>Non si può annullare</b>: l'app chiede conferma e ripete il nome."]], [0])}
   `));
 
   P.push(pg("paper", "Leggere i risultati", `
@@ -166,7 +166,7 @@ function build() {
       ["Chi vede le serate che creo?", "Tutti i membri del tuo gruppo, nell'elenco «Degustazioni del team». Gli altri gruppi non le vedono."],
       ["Non vedo «Nuova degustazione».", "Il tuo profilo non è organizzatore: chiedilo a chi cura il sito."],
       ["Compare «Devi rientrare».", "L'accesso è scaduto (dopo qualche ora). Ricarica la pagina del tuo club: di solito basta."],
-      ["La media non compare.", "Vota prima quel vino: la media si sblocca dopo il tuo voto."],
+      ["La media non compare.", "Vota prima quel vino: la media si sblocca dopo il tuo voto. A serata chiusa la vedono tutti, dal secondo voto."],
       ["Ho chiuso troppo presto.", "Premi «Riapri la degustazione»: si può votare e aggiungere vini di nuovo."],
       ["Posso riaprire una serata svelata?", "No: lo svelamento è definitivo. Una serata alla cieca ancora non svelata si può chiudere e riaprire come le altre."],
       ["Non vedo i nomi dei vini.", "È una serata alla cieca: i nomi compaiono quando l'organizzatore svela i vini."],
