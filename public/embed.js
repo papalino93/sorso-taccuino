@@ -35,6 +35,7 @@
       e_generic: "Qualcosa non ha funzionato. Riprova.",
       e_rate: "Troppe richieste in poco tempo. Aspetta qualche secondo e riprova.",
       e_readonly: "Il servizio è temporaneamente in sola lettura: puoi consultare, ma non votare né creare.",
+      updatedOn: "ultimo aggiornamento: {d}",
       e_gone: "Questa degustazione non esiste più: è stata eliminata.",
       e_closed_unsaved: "La degustazione è stata chiusa: il tuo voto non è stato salvato.",
       reauthAsked: "Richiesta inviata al sito. Se non succede nulla, torna alla pagina del sito e ricaricala.",
@@ -72,7 +73,7 @@
       vote: "Vota", editVote: "Modifica il mio voto", yourVote: "Il tuo voto", teamAvg: "Media del team",
       voteSingle: "{n} voto", votePlural: "{n} voti",
       votedSingle: "{n} persona ha votato", votedPlural: "{n} persone hanno votato",
-      voteToSee: "Vota questo vino per vedere la media del team.", savedOk: "Voto salvato.",
+      voteToSee: "Vota questo vino per vedere la media del team.", savedOk: "Voto salvato.", aboveAvg: "+{n} sopra la media", belowAvg: "−{n} sotto la media", onAvg: "In linea con la media",
       modeLabel: "Modalità di voto", modeSmart: "Voto rapido", modeFull: "Scheda completa",
       smartHint: "Tre giudizi da 50 a 100.", fullHint: "Nove giudizi da 0 a 10 sulle quattro fasi.",
       eye: "Occhio", nose: "Naso", mouth: "Bocca",
@@ -96,6 +97,7 @@
       e_generic: "Something went wrong. Please try again.",
       e_rate: "Too many requests in a short time. Wait a few seconds and try again.",
       e_readonly: "The service is temporarily read-only: you can browse, but not vote or create.",
+      updatedOn: "last updated {d}",
       e_gone: "This tasting no longer exists: it was deleted.",
       e_closed_unsaved: "The tasting was closed: your vote was not saved.",
       reauthAsked: "Request sent to the website. If nothing happens, go back to the website page and reload it.",
@@ -133,7 +135,7 @@
       vote: "Vote", editVote: "Edit my vote", yourVote: "Your vote", teamAvg: "Team average",
       voteSingle: "{n} vote", votePlural: "{n} votes",
       votedSingle: "{n} person has voted", votedPlural: "{n} people have voted",
-      voteToSee: "Vote on this wine to see the team average.", savedOk: "Vote saved.",
+      voteToSee: "Vote on this wine to see the team average.", savedOk: "Vote saved.", aboveAvg: "+{n} above average", belowAvg: "−{n} below average", onAvg: "In line with the average",
       modeLabel: "Voting mode", modeSmart: "Quick score", modeFull: "Full sheet",
       smartHint: "Three ratings from 50 to 100.", fullHint: "Nine ratings from 0 to 10 across four stages.",
       eye: "Eye", nose: "Nose", mouth: "Mouth",
@@ -180,6 +182,13 @@
     setTimeout(function () { el.textContent = text; }, 30);
   }
 
+  /* versione e data dell'ultimo aggiornamento, sempre in fondo (fonte: js/version.js) */
+  function versionHtml() {
+    if (!window.SORSO_VERSION) return "";
+    var d = SORSO_VERSION.date;
+    try { d = new Date(SORSO_VERSION.date + "T12:00:00").toLocaleDateString(S.lang === "en" ? "en-GB" : "it-IT", { day: "numeric", month: "short", year: "numeric" }); } catch (e) { /* data grezza */ }
+    return '<p class="foot">Sorso · v' + esc(SORSO_VERSION.version) + ' · ' + esc(t("updatedOn", { d: d })) + '</p>';
+  }
   function reportHeight() {
     try { parent.postMessage({ type: "sorso:height", height: Math.ceil(app.getBoundingClientRect().height) }, "*"); } catch (e) { /* fuori da un iframe */ }
   }
@@ -241,6 +250,8 @@
     var text = errText(e);
     /* degustazione eliminata o chiusa da un altro mentre si lavorava: si torna a uno stato vero */
     if (e.code === "not_found" && S.view === "tasting" && !(where === "form" && S.form && S.form.kind === "wine" && false)) {
+      var gone = S.tasting && S.tasting.id;
+      S.tastings = S.tastings.filter(function (x) { return x.id !== gone; });     // sparisce subito dall'elenco, senza aspettare il ricarico
       S.tasting = null; S.wines = []; S.sheet = null; S.form = null; S.confirm = null;
       S.view = "list"; S.notice = { kind: "err", text: t("e_gone") };
       announce(t("e_gone"), true); focusSel("#h-main");
@@ -375,9 +386,16 @@
     var h = '<article class="card wine' + (S.saved === w.id ? " just-saved" : "") + '" aria-labelledby="wn-' + esc(w.id) + '">' +
       '<h3 class="name" id="wn-' + esc(w.id) + '" dir="auto">' + esc(w.name) + '</h3><p class="meta" dir="auto">' + wineLine(w) + '</p>';
     if (w.mine) {
-      h += '<div class="score-line"><div><div class="band">' + esc(t("yourVote")) + '</div><div class="big">' + w.mine.score + '</div></div>';
-      if (w.team) h += '<div><div class="band">' + esc(t("teamAvg")) + ' · ' + esc(plural(w.team.count, "voteSingle", "votePlural")) + '</div><div class="big team">' + dec(w.team.avg) + '</div></div>';
-      h += '</div><p class="band">' + esc(bandWord(w.mine.score)) + ' · ' + esc(t(w.mine.mode === "full" ? "modeFull" : "modeSmart")) + '</p>';
+      /* due blocchi affiancati: il tuo voto e la media del team (a colore pieno); dal 96 anche il tuo
+         voto si colora: è l'unico momento in cui il colore occupa lo spazio */
+      h += '<div class="score-line"><div class="tile' + (w.mine.score >= 96 ? " hi" : "") + '"><div class="band">' + esc(t("yourVote")) + '</div><div class="big">' + w.mine.score + '</div><div class="band">' + esc(bandWord(w.mine.score)) + '</div></div>';
+      if (w.team) h += '<div class="tile team"><div class="band">' + esc(t("teamAvg")) + '</div><div class="big team">' + dec(w.team.avg) + '</div><div class="band">' + esc(plural(w.team.count, "voteSingle", "votePlural")) + '</div></div>';
+      h += '</div>';
+      if (w.team) {
+        var diff = Scoring.roundHalfUp(w.mine.score - w.team.avg, 1);
+        h += '<p class="chips"><span class="chip">' + esc(diff === 0 ? t("onAvg") : t(diff > 0 ? "aboveAvg" : "belowAvg", { n: dec(Math.abs(diff)) })) + '</span>' +
+          '<span class="chip">' + esc(t(w.mine.mode === "full" ? "modeFull" : "modeSmart")) + '</span></p>';
+      } else h += '<p class="chips"><span class="chip">' + esc(t(w.mine.mode === "full" ? "modeFull" : "modeSmart")) + '</span></p>';
       if (S.saved === w.id) h += '<p class="saved-note">✓ ' + esc(t("savedOk")) + '</p>';
     } else if (open) {
       h += '<p class="lock">' + esc(t("voteToSee")) + '</p>';
@@ -507,7 +525,7 @@
     if (S.fatal) html = viewFatal();
     else if (!S.user) html = '<section class="card" aria-busy="true"><p>' + esc(t("loading")) + '</p></section>';
     else html = S.view === "tasting" && S.tasting ? viewTasting() : viewList();
-    app.innerHTML = '<main>' + html + '</main>';
+    app.innerHTML = '<main>' + html + '</main>' + versionHtml();
     var logo = app.querySelector(".logo"); if (logo) logo.addEventListener("error", function () { logo.remove(); reportHeight(); });
     var title = ((S.config && S.config.title) || "Sorso") + (S.user && !S.fatal ? " — " + (S.view === "tasting" && S.tasting ? S.tasting.name : t("tastings")) : "");
     if (title !== lastTitle) { document.title = title; lastTitle = title; }

@@ -66,6 +66,7 @@ const ok = (c, m) => { console.log((c ? "OK   " : "FAIL ") + m); if (!c) fails++
   await api({ op: "tasting.delete", tasting: t.id }, org);
   await p.locator('[data-act="refresh"]').first().click();
   await p.locator("#h-main", { hasText: "Degustazioni" }).waitFor();
+  await p.locator(".card.link").first().waitFor({ state: "detached", timeout: 5000 }).catch(() => {});
   ok(/non esiste più/.test(await p.locator(".notice.err").textContent()) && await p.locator(".card.link").count() === 0 && await p.locator(".wine").count() === 0, "degustazione eliminata: si torna all'elenco con un avviso, senza vini fantasma");
   await p.context().close();
 

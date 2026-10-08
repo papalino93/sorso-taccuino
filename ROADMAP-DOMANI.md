@@ -24,8 +24,8 @@ Senza, posso provare l'integrazione solo in locale. Con, faccio la **prova di ac
 ### 2. Mandami il file "Salva copia" delle tue schede  ☐
 Taccuino → in fondo, riquadro "Il tuo archivio" → **Salva copia** → allega il file in chat. Mi serve per confermare i punteggi sulle tue schede vere (oggi la curva è scelta in base alle parole dei giudizi, non ancora verificata sui tuoi dati). Se il file è troppo grande, dimmelo e ti preparo una pagina che fa il confronto nel tuo browser.
 
-### 3. Guarda le anteprime del design B e dimmi ok o cosa cambiare  ☐
-Ti ho mandato (o ti mando) le schermate reali dell'app con il design B. Dimmi: va bene così? Colore d'accento (ora viola)? Altro? **Solo dopo il tuo ok lo porto online.**
+### 3. Design B  ✅ approvato da te
+Portato online nella **versione 1.4.0 (aggiornamento dell'8 ottobre 2026)**, con la possibilità per chi usa l'app di scegliere i propri colori (Taccuino → riquadro «Aspetto»: colore d'accento e sfondo, predefiniti o a scelta; il testo resta sempre leggibile). Versione e data si leggono in fondo all'app e dello spazio di team.
 
 ### 4. Controlla la tua app dal telefono  ☐
 Apri https://sorso-taccuino.vercel.app/ con il browser che usi di solito:
@@ -53,13 +53,28 @@ Mi servono questi dati per creare il loro spazio:
 - Chi, da loro, riceverà il **segreto di firma e la chiave API**? Mandali **separati e su un canale sicuro** (non per email in chiaro, non in chat condivise).
 
 ### 7. Manda loro la guida PDF  ☐
-`docs/guida-integrazione-sorso.pdf` (14 pagine). **Mandala solo dopo che ti ho scritto che la verifica finale è pulita** (vedi "Stato a fine lavoro").
+`docs/guida-attivazione-api.pdf` (3 pagine: cosa mandare, cosa si riceve, prima prova, messa online) e, per chi sviluppa, `docs/guida-integrazione-sorso.pdf` (14 pagine, tutti i dettagli). **Mandale solo dopo che ti ho scritto che la verifica finale è pulita** (vedi "Stato a fine lavoro").
 
 ### 8. Decisioni che ti spettano (anche dopo)  ☐
 - **Foto dei vini nel team**: oggi non ci sono, per risparmiare spazio gratuito. Va bene aspettare?
 - **Chi gestisce le richieste di cancellazione** dei dati degli utenti del partner (c'è l'API, serve una persona).
 - **Backup**: consiglia al partner di scaricare il CSV dei risultati dopo ogni serata (non è un servizio con garanzia di continuità).
 - **Stato commerciale**: oggi il progetto sta su un piano gratuito che consente solo uso non commerciale. Se qualcuno verrà pagato per il lavoro o per l'hosting, **dimmelo prima del via**: va cambiato hosting (resta gratis, ma serve del lavoro).
+
+---
+
+## Attivare un partner (tu, circa 5 minuti)
+
+Servono Node 20+, il repository e le due variabili `KV_REST_API_URL` e `KV_REST_API_TOKEN` nel terminale. Sostituisci i valori in maiuscolo:
+
+```
+node scripts/partner.js create ID-PARTNER --name "Nome del club" --origin https://www.sito-partner.example --lang it
+node scripts/partner.js theme ID-PARTNER --accent #8c1d3f --bg #fbf6f1 --ink #2a1a1f --title "Nome del club" --logo https://.../logo.png
+node scripts/partner.js settings ID-PARTNER --modes smart,full --default-mode smart
+node scripts/partner.js token ID-PARTNER --sub prova --team test --role organizer --name Prova   # token di prova
+```
+
+`create` mostra **una sola volta** segreto di firma e chiave API: copiali subito e mandali al partner in **due invii separati**. Per aggiungere un dominio: `origins ID-PARTNER --add --origin https://altro.example`. Per ruotare le credenziali: `rotate-secret` e `rotate-key`. Per sospendere: `disable ID-PARTNER`. Poi manda al partner `docs/guida-attivazione-api.pdf`.
 
 ---
 
@@ -86,11 +101,11 @@ Capitolo 11 della guida PDF ("Elenco di verifica prima di andare online"). In br
 
 - **Prova sul database vero** (Upstash/Vercel): non ho le chiavi. È il punto 1 della mattina. Finché non è fatta, non andare online col partner.
 - **Eventi personali** nell'app (la tua decisione "gli eventi devono essere personali"): non toccato. Non riguarda lo spazio di team del partner; è una modifica a parte dell'app personale (campo `evento` sulle schede e chiusura dello spazio condiviso). Dimmi se farla prima o dopo il design.
-- **Nuovo design B**: vedi il punto 3. Resta su un ramo a parte e **non è online**.
+- **Design B**: approvato da te e portato online (versione 1.4.0, aggiornamento dell'8 ottobre 2026), con la scelta dei colori per chi usa l'app.
 - **Salvataggio automatico della bozza** dell'app personale se si ricarica la pagina: non fatto (difetto basso). Oggi chiede conferma prima di «Azzera».
 
 **Una cosa da sapere e su cui decidere** (non è un difetto, è un limite delle medie)
 
 In un gruppo molto piccolo (2-3 persone), chi vede la media prima e dopo un nuovo voto può dedurre quel voto. Succede in qualunque sistema con medie visibili. Alternative: mostrare la media solo da 3 voti, o solo a degustazione chiusa. Oggi la guida lo dice al partner. Dimmi se vuoi cambiare.
 
-**Per rilasciare**: le correzioni sono su un ramo e le porto in produzione appena la verifica è pulita (lo faccio io, non il design).
+
