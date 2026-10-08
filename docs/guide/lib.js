@@ -11,14 +11,27 @@ const DATA = `${dd} ${MESI[mm - 1]} ${yy}`;
 const VERSIONE = V.version;
 const BASE = "https://sorso-taccuino.vercel.app";
 
-const img = n => "data:image/png;base64," + fs.readFileSync(path.join(__dirname, "img", n)).toString("base64");
+const JPG = path.join(__dirname, "img", "jpg");
+const img = n => {
+  const j = path.join(JPG, n.replace(/\.png$/, ".jpg"));
+  return fs.existsSync(j) ? "data:image/jpeg;base64," + fs.readFileSync(j).toString("base64")
+    : "data:image/png;base64," + fs.readFileSync(path.join(__dirname, "img", n)).toString("base64");
+};
 const esc = s => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
 const MARCHIO = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="18" fill="#0B0B10"/><circle cx="32" cy="32" r="22.5" fill="none" stroke="#2c2c36" stroke-width="5.5"/><path d="M32 9.5a22.5 22.5 0 1 1-20.6 13.4" fill="none" stroke="#A58BFF" stroke-width="5.5" stroke-linecap="round"/><circle cx="32" cy="27" r="10" fill="#fff"/><circle cx="32" cy="27" r="7.8" fill="#A58BFF"/><path d="M27.2 24.2a6.2 6.2 0 0 1 5.2-2.9" fill="none" stroke="#fff" stroke-opacity=".8" stroke-width="1.9" stroke-linecap="round"/><path d="M19.4 41Q32 53.4 44.6 41Q32 48.6 19.4 41Z" fill="#fff"/></svg>`;
 const ROMBO = `<svg class="rombo" viewBox="0 0 10 10"><path d="M5 0l5 5-5 5-5-5z" fill="currentColor"/></svg>`;
 
 const CSS = `
-@import url("https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@400;450;500;600;700;800&family=Geist+Mono:wght@400;500&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&display=swap");
+/* Geist e Geist Mono statici (cartella fonts/): i font variabili vengono incorporati nel PDF come "Type 3" e rendono lenta la pagina */
+@font-face { font-family: 'Geist'; font-weight: 400; src: url("fonts/geist-400.woff") format("woff"); }
+@font-face { font-family: 'Geist'; font-weight: 500; src: url("fonts/geist-500.woff") format("woff"); }
+@font-face { font-family: 'Geist'; font-weight: 600; src: url("fonts/geist-600.woff") format("woff"); }
+@font-face { font-family: 'Geist'; font-weight: 700; src: url("fonts/geist-700.woff") format("woff"); }
+@font-face { font-family: 'Geist'; font-weight: 800; src: url("fonts/geist-800.woff") format("woff"); }
+@font-face { font-family: 'Geist Mono'; font-weight: 400; src: url("fonts/geistmono-400.woff") format("woff"); }
+@font-face { font-family: 'Geist Mono'; font-weight: 500; src: url("fonts/geistmono-500.woff") format("woff"); }
 @page { size: A4; margin: 0; }
 :root { --ink:#0B0B10; --paper:#FBF4E6; --card:#F1E8D6; --line:#E0D5BD; --violet:#8C1D3F; --lilac:#E7849D; --mute:#5b5b64; --night:#120A0E; --night2:#2A0E19; }
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -31,7 +44,7 @@ code { background: rgba(140,29,63,.09); color: #7A1535; padding: .5pt 3.5pt; bor
 .ink code, .cover code { background: rgba(255,255,255,.12); color: #F6D5DE; }
 
 .page { width: 210mm; height: 297mm; position: relative; overflow: hidden; page-break-after: always; break-after: page; background: var(--paper); }
-.page.ink { background: radial-gradient(900px 520px at 85% -5%, rgba(140,29,63,.35), transparent 62%), radial-gradient(700px 500px at 0% 105%, rgba(231,132,157,.16), transparent 60%), var(--night); color: #F4F2FF; }
+.page.ink { background: radial-gradient(900px 520px at 85% -5%, #3a1322, #120A0E 62%); color: #F4F2FF; }
 .frame { position: absolute; inset: 8mm; border: .25mm solid rgba(140,29,63,.45); pointer-events: none; }
 .ink .frame, .cover .frame { border-color: rgba(231,132,157,.5); }
 .frame .c { position: absolute; width: 3.2mm; height: 3.2mm; color: var(--violet); }
@@ -69,8 +82,8 @@ ul.l li::before { content: ""; position: absolute; left: .6mm; top: 1.9mm; width
 .ink ul.l li::before { background: var(--lilac); }
 
 /* copertina */
-.cover { background: radial-gradient(1000px 700px at 80% 8%, rgba(140,29,63,.55), transparent 60%), radial-gradient(800px 700px at 5% 100%, rgba(231,132,157,.25), transparent 55%), var(--night); color: #fff; }
-.cover .big100 { position: absolute; right: -14mm; bottom: 38mm; font-family: 'Geist', sans-serif; font-weight: 800; font-size: 250pt; line-height: .8; letter-spacing: -.08em; color: transparent; -webkit-text-stroke: .35mm rgba(231,132,157,.35); }
+.cover { background: radial-gradient(1000px 700px at 80% 8%, #4d1629, #120A0E 62%); color: #fff; }
+.cover .big100 { position: absolute; right: -14mm; bottom: 38mm; font-family: 'Geist', sans-serif; font-weight: 800; font-size: 250pt; line-height: .8; letter-spacing: -.08em; color: transparent; -webkit-text-stroke: .35mm #5a2f3d; }
 .cover .mk { position: absolute; left: 22mm; top: 24mm; width: 17mm; height: 17mm; }
 .cover .brand { position: absolute; left: 43mm; top: 27.5mm; font-size: 8pt; letter-spacing: .3em; text-transform: uppercase; color: rgba(255,255,255,.78); }
 .cover .brand b { display: block; font-family: 'Geist', sans-serif; font-weight: 800; letter-spacing: -.02em; font-size: 22pt; text-transform: none; color: #fff; margin-top: .5mm; }
@@ -106,8 +119,8 @@ ul.l li::before { content: ""; position: absolute; left: .6mm; top: 1.9mm; width
 .ink .call { background: rgba(255,255,255,.08); border-color: var(--lilac); }
 
 /* telefono */
-.phone { position: relative; width: 56mm; border-radius: 8.5mm; background: #0B0B10; padding: 1.7mm; box-shadow: 0 6mm 10mm -4mm rgba(11,11,16,.45), 0 0 0 .3mm rgba(255,255,255,.1) inset; }
-.ink .phone { box-shadow: 0 8mm 14mm -4mm rgba(0,0,0,.7), 0 0 0 .3mm rgba(231,132,157,.35); }
+.phone { position: relative; width: 56mm; border-radius: 8.5mm; background: #0B0B10; padding: 1.7mm; box-shadow: 0 0 0 .3mm #34343d inset; }
+.ink .phone { box-shadow: 0 0 0 .3mm #7a4456 inset; }
 .phone .scr { border-radius: 6.9mm; overflow: hidden; background: #fff; aspect-ratio: 390 / 800; position: relative; }
 .phone .scr img { width: 100%; display: block; }
 .phone .scr::before { content: ""; position: absolute; z-index: 2; top: 2mm; left: 50%; transform: translateX(-50%); width: 15mm; height: 4mm; border-radius: 3mm; background: #0B0B10; }

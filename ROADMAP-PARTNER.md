@@ -1,6 +1,6 @@
 # Sorso — cosa devi fare tu per il partner
 
-Aggiornata l'8 ottobre 2026 · **Sorso 1.6.1**.
+Aggiornata l'8 ottobre 2026 · **Sorso 1.6.2**.
 
 **Dove siamo.** Il sito, l'app personale (con la vista da PC) e lo spazio di team per il partner sono pronti e online. Test automatici: tutti verdi. Le tre guide PDF sono aggiornate con la nuova grafica. **Manca una sola cosa tecnica prima di andare dal partner: la prova sul database vero**, che io non posso fare dal mio ambiente.
 
@@ -13,17 +13,41 @@ Legenda: ☐ da fare · ✅ fatto
 ### 1. Decidi lo stato commerciale  ☐  *(5 minuti, ma può bloccare tutto)*
 Oggi Sorso sta sul piano gratuito di Vercel, che **consente solo uso non commerciale**. Se qualcuno verrà pagato (per il lavoro, per l'hosting, per il servizio), **dimmelo prima**: va cambiato hosting (resta a costo zero o quasi, ma serve del lavoro). Se è un favore a un club, siamo a posto.
 
-### 2. Dammi accesso al database, così provo tutto sul sito vero  ☐  *(circa 20 minuti)*
-È l'unico passaggio che ancora manca. Con l'accesso faccio la **prova di accettazione** completa (partner di prova, voti, team separati, cancellazione) e poi cancello i dati di prova.
-- Apri le impostazioni dell'ambiente cloud (menu dell'ambiente nella barra del titolo della sessione → **Modifica**).
-- Aggiungi due variabili: `KV_REST_API_URL` e `KV_REST_API_TOKEN`. I valori li copi da Vercel (progetto *sorso-taccuino* → Settings → Environment Variables, oppure Storage). **Non incollarli in chat.**
-- Apri una **sessione nuova** (quella attuale non le vede) e incolla come primo messaggio:
-  > Leggi ROADMAP-PARTNER.md e PIANO.md. Fai la prova di accettazione dell'integrazione sul sito vero con un partner di prova, poi cancellalo.
-- Se preferisci non dare quel token (permette anche di scrivere sul database), fai tu questi due comandi dal tuo computer (servono Node 20+, `git clone`, `npm install` e le due variabili nel terminale) e dimmi l'esito:
-  ```
-  node scripts/partner.js create prova --name "Prova" --origin https://IL-TUO-DOMINIO
-  node scripts/partner.js token prova --sub anna --team test --role organizer --name Anna
-  ```
+### 2. Vercel e database: passo passo  ☐  *(circa 20 minuti)*
+È l'unico passaggio tecnico che ancora manca: con l'accesso al database faccio la **prova di accettazione** completa (partner di prova, voti, team separati, cancellazione) e poi cancello i dati di prova. I nomi dei menu di Vercel cambiano ogni tanto: se un nome non torna, cerca quello più simile.
+
+**Passo 1 · Entra nel progetto su Vercel**
+1. Vai su https://vercel.com e accedi.
+2. Dalla home apri il progetto **sorso-taccuino**.
+3. Controlla che in alto compaia il deploy di produzione con stato **Ready** e che https://sorso-taccuino.vercel.app/ si apra.
+
+**Passo 2 · Trova il database**
+1. Nel progetto apri la scheda **Storage**.
+2. Dovresti vedere un database **Redis** (Upstash). Clicca sul nome: si apre la sua pagina. Se la scheda è vuota, scrivimelo: vuol dire che il database vive altrove e lo ritroviamo insieme.
+3. Nella pagina del database, la sezione **.env.local** o **Quickstart** mostra i due valori che servono: `KV_REST_API_URL` e `KV_REST_API_TOKEN`. In alternativa: **Settings → Environment Variables** del progetto, e clicca l'occhio accanto alla variabile per vederne il valore.
+
+**Passo 3 · Scegli come farmi fare la prova**
+- **Via sicura (consigliata se hai dubbi):** non mi dai niente e i due comandi li lanci tu dal tuo computer (vedi sotto, «Sul tuo computer»). Poi mi dici cosa è uscito.
+- **Via veloce:** me le dai nell'ambiente cloud, **senza incollarle in chat**:
+  1. Nella sessione, clicca il **menu dell'ambiente** nella barra del titolo → **Edit**.
+  2. Dove c'è **Network secrets** (o *API credentials*) aggiungi il token; se non c'è, usa **Environment variables**. Crea due variabili: `KV_REST_API_URL` (il valore dell'indirizzo) e `KV_REST_API_TOKEN` (il token).
+  3. Sempre in **Edit → Network access**: se il livello è «Limited», aggiungi il dominio del database (finisce con `.upstash.io`, lo vedi nell'indirizzo `KV_REST_API_URL`) sotto **Allowed domains**.
+  4. Salva e apri una **sessione nuova** (quella attuale non vede le modifiche). Incolla come primo messaggio:
+     > Leggi ROADMAP-PARTNER.md e PIANO.md. Fai la prova di accettazione dell'integrazione sul sito vero con un partner di prova, poi cancellalo.
+  5. Il token permette anche di **scrivere** sul database. Finita la prova torna in **Edit** e **cancella** le due variabili.
+
+**Passo 4 · Controlli su Vercel (2 minuti)**
+1. **Settings → General**: guarda il piano. Se è **Hobby**, vale il punto 1 (solo uso non commerciale).
+2. **Settings → Deployment Protection**: la produzione deve poter essere aperta senza accedere a Vercel. Prova ad aprire https://sorso-taccuino.vercel.app/ da una finestra privata del browser: se si apre, sei a posto.
+3. **Settings → Environment Variables**: devono esserci `KV_REST_API_URL` e `KV_REST_API_TOKEN` per **Production**. Sono quelle che usano le funzioni del sito.
+
+**Sul tuo computer (serve solo per la via sicura e per attivare il partner)**
+1. Installa **Node 20 o più recente** da https://nodejs.org (versione LTS), poi apri il Terminale (Mac) o PowerShell (Windows).
+2. Scarica il progetto: `git clone https://github.com/papalino93/sorso-taccuino.git`, poi `cd sorso-taccuino` e `npm install`.
+3. Imposta le due variabili nella stessa finestra del terminale:
+   - Mac: `export KV_REST_API_URL="..."` e `export KV_REST_API_TOKEN="..."`
+   - Windows (PowerShell): `$env:KV_REST_API_URL="..."` e `$env:KV_REST_API_TOKEN="..."`
+4. Lancia i comandi di `node scripts/partner.js ...` indicati ai punti 6 e seguenti. Le variabili valgono solo in quella finestra: chiudendola spariscono.
 
 ### 3. Guarda Sorso 1.6.1 con i tuoi occhi  ☐  *(10 minuti)*
 Aprilo su telefono e su PC, con il browser che usi di solito: https://sorso-taccuino.vercel.app/

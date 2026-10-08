@@ -3,6 +3,9 @@
 La versione e la data dell'ultimo aggiornamento sono mostrate in fondo all'app e dello spazio di team
 (fonte: `public/js/version.js`, da tenere uguale a `package.json`).
 
+## 1.6.2 — 8 ottobre 2026
+- Guide PDF molto più leggere e veloci da sfogliare: da 2,8 / 1,8 / 0,5 MB a 1,1 / 0,8 / 0,2 MB. Font statici al posto dei variabili (nel PDF diventavano disegni «Type 3», lenti da mostrare), schermate in JPEG, niente ombre sfocate né sfumature trasparenti.
+
 ## 1.6.1 — 8 ottobre 2026
 - Spazio di team: i colori di base sono ora quelli del vino, come nell'app (crema e bordeaux; nero e ciliegia con il dispositivo in tema scuro). Chi ha già colori propri impostati non vede differenze.
 - Guide PDF (integrazione API, gestione delle degustazioni, attivazione): nuova identità grafica (bordeaux e crema, nuovo marchio), schermate aggiornate, e chiarito che le serate create dal responsabile compaiono in «Degustazioni del team» per tutti i membri.
