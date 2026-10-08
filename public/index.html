@@ -855,6 +855,12 @@
   .empty-title{font-family:'Geist',sans-serif;font-style:normal;font-weight:750;letter-spacing:-.02em;color:var(--ink);}
   .scale-note{background:var(--card-alt);border:0;border-radius:18px;}
   .coffee-fab{background:var(--ink);color:var(--panel);}
+  .look-label{font:700 11px/1 'Geist','Inter';letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);margin:14px 0 10px;}
+  .swatches{display:flex;flex-wrap:wrap;gap:12px;}
+  .swatch{width:44px;height:44px;border-radius:50%;border:0;cursor:pointer;box-shadow:inset 0 0 0 1.5px var(--line-strong);}
+  .swatch[aria-pressed=true]{box-shadow:0 0 0 3px var(--card),0 0 0 6px var(--ink);}
+  .look-custom{display:flex;align-items:center;gap:12px;min-height:48px;margin-top:10px;font:600 14px/1 'Geist','Inter';color:var(--ink-2);cursor:pointer;}
+  .look-custom input[type=color]{width:48px;height:48px;padding:0;border:0;border-radius:14px;background:none;cursor:pointer;}
   .wine-slot.no-photo{display:none;}
   .wine-slot{width:56px;height:70px;border:0;border-radius:14px;}
   .stats-section-head b{font-family:'Geist',sans-serif;font-style:normal;font-weight:800;font-size:22px;letter-spacing:-.03em;}
@@ -1055,6 +1061,19 @@
         <div class="note-line" id="backupStatus"></div>
       </div>
 
+      <div class="card" id="lookCard">
+        <div class="card-head"><span class="eyebrow" data-i18n="look.eyebrow">Aspetto</span><span class="fill"></span></div>
+        <p class="note-line" data-i18n="look.intro">Scegli i tuoi colori. La scelta resta su questo dispositivo e il testo resta sempre leggibile.</p>
+        <div class="look-label" data-i18n="look.accent">Colore d'accento</div>
+        <div class="swatches" id="accentSwatches" role="group" data-i18n-aria="look.accent" aria-label="Colore d'accento"></div>
+        <label class="look-custom"><input type="color" id="accentCustom" value="#5b2eff"><span data-i18n="look.custom">Un altro colore…</span></label>
+        <div class="look-label" data-i18n="look.bg">Sfondo</div>
+        <div class="swatches" id="bgSwatches" role="group" data-i18n-aria="look.bg" aria-label="Sfondo"></div>
+        <label class="look-custom"><input type="color" id="bgCustom" value="#fafaf7"><span data-i18n="look.custom">Un altro colore…</span></label>
+        <p class="note-line hidden" id="lookAdjusted" role="status"></p>
+        <div class="backup-actions"><button type="button" class="pill-ghost" id="lookReset" data-i18n="look.reset">Ripristina i colori</button></div>
+      </div>
+
       <div class="card backup-card" id="accountCard">
         <div class="card-head"><span class="eyebrow" data-i18n="account.eyebrow">Account</span><span class="fill"></span></div>
         <p class="note-line" id="accountNote"></p>
@@ -1136,7 +1155,7 @@
       <div id="lbList"></div>
     </section>
 
-    <footer class="app-version" data-i18n-aria="app.versionAria" aria-label="Versione dell'app">Sorso · v1.4.0</footer>
+    <footer class="app-version" id="appVersion" data-i18n-aria="app.versionAria" aria-label="Versione dell'app">Sorso</footer>
   </main>
 
   <div class="ac-box hidden" id="acBox" role="listbox"></div>
@@ -1155,6 +1174,8 @@
 </div>
 
 <script src="js/scoring.js"></script>
+<script src="js/theme.js"></script>
+<script src="js/version.js"></script>
 <script>
 /* ============================================================
    DATI DI RIFERIMENTO — terminologia AIS
@@ -1900,6 +1921,31 @@ const I18N = {
     "smart.sliderLabel":"{name}, da 50 a 100",
     "scale.note":"Ho ricalcolato i punteggi con la nuova scala 50–100: un vino ora va da 50 a 100 e il 100 è rarissimo. Il punteggio originale resta salvato in ogni scheda.",
     "scale.noteOk":"Ho capito",
+    "look.eyebrow":"Aspetto",
+    "look.intro":"Scegli i tuoi colori. La scelta resta su questo dispositivo e il testo resta sempre leggibile.",
+    "look.accent":"Colore d'accento",
+    "look.bg":"Sfondo",
+    "look.custom":"Un altro colore…",
+    "look.reset":"Ripristina i colori",
+    "look.adjusted":"Ho corretto leggermente il colore scelto per tenerlo leggibile.",
+    "look.a.uva":"Uva",
+    "look.a.vinaccia":"Vinaccia",
+    "look.a.bosco":"Bosco",
+    "look.a.oceano":"Oceano",
+    "look.a.ambra":"Ambra",
+    "look.a.corallo":"Corallo",
+    "look.a.grafite":"Grafite",
+    "look.b.carta":"Carta",
+    "look.b.bianco":"Bianco",
+    "look.b.crema":"Crema",
+    "look.b.salvia":"Salvia",
+    "look.b.nebbia":"Nebbia",
+    "look.b.nero":"Nero",
+    "look.b.grafite":"Grafite",
+    "look.b.notte":"Notte",
+    "look.b.bosco":"Bosco",
+    "look.b.cantina":"Cantina",
+    "app.updated":"ultimo aggiornamento: {d}",
     "event.pickerAria":"Evento",
     "blend.pctAria":"Percentuale del vitigno",
     "app.versionAria":"Versione dell'app",
@@ -2388,6 +2434,31 @@ const I18N = {
     "smart.sliderLabel":"{name}, from 50 to 100",
     "scale.note":"I recalculated your scores on the new 50–100 scale: a wine now scores between 50 and 100, and 100 is very rare. The original score stays saved on every entry.",
     "scale.noteOk":"Got it",
+    "look.eyebrow":"Appearance",
+    "look.intro":"Choose your colors. Your choice stays on this device and the text always stays readable.",
+    "look.accent":"Accent color",
+    "look.bg":"Background",
+    "look.custom":"Another color…",
+    "look.reset":"Reset colors",
+    "look.adjusted":"I slightly adjusted the color you picked to keep it readable.",
+    "look.a.uva":"Grape",
+    "look.a.vinaccia":"Wine red",
+    "look.a.bosco":"Forest",
+    "look.a.oceano":"Ocean",
+    "look.a.ambra":"Amber",
+    "look.a.corallo":"Coral",
+    "look.a.grafite":"Graphite",
+    "look.b.carta":"Paper",
+    "look.b.bianco":"White",
+    "look.b.crema":"Cream",
+    "look.b.salvia":"Sage",
+    "look.b.nebbia":"Mist",
+    "look.b.nero":"Black",
+    "look.b.grafite":"Graphite",
+    "look.b.notte":"Night",
+    "look.b.bosco":"Forest",
+    "look.b.cantina":"Cellar",
+    "app.updated":"last updated {d}",
     "event.pickerAria":"Event",
     "blend.pctAria":"Grape percentage",
     "app.versionAria":"App version",
@@ -2626,6 +2697,13 @@ function applyStaticText(){
   document.title = "Sorso — " + t("login.tag");
 }
 const LANG_KEY = "sorso-lang";
+/* versione e data dell'ultimo aggiornamento, sempre visibili in fondo (fonte: js/version.js) */
+function renderVersion(){
+  const el = document.getElementById("appVersion"); if(!el || !window.SORSO_VERSION) return;
+  let d = SORSO_VERSION.date;
+  try{ d = new Date(SORSO_VERSION.date+"T12:00:00").toLocaleDateString(S.lang === "en" ? "en-GB" : "it-IT", {day:"numeric", month:"short", year:"numeric"}); }catch(e){}
+  el.textContent = "Sorso · v"+SORSO_VERSION.version+" · "+tf("app.updated",{d:d});
+}
 function setLang(lang){
   S.lang = (lang === "en") ? "en" : "it";
   try{ window.localStorage.setItem(LANG_KEY, S.lang); }catch(e){}
@@ -2634,6 +2712,8 @@ function setLang(lang){
   });
   document.documentElement.lang = S.lang;
   applyStaticText();
+  try{ renderVersion(); }catch(e){}
+  try{ renderLook(); }catch(e){}
   try{ renderAll(); }catch(e){}
   try{ renderAccount(); }catch(e){}
   /* la classifica dell'evento è già disegnata: va ridisegnata nella lingua nuova */
@@ -5236,10 +5316,49 @@ $("nav").addEventListener("click", e => {
 $("themeLight").addEventListener("click", () => setTheme("light", true));
 $("themeDark").addEventListener("click", () => setTheme("dark", true));
 const THEME_KEY = "sorso-theme";
+const LOOK_KEY = "sorso-colori";
+/* ---- colori scelti dall'utente (vedi js/theme.js): accento e sfondo, tavolozza ricavata con contrasto garantito ---- */
+S.look = {}; S.lookKeys = [];
+try{ S.look = Theme.sanitize(JSON.parse(window.localStorage.getItem(LOOK_KEY) || "{}")); }catch(e){ S.look = {}; }
+function lookSave(){ try{ window.localStorage.setItem(LOOK_KEY, JSON.stringify(S.look)); }catch(e){} }
+function applyLook(){
+  const root = $("root"), dark = S.theme === "dark";
+  S.lookKeys.forEach(k => root.style.removeProperty(k));
+  S.lookKeys = [];
+  const d = Theme.derive({accent:S.look.accent, bg:dark ? S.look.bgDark : S.look.bgLight, dark});
+  if(d){
+    Object.keys(d.vars).forEach(k => root.style.setProperty(k, d.vars[k]));
+    S.lookKeys = Object.keys(d.vars);
+  }
+  document.body.style.background = d ? d.vars["--shell"] : (dark ? "#000000" : "#EDEDE8");
+  const meta = document.querySelector('meta[name="theme-color"]');
+  if(meta) meta.setAttribute("content", d ? d.vars["--panel"] : (dark ? "#08080B" : "#FAFAF7"));
+  const note = $("lookAdjusted");
+  if(note){ note.textContent = d && d.adjusted ? t("look.adjusted") : ""; note.classList.toggle("hidden", !(d && d.adjusted)); }
+  renderLook();
+}
+function renderLook(){
+  const dark = S.theme === "dark";
+  const acc = (S.look.accent || Theme.DEFAULT_ACCENT).toLowerCase();
+  const bgList = dark ? Theme.BG_DARK : Theme.BG_LIGHT;
+  const bg = (dark ? S.look.bgDark : S.look.bgLight) || bgList[0].hex;
+  $("accentSwatches").innerHTML = Theme.ACCENTS.map(a =>
+    '<button type="button" class="swatch" data-accent="'+a.hex+'" style="background:'+a.hex+'" aria-pressed="'+(acc === a.hex)+'" aria-label="'+esc(t("look.a."+a.id))+'" title="'+esc(t("look.a."+a.id))+'"></button>').join("");
+  $("bgSwatches").innerHTML = bgList.map(b =>
+    '<button type="button" class="swatch" data-bg="'+b.hex+'" style="background:'+b.hex+'" aria-pressed="'+(bg === b.hex)+'" aria-label="'+esc(t("look.b."+b.id))+'" title="'+esc(t("look.b."+b.id))+'"></button>').join("");
+  $("accentCustom").value = acc; $("bgCustom").value = bg;
+}
+$("accentSwatches").addEventListener("click", e => { const b = e.target.closest("[data-accent]"); if(b) setLook({accent:b.dataset.accent}); });
+$("bgSwatches").addEventListener("click", e => { const b = e.target.closest("[data-bg]"); if(b) setLook(S.theme === "dark" ? {bgDark:b.dataset.bg} : {bgLight:b.dataset.bg}); });
+$("accentCustom").addEventListener("input", e => setLook({accent:e.target.value}));
+$("bgCustom").addEventListener("input", e => setLook(S.theme === "dark" ? {bgDark:e.target.value} : {bgLight:e.target.value}));
+$("lookReset").addEventListener("click", () => { S.look = {}; lookSave(); applyLook(); });
+function setLook(o){ S.look = Theme.sanitize(Object.assign({}, S.look, o)); lookSave(); applyLook(); }
+
 function setTheme(t, salva){
   S.theme = t;
   $("root").classList.toggle("dark", t === "dark");
-  document.body.style.background = t === "dark" ? "#0A0A0A" : "#EFECE4";
+  try{ applyLook(); }catch(e){ document.body.style.background = t === "dark" ? "#000000" : "#EDEDE8"; }
   $("themeLight").classList.toggle("on", t === "light");
   $("themeDark").classList.toggle("on", t === "dark");
   $("themeLight").setAttribute("aria-pressed", String(t === "light"));

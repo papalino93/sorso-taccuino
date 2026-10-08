@@ -140,3 +140,4 @@ label.f { display: block; font-size: 13px; font-weight: 700; margin: 12px 0 5px;
   @keyframes pop { from { transform: scale(.94); opacity: .6; } to { transform: none; opacity: 1; } }
 }
 .card .btn:not(.primary):not(.ghost):not(.danger) { background: var(--bg); }
+.foot { margin: 28px 0 0; text-align: center; font-size: 12px; color: var(--muted); }

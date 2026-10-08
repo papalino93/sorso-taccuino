@@ -23,7 +23,18 @@ AQUI = os.path.dirname(os.path.abspath(__file__))
 ESEMPI = os.path.join(AQUI, "esempi")
 USCITA = os.path.join(AQUI, "guida-integrazione-sorso.pdf")
 BASE = "https://sorso-taccuino.vercel.app"
-DATA = "7 ottobre 2026"
+
+def _versione():
+    """Versione e data di Sorso: l'unica fonte è public/js/version.js."""
+    import re
+    t = open(os.path.join(AQUI, "..", "public", "js", "version.js"), encoding="utf-8").read()
+    v = re.search(r'version:\s*"([^"]+)"', t).group(1)
+    d = re.search(r'date:\s*"(\d{4})-(\d{2})-(\d{2})"', t)
+    mesi = ["gennaio", "febbraio", "marzo", "aprile", "maggio", "giugno", "luglio", "agosto", "settembre", "ottobre", "novembre", "dicembre"]
+    return v, "%d %s %s" % (int(d.group(3)), mesi[int(d.group(2)) - 1], d.group(1))
+
+
+VERSIONE, DATA = _versione()
 
 FD = "/usr/share/fonts/truetype/dejavu/"
 pdfmetrics.registerFont(TTFont("Sans", FD + "DejaVuSans.ttf"))
@@ -104,6 +115,8 @@ def riquadro(testo, colore=BORDO):
 
 
 class Doc(BaseDocTemplate):
+    titolo_piede = "Sorso · Spazio di team · Guida all'integrazione · API v1"
+
     def __init__(self, nome, **kw):
         super().__init__(nome, **kw)
         cornice = Frame(2 * cm, 2 * cm, 17 * cm, 25.2 * cm, id="f", leftPadding=0, rightPadding=0, topPadding=0, bottomPadding=0)
@@ -113,7 +126,7 @@ class Doc(BaseDocTemplate):
         canvas.saveState()
         canvas.setFont("Sans", 7.8)
         canvas.setFillColor(GRIGIO)
-        canvas.drawString(2 * cm, 1.1 * cm, "Sorso · Spazio di team · Guida all'integrazione · API v1")
+        canvas.drawString(2 * cm, 1.1 * cm, "%s · v%s · %s" % (self.titolo_piede, VERSIONE, DATA))
         canvas.drawRightString(19 * cm, 1.1 * cm, "Pagina %d" % doc.page)
         canvas.setStrokeColor(LINEA)
         canvas.line(2 * cm, 1.5 * cm, 19 * cm, 1.5 * cm)
@@ -139,7 +152,7 @@ def main():
               P("Per chi sviluppa il sito che incorpora lo spazio di team: come far accedere i tuoi utenti, "
                 "come incorporare la pagina e come leggere i risultati dal tuo server.", "corpo"),
               Spacer(1, 1.2 * cm),
-              tabella([["Versione della guida", "1.0 — %s" % DATA], ["API", "v1 (sola lettura)"],
+              tabella([["Versione di Sorso", "%s — ultimo aggiornamento: %s" % (VERSIONE, DATA)], ["API", "v1 (sola lettura)"],
                        ["Indirizzo di Sorso", BASE], ["Cosa serve per cominciare", "ID partner, segreto di firma e chiave API (te li consegniamo noi)"]],
                       [5.2, 11.8], intestazione=False),
               PageBreak()]

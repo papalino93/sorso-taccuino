@@ -35,6 +35,7 @@
       e_generic: "Qualcosa non ha funzionato. Riprova.",
       e_rate: "Troppe richieste in poco tempo. Aspetta qualche secondo e riprova.",
       e_readonly: "Il servizio è temporaneamente in sola lettura: puoi consultare, ma non votare né creare.",
+      updatedOn: "ultimo aggiornamento: {d}",
       e_gone: "Questa degustazione non esiste più: è stata eliminata.",
       e_closed_unsaved: "La degustazione è stata chiusa: il tuo voto non è stato salvato.",
       reauthAsked: "Richiesta inviata al sito. Se non succede nulla, torna alla pagina del sito e ricaricala.",
@@ -96,6 +97,7 @@
       e_generic: "Something went wrong. Please try again.",
       e_rate: "Too many requests in a short time. Wait a few seconds and try again.",
       e_readonly: "The service is temporarily read-only: you can browse, but not vote or create.",
+      updatedOn: "last updated {d}",
       e_gone: "This tasting no longer exists: it was deleted.",
       e_closed_unsaved: "The tasting was closed: your vote was not saved.",
       reauthAsked: "Request sent to the website. If nothing happens, go back to the website page and reload it.",
@@ -180,6 +182,13 @@
     setTimeout(function () { el.textContent = text; }, 30);
   }
 
+  /* versione e data dell'ultimo aggiornamento, sempre in fondo (fonte: js/version.js) */
+  function versionHtml() {
+    if (!window.SORSO_VERSION) return "";
+    var d = SORSO_VERSION.date;
+    try { d = new Date(SORSO_VERSION.date + "T12:00:00").toLocaleDateString(S.lang === "en" ? "en-GB" : "it-IT", { day: "numeric", month: "short", year: "numeric" }); } catch (e) { /* data grezza */ }
+    return '<p class="foot">Sorso · v' + esc(SORSO_VERSION.version) + ' · ' + esc(t("updatedOn", { d: d })) + '</p>';
+  }
   function reportHeight() {
     try { parent.postMessage({ type: "sorso:height", height: Math.ceil(app.getBoundingClientRect().height) }, "*"); } catch (e) { /* fuori da un iframe */ }
   }
@@ -241,6 +250,8 @@
     var text = errText(e);
     /* degustazione eliminata o chiusa da un altro mentre si lavorava: si torna a uno stato vero */
     if (e.code === "not_found" && S.view === "tasting" && !(where === "form" && S.form && S.form.kind === "wine" && false)) {
+      var gone = S.tasting && S.tasting.id;
+      S.tastings = S.tastings.filter(function (x) { return x.id !== gone; });     // sparisce subito dall'elenco, senza aspettare il ricarico
       S.tasting = null; S.wines = []; S.sheet = null; S.form = null; S.confirm = null;
       S.view = "list"; S.notice = { kind: "err", text: t("e_gone") };
       announce(t("e_gone"), true); focusSel("#h-main");
@@ -514,7 +525,7 @@
     if (S.fatal) html = viewFatal();
     else if (!S.user) html = '<section class="card" aria-busy="true"><p>' + esc(t("loading")) + '</p></section>';
     else html = S.view === "tasting" && S.tasting ? viewTasting() : viewList();
-    app.innerHTML = '<main>' + html + '</main>';
+    app.innerHTML = '<main>' + html + '</main>' + versionHtml();
     var logo = app.querySelector(".logo"); if (logo) logo.addEventListener("error", function () { logo.remove(); reportHeight(); });
     var title = ((S.config && S.config.title) || "Sorso") + (S.user && !S.fatal ? " — " + (S.view === "tasting" && S.tasting ? S.tasting.name : t("tastings")) : "");
     if (title !== lastTitle) { document.title = title; lastTitle = title; }

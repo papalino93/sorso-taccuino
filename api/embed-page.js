@@ -31,6 +31,7 @@ const SHELL = nonce => themeCss => lang => `<!doctype html>
 <body>
 <div id="app"></div>
 <script src="/js/scoring.js"></script>
+<script src="/js/version.js"></script>
 <script src="/embed.js"></script>
 </body>
 </html>
