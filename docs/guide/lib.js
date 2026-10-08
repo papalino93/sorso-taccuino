@@ -132,6 +132,11 @@ ul.l li::before { content: ""; position: absolute; left: .6mm; top: 1.9mm; width
 .ink .cap .nb { background: var(--lilac); color: var(--night); }
 .fig { display: flex; flex-direction: column; align-items: center; }
 .fig .cap { max-width: 56mm; }
+.wide { margin: 3mm auto 2mm; width: 138mm; }
+.wide .scr { border: .3mm solid var(--line); border-radius: 2.4mm; overflow: hidden; background: #fff; }
+.wide .scr img { width: 100%; display: block; }
+.ink .wide .scr { border-color: rgba(231,132,157,.4); }
+.wide .cap { max-width: none; }
 
 /* tabelle */
 table.t { width: 100%; border-collapse: collapse; font-size: 8.7pt; margin: 2.5mm 0 4mm; }
@@ -204,6 +209,7 @@ function cover({ titolo, sotto, tipo, doc }) {
 const eyebrow = (n, t) => `<div class="eyebrow"><i>${n}</i> ${esc(t)}</div>`;
 const phone = (file, cls = "") => `<div class="phone ${cls}"><div class="scr"><img src="${img(file)}"></div></div>`;
 const fig = (file, nb, testo, cls = "") => `<div class="fig">${phone(file, cls)}<div class="cap"><span class="nb">${nb}</span><span>${testo}</span></div></div>`;
+const wide = (file, nb, testo) => `<div class="wide"><div class="scr"><img src="${img(file)}"></div><div class="cap"><span class="nb">${nb}</span><span>${testo}</span></div></div>`;
 const stats = list => `<div class="stats">${list.map(([v, t]) => `<div><span class="v">${v}</span><span class="t">${t}</span></div>`).join("")}</div>`;
 const cards = (list, n = 3) => `<div class="cards${n}">${list.map(([t, p]) => `<div class="card"><h4>${t}</h4><p>${p}</p></div>`).join("")}</div>`;
 const table = (head, rows, w) => `<table class="t"><thead><tr>${head.map(h => `<th>${h}</th>`).join("")}</tr></thead><tbody>${rows.map(r => `<tr>${r.map((c, i) => `<td${w && w.includes(i) ? ' class="w"' : ""}>${c}</td>`).join("")}</tr>`).join("")}</tbody></table>`;
@@ -240,4 +246,4 @@ function documento(titolo, pagine) {
   return `<!doctype html><html lang="it"><head><meta charset="utf-8"><title>${esc(titolo)}</title><style>${CSS}</style></head><body>${pagine.join("\n")}</body></html>`;
 }
 const anat = () => `<div class="anat"><div class="h"><b>header</b>L'algoritmo: sempre <code>HS256</code>, tipo <code>JWT</code>.</div><div class="p"><b>payload</b>Chi è l'utente, in che gruppo, con che ruolo, fino a quando vale: i campi qui sopra.</div><div class="f"><b>firma</b>Calcolata con il tuo segreto: solo tu e Sorso potete produrla.</div></div>`;
-module.exports = { anat, page, cover, eyebrow, phone, fig, stats, cards, table, call, quote, ul, check, code, esempio, documento, esc, MARCHIO, DATA, VERSIONE, BASE, img };
+module.exports = { anat, page, cover, eyebrow, phone, fig, wide, stats, cards, table, call, quote, ul, check, code, esempio, documento, esc, MARCHIO, DATA, VERSIONE, BASE, img };

@@ -1,6 +1,6 @@
 # Sorso — cosa devi fare tu per il partner
 
-Aggiornata l'8 ottobre 2026 · **Sorso 1.6.2**.
+Aggiornata l'8 ottobre 2026 · **Sorso 1.7.0**.
 
 **Dove siamo.** Il sito, l'app personale (con la vista da PC) e lo spazio di team per il partner sono pronti e online. Test automatici: tutti verdi. Le tre guide PDF sono aggiornate con la nuova grafica. **La prova sul database vero è stata fatta l'8 ottobre 2026 e non ha trovato difetti** (vedi il punto 2). Mancano solo le cose che dipendono dal partner.
 
@@ -85,7 +85,7 @@ Capitolo «Prima di andare online» della guida di integrazione. In breve: l'ifr
 ## C · Decisioni che ti spettano (quando vuoi, nessuna blocca)
 
 - **«Degustazioni del team».** Oggi le serate create dal responsabile (organizzatore) compaiono in un elenco «Degustazioni del team» visibile a tutti i membri. Vuoi anche altro? (a) degustazioni **private** di ogni persona dentro lo spazio; (b) poter **portare nel team** una scheda dal proprio Taccuino personale.
-- **Taccuino, Statistiche, Alla cieca ed Evento** per ora **non** ci sono nello spazio di team né nell'API (la guida lo spiega). Se il partner li vuole, li costruisco: dimmi quali, in che ordine.
+- **Alla cieca, Classifica e Statistiche** (che nell'app personale sono Alla cieca, Evento e Statistiche) ci sono dalla 1.7.0 sia nello spazio di team sia nell'API v1. Il **Taccuino personale** resta solo nell'app: nello spazio di team non c'è.
 - **Medie in gruppi molto piccoli** (2–3 persone): si può dedurre un voto guardando come cambia la media. Va bene così, oppure la media compare solo da 3 voti o solo a serata chiusa?
 - **Foto dei vini nel team**: oggi non ci sono, per risparmiare spazio gratuito. Va bene aspettare?
 - **Chi gestisce le richieste di cancellazione** dei dati degli utenti del partner: c'è l'API, serve una persona.

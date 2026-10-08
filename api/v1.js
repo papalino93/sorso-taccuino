@@ -12,6 +12,9 @@ const limit = require("./_limit");
 
      GET    /api/v1/tastings[?team=&status=open|closed]
      GET    /api/v1/tastings/{id}/results[?format=csv]
+     GET    /api/v1/tastings/{id}/guesses        (alla cieca, solo dopo lo svelamento)
+     GET    /api/v1/stats?team=<team>
+     GET    /api/v1/events?team=<team>
      DELETE /api/v1/users/{sub}
 
    Espone solo aggregati: mai chi ha votato cosa. La media compare dal secondo
@@ -75,6 +78,20 @@ module.exports = async (req, res) => {
       return;
     }
 
+    if (req.method === "GET" && parts.length === 3 && parts[0] === "tastings" && parts[2] === "guesses") {
+      if (!ID.test(parts[1])) throw new HttpError(404, "not_found", "Degustazione non trovata.");
+      sendJson(res, 200, await Team.getGuesses(redis, partner.id, parts[1]));
+      return;
+    }
+
+    if (req.method === "GET" && parts.length === 1 && (parts[0] === "stats" || parts[0] === "events")) {
+      const team = url.searchParams.get("team") || "";
+      /* il team è obbligatorio: senza, ogni chiamata costerebbe un calcolo per ogni team del partner */
+      if (!team || team.length > 64) throw new HttpError(400, "invalid_team", "Serve il parametro team (fino a 64 caratteri).");
+      sendJson(res, 200, parts[0] === "stats" ? await Team.getTeamStatsApi(redis, partner.id, team) : await Team.getEventsApi(redis, partner.id, team));
+      return;
+    }
+
     if (req.method === "DELETE" && parts.length === 2 && parts[0] === "users") {
       if (!USER_ID.test(parts[1])) throw new HttpError(400, "invalid_user", "Identificativo utente non valido.");
       /* la cancellazione dei dati si può sempre fare, anche in sola lettura: libera spazio */
@@ -82,7 +99,7 @@ module.exports = async (req, res) => {
       return;
     }
 
-    const known = (parts.length === 1 && parts[0] === "tastings") || (parts.length === 3 && parts[0] === "tastings" && parts[2] === "results") || (parts.length === 2 && parts[0] === "users");
+    const known = (parts.length === 1 && (parts[0] === "tastings" || parts[0] === "stats" || parts[0] === "events")) || (parts.length === 3 && parts[0] === "tastings" && (parts[2] === "results" || parts[2] === "guesses")) || (parts.length === 2 && parts[0] === "users");
     if (known) throw new HttpError(405, "method_not_allowed", "Metodo non consentito.");
     throw new HttpError(404, "not_found", "Percorso sconosciuto.");
   } catch (e) {

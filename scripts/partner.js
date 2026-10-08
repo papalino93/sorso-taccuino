@@ -189,7 +189,7 @@ async function main(argv, redis, log) {
   }
   if (cmd === "purge") {
     if (!opt.yes) throw new Error("operazione irreversibile: cancella tutte le degustazioni, i vini e i voti di " + id + ". Ripeti con --yes per confermare");
-    const modelli = ["tl:" + id + ":*", "wn:" + id + ":*", "vt:" + id + ":*", "vs:" + id + ":*", "sm:" + id + ":*", "ct:" + id + ":*", "uv:" + id + ":*"];      // i jti non si toccano: scadono da soli, e cancellarli farebbe riusare i token già usati
+    const modelli = Team.KEY_PATTERNS(id);      // i jti non si toccano: scadono da soli, e cancellarli farebbe riusare i token già usati
     const fissi = ["ti:" + id, "tm:" + id, "cn:" + id];
     let chiavi = fissi.slice();
     for (const m of modelli) chiavi = chiavi.concat((await redis.keys(m)) || []);

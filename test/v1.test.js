@@ -114,9 +114,9 @@ test("export CSV: intestazione, virgolette e protezione dalle formule", async ()
   assert.match(r.headers["content-type"], /text\/csv/);
   assert.match(r.headers["content-disposition"], /attachment; filename="sorso-/);
   const righe = r.body.trim().split("\r\n");
-  assert.equal(righe[0], "tasting_id,tasting,wine_id,producer,name,vintage,votes,average");
+  assert.equal(righe[0], "tasting_id,tasting,wine_id,producer,name,vintage,votes,average,type,grape,rank");
   assert.equal(righe.length, 3);
-  assert.ok(righe[1].endsWith(",2,85"), righe[1]);
+  assert.ok(righe[1].endsWith(",2,85,,,1"), righe[1]);          // votes, average, type, grape, rank
   assert.ok(righe[2].includes("\"'=HYPERLINK(\"\"http://x\"\")\""), "formula neutralizzata e virgolette raddoppiate: " + righe[2]);
   assert.ok(righe[2].includes('"Con ""virgolette"", e virgola"'));
 });
@@ -127,7 +127,7 @@ test("cancellazione utente via API, con id che contiene la chiocciola", async ()
   await post(Object.assign({ op: "vote", tasting: t.id, wine: w1.id }, smart(90, 90, 90)), b);
   let r = await call(v1, { method: "DELETE", url: "/api/v1?path=" + encodeURIComponent("users/anna@example.com"), headers: { authorization: "Bearer " + KEY } });
   assert.equal(r.statusCode, 200);
-  assert.deepEqual(r.body, { votesRemoved: 1 });
+  assert.deepEqual(r.body, { votesRemoved: 1, guessesRemoved: 0 });
   const x = (await get("tastings/" + t.id + "/results")).body.wines.find(w => w.id === w1.id);
   assert.equal(x.votes, 1);
   r = await call(v1, { method: "DELETE", url: "/api/v1?path=" + encodeURIComponent("users/a b"), headers: { authorization: "Bearer " + KEY } });

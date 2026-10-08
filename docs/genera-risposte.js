@@ -29,10 +29,37 @@ const jwt = require("../api/_jwt");
   }
   await emb({ op: "tasting.status", tasting: t.id, status: "closed" }, org);
 
-  const out = {
+  const base = {
     tastings: await (await api("tastings?status=closed")).json(),
     results: await (await api("tastings/" + t.id + "/results")).json(),
-    csv: await (await api("tastings/" + t.id + "/results?format=csv")).text(),
+    csv: await (await api("tastings/" + t.id + "/results?format=csv")).text()
+  };
+
+  /* una degustazione alla cieca, con ipotesi, poi svelata */
+  const bt = (await emb({ op: "tasting.create", name: "Alla cieca di giovedì", blind: true }, org)).tasting;
+  const bw = [];
+  for (const [name, producer, vintage, type, grape] of [["Barolo Cannubi", "Poderi Rivalta", "2019", "Rosso", "Nebbiolo"], ["Verdicchio Classico", "Casa Marchigiana", "2022", "Bianco", "Verdicchio"]])
+    bw.push((await emb({ op: "wine.add", tasting: bt.id, wine: { name, producer, vintage, type, grape } }, org)).wine);
+  const guesses = [["u1", "Nebbiolo", "2019"], ["u2", "Sangiovese", "2018"], ["u3", "Nebbiolo", "2020"]];
+  for (const [u, grape, year] of guesses) {
+    const s = await login({ sub: u, name: u });
+    await emb({ op: "vote", tasting: bt.id, wine: bw[0].id, mode: "smart", giudizi: { occhio: 88, naso: 90, bocca: 92 } }, s);
+    await emb({ op: "vote", tasting: bt.id, wine: bw[1].id, mode: "smart", giudizi: { occhio: 82, naso: 80, bocca: 84 } }, s);
+    await emb({ op: "guess", tasting: bt.id, wine: bw[0].id, type: "Rosso", grape, year }, s);
+    await emb({ op: "guess", tasting: bt.id, wine: bw[1].id, type: "Bianco", grape: "Vermentino" }, s);
+  }
+  const resultsBlindHidden = await (await api("tastings/" + bt.id + "/results")).json();
+  await emb({ op: "tasting.reveal", tasting: bt.id }, org);
+  Object.assign(base, {
+    resultsBlindHidden,
+    guesses: await (await api("tastings/" + bt.id + "/guesses")).json(),
+    stats: await (await api("stats?team=giovedi")).json(),
+    events: await (await api("events?team=giovedi")).json(),
+    errNotRevealed: await (async () => { const x = (await emb({ op: "tasting.create", name: "Un'altra cieca", blind: true }, org)).tasting; return (await api("tastings/" + x.id + "/guesses")).json(); })()
+  });
+
+  const out = {
+    ...base,
     deleteUser: await (await api("users/u3", { method: "DELETE" })).json(),
     errUnauthorized: await (await fetch(d.url + "/api/v1/tastings")).json(),
     errNotFound: await (await api("tastings/nonesiste/results")).json(),

@@ -11,7 +11,7 @@ const limit = require("./_limit");
    "session", che scambia il token firmato dal partner con una sessione.
    Tutte le altre vogliono  Authorization: Bearer <sessione>. */
 
-const WRITES = Object.assign(Object.create(null), { "tasting.create": 1, "tasting.status": 1, "tasting.delete": 1, "wine.add": 1, "vote": 1 });
+const WRITES = Object.assign(Object.create(null), { "tasting.create": 1, "tasting.status": 1, "tasting.delete": 1, "wine.add": 1, "vote": 1, "tasting.reveal": 1, "guess": 1 });
 const SESSIONS_PER_IP = 200;   // al minuto: una serata di 40 persone nello stesso locale entra senza problemi
 const OPS_PER_USER = 90;       // al minuto
 
@@ -77,9 +77,20 @@ module.exports = async (req, res) => {
         return;
       case "tasting.status": {
         const t = await Team.setTastingStatus(redis, partner.id, ctx, body.tasting, body.status);
-        sendJson(res, 200, { tasting: { id: t.id, name: t.name, status: t.status } });
+        sendJson(res, 200, { tasting: { id: t.id, name: t.name, status: t.status, blind: !!t.blind, revealed: !!t.revealed } });
         return;
       }
+      case "tasting.reveal": {
+        const t = await Team.revealTasting(redis, partner.id, ctx, body.tasting);
+        sendJson(res, 200, { tasting: { id: t.id, name: t.name, status: t.status, blind: !!t.blind, revealed: !!t.revealed } });
+        return;
+      }
+      case "guess":
+        sendJson(res, 200, await Team.castGuess(redis, partner, ctx, body));
+        return;
+      case "stats":
+        sendJson(res, 200, { stats: await Team.getStats(redis, partner, ctx) });
+        return;
       case "tasting.delete":
         sendJson(res, 200, await Team.deleteTasting(redis, partner.id, ctx, body.tasting));
         return;
