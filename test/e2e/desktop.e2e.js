@@ -52,6 +52,23 @@ const TABS = ["new", "blind", "book", "stats", "event", "settings"];
     const second = await page.locator("#bookList .wine-detail .dt-name").textContent();
     ok(second !== first.name, "scegliendo un altro vino il dettaglio cambia (" + second + ")");
     ok((await page.locator("#bookList .wine-row.sel").count()) === 1, "una sola riga evidenziata");
+    /* confronto tra due vini: testi leggibili (prima erano chiari su fondo chiaro) */
+    await page.locator("#bookList .wine-score").nth(0).click(); await page.locator("#bookList .wine-score").nth(1).click(); await page.waitForTimeout(250);
+    const lum = c => { const v = c.match(/\d+(\.\d+)?/g).slice(0, 3).map(Number).map(x => { x /= 255; return x <= .03928 ? x / 12.92 : Math.pow((x + .055) / 1.055, 2.4); }); return .2126 * v[0] + .7152 * v[1] + .0722 * v[2]; };
+    const cc = await page.evaluate(() => { const cs = e => getComputedStyle(document.querySelector(e)); return [cs(".cmp-lab").color, cs(".cmp-l").color, cs(".cmp-meta").color, cs(".cmp").backgroundColor]; });
+    const ct = c => (Math.max(lum(c[0]), lum(c[3])) + .05) / (Math.min(lum(c[0]), lum(c[3])) + .05);
+    ok(ct([cc[0], 0, 0, cc[3]]) >= 4.5 && ct([cc[1], 0, 0, cc[3]]) >= 4.5 && ct([cc[2], 0, 0, cc[3]]) >= 4.5, "confronto: testi leggibili sul fondo " + cc.join(" | "));
+    await page.locator("#cmpClose").click();
+    /* il riquadro dei contenuti torna in cima quando si cambia scheda */
+    await go(page, "stats", 1440); await page.evaluate(() => document.querySelector(".body").scrollTo(0, 600)); await go(page, "new", 1440);
+    ok((await page.evaluate(() => document.querySelector(".body").scrollTop)) === 0, "cambiando scheda si riparte dall'alto");
+    /* punteggio 96+: il rail non diventa illeggibile (marchio e comandi restano scuri sul fondo chiaro) */
+    await page.click('#modeTopWrap button[data-modalita="smart"]');
+    await page.evaluate(() => document.querySelectorAll("[data-smart-range]").forEach(el => { el.value = 100; el.dispatchEvent(new Event("input", { bubbles: true })); }));
+    await page.waitForTimeout(250);
+    const fl = await page.evaluate(() => ({ flood: document.querySelector(".hdr").classList.contains("flood"), brand: getComputedStyle(document.querySelector(".brand-name")).color, panel: getComputedStyle(document.querySelector(".panel")).getPropertyValue("--panel").trim() }));
+    ok(fl.flood && fl.brand !== "rgb(255, 255, 255)", "punteggio 100: marchio leggibile nel menù (" + fl.brand + ")");
+    await page.click("#resetBtn");
     /* Impostazioni */
     await go(page, "settings", 1440);
     ok(await page.locator("#lookCard").isVisible() && await page.locator("#voteModeCard").isVisible() && await page.locator("#accountCard").isVisible(), "Impostazioni: aspetto, voto e account in una pagina");

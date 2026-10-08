@@ -9,6 +9,9 @@ La versione e la data dell'ultimo aggiornamento sono mostrate in fondo all'app e
 - **Colori del vino come predefiniti**: chiaro crema e bordeaux, scuro nero con una punta di vino e bordeaux acceso (il bordeaux profondo su nero non si leggeva). Chi aveva scelto i propri colori li mantiene.
 - **Tema Chiaro / Scuro / Automatico**: «Automatico» segue il tema del dispositivo e cambia con lui. Per chi non ha mai scelto, il tema parte da «Automatico».
 - Il logo del favicon compare accanto a «Sorso».
+- Corretto: il pannello «Confronto» tra due vini era illeggibile sul tema chiaro (testi chiari su fondo chiaro), anche su telefono.
+- Corretto: su PC, cambiando scheda il contenuto riparte dall'alto; con un punteggio da 96 in su il menù resta leggibile; su schermi bassi (portatili, zoom) il menù si compatta e «Salva» resta sempre visibile.
+- Il logo compare anche nella schermata di accesso; senza lampo di chiaro all'apertura per chi usa il tema scuro.
 
 ## 1.5.2 — 8 ottobre 2026
 - Telefono: filtri per tipologia, filtri del Taccuino e pulsanti «+ Vitigno» / «+ Altro» alti almeno 44 px (si toccano senza sbagliare); a 320 px la didascalia sotto il punteggio («Statistiche», «Nuova degustazione») non esce più dallo schermo e va sotto il numero.

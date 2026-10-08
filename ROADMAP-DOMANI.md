@@ -102,6 +102,7 @@ Capitolo 11 della guida PDF ("Elenco di verifica prima di andare online"). In br
 - **Prova sul database vero** (Upstash/Vercel): non ho le chiavi. È il punto 1 della mattina. Finché non è fatta, non andare online col partner.
 - **Eventi personali** nell'app (la tua decisione "gli eventi devono essere personali"): non toccato. Non riguarda lo spazio di team del partner; è una modifica a parte dell'app personale (campo `evento` sulle schede e chiusura dello spazio condiviso). Dimmi se farla prima o dopo il design.
 - **Design B**: approvato da te e portato online (versione 1.4.0, aggiornamento dell'8 ottobre 2026), con la scelta dei colori per chi usa l'app.
+- **Versione 1.6.0 (8 ottobre 2026)**: vista da PC (menù a sinistra, due colonne, Taccuino con elenco + dettaglio), pagina Impostazioni, colori del vino come predefiniti (crema/bordeaux e nero/ciliegia), tema Chiaro/Scuro/Automatico. Sul telefono è invariato tranne l'ingranaggio e il logo. Trovato e corretto nel giro finale: il pannello «Confronto» dei vini era illeggibile sul tema chiaro anche sul telefono.
 - **Salvataggio automatico della bozza** dell'app personale se si ricarica la pagina: non fatto (difetto basso). Oggi chiede conferma prima di «Azzera».
 
 **Una cosa da sapere e su cui decidere** (non è un difetto, è un limite delle medie)
