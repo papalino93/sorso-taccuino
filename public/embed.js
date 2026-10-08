@@ -614,7 +614,7 @@
         if (r.max) h += '<p class="small"><b>' + esc(t("guessPoints", { p: r.points, m: r.max })) + '</b></p>';
       }
       var gs = w.guessStats;
-      if (gs && gs.guessers > 0) h += '<p class="small muted">' + esc(t("groupGuess", { a: gs.type.correct + "/" + gs.type.answered, b: gs.grape.correct + "/" + gs.grape.answered, c: gs.year.exact + "/" + gs.year.answered })) + '</p>';
+      if (gs && !gs.hidden && gs.guessers > 0) h += '<p class="small muted">' + esc(t("groupGuess", { a: gs.type.correct + "/" + gs.type.answered, b: gs.grape.correct + "/" + gs.grape.answered, c: gs.year.exact + "/" + gs.year.answered })) + '</p>';
       return h + '</div>';
     }
     if (S.gform && S.gform.wine === w.id) return guessFormHtml(w);

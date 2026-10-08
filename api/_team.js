@@ -145,6 +145,15 @@ async function setTastingStatus(redis, pid, ctx, tid, status) {
     await redis.hdel(K.tl(pid, ctx.team), t.id);
     throw notFound("Degustazione");
   }
+  /* uno svelamento arrivato proprio in mezzo avrebbe perso il suo "svelata": si rimette */
+  const cur = parse(await redis.hget(K.tl(pid, ctx.team), t.id));
+  if (cur && cur.revealed && !t.revealed) {
+    t.revealed = true; t.revealedAt = cur.revealedAt; t.status = "closed";
+    await redis.hset(K.tl(pid, ctx.team), { [t.id]: JSON.stringify(t) });
+    await invalidateStats(redis, pid, ctx.team);
+    if (status === "open") throw new HttpError(409, "revealed", "Una degustazione svelata non si riapre: i vini sono già noti.");
+    return t;
+  }
   await invalidateStats(redis, pid, ctx.team);
   return t;
 }
@@ -163,13 +172,20 @@ async function deleteTasting(redis, pid, ctx, tid) {
   await redis.hincrby(K.cn(pid), "t:" + ctx.team, -1);
   const wines = Object.keys(asObject(await redis.hgetall(K.wn(pid, t.id))));
   let votes = 0;
-  for (const w of wines) {
-    const uids = (await redis.smembers(K.vs(pid, t.id, w))) || [];
+  if (wines.length) {
+    const sp = redis.pipeline();
+    wines.forEach(w => sp.smembers(K.vs(pid, t.id, w)));
+    const lists = await sp.exec();
     const c = redis.pipeline();
-    uids.forEach(u => { c.del(K.vt(pid, t.id, w, u)); c.del(K.gs(pid, t.id, w, u)); });
-    c.del(K.vs(pid, t.id, w));
+    wines.forEach((w, i) => {
+      const uids = (lists[i] || []).map(String);
+      /* una sola cancellazione per vino (voti, ipotesi e indice) e la voce tolta dall'elenco di chi ha votato */
+      const keys = [K.vs(pid, t.id, w)];
+      uids.forEach(u => { keys.push(K.vt(pid, t.id, w, u), K.gs(pid, t.id, w, u)); c.srem(K.uv(pid, u), t.id + "|" + w); });
+      c.del(...keys);
+      votes += uids.length;
+    });
     await c.exec();
-    votes += uids.length;
   }
   const f = redis.pipeline();
   f.del(K.wn(pid, t.id)); f.del(K.sm(pid, t.id)); f.del(K.ct(pid, t.id)); f.del(K.gr(pid, t.id)); f.hdel(K.cn(pid), "w:" + t.id);
@@ -273,7 +289,18 @@ async function castVote(redis, partner, ctx, body) {
   p.sadd(K.uv(pid, ctx.uid), tid + "|" + wid);
   p.sadd(K.vs(pid, tid, wid), ctx.uid);
   p.hexists(K.ti(pid), tid);
+  p.hget(K.tl(pid, ctx.team), tid);
   const res = await p.exec();
+  /* chiusa (o svelata) mentre si votava: i voti sono definitivi, questo non entra e il precedente torna com'era */
+  const t2 = res[5] ? parse(res[5]) : null;
+  if (Number(res[4]) && t2 && t2.status !== "open") {
+    const c = redis.pipeline();
+    if (oldRaw) c.set(K.vt(pid, tid, wid, ctx.uid), oldRaw); else c.del(K.vt(pid, tid, wid, ctx.uid));
+    c.hincrby(K.sm(pid, tid), wid, -delta);
+    c.hincrby(K.ct(pid, tid), wid, oldRaw ? 0 : -1);
+    await c.exec();
+    throw new HttpError(409, "closed", "La degustazione è stata chiusa: il voto non è stato salvato.");
+  }
   /* la degustazione è stata eliminata mentre si votava: il voto non deve restare orfano */
   if (!Number(res[4])) {
     const c = redis.pipeline();
@@ -362,41 +389,57 @@ async function castGuess(redis, partner, ctx, body) {
   return { saved: true };
 }
 
-/* Svela: chiude la degustazione per sempre e scrive il riepilogo anonimo delle ipotesi. */
+/* contributo di un'ipotesi al riepilogo anonimo di un vino (sign = +1 per aggiungerla, -1 per toglierla) */
+function addToSnap(sn, w, g, sign) {
+  const sc = scoreGuess(w, g);
+  sn.n += sign;
+  if (sc.type !== "na") { sn.ty[0] += sign; if (sc.type === "ok") sn.ty[1] += sign; }
+  if (sc.grape !== "na") { sn.gr[0] += sign; if (sc.grape === "ok") sn.gr[1] += sign; }
+  if (sc.year !== "na") { sn.yr[0] += sign; if (sc.year === "ok") sn.yr[1] += sign; else if (sc.year === "close") sn.yr[2] += sign; }
+}
+const emptySnap = () => ({ n: 0, ty: [0, 0], gr: [0, 0], yr: [0, 0, 0] });
+
+/* Svela: chiude la degustazione per sempre e scrive il riepilogo anonimo delle ipotesi.
+   Il riepilogo si scrive PRIMA di segnare la degustazione come svelata: se la funzione si
+   interrompe a metà, un secondo "Svela" lo rifà da capo invece di trovarlo mancante. */
 async function revealTasting(redis, pid, ctx, tid) {
   requireOrganizer(ctx);
   const t = await getTasting(redis, pid, tid, ctx.team);
   if (!t.blind) throw new HttpError(409, "not_blind", "Questa degustazione non è alla cieca.");
   if (t.revealed) return t;
+  const wines = Object.values(parseHash(await redis.hgetall(K.wn(pid, t.id))));
+  const snap = {};
+  if (wines.length) {
+    const sp = redis.pipeline();
+    wines.forEach(w => sp.smembers(K.vs(pid, t.id, w.id)));
+    const lists = (await sp.exec()).map(l => (l || []).map(String));
+    const gp = redis.pipeline();
+    let any = false;
+    wines.forEach((w, i) => { if (lists[i].length) { any = true; gp.mget(...lists[i].map(u => K.gs(pid, t.id, w.id, u))); } });
+    const got = any ? await gp.exec() : [];
+    let k = 0;
+    wines.forEach((w, i) => {
+      const sn = emptySnap();
+      if (lists[i].length) (got[k++] || []).forEach(r => { const g = r ? parse(r) : null; if (g) addToSnap(sn, w, g, 1); });
+      snap[w.id] = JSON.stringify(sn);
+    });
+    await redis.hset(K.gr(pid, t.id), snap);
+  }
   t.status = "closed"; t.revealed = true; t.revealedAt = Date.now();
   await redis.hset(K.tl(pid, ctx.team), { [t.id]: JSON.stringify(t) });
   if (!(await redis.hexists(K.ti(pid), t.id))) {
     await redis.hdel(K.tl(pid, ctx.team), t.id);
+    await redis.del(K.gr(pid, t.id)).catch(() => {});
     throw notFound("Degustazione");
   }
-  const wines = parseHash(await redis.hgetall(K.wn(pid, t.id)));
-  const snap = {};
-  for (const w of Object.values(wines)) {
-    const uids = (await redis.smembers(K.vs(pid, t.id, w.id))) || [];
-    const raws = uids.length ? await redis.mget(...uids.map(u => K.gs(pid, t.id, w.id, u))) : [];
-    const sn = { n: 0, ty: [0, 0], gr: [0, 0], yr: [0, 0, 0] };
-    raws.forEach(r => {
-      const g = r ? parse(r) : null;
-      if (!g) return;
-      sn.n++;
-      const sc = scoreGuess(w, g);
-      if (sc.type !== "na") { sn.ty[0]++; if (sc.type === "ok") sn.ty[1]++; }
-      if (sc.grape !== "na") { sn.gr[0]++; if (sc.grape === "ok") sn.gr[1]++; }
-      if (sc.year !== "na") { sn.yr[0]++; if (sc.year === "ok") sn.yr[1]++; else if (sc.year === "close") sn.yr[2]++; }
-    });
-    snap[w.id] = JSON.stringify(sn);
-  }
-  if (Object.keys(snap).length) await redis.hset(K.gr(pid, t.id), snap);
   await invalidateStats(redis, pid, ctx.team);
   return t;
 }
 
-const guessSummary = sn => sn ? { guessers: sn.n, type: { answered: sn.ty[0], correct: sn.ty[1] }, grape: { answered: sn.gr[0], correct: sn.gr[1] }, year: { answered: sn.yr[0], exact: sn.yr[1], close: sn.yr[2] } } : null;
+/* il riepilogo del gruppo è anonimo: con meno di due ipotesi coinciderebbe con quelle di una persona, e non si mostra */
+const guessSummary = sn => !sn ? null : (sn.n < MIN_VOTES_API
+  ? { guessers: Math.max(0, sn.n), hidden: true, type: null, grape: null, year: null }
+  : { guessers: sn.n, hidden: false, type: { answered: sn.ty[0], correct: sn.ty[1] }, grape: { answered: sn.gr[0], correct: sn.gr[1] }, year: { answered: sn.yr[0], exact: sn.yr[1], close: sn.yr[2] } });
 
 /* ---- stato per l'embed ---- */
 async function getState(redis, partner, ctx, tid) {
@@ -501,11 +544,11 @@ async function getGuesses(redis, pid, tid) {
   if (!t.revealed) throw new HttpError(409, "not_revealed", "La degustazione non è ancora stata svelata.");
   const [wn, gr] = await Promise.all([redis.hgetall(K.wn(pid, tid)), redis.hgetall(K.gr(pid, tid))]);
   const grs = parseHash(gr);
-  const nobody = { guessers: 0, type: { answered: 0, correct: 0 }, grape: { answered: 0, correct: 0 }, year: { answered: 0, exact: 0, close: 0 } };
+  const nobody = { guessers: 0, hidden: true, type: null, grape: null, year: null };
   const wines = Object.values(parseHash(wn)).sort((a, b) => a.createdAt - b.createdAt).map((w, i) => {
     const g = guessSummary(grs[w.id]) || nobody;
     return { id: w.id, position: i + 1, producer: w.producer, name: w.name, vintage: w.vintage, type: w.type || null, grape: w.grape || null,
-      guessers: g.guessers, answers: { type: g.type, grape: g.grape, year: g.year } };
+      guessers: g.guessers, answers: g.hidden ? null : { type: g.type, grape: g.grape, year: g.year } };
   });
   return { tasting: { id: t.id, team: t.team, name: t.name, status: t.status, revealed: true, createdAt: new Date(t.createdAt).toISOString() }, wines };
 }
@@ -536,7 +579,27 @@ async function deleteUser(redis, pid, uid) {
     /* le ipotesi "alla cieca" dell'utente si tolgono allo stesso modo (restituisce e toglie in un colpo) */
     const gg = redis.pipeline();
     blocco.forEach(m => { const [t, w] = m.split("|"); gg.getdel(K.gs(pid, t, w, uid)); });
-    (await gg.exec()).forEach(x => { if (x) guessesRemoved++; });
+    const gone = await gg.exec();
+    const tolti = [];
+    gone.forEach((x, i) => { if (x) { guessesRemoved++; tolti.push([blocco[i], parse(x)]); } });
+    /* se la degustazione è già svelata, l'ipotesi si toglie anche dal riepilogo anonimo del gruppo */
+    if (tolti.length) {
+      const q = redis.pipeline();
+      tolti.forEach(([m]) => { const [t, w] = m.split("|"); q.hget(K.wn(pid, t), w); q.hget(K.gr(pid, t), w); });
+      const info = await q.exec();
+      const upd = {};
+      tolti.forEach(([m, g], i) => {
+        const [t, w] = m.split("|");
+        const wine = info[2 * i] ? parse(info[2 * i]) : null, snRaw = info[2 * i + 1];
+        if (!wine || !snRaw || !g) return;
+        const sn = parse(snRaw); if (!sn) return;
+        addToSnap(sn, wine, g, -1);
+        (upd[t] || (upd[t] = {}))[w] = JSON.stringify(sn);
+      });
+      const u = redis.pipeline();
+      Object.keys(upd).forEach(t => u.hset(K.gr(pid, t), upd[t]));
+      if (Object.keys(upd).length) await u.exec();
+    }
     const g = redis.pipeline();
     blocco.forEach(m => { const [t, w] = m.split("|"); g.getdel(K.vt(pid, t, w, uid)); });
     const olds = await g.exec();
@@ -573,6 +636,14 @@ async function deleteUser(redis, pid, uid) {
       tolte.forEach((m, i) => { if (Number(ancora[i])) { const [t, w] = m.split("|"); back.sadd(K.uv(pid, uid), m); back.sadd(K.vs(pid, t, w), uid); nb++; } });
       if (nb) await back.exec();
     }
+  }
+  /* le statistiche in memoria dei team toccati si buttano: le medie sono cambiate */
+  if (removed || guessesRemoved) {
+    const tids = [...new Set(members.map(m => m.split("|")[0]))];
+    const tp = redis.pipeline();
+    tids.forEach(t => tp.hget(K.ti(pid), t));
+    const teams = [...new Set((await tp.exec()).filter(Boolean).map(String))];
+    if (teams.length) { const d = redis.pipeline(); teams.forEach(tm => d.del(K.st(pid, tm))); await d.exec(); }
   }
   return { votesRemoved: removed, guessesRemoved };
 }
@@ -629,20 +700,21 @@ async function computeTeamStats(redis, pid, team) {
       wineN++; voteN += count; tVotes += count;
       const info = hide ? { name: "", producer: "", vintage: "", hidden: true, index: k + 1 } : { name: w.name, producer: w.producer, vintage: w.vintage, hidden: false, index: k + 1 };
       const avg = count >= MIN_VOTES_API ? sum / count : null;
-      if (wn_ok(wm)) wm[t.id + "|" + w.id] = Object.assign({ a: avg == null ? null : Math.round(avg * 100) / 100, t: t.name }, info);
       if (avg == null) return;
+      if (wn_ok(wm)) wm[t.id + "|" + w.id] = Object.assign({ a: Scoring.roundHalfUp(avg, 2), t: t.name }, info);
       sumAll += sum; cntAll += count; tSum += sum; tCnt += count;
       const r = Scoring.roundHalfUp(avg);
       BUCKETS.forEach(b => { if (r >= b[1] && r <= b[2]) dist[b[0]]++; });
       const row = Object.assign({ avg: round1(avg), votes: count, tasting: t.id, tastingName: t.name }, info);
       rated.push(row);
-      if (!best || avg > best.avg) { best = Object.assign({ avg }, row); tie = false; } else if (avg === best.avg) tie = true;
-      if (w.type) { const e = types[w.type] || (types[w.type] = { sum: 0, count: 0, wines: 0 }); e.sum += sum; e.count += count; e.wines++; }
+      /* stesso criterio della classifica: si confrontano le medie arrotondate al decimale */
+      if (!best || row.avg > best.avg) { best = row; tie = false; } else if (row.avg === best.avg) tie = true;
+      if (w.type && !hide) { const e = types[w.type] || (types[w.type] = { sum: 0, count: 0, wines: 0 }); e.sum += sum; e.count += count; e.wines++; }
     });
     events.push({
       id: t.id, name: t.name, createdAt: t.createdAt, blind: !!t.blind, revealed: !!t.revealed, wines: wines.length, votes: tVotes,
       average: tCnt ? round1(tSum / tCnt) : null,
-      winner: best ? { name: best.name, producer: best.producer, vintage: best.vintage, hidden: best.hidden, index: best.index, average: round1(best.avg), votes: best.votes, tie } : null
+      winner: best ? { name: best.name, producer: best.producer, vintage: best.vintage, hidden: best.hidden, index: best.index, average: best.avg, votes: best.votes, tie } : null
     });
   });
   rated.sort((a, b) => b.avg - a.avg || b.votes - a.votes);
@@ -685,7 +757,17 @@ async function myStats(redis, pid, uid, st) {
   const avg = votes.reduce((a, v) => a + v.score, 0) / votes.length;
   let top = votes[0];
   votes.forEach(v => { if (v.score > top.score) top = v; });
-  const meta = st.wm[top.key] || null;
+  let meta = st.wm[top.key] || null;
+  if (!meta) {
+    /* un vino senza media (meno di due voti) non è in memoria: si legge solo quello */
+    const [t, w] = top.key.split("|");
+    const raw = await redis.hget(K.wn(pid, t), w);
+    const wine = raw ? parse(raw) : null, ev = st.events.find(e => e.id === t);
+    if (wine && ev) {
+      const hid = !!ev.blind && !ev.revealed;
+      meta = hid ? { name: "", producer: "", vintage: "", hidden: true, index: 0, t: ev.name } : { name: wine.name, producer: wine.producer, vintage: wine.vintage, hidden: false, index: 0, t: ev.name };
+    }
+  }
   const cmp = votes.filter(v => st.wm[v.key] && st.wm[v.key].a != null);
   const diff = cmp.length >= 3 ? cmp.reduce((a, v) => a + (v.score - st.wm[v.key].a), 0) / cmp.length : null;
   return {

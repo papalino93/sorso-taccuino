@@ -271,7 +271,7 @@ function build() {
     ${eyebrow("11", "API di sola lettura — ipotesi alla cieca")}
     <h2 class="s" style="margin-top:0">Le ipotesi <em>alla cieca</em></h2>
     ${code("GET /api/v1/tastings/{id}/guesses\n\n" + "{\n  \"tasting\": { \"id\": \"…\", \"revealed\": true, … },\n  \"wines\": [\n" + compact({ id: "…", position: gu.position, name: gu.name, type: gu.type, grape: gu.grape, vintage: gu.vintage, guessers: gu.guessers, answers: gu.answers }).split("\n").map(l => "  " + l).join("\n") + "\n  ]\n}", "GET")}
-    <p>Solo per le degustazioni alla cieca <b>già svelate</b>: prima risponde <code>409 not_revealed</code>, e per una degustazione normale <code>409 not_blind</code>. Dice, per ogni vino, quante persone hanno provato a indovinare e quante hanno risposto giusto su tipologia, vitigno e annata (<code>exact</code> esatta, <code>close</code> con un anno di scarto). Mai chi ha detto cosa.</p>
+    <p>Solo per le degustazioni alla cieca <b>già svelate</b>: prima risponde <code>409 not_revealed</code>, e per una degustazione normale <code>409 not_blind</code>. Dice, per ogni vino, quante persone hanno provato a indovinare e quante hanno risposto giusto su tipologia, vitigno e annata (<code>exact</code> esatta, <code>close</code> con un anno di scarto). Mai chi ha detto cosa. Con meno di due persone che hanno risposto, <code>answers</code> è <code>null</code>: un riepilogo di una persona sola svelerebbe le sue risposte.</p>
     <h2 class="s">Cosa vede <em>l'API di una cieca</em></h2>
     ${code("GET /api/v1/tastings/{id}/results     (cieca non svelata)\n\n" + compact(Object.assign({}, R.resultsBlindHidden.wines[0], { id: "…" })), "GET")}
     <p>Finché la degustazione non è svelata, <code>name</code>, <code>producer</code>, <code>vintage</code>, <code>type</code> e <code>grape</code> sono <code>null</code>, anche nel CSV: il tuo sito non può rivelare per sbaglio il vino ai partecipanti. Le medie e la classifica (<code>rank</code>) ci sono comunque.</p>
@@ -313,7 +313,7 @@ function build() {
       ["405", "<code>method_not_allowed</code>", "Metodo non previsto per quel percorso."],
       ["429", "<code>rate_limited</code>", "Troppe richieste: <code>Retry-After</code> dice quando riprovare."],
       ["400 · 409", "<code>invalid_team</code> · <code>not_blind</code> · <code>not_revealed</code>", "Manca <code>team</code> in <code>/stats</code> e <code>/events</code>; oppure <code>/guesses</code> su una degustazione normale o non ancora svelata."],
-      ["503", "<code>read_only</code>", "Sola lettura per il limite mensile: le letture e la cancellazione dati funzionano."]], [1])}
+      ["503", "<code>no_database</code>", "Il database non è raggiungibile o non è collegato: riprova fra poco. Se il limite mensile è quasi esaurito, le risposte portano l'intestazione <code>X-Sorso-Quota</code>; letture e cancellazione dati restano sempre disponibili."]], [1])}
     <h2 class="s">Limiti e <em>disponibilità</em></h2>
     ${table(["Cosa", "Limite"], [["Aperture di sessione (<code>/embed</code>)", "200 al minuto per indirizzo IP"], ["Operazioni di un utente nell'iframe", "90 al minuto per utente"], ["API di sola lettura", "120 richieste al minuto per chiave e per IP"]], [0])}
     <p class="mute" style="font-size:8pt">Sessione dell'iframe 4 ore; token al massimo 15 minuti, monouso. Servizio gratuito, senza garanzia di continuità: scarica il CSV dopo ogni serata. All'80% dell'uso mensile compare <code>X-Sorso-Quota: warn</code>; oltre il 90% si passa in sola lettura fino al mese dopo.</p>
