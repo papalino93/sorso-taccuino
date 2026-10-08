@@ -58,7 +58,7 @@
       authReload: "Torna alla pagina del sito e ricaricala per entrare di nuovo.",
       authUnsaved: "Il voto che stavi compilando non è stato salvato.",
       authAsk: "Chiedi un nuovo accesso al sito", authReloadHere: "Ricarica questa pagina",
-      tastings: "Degustazioni", noTastings: "Ancora nessuna degustazione.", noTastingsOrg: "Crea la prima degustazione del tuo team.",
+      tastings: "Degustazioni del team", tastingsHint: "Le crea il responsabile del team: le vedono tutti i membri.", tastingsHintOrg: "Le degustazioni che crei qui le vedono tutti i membri del tuo team.", noTastings: "Ancora nessuna degustazione.", noTastingsOrg: "Crea la prima degustazione del tuo team.",
       newTasting: "Nuova degustazione", tastingName: "Nome della degustazione", open: "aperta", closedBadge: "chiusa",
       wines: "Vini", noWines: "Nessun vino ancora: l'organizzatore deve aggiungerli.", noWinesOrg: "Aggiungi i vini da votare.",
       addWine: "Aggiungi vino", wineName: "Nome del vino", producer: "Produttore (facoltativo)", vintage: "Annata (facoltativa, es. 2018 o NV)",
@@ -120,7 +120,7 @@
       authReload: "Go back to the website page and reload it to enter again.",
       authUnsaved: "The vote you were filling in was not saved.",
       authAsk: "Ask the website for a new access", authReloadHere: "Reload this page",
-      tastings: "Tastings", noTastings: "No tastings yet.", noTastingsOrg: "Create your team's first tasting.",
+      tastings: "Team tastings", tastingsHint: "Created by the team lead: every member can see them.", tastingsHintOrg: "The tastings you create here are visible to every member of your team.", noTastings: "No tastings yet.", noTastingsOrg: "Create your team's first tasting.",
       newTasting: "New tasting", tastingName: "Tasting name", open: "open", closedBadge: "closed",
       wines: "Wines", noWines: "No wines yet: the organizer has to add them.", noWinesOrg: "Add the wines to vote on.",
       addWine: "Add wine", wineName: "Wine name", producer: "Producer (optional)", vintage: "Vintage (optional, e.g. 2018 or NV)",
@@ -367,6 +367,7 @@
   function viewList() {
     var org = isOrg(), h = head() + notices();
     h += '<div class="row spread"><h2 id="h-main" tabindex="-1">' + esc(t("tastings")) + '</h2>' + btn("refresh", t("refresh"), { cls: "small ghost", fk: "refresh" }) + '</div>';
+    h += '<p class="muted small">' + esc(t(org ? "tastingsHintOrg" : "tastingsHint")) + '</p>';
     if (S.loadError) return h + loadErrorHtml();
     if (S.loading && !S.tastings.length) return h + '<p class="muted" aria-busy="true">' + esc(t("loading")) + '</p>';
     if (org) h += S.form && S.form.kind === "tasting" ? formHtml("tasting") : '<p>' + btn("new-tasting", t("newTasting"), { cls: "primary", disabled: readonly(), fk: "new-tasting" }) + '</p>';
