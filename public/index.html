@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#FAFAF7" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#08080B" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#FBF4E6" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0F080B" media="(prefers-color-scheme: dark)">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -756,7 +756,7 @@
     --ph-v:#5E4CB8; --ph-o:#7C65D8; --ph-g:#9279F2; --ph-f:#A58BFF;
     --positive:#5FD38D;
   }
-  body{background:#EDEDE8;font-family:'Geist','Inter',system-ui,sans-serif;}
+  body{background:#ede6d9;font-family:'Geist','Inter',system-ui,sans-serif;}
   .shell,.panel{font-family:'Geist','Inter',system-ui,sans-serif;}
   .panel{box-shadow:none;}
   @media (min-width:900px){ .panel{box-shadow:0 0 0 1px var(--desk-edge);} }
@@ -881,10 +881,183 @@
   .hdr-score{flex-wrap:wrap;row-gap:8px;}
   .hdr-caption{white-space:nowrap;}
   input,select{text-overflow:ellipsis;}
+  /* confronto tra due vini: scheda tono su tono (prima i colori fissi, pensati per un fondo scuro, sparivano sul tema chiaro) */
+  .cmp{background:var(--card);color:var(--ink);border-radius:24px;}
+  .cmp-eyebrow{color:var(--ink-3);}
+  .cmp-close{border:1.5px solid var(--line-strong);color:var(--ink-2);}
+  .cmp-meta{color:var(--ink-3);}
+  .cmp-score{color:var(--accent-text);}
+  .cmp-l,.cmp-r{color:var(--ink-2);}
+  .cmp-bar{background:var(--line);}
+  .cmp-bar i{background:var(--ink-4);}
+  .cmp-bar i.win{background:var(--accent);}
+  .cmp-lab{color:var(--ink-3);}
+  .cmp .note-line{color:var(--ink-2);}
+
+  /* ---------- v1.6.0 · Impostazioni, logo, base per il layout a schermo largo ---------- */
+  .pane-head{display:none;}
+  .pcols,.pcol{display:contents;}
+  .bo1{order:1;}.bo2{order:2;}.bo3{order:3;}.bo4{order:4;}.bo5{order:5;}.bo6{order:6;}.bo7{order:7;}.bo8{order:8;}
+  .nav button.nav-set{display:none;}
+  .set-grid{display:flex;flex-direction:column;gap:12px;}
+  .gear-btn{width:44px;height:44px;border-radius:50%;border:1.5px solid var(--line-strong);background:none;color:var(--ink-3);display:grid;place-items:center;cursor:pointer;padding:0;}
+  .gear-btn[aria-pressed=true]{background:var(--ink);color:var(--panel);border-color:var(--ink);}
+  .brand{align-items:center;}
+  .brand-logo{width:28px;height:28px;border-radius:8px;flex:none;display:block;}
+  .dt-head{display:none;}
+  /* telefono: nelle Impostazioni al posto del numero grande c'è il titolo, e le schede hanno un ordine sensato */
+  .hdr.no-score .hdr-score,.hdr.no-score .hdr-evt{display:none;}
+  #pane-settings .pane-head{display:block;margin:6px 2px 2px;}
+  #pane-settings .pane-title{font-size:30px;line-height:1.1;letter-spacing:-.03em;font-weight:750;margin:0 0 4px;}
+  #pane-settings .pane-sub{margin:0;color:var(--ink-3);font-size:14px;}
+  .modes button{min-width:0;padding-left:8px;padding-right:8px;}
+  @media (max-width:360px){ .modes button{font-size:12.5px;padding-left:3px;padding-right:3px;line-height:1.15;} }
+  .set-grid > #lookCard{order:1;}.set-grid > #voteModeCard{order:2;}
+  .set-grid > .backup-card:not(#accountCard){order:3;}.set-grid > #accountCard{order:4;}
+  .stats-wrap-grid{display:contents;}
+
+  /* ---------- schermo largo (PC): menù a sinistra, due colonne, elenco + dettaglio ----------
+     Sotto i 1100px non cambia nulla: resta la colonna del telefono. */
+  @media (min-width:1100px){
+    html,body{height:100%;overflow:hidden;}
+    .shell{height:100vh;min-height:0;}
+    .panel{max-width:1320px;height:100vh;min-height:0;overflow:hidden;display:grid;
+           grid-template-columns:292px minmax(0,1fr);
+           grid-template-rows:auto auto minmax(0,1fr) auto auto auto auto auto;}
+    .panel::before{content:"";grid-column:1;grid-row:1 / -1;background:var(--card);border-right:1px solid var(--line);}
+    .panel > *{position:relative;}
+    .hdr,.hdr-top{display:contents;}
+    .brand{grid-column:1;grid-row:1;align-self:start;justify-self:start;margin:22px 22px 14px;gap:11px;flex-wrap:nowrap;z-index:1;}
+    .brand-logo{width:40px;height:40px;border-radius:12px;}
+    .brand-name{font-size:22px;}
+    .brand{display:grid;grid-template-columns:auto 1fr;column-gap:11px;row-gap:0;align-items:center;}
+    .brand-logo{grid-row:1 / span 2;}
+    .brand-name{align-self:end;line-height:1.05;}
+    .brand-tag{align-self:start;margin-top:3px;font-size:9px;letter-spacing:.14em;}
+    .coffee-fab{right:24px;bottom:24px;}
+    .scale-help{display:none;}
+    .nav{grid-column:1;grid-row:2;z-index:1;position:relative;display:flex;flex-direction:column;gap:2px;padding:0 14px;border:0;background:none;}
+    .nav button{justify-content:flex-start;gap:0;padding:12px 16px;min-height:46px;border-radius:14px;text-align:left;}
+    .nav button::after,.nav .dot{display:none;}
+    .nav .lbl{font:600 14.5px/1.2 'Geist','Inter';color:var(--ink-2);}
+    .nav button:hover:not(.on){background:var(--card-alt);}
+    .nav button.on{background:var(--sel-bg);}
+    .nav button.on .lbl{color:var(--sel-fg);}
+    .nav button.nav-set{display:flex;margin-top:14px;}
+    .nav-set::before{content:"";position:absolute;top:-8px;left:16px;right:16px;border-top:1px solid var(--line-strong);opacity:.35;}
+    .hdr.no-score .hdr-score{display:flex;}
+    .hdr-evt{grid-column:1;grid-row:4;margin:0 22px 10px;z-index:1;}
+    .hdr-score{grid-column:1;grid-row:5;z-index:1;margin:0 14px;padding:14px 8px 4px;flex-wrap:wrap;align-items:flex-end;gap:6px 12px;border-radius:24px;}
+    .hdr-num{font-size:100px;}
+    .hdr.flood .hdr-score{background:var(--accent);padding:16px 18px 14px;}
+    .hdr.flood .brand-name{color:var(--ink);}
+    .hdr.flood .brand-tag{color:var(--ink-3);}
+    .hdr.flood .lang-switch,.hdr.flood .theme-switch{border-color:var(--line-strong);}
+    .hdr.flood .lang-switch button,.hdr.flood .theme-switch button{color:var(--ink-3);}
+    .hdr.flood .lang-switch button.on,.hdr.flood .theme-switch button.on,.hdr.flood .avatar-btn{background:var(--ink);color:var(--panel);}
+    .segs{grid-column:1;grid-row:6;z-index:1;margin:12px 22px 0;}
+    .hdr.flood .segs{--head-fg:var(--ink);--head-dim:var(--ink-3);--head-line:var(--line-strong);--head-gold:var(--accent);}
+    .hdr-ctrl{grid-column:1;grid-row:8;z-index:1;margin:16px 18px 18px;justify-content:flex-start;gap:8px;}
+    .hdr-ctrl .avatar-wrap{margin-left:auto;}
+    .gear-btn{display:none;}
+    .avatar-menu{top:auto;bottom:calc(100% + 8px);left:0;right:auto;}
+    .bottom{position:relative;grid-column:1;grid-row:7;display:block;pointer-events:auto;z-index:2;}
+    .bottom-inner{max-width:none;background:none;backdrop-filter:none;border:0;}
+    .act-row{padding:14px 18px 0;}
+    .act-reset,.act-save{min-height:48px;}
+    .act-reset{padding:0 20px;}
+    .body{grid-column:2;grid-row:1 / -1;height:100vh;overflow-y:auto;padding:28px 36px 36px !important;max-width:none;z-index:1;}
+    .body > .tabpane{max-width:1100px;}
+    .pane-head{display:block;margin-bottom:6px;}
+    .pane-title{font-size:30px;line-height:1.1;letter-spacing:-.03em;font-weight:750;margin:0 0 4px;}
+    .pane-sub{margin:0;color:var(--ink-3);font-size:14px;}
+    .tabpane{gap:14px;}
+
+    /* Nuova e Alla cieca: due colonne */
+    .pcols{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.12fr);gap:22px;align-items:start;}
+    .pcol{display:flex;flex-direction:column;gap:12px;min-width:0;}
+    .bo1,.bo2,.bo3,.bo4,.bo5,.bo6,.bo7,.bo8{order:0;}
+    #pane-new .id-fields{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);column-gap:16px;row-gap:10px;}
+    #pane-new .id-fields > .fld-main,#pane-new .id-fields > .type-chips,#pane-new .id-fields > .uv-box,#pane-new .id-fields > .opt-hint{grid-column:1 / -1;}
+    #pane-new .id-fields .id-row{display:contents;}
+    #pane-new .id-fields .fld-yr,#pane-new .id-fields .fld-price{width:auto;flex:initial;}
+    #pane-new .type-chips{padding-top:6px;}
+    #pane-new .opt-hint,#pane-new .guide-note,#pane-new .evt-card .evt-intro{display:none;}
+    #labelCard{padding:12px 16px;}
+    #labelCard .drop{padding:12px 14px;gap:12px;flex-wrap:nowrap;}
+    #labelCard .drop-sub{display:none !important;}
+    #labelCard .drop-icon{transform:scale(.85);transform-origin:left center;}
+    #labelCard .drop-btns{margin-top:8px;}
+    .modes button{white-space:nowrap;padding-left:6px;padding-right:6px;font-size:13px;}
+    .mode-top{margin-bottom:0;}
+
+    /* Taccuino: elenco a sinistra, il vino scelto a destra */
+    #pane-book{display:grid;grid-template-columns:minmax(0,440px) minmax(0,1fr);column-gap:24px;row-gap:0;align-content:start;}
+    #pane-book > *{margin-bottom:12px;grid-column:1;}
+    #pane-book > .pane-head{grid-column:1 / -1;}
+    #pane-book > #cmpWrap:empty{display:none;}
+    #bookList,#bookList > div{display:contents !important;}
+    #bookList .wine-row{grid-column:1;margin-bottom:10px;}
+    #bookList .wine-row.sel{box-shadow:inset 0 0 0 2.5px var(--accent);}
+    #bookList .empty,#bookList > p{grid-column:1;}
+    #bookList .wine-detail{grid-column:2;grid-row:2 / span 60;position:sticky;top:0;align-self:start;margin:0;background:var(--card);border-radius:26px;padding:24px 26px;max-height:calc(100vh - 64px);overflow-y:auto;border:0;}
+    .dt-head{display:block;margin-bottom:12px;}
+    .dt-top{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;}
+    .dt-name{font-size:28px;line-height:1.12;letter-spacing:-.03em;font-weight:750;overflow-wrap:anywhere;}
+    .dt-meta{color:var(--ink-3);margin-top:4px;overflow-wrap:anywhere;}
+    .dt-big{text-align:right;flex:none;}
+    .dt-big b{display:block;font-size:76px;line-height:.85;letter-spacing:-.06em;font-weight:800;color:var(--accent-text);font-variant-numeric:tabular-nums;}
+    .dt-big span{font-weight:700;color:var(--accent-text);}
+    .dt-bars{margin-top:14px;display:grid;gap:4px;}
+    .dt-bar{display:grid;grid-template-columns:96px 1fr 34px;gap:10px;align-items:center;font-size:13px;color:var(--ink-2);}
+    .dt-bar i{display:block;height:7px;border-radius:9px;background:var(--line);overflow:hidden;}
+    .dt-bar i u{display:block;height:100%;background:var(--accent);border-radius:9px;}
+    .dt-bar em{font-style:normal;font-weight:700;text-align:right;color:var(--ink);}
+
+    /* Statistiche: a colonne */
+    #statsWrap{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;align-items:stretch;}
+    #statsWrap > *{margin:0;min-width:0;}
+    #statsWrap > .stats-section-head{grid-column:1 / -1;margin-top:8px;}
+    #statsWrap > .resume{grid-column:span 1;grid-row:span 1;}
+    #statsWrap > .stat-grid{grid-column:span 2;grid-template-columns:1fr 1fr;}
+    #statsWrap .stat-panel svg{max-height:300px;}
+
+    /* Evento */
+    #pane-event{display:grid;grid-template-columns:minmax(0,440px) minmax(0,1fr);column-gap:24px;row-gap:0;align-content:start;}
+    #pane-event > *{margin-bottom:12px;}
+    #pane-event > .pane-head{grid-column:1 / -1;}
+
+    /* Impostazioni */
+    .set-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);grid-template-rows:auto 1fr;gap:14px;align-items:start;}
+    .set-grid > #lookCard{grid-column:1;grid-row:1 / span 2;}
+    .set-grid > #voteModeCard{grid-column:2;grid-row:1;}
+    .set-grid > .backup-card:not(#accountCard){grid-column:2;grid-row:2;margin-top:0;}
+    .set-grid > #accountCard{grid-column:1 / -1;grid-row:3;margin-top:0;}
+    .app-version{margin-top:24px;}
+  }
+  @media (min-width:1100px) and (max-height:820px){
+    .brand{margin:14px 22px 8px;}
+    .brand-logo{width:34px;height:34px;}
+    .nav button{min-height:38px;padding:8px 16px;}
+    .nav button.nav-set{margin-top:8px;}
+    .hdr-num{font-size:72px;}
+    .hdr-score{padding-top:6px;}
+    .seg{min-height:30px;padding:4px 0;}
+    .segs{margin-top:6px;}
+    .act-row{padding-top:8px;}
+    .hdr-ctrl{margin:10px 18px 12px;}
+  }
+  @media (min-width:1100px) and (max-height:640px){ .segs{display:none;} .hdr-num{font-size:60px;} }
+  @media (min-width:1700px){ .panel{max-width:1440px;} .body > .tabpane{max-width:1200px;} }
+  /* THEME-DEFAULTS-BEGIN (generato da scripts/theme-css.js: non modificare a mano) */
+  #root{--shell:#ede6d9;--panel:#fbf4e6;--card:#efe8db;--card-alt:#e5dfd3;--field:#fefcf8;--line:#d9d3c8;--line-soft:#e3ddd1;--line-strong:#7e7b77;--ink:#0b0b10;--ink-2:#28272a;--ink-3:#535150;--ink-4:#5f5d5c;--sel-bg:#8c1d3f;--sel-fg:#ffffff;--accent:#8c1d3f;--accent-text:#8c1d3f;--gold:#8c1d3f;--head-gold:#8c1d3f;--head-bg:#fbf4e6;--head-fg:#0b0b10;--head-dim:#535150;--head-line:rgba(11,11,16,.16);--bar:rgba(251,244,230,.94);--chip:#e5dfd3;--desk-wine:rgba(140,29,63,.07);--desk-gold:rgba(140,29,63,.05);--desk-edge:rgba(11,11,16,.08);--ph-v:#d4a9ac;--ph-o:#b87382;--ph-g:#a0445d;--ph-f:#8c1d3f;}
+  #root.dark{--shell:#060304;--panel:#0f080b;--card:#20161a;--card-alt:#2b2023;--field:#2b2023;--line:#2f292b;--line-soft:#262022;--line-strong:#837f7f;--ink:#f6f6f3;--ink-2:#dad9d7;--ink-3:#b1afad;--ink-4:#9a9796;--sel-bg:#c8385c;--sel-fg:#ffffff;--accent:#c8385c;--accent-text:#d46a84;--gold:#d46a84;--head-gold:#c8385c;--head-bg:#0f080b;--head-fg:#f6f6f3;--head-dim:#b1afad;--head-line:rgba(246,246,243,.16);--bar:rgba(15,8,11,.94);--chip:#2b2023;--desk-wine:rgba(200,56,92,.10);--desk-gold:rgba(200,56,92,.06);--desk-edge:rgba(246,246,243,.08);--ph-v:#501927;--ph-o:#7e253c;--ph-g:#a72f4d;--ph-f:#c8385c;}
+  /* THEME-DEFAULTS-END */
 </style>
 </head>
 <body>
-<div id="root">
+<div id="root"><script>/* niente lampo di chiaro per chi usa il tema scuro: la classe si mette prima del primo disegno */
+try{var _p=localStorage.getItem("sorso-theme");if(_p==="dark"||(_p!=="light"&&window.matchMedia&&matchMedia("(prefers-color-scheme: dark)").matches)){document.getElementById("root").classList.add("dark");}}catch(e){}</script>
 
 <a class="coffee-fab" id="coffeeFab" href="https://buymeacoffee.com/papalino" target="_blank" rel="noopener noreferrer" data-i18n-title="coffee.label" data-i18n-aria="coffee.label" title="Offrimi un calice" aria-label="Offrimi un calice"><span class="coffee-fab-label" data-i18n="coffee.label">Offrimi un calice</span><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 22h8"/><path d="M12 15v7"/><path d="M12 15a7 7 0 0 0 7-7V3H5v5a7 7 0 0 0 7 7z"/></svg></a>
 
@@ -895,6 +1068,7 @@
       <button type="button" id="loginLangEn">EN</button>
     </div>
     <div class="login-brand">
+      <img src="/favicon.svg" alt="" width="56" height="56" style="display:block;margin:0 auto 10px;border-radius:16px">
       <span class="login-brand-name">Sorso</span>
       <span class="login-brand-tag" data-i18n="login.tag">taccuino di degustazione</span>
     </div>
@@ -920,11 +1094,12 @@
     <button type="button" data-tab="book"><span class="dot"></span><span class="lbl" data-i18n="nav.book">Taccuino</span></button>
     <button type="button" data-tab="stats"><span class="dot"></span><span class="lbl" data-i18n="nav.stats">Statistiche</span></button>
     <button type="button" data-tab="event"><span class="dot"></span><span class="lbl" data-i18n="nav.event">Evento</span></button>
+    <button type="button" data-tab="settings" class="nav-set"><span class="dot"></span><span class="lbl" data-i18n="nav.settings">Impostazioni</span></button>
   </nav>
 
   <header class="hdr">
     <div class="hdr-top">
-      <button type="button" class="brand" id="brandBtn" data-i18n-title="hdr.brandTitle" title="Tocca per personalizzare"><span class="brand-name" id="brandName">Sorso</span><span class="brand-tag" id="brandOwner" data-i18n="hdr.brandTagDefault">il taccuino</span></button>
+      <button type="button" class="brand" id="brandBtn" data-i18n-title="hdr.brandTitle" title="Tocca per personalizzare"><img class="brand-logo" src="/favicon.svg" alt="" width="28" height="28"><span class="brand-name" id="brandName">Sorso</span><span class="brand-tag" id="brandOwner" data-i18n="hdr.brandTagDefault">il taccuino</span></button>
       <div class="hdr-ctrl">
         <div class="lang-switch" id="langSwitch">
           <button type="button" id="langIt" class="on">IT</button>
@@ -934,6 +1109,7 @@
           <button type="button" id="themeLight" class="on" data-i18n-title="theme.light" title="Tema chiaro">&#9728;</button>
           <button type="button" id="themeDark" data-i18n-title="theme.dark" title="Tema scuro">&#9790;</button>
         </div>
+        <button type="button" class="gear-btn" id="settingsBtn" data-i18n-title="nav.settings" title="Impostazioni" aria-label="Impostazioni"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3.2"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.87l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.7 1.7 0 0 0-1.87-.34 1.7 1.7 0 0 0-1.03 1.56V21a2 2 0 1 1-4 0v-.09A1.7 1.7 0 0 0 9 19.4a1.7 1.7 0 0 0-1.87.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.7 1.7 0 0 0 4.6 15a1.7 1.7 0 0 0-1.56-1.03H3a2 2 0 1 1 0-4h.09A1.7 1.7 0 0 0 4.6 9a1.7 1.7 0 0 0-.34-1.87l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.7 1.7 0 0 0 9 4.6a1.7 1.7 0 0 0 1.03-1.56V3a2 2 0 1 1 4 0v.09A1.7 1.7 0 0 0 15 4.6a1.7 1.7 0 0 0 1.87-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.7 1.7 0 0 0 19.4 9a1.7 1.7 0 0 0 1.56 1.03H21a2 2 0 1 1 0 4h-.09A1.7 1.7 0 0 0 19.4 15z"/></svg></button>
         <div class="avatar-wrap" id="avatarWrap">
           <button type="button" class="avatar-btn" id="avatarBtn"><span id="avatarInitials">?</span></button>
           <div class="avatar-menu hidden" id="avatarMenu">
@@ -967,10 +1143,12 @@
 
     <!-- ============ NUOVA ============ -->
     <section class="tabpane" id="pane-new">
+      <div class="pane-head"><h1 class="pane-title" data-i18n="pane.new.title"></h1><p class="pane-sub" data-i18n="pane.new.sub"></p></div>
       <div class="edit-banner hidden" id="editBanner">
         <span id="editBannerText"></span>
         <button type="button" class="edit-cancel" id="editCancelBtn" data-i18n="action.cancel">Annulla</button>
       </div>
+      <div class="pcols"><div class="pcol pcol-a">
       <div id="modeTopWrap" class="mode-top"></div>
       <div class="card" id="labelCard">
         <div class="card-head">
@@ -1035,6 +1213,7 @@
         <div class="opt-hint" data-i18n="new.optHint">Tutti i campi oltre al nome sono facoltativi. L'uvaggio alimenta le statistiche per vitigno: più lo compili, più il tuo profilo diventa preciso.</div>
       </div>
 
+      </div><div class="pcol pcol-b">
       <div id="sectionsWrap"></div>
 
       <p class="guide-note" data-i18n-html="new.guideNote">Voci e terminologia ispirate alla scheda AIS. Ogni giudizio si dà <b>in riferimento alla tipologia</b>: un vino delicato non viene penalizzato per non essere potente. Limpidezza, colore, corpo e tannino si descrivono soltanto, perché sono caratteristiche e non pregi. Pesi: visivo 10, olfattivo 30, gusto-olfattivo 40, finale 20.</p>
@@ -1050,10 +1229,12 @@
         </div>
         <div class="evt-note" id="evtQuickNote"></div>
       </div>
+      </div></div>
     </section>
 
     <!-- ============ TACCUINO ============ -->
     <section class="tabpane hidden" id="pane-book">
+      <div class="pane-head"><h1 class="pane-title" data-i18n="pane.book.title"></h1><p class="pane-sub" data-i18n="pane.book.sub"></p></div>
       <div style="display:flex;flex-direction:column;gap:10px">
         <div class="search-wrap"><span aria-hidden="true"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg></span><input id="queryInput" data-i18n-placeholder="book.searchPh" placeholder="Cerca vino, produttore, denominazione..."></div>
         <div class="filter-row" id="filterRow"></div>
@@ -1061,7 +1242,13 @@
       <div id="cmpWrap"></div>
       <div id="bookList"></div>
 
-      <div class="card backup-card">
+    </section>
+
+    <!-- ============ IMPOSTAZIONI ============ -->
+    <section class="tabpane hidden" id="pane-settings">
+      <div class="pane-head"><h1 class="pane-title" data-i18n="pane.settings.title">Impostazioni</h1><p class="pane-sub" data-i18n="pane.settings.sub">Tutto ciò che riguarda il tuo profilo, in un posto solo.</p></div>
+      <div class="set-grid">
+        <div class="card backup-card">
         <div class="card-head"><span class="eyebrow" data-i18n="book.archiveEyebrow">Il tuo archivio</span><span class="fill"></span>
           <span class="status" id="storageMode"></span></div>
         <p class="note-line" id="backupNote"></p>
@@ -1073,7 +1260,7 @@
         <div class="note-line" id="backupStatus"></div>
       </div>
 
-      <div class="card" id="voteModeCard">
+        <div class="card" id="voteModeCard">
         <div class="card-head"><span class="eyebrow" data-i18n="vmode.eyebrow">Come voti di solito</span><span class="fill"></span></div>
         <p class="note-line" data-i18n="vmode.intro">Scegli con quale modalità si apre ogni nuova scheda. Puoi sempre cambiarla scheda per scheda.</p>
         <div class="modes" id="vmodeSwitch" role="group" data-i18n-aria="vmode.eyebrow" aria-label="Come voti di solito">
@@ -1083,9 +1270,16 @@
         </div>
       </div>
 
-      <div class="card" id="lookCard">
+        <div class="card" id="lookCard">
         <div class="card-head"><span class="eyebrow" data-i18n="look.eyebrow">Aspetto</span><span class="fill"></span></div>
         <p class="note-line" data-i18n="look.intro">Scegli i tuoi colori. La scelta resta su questo dispositivo e il testo resta sempre leggibile.</p>
+        <div class="look-label" data-i18n="look.theme">Tema</div>
+        <div class="modes" id="themePrefSwitch" role="group" data-i18n-aria="look.theme" aria-label="Tema">
+          <button type="button" data-themepref="light" data-i18n="look.theme.light">Chiaro</button>
+          <button type="button" data-themepref="dark" data-i18n="look.theme.dark">Scuro</button>
+          <button type="button" data-themepref="auto" data-i18n="look.theme.auto">Automatico</button>
+        </div>
+        <p class="note-line" data-i18n="look.theme.hint">Automatico segue il tema del tuo dispositivo e cambia con lui.</p>
         <div class="look-label" data-i18n="look.accent">Colore d'accento</div>
         <div class="swatches" id="accentSwatches" role="group" data-i18n-aria="look.accent" aria-label="Colore d'accento"></div>
         <label class="look-custom"><input type="color" id="accentCustom" value="#5b2eff"><span data-i18n="look.custom">Un altro colore…</span></label>
@@ -1096,7 +1290,7 @@
         <div class="backup-actions"><button type="button" class="pill-ghost" id="lookReset" data-i18n="look.reset">Ripristina i colori</button></div>
       </div>
 
-      <div class="card backup-card" id="accountCard">
+        <div class="card backup-card" id="accountCard">
         <div class="card-head"><span class="eyebrow" data-i18n="account.eyebrow">Account</span><span class="fill"></span></div>
         <p class="note-line" id="accountNote"></p>
         <div class="backup-actions">
@@ -1104,21 +1298,25 @@
           <button type="button" class="pill-solid hidden" id="loginPromptBtn">Accedi o crea un account</button>
         </div>
       </div>
+      </div>
     </section>
 
     <!-- ============ STATISTICHE ============ -->
     <section class="tabpane hidden" id="pane-stats">
+      <div class="pane-head"><h1 class="pane-title" data-i18n="pane.stats.title"></h1><p class="pane-sub" data-i18n="pane.stats.sub"></p></div>
       <div id="statsWrap"></div>
     </section>
 
     <!-- ============ ALLA CIECA ============ -->
     <section class="tabpane hidden" id="pane-blind">
-      <div class="card">
+      <div class="pane-head"><h1 class="pane-title" data-i18n="pane.blind.title"></h1><p class="pane-sub" data-i18n="pane.blind.sub"></p></div>
+      <div class="pcols"><div class="pcol pcol-a">
+      <div class="card bo1">
         <div class="card-head"><span class="eyebrow" data-i18n="blind.eyebrow">Degustazione alla cieca</span><span class="fill"></span></div>
         <p class="evt-intro" data-i18n="blind.intro">Assaggi senza guardare l'etichetta e provi a riconoscere vitigno, regione, tipologia e annata, da solo o a cena con gli amici, per vedere chi si avvicina di più. La prova resta nella sezione «Alla cieca» finché il vino è un mistero; quando lo sveli e scrivi il suo nome, la ritrovi anche nel tuo taccuino.</p>
       </div>
 
-      <div class="card">
+      <div class="card bo2">
         <div class="card-head"><span class="eyebrow" data-i18n="blind.guessEyebrow">La tua ipotesi</span><span class="fill"></span>
           <span class="status" data-i18n="blind.allOptional">tutto facoltativo</span></div>
         <div class="id-fields">
@@ -1136,33 +1334,35 @@
         </div>
       </div>
 
-      <div id="bSectionsWrap"></div>
-
-      <div class="card">
+      <div class="card bo4">
         <label class="fld"><span class="fld-lab" data-i18n="blind.labelName">Come la chiami per ritrovarla</span>
           <input class="in-line" id="bEtichettaInput" data-i18n-placeholder="blind.labelName.ph" placeholder="es. Calice n.3 — serata del giovedì"></label>
       </div>
 
-      <div class="edit-banner hidden" id="bEditBanner">
+      <div class="edit-banner hidden bo5" id="bEditBanner">
         <span id="bEditBannerText"></span>
         <button type="button" class="edit-cancel" id="bEditCancelBtn" data-i18n="action.cancel">Annulla</button>
       </div>
 
-      <div class="act-row" style="padding:0">
+      <div class="act-row bo6" style="padding:0">
         <button type="button" class="act-reset" id="bResetBtn" data-i18n="action.clear">Azzera</button>
         <button type="button" class="act-save" id="bSaveBtn" data-i18n="blind.saveBtn">Salva alla cieca</button>
       </div>
-      <div class="note-line" id="bStatus" role="status" style="text-align:center"></div>
+      <div class="note-line bo7" id="bStatus" role="status" style="text-align:center"></div>
 
-      <div class="card">
+      <div class="card bo8">
         <div class="card-head"><span class="eyebrow" data-i18n="blind.yourTrials">Le tue prove</span><span class="fill"></span>
           <span class="status" id="bCount"></span></div>
         <div id="bList"></div>
       </div>
+      </div><div class="pcol pcol-b">
+      <div id="bSectionsWrap" class="bo3"></div>
+      </div></div>
     </section>
 
     <!-- ============ EVENTO ============ -->
     <section class="tabpane hidden" id="pane-event">
+      <div class="pane-head"><h1 class="pane-title" data-i18n="pane.event.title"></h1><p class="pane-sub" data-i18n="pane.event.sub"></p></div>
       <div class="card">
         <div class="card-head"><span class="eyebrow" data-i18n="event.leaderboardEyebrow">Classifica evento</span><span class="fill"></span></div>
         <p class="evt-intro" data-i18n="event.introEvent">Qui vedi come sono stati votati i vini di una degustazione di gruppo. Le schede si collegano a un evento dal menu in fondo alla pagina "Nuova".</p>
@@ -1666,6 +1866,12 @@ const S = {
 };
 
 const $ = id => document.getElementById(id);
+/* torna in cima: la pagina (telefono) e, su schermo largo, anche il riquadro dei contenuti che scorre da solo */
+function vaInCima(morbido){
+  const o = {top:0, behavior: morbido ? "smooth" : "auto"};
+  try{ window.scrollTo(o); }catch(e){}
+  try{ const b = document.querySelector(".body"); if(b && b.scrollTo) b.scrollTo(o); }catch(e){}
+}
 
 /* ============================================================
    TRADUZIONE DELL'INTERFACCIA (IT/EN)
@@ -1682,6 +1888,14 @@ const I18N = {
     "nav.stats":"Statistiche", "nav.event":"Evento",
 
     "theme.light":"Tema chiaro", "theme.dark":"Tema scuro",
+    "nav.settings":"Impostazioni",
+    "pane.new.title":"Nuova degustazione", "pane.new.sub":"Compila la scheda: il punteggio si aggiorna da solo.",
+    "pane.book.title":"Taccuino", "pane.book.sub":"I tuoi vini, con ricerca e filtri.",
+    "pane.stats.title":"Statistiche", "pane.stats.sub":"Il tuo profilo di degustatore.",
+    "pane.blind.title":"Alla cieca", "pane.blind.sub":"Prova a riconoscere il vino senza guardare l'etichetta.",
+    "pane.event.title":"Evento", "pane.event.sub":"La classifica dei vini votati insieme.",
+    "pane.settings.title":"Impostazioni", "pane.settings.sub":"Tutto ciò che riguarda il tuo profilo, in un posto solo.",
+
     "lang.it":"Italiano", "lang.en":"Inglese",
 
     "coffee.label":"Offrimi un calice",
@@ -1952,6 +2166,8 @@ const I18N = {
     "vmode.intro":"Scegli con quale modalità si apre ogni nuova scheda. Puoi sempre cambiarla scheda per scheda.",
     "vmode.remember":"Ricorda l'ultima",
     "look.eyebrow":"Aspetto",
+    "look.theme":"Tema", "look.theme.light":"Chiaro", "look.theme.dark":"Scuro", "look.theme.auto":"Automatico",
+    "look.theme.hint":"Automatico segue il tema del tuo dispositivo e cambia con lui.",
     "look.intro":"Scegli i tuoi colori. La scelta resta su questo dispositivo e il testo resta sempre leggibile.",
     "look.accent":"Colore d'accento",
     "look.bg":"Sfondo",
@@ -2198,6 +2414,14 @@ const I18N = {
     "nav.stats":"Stats", "nav.event":"Event",
 
     "theme.light":"Light theme", "theme.dark":"Dark theme",
+    "nav.settings":"Settings",
+    "pane.new.title":"New tasting", "pane.new.sub":"Fill in the sheet: the score updates by itself.",
+    "pane.book.title":"Notebook", "pane.book.sub":"Your wines, with search and filters.",
+    "pane.stats.title":"Statistics", "pane.stats.sub":"Your taster profile.",
+    "pane.blind.title":"Blind", "pane.blind.sub":"Try to recognise the wine without looking at the label.",
+    "pane.event.title":"Event", "pane.event.sub":"The ranking of the wines voted together.",
+    "pane.settings.title":"Settings", "pane.settings.sub":"Everything about your profile, in one place.",
+
     "lang.it":"Italian", "lang.en":"English",
 
     "coffee.label":"Buy me a glass",
@@ -2468,6 +2692,8 @@ const I18N = {
     "vmode.intro":"Choose which mode every new entry opens in. You can always change it entry by entry.",
     "vmode.remember":"Remember the last one",
     "look.eyebrow":"Appearance",
+    "look.theme":"Theme", "look.theme.light":"Light", "look.theme.dark":"Dark", "look.theme.auto":"Automatic",
+    "look.theme.hint":"Automatic follows your device's theme and changes with it.",
     "look.intro":"Choose your colors. Your choice stays on this device and the text always stays readable.",
     "look.accent":"Accent color",
     "look.bg":"Background",
@@ -2811,10 +3037,11 @@ function renderHeader(){
     const n = S.saved.length;
     const avg = n ? S.saved.reduce((a,w)=>a+w.score,0)/n : 0;
     num = n ? dec(avg) : 0; unit = t("hdr.average");
-    caption = S.tab==="book" ? (n+" "+(n===1?t("hdr.card"):t("hdr.cardPl"))) : t("hdr.statsCaption");
+    caption = S.tab==="book" ? (n+" "+(n===1?t("hdr.card"):t("hdr.cardPl"))) : S.tab==="settings" ? t("nav.settings") : t("hdr.statsCaption");
     showSegs = false;
   }
   /* dal 96 in su (nella scheda o nella prova) il colore inonda l'intestazione */
+  document.querySelector(".hdr").classList.toggle("no-score", S.tab === "settings");
   document.querySelector(".hdr").classList.toggle("flood", (S.tab === "new" || S.tab === "blind") && Number(num) >= 96);
   $("ringNum").textContent = num;
   $("ringUnit").textContent = unit;
@@ -3544,6 +3771,24 @@ function scoreDetailText(w){
     : tf("book.dl.scoreDetail",{total:w.score, v:f.v, o:f.o, g:f.g, a:f.f});
 }
 
+/* intestazione del dettaglio (si vede solo su schermo largo): nome, numero grande e giurie */
+const PC = window.matchMedia ? window.matchMedia("(min-width:1100px)") : {matches:false};
+function dettaglioTesta(w){
+  const f = fasiOf(w);
+  const larg = x => Math.max(0, Math.min(100, (x-50)/50*100));
+  let righe = [];
+  if(!f.none){
+    righe = f.smart
+      ? [[t("smart.eye"), f.occhio],[t("smart.nose"), f.naso],[t("smart.mouth"), boccaOf(f)]]
+      : [[t("seg.visual"), f.v],[t("seg.olfactory"), f.o],[t("seg.taste"), f.g],[t("seg.final"), f.f]];
+  }
+  return '<div class="dt-head"><div class="dt-top"><div><div class="dt-name">'+esc(w.nome||t("book.noName"))+'</div>'+
+    '<div class="dt-meta">'+esc(metaOf(w))+'</div></div>'+
+    '<div class="dt-big"><b>'+w.score+'</b><span>'+judge(w.score)+'</span></div></div>'+
+    (righe.length ? '<div class="dt-bars">'+righe.map(r =>
+      '<div class="dt-bar"><span>'+r[0]+'</span><i><u style="width:'+larg(r[1])+'%"></u></i><em>'+r[1]+'</em></div>').join("")+'</div>' : '')+
+    '</div>';
+}
 function renderBook(){
   $("filterRow").innerHTML =
     ["Tutti"].concat(TYPES).map(f => '<button type="button" class="fchip'+(S.filter===f?" on":"")+'" aria-pressed="'+(S.filter===f)+'" data-filter="'+f+'">'+(f==="Tutti"?t("book.filterAll"):f)+'</button>').join("")+
@@ -3586,6 +3831,9 @@ function renderBook(){
     $("cmpWrap").innerHTML = "";
   }
 
+  /* su schermo largo il dettaglio sta sempre a destra: se nessun vino è scelto si apre il primo */
+  if(PC.matches && list.length && !list.some(w => w.id === S.expanded)) S.expanded = list[0].id;
+
   if(list.length === 0){
     $("bookList").innerHTML = '<div class="empty"><div class="empty-title">'+t("book.noResultsTitle")+'</div><p class="empty-sub">'+
       (S.saved.length===0 ? t("book.noResultsEmpty") : t("book.noResultsFilter"))+'</p></div>';
@@ -3594,7 +3842,7 @@ function renderBook(){
 
   $("bookList").innerHTML = '<div style="display:flex;flex-direction:column;gap:10px">'+list.map(w => {
     const on = S.picked.indexOf(w.id) > -1;
-    let h = '<div class="wine-row'+(on?" picked":"")+'">'+
+    let h = '<div class="wine-row'+(on?" picked":"")+(S.expanded === w.id ? " sel" : "")+'">'+
       '<div class="wine-side">'+
         '<button type="button" class="wine-score" data-pick="'+w.id+'" aria-pressed="'+on+'" aria-label="'+esc(tf("book.cmpAria",{name:w.nome||t("book.noName"), n:w.score}))+'" title="'+t("book.cmpToTouch")+'">'+w.score+'</button>'+
         '<div class="wine-slot'+(w.thumb?'':' no-photo')+'" aria-hidden="'+(w.thumb?'false':'true')+'">'+
@@ -3608,7 +3856,7 @@ function renderBook(){
       '</div>'+
     '</div>';
     if(S.expanded === w.id){
-      h += '<div class="wine-detail">'+
+      h += '<div class="wine-detail">'+dettaglioTesta(w)+
         (w.thumb ? '<img class="detail-thumb" src="'+w.thumb+'" alt="'+t("card.label")+'">' : '')+
         '<div class="dl"><b>'+t("book.dl.score")+'</b><span>'+scoreDetailText(w)+'</span></div>'+
         (w.legacyTotal != null ? '<div class="dl"><b>'+t("book.dl.legacy")+'</b><span>'+tf("book.dl.legacyVal",{n:w.legacyTotal})+'</span></div>' : "")+
@@ -4692,7 +4940,7 @@ function apriInModifica(id){
   S.tab = "new";
   S.expanded = null;
   renderAll();
-  window.scrollTo({top:0, behavior:"smooth"});
+  vaInCima(true);
   setStatus(tf("new.editingSave",{name:(w.nome||t("new.editingFallback"))}));
 }
 
@@ -4968,7 +5216,7 @@ function bEdit(id){
   B.editTouched = false;
   B.editFrozen = scoresOf(B).total !== pr.score ? {score:pr.score, modello:pr.modello != null ? pr.modello : null, orig:{voti:pr.voti, parts:pr.parts}} : null;
   renderBlindForm(); renderBlindList();
-  window.scrollTo({top:0, behavior:"smooth"});
+  vaInCima(true);
   bStatus(t("blind.editingNotify"));
 }
 
@@ -5330,7 +5578,7 @@ async function handleFile(file){
    RENDER + EVENTI
    ============================================================ */
 function renderAll(){
-  ["new","book","blind","stats","event"].forEach(t => $("pane-"+t).classList.toggle("hidden", S.tab !== t));
+  ["new","book","blind","stats","event","settings"].forEach(t => $("pane-"+t).classList.toggle("hidden", S.tab !== t));
   $("bottomBar").classList.toggle("hidden", S.tab !== "new");
   document.querySelector(".body").style.paddingBottom = S.tab === "new" ? "110px" : "40px";
   Array.prototype.forEach.call($("nav").children, b => { b.classList.toggle("on", b.dataset.tab === S.tab); if(b.dataset.tab === S.tab) b.setAttribute("aria-current", "page"); else b.removeAttribute("aria-current"); });
@@ -5339,14 +5587,18 @@ function renderAll(){
   if(S.tab === "blind"){ renderBlindForm(); renderBlindList(); }
   if(S.tab === "stats") renderStats();
   if(S.tab === "event") renderEventPicker();
+  if(S.tab === "settings"){ descriviArchivio(); renderLook(); renderVoteMode(); renderThemePref(); }
+  $("settingsBtn").setAttribute("aria-pressed", String(S.tab === "settings"));
   renderHeader();
 }
 
+if(PC.addEventListener) PC.addEventListener("change", () => { try{ renderAll(); }catch(e){} });
 $("nav").addEventListener("click", e => {
   const b = e.target.closest("button[data-tab]");
   if(!b) return;
   S.tab = b.dataset.tab;
   renderAll();
+  vaInCima(false);
   // Arrivando sulla tab Evento con un evento già scelto, la classifica si
   // legge subito da sola: prima bisognava sapere di dover premere "Aggiorna
   // classifica", e nel frattempo l'intestazione mostrava "0 vini in gara"
@@ -5354,6 +5606,7 @@ $("nav").addEventListener("click", e => {
   if(S.tab === "event" && S.currentEvent && !S.newEventMode) loadLeaderboard();
 });
 
+$("settingsBtn").addEventListener("click", () => { S.tab = "settings"; renderAll(); vaInCima(false); });
 $("themeLight").addEventListener("click", () => setTheme("light", true));
 $("themeDark").addEventListener("click", () => setTheme("dark", true));
 const THEME_KEY = "sorso-theme";
@@ -5367,14 +5620,12 @@ function applyLook(){
   S.lookKeys.forEach(k => root.style.removeProperty(k));
   S.lookKeys = [];
   const d = Theme.derive({accent:S.look.accent, bg:dark ? S.look.bgDark : S.look.bgLight, dark});
-  if(d){
-    Object.keys(d.vars).forEach(k => root.style.setProperty(k, d.vars[k]));
-    S.lookKeys = Object.keys(d.vars);
-  }
-  document.body.style.background = d ? d.vars["--shell"] : (dark ? "#000000" : "#EDEDE8");
-  document.querySelectorAll('meta[name="theme-color"]').forEach(meta => meta.setAttribute("content", d ? d.vars["--panel"] : (dark ? "#08080B" : "#FAFAF7")));
+  Object.keys(d.vars).forEach(k => root.style.setProperty(k, d.vars[k]));
+  S.lookKeys = Object.keys(d.vars);
+  document.body.style.background = d.vars["--shell"];
+  document.querySelectorAll('meta[name="theme-color"]').forEach(meta => meta.setAttribute("content", d.vars["--panel"]));
   const note = $("lookAdjusted");
-  if(note){ note.textContent = d && d.adjusted ? t("look.adjusted") : ""; note.classList.toggle("hidden", !(d && d.adjusted)); }
+  if(note){ note.textContent = d.adjusted ? t("look.adjusted") : ""; note.classList.toggle("hidden", !d.adjusted); }
   renderLook();
 }
 function renderLook(){
@@ -5409,15 +5660,37 @@ $("vmodeSwitch").addEventListener("click", async e => {
 $("lookReset").addEventListener("click", () => { S.look = {}; lookSave(); applyLook(); });
 function setLook(o){ S.look = Theme.sanitize(Object.assign({}, S.look, o)); lookSave(); applyLook(); }
 
+/* Tema: "chiaro", "scuro" oppure "auto" (segue il dispositivo). S.theme è sempre quello in uso. */
+const SCHEMA_SCURO = window.matchMedia ? window.matchMedia("(prefers-color-scheme: dark)") : null;
+function temaDaPref(pref){ return pref === "light" ? "light" : pref === "dark" ? "dark" : (SCHEMA_SCURO && SCHEMA_SCURO.matches ? "dark" : "light"); }
 function setTheme(t, salva){
   S.theme = t;
+  if(salva) S.themePref = t;
   $("root").classList.toggle("dark", t === "dark");
-  try{ applyLook(); }catch(e){ document.body.style.background = t === "dark" ? "#000000" : "#EDEDE8"; }
+  try{ applyLook(); }catch(e){ document.body.style.background = t === "dark" ? "#060304" : "#EDE6D9"; }
   $("themeLight").classList.toggle("on", t === "light");
   $("themeDark").classList.toggle("on", t === "dark");
   $("themeLight").setAttribute("aria-pressed", String(t === "light"));
   $("themeDark").setAttribute("aria-pressed", String(t === "dark"));
   if(salva){ try{ window.localStorage.setItem(THEME_KEY, t); }catch(e){} }
+  renderThemePref();
+}
+function setThemePref(pref){
+  S.themePref = pref;
+  try{ window.localStorage.setItem(THEME_KEY, pref); }catch(e){}
+  setTheme(temaDaPref(pref), false);
+}
+function renderThemePref(){
+  const box = $("themePrefSwitch"); if(!box) return;
+  Array.prototype.forEach.call(box.children, b => {
+    const on = b.dataset.themepref === S.themePref;
+    b.classList.toggle("on", on); b.setAttribute("aria-pressed", String(on));
+  });
+}
+$("themePrefSwitch").addEventListener("click", e => { const b = e.target.closest("[data-themepref]"); if(b) setThemePref(b.dataset.themepref); });
+if(SCHEMA_SCURO){
+  const segui = () => { if(S.themePref === "auto") setTheme(temaDaPref("auto"), false); };
+  if(SCHEMA_SCURO.addEventListener) SCHEMA_SCURO.addEventListener("change", segui); else if(SCHEMA_SCURO.addListener) SCHEMA_SCURO.addListener(segui);
 }
 $("langIt").addEventListener("click", () => setLang("it"));
 $("langEn").addEventListener("click", () => setLang("en"));
@@ -6008,7 +6281,8 @@ async function handleGoogleRedirect(){
      apertura. */
   let savedTheme = null;
   try{ savedTheme = window.localStorage.getItem(THEME_KEY); }catch(e){}
-  setTheme(savedTheme === "light" ? "light" : "dark");
+  S.themePref = (savedTheme === "light" || savedTheme === "dark") ? savedTheme : "auto";
+  setTheme(temaDaPref(S.themePref), false);
   let savedLang = "it";
   try{ savedLang = window.localStorage.getItem(LANG_KEY) || "it"; }catch(e){}
   setLang(savedLang);
