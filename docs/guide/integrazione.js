@@ -178,7 +178,7 @@ function build() {
     <h1 class="d">Nei <em>tuoi</em> colori</h1>
     <p class="lead" style="max-width:130mm">Con pochi valori lo spazio prende il tono del tuo sito. Li impostiamo noi, su tua richiesta.</p>
     <div class="phones" style="margin:5mm 0">
-      ${fig("team-base-2-vini.png", 1, "<b>Tema di base</b>: nessuna scelta.", "sm")}
+      ${fig("team-base-2-vini.png", 1, "<b>Tema di base</b>: i colori del vino, senza nessuna scelta.", "sm")}
       ${fig("team-vinaccia-2-vini.png", 2, "<b>Enoteca Ruggeri</b>: accento vinaccia, sfondo carta, carattere con grazie.", "sm")}
       ${fig("team-bosco-2-vini.png", 3, "<b>Club del Bosco</b>: accento verde, sfondo scuro, carattere arrotondato.", "sm")}
     </div>
@@ -189,7 +189,7 @@ function build() {
       ["<code>bg</code> · <code>ink</code>", "colori <code>#rrggbb</code>", "Sfondo e testo."],
       ["<code>font</code>", "sistema, serif, arrotondato, mono", "Carattere (solo tra quelli di sistema)."],
       ["lingua · modalità", "it/en · rapido/completa/entrambe", "Lingua predefinita e modalità consentite."]], [2])}
-    ${call("<b>Leggibilità garantita.</b> Se i colori scelti non assicurano un testo leggibile (contrasto almeno 4,5 a 1), Sorso li corregge o torna a quelli predefiniti, anche sui riquadri e sui bordi dei campi. Imposta sempre insieme sfondo e testo.")}
+    ${call("<b>Leggibilità garantita.</b> Se i colori scelti non assicurano un testo leggibile (contrasto almeno 4,5 a 1), Sorso li corregge o torna a quelli predefiniti, anche sui riquadri e sui bordi dei campi. Imposta sempre insieme sfondo e testo. Se non imposti nulla, lo spazio usa i colori del vino: crema e bordeaux, e nero con ciliegia quando il dispositivo è in tema scuro.")}
   `));
 
   /* 10 API */

@@ -1,6 +1,6 @@
 # Sorso — Taccuino di degustazione
 
-Versione corrente: **1.6.0** — ultimo aggiornamento: 8 ottobre 2026 (cronologia in `CHANGELOG.md`). La versione e la data si leggono anche in fondo all'app e dello spazio di team.
+Versione corrente: **1.6.1** — ultimo aggiornamento: 8 ottobre 2026 (cronologia in `CHANGELOG.md`). La versione e la data si leggono anche in fondo all'app e dello spazio di team.
 
 App per registrare degustazioni di vino con scheda di valutazione, statistiche personali, degustazioni alla cieca ed eventi condivisi.
 
@@ -14,6 +14,7 @@ App per registrare degustazioni di vino con scheda di valutazione, statistiche p
 - `api/db.js` — archivio chiave-valore per utente, usato dal frontend per salvare schede, profilo ed eventi.
 - `api/_redis.js` — connessione al database (Vercel KV / Upstash Redis).
 - Spazio di team per siti partner (vedi sotto): `api/embed.js`, `api/embed-page.js`, `api/v1.js` e i moduli `api/_jwt.js`, `_partner.js`, `_team.js`, `_limit.js`, `_quota.js`, `_http.js`; interfaccia in `public/embed.js` e `public/embed.css`; configurazione in `vercel.json`.
+- `ROADMAP-PARTNER.md`: cosa deve fare il gestore per attivare e consegnare lo spazio al partner (aggiornata a ogni versione).
 - `scripts/partner.js` (gestione dei partner), `scripts/usage.js` (consumo di Redis), `scripts/confronto-scala.js`.
 
 ## Punteggio

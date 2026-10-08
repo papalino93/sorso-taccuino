@@ -3,6 +3,10 @@
 La versione e la data dell'ultimo aggiornamento sono mostrate in fondo all'app e dello spazio di team
 (fonte: `public/js/version.js`, da tenere uguale a `package.json`).
 
+## 1.6.1 — 8 ottobre 2026
+- Spazio di team: i colori di base sono ora quelli del vino, come nell'app (crema e bordeaux; nero e ciliegia con il dispositivo in tema scuro). Chi ha già colori propri impostati non vede differenze.
+- Guide PDF (integrazione API, gestione delle degustazioni, attivazione): nuova identità grafica (bordeaux e crema, nuovo marchio), schermate aggiornate, e chiarito che le serate create dal responsabile compaiono in «Degustazioni del team» per tutti i membri.
+
 ## 1.6.0 — 8 ottobre 2026
 - **Vista da PC** (schermi larghi, da 1100 px): menù a sinistra con il punteggio sempre in vista e «Salva» a portata di mano; Nuova, Alla cieca ed Evento a due colonne; Taccuino con l'elenco a sinistra e il vino scelto a destra; Statistiche a colonne; contenuto largo al massimo 1320 px (1440 sui monitor più grandi). Su telefono e tablet stretto non cambia nulla.
 - **Impostazioni**: nuova sezione con aspetto (tema e colori), «Come voti di solito», archivio e account, prima sparsi in fondo al Taccuino. Su telefono si apre dall'icona a ingranaggio in alto; su PC è la voce in fondo al menù.
