@@ -21,7 +21,7 @@
      node scripts/partner.js rotate-key <id>
      node scripts/partner.js recount <id> <degustazione>      ricalcola somma e conteggio dai voti veri (riparazione)
      node scripts/partner.js purge <id> --yes                 cancella TUTTI i dati di team del partner (non la sua configurazione)
-     node scripts/partner.js token <id> --sub <utente> --team <team> [--role member|organizer] [--name N] [--lang it|en]
+     node scripts/partner.js token <id> --sub <utente> --team <team> [--role member|organizer] [--name N] [--lang it|en] [--mode smart|full]
 
    Il segreto di firma e la chiave API compaiono UNA volta sola, alla creazione
    o alla rotazione: la chiave API si salva solo come hash e non si può rileggere.
@@ -91,7 +91,7 @@ async function main(argv, redis, log) {
   const AMMESSE = {
     create: ["name", "origin", "modes", "default-mode", "lang", "allow-localhost"], origins: ["origin", "allow-localhost", "clear", "add"],
     theme: ["accent", "bg", "ink", "font", "title", "logo", "clear"], settings: ["name", "modes", "default-mode", "lang"],
-    token: ["sub", "team", "role", "name", "lang"], purge: ["yes"]
+    token: ["sub", "team", "role", "name", "lang", "mode"], purge: ["yes"]
   };
   const ok = AMMESSE[cmd] || [];
   Object.keys(opt).filter(k => k !== "origin" || opt.origin.length).forEach(k => {
@@ -201,6 +201,7 @@ async function main(argv, redis, log) {
     if (!opt.sub || !opt.team) throw new Error("servono --sub e --team");
     const claims = { iss: id, sub: opt.sub, team: opt.team, role: opt.role || "member", name: opt.name || "", jti: "t-" + crypto.randomBytes(8).toString("hex"), exp: Math.floor(Date.now() / 1000) + 600 };
     if (opt.lang) claims.lang = opt.lang;
+    if (opt.mode) { if (opt.mode !== "smart" && opt.mode !== "full") throw new Error("--mode: smart (voto rapido) oppure full (scheda completa)"); claims.mode = opt.mode; }
     const tk = jwt.sign(claims, cfg.secret);
     P.validId(id); // già controllato da load()
     await P.verifyPartnerToken(redis, tk);

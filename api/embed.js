@@ -47,7 +47,8 @@ module.exports = async (req, res) => {
         user: { name: ctx.name, role: ctx.role, team: ctx.team },
         config: {
           modes: partner.modes,
-          defaultMode: partner.defaultMode === "full" && partner.modes.indexOf("full") > -1 ? "full" : (partner.modes.indexOf("smart") > -1 ? "smart" : partner.modes[0]),
+          defaultMode: ctx.mode && partner.modes.indexOf(ctx.mode) > -1 ? ctx.mode
+            : (partner.defaultMode === "full" && partner.modes.indexOf("full") > -1 ? "full" : (partner.modes.indexOf("smart") > -1 ? "smart" : partner.modes[0])),
           lang: ctx.lang || partner.lang || "it",
           title: th.title || partner.name || "", logo: th.logo || ""
         },

@@ -58,6 +58,17 @@ test("sessione: scambio del token e configurazione", async () => {
   assert.ok(r.body.session.startsWith("s1."));
   assert.equal(r.headers["cache-control"], "no-store");
 });
+test("sessione: il claim mode sceglie la modalità iniziale di quell'utente, dentro quelle consentite", async () => {
+  await putPartner("demo", { modes: ["smart", "full"], defaultMode: "smart" });
+  assert.equal((await post({ op: "session", token: token({ mode: "full" }) })).body.config.defaultMode, "full", "claim full");
+  assert.equal((await post({ op: "session", token: token({ mode: "smart" }) })).body.config.defaultMode, "smart", "claim smart");
+  assert.equal((await post({ op: "session", token: token() })).body.config.defaultMode, "smart", "senza claim vale il predefinito del partner");
+  assert.equal((await post({ op: "session", token: token({ mode: "boh" }) })).body.config.defaultMode, "smart", "claim non valido: ignorato");
+  await putPartner("demo", { modes: ["smart"], defaultMode: "smart" }); P.clearCache();
+  assert.equal((await post({ op: "session", token: token({ mode: "full" }) })).body.config.defaultMode, "smart", "modalità non consentita al partner: ignorata");
+  await putPartner("demo", { modes: ["smart", "full"], defaultMode: "full" }); P.clearCache();
+  assert.equal((await post({ op: "session", token: token({ mode: "smart" }) })).body.config.defaultMode, "smart", "il claim batte il predefinito del partner");
+});
 test("sessione: il token si usa una volta sola", async () => {
   const tk = token();
   assert.equal((await post({ op: "session", token: tk })).statusCode, 200);

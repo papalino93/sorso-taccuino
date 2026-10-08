@@ -3,6 +3,12 @@
 La versione e la data dell'ultimo aggiornamento sono mostrate in fondo all'app e dello spazio di team
 (fonte: `public/js/version.js`, da tenere uguale a `package.json`).
 
+## 1.5.0 — 8 ottobre 2026
+- Modalità di voto predefinita per ogni profilo (Taccuino → «Come voti di solito»): Voto rapido, Scheda completa, oppure ricorda l'ultima. Con un account segue il profilo su ogni dispositivo.
+- Spazio di team: claim facoltativo `mode` nel token (`smart` o `full`) per decidere la modalità iniziale utente per utente.
+- Correzione: «Scegli file» e «Scatta foto» ora sono allineati.
+- Guide PDF rifatte (integrazione API e utilizzo per il gestore).
+
 ## 1.4.0 — 8 ottobre 2026
 - Nuovo design «Numero e inchiostro» su app personale e spazio di team.
 - Colori scelti dall'utente: accento e sfondo, con contrasto sempre garantito.
