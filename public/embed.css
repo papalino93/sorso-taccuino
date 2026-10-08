@@ -108,7 +108,7 @@ input[aria-invalid=true] { box-shadow: inset 0 0 0 2px var(--danger); }
 .sheet { box-shadow: inset 0 0 0 2.5px var(--accent); }
 .modes { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; padding: 4px; border-radius: var(--r-pill); background: var(--bg); margin: 12px 0 8px; }
 .modes button { min-height: 44px; border: 0; border-radius: var(--r-pill); background: none; font-weight: 650; font-size: 14px; }
-.modes button.on { background: var(--ink); color: var(--bg); }
+.modes button.on { background: var(--accent); color: var(--on-accent); }
 .slider { margin: 18px 0; }
 .slider .head { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
 .slider .lab { font-weight: 700; }
@@ -145,7 +145,7 @@ label.f { display: block; font-size: 13px; font-weight: 700; margin: 12px 0 5px;
 /* sezioni (Degustazioni · Classifica · Statistiche) */
 .tabs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; padding: 4px; border-radius: var(--r-pill); background: var(--surface); margin: 0 0 18px; }
 .tab { min-height: 44px; border: 0; border-radius: var(--r-pill); background: none; font-weight: 650; font-size: 14px; color: var(--muted); padding: 0 6px; }
-.tab.on { background: var(--ink); color: var(--bg); }
+.tab.on { background: var(--accent); color: var(--on-accent); }
 .badges { display: inline-flex; flex-wrap: wrap; gap: 6px; justify-content: flex-end; flex: none; }
 select { appearance: none; -webkit-appearance: none; padding-right: 36px; background-image: linear-gradient(45deg, transparent 50%, var(--muted) 50%), linear-gradient(135deg, var(--muted) 50%, transparent 50%); background-position: calc(100% - 20px) 50%, calc(100% - 14px) 50%; background-size: 6px 6px, 6px 6px; background-repeat: no-repeat; }
 label.check { display: flex; align-items: center; gap: 10px; margin: 14px 0 4px; font-weight: 600; font-size: 14px; }
