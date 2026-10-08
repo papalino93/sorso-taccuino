@@ -3,6 +3,10 @@
 La versione e la data dell'ultimo aggiornamento sono mostrate in fondo all'app e dello spazio di team
 (fonte: `public/js/version.js`, da tenere uguale a `package.json`).
 
+## 1.9.0 — 8 ottobre 2026
+- **Nome del taccuino in Impostazioni**: una nuova card «Nome del taccuino» con il titolo (per esempio «Sorso di vino») e, se vuoi, di chi è («il taccuino di Mario Rossi»), con anteprima e «Ripristina». Si salva nel profilo (con l'account lo ritrovi ovunque) e compare in alto e nel titolo della scheda del browser. Toccando il nome in alto si apre direttamente la card (prima c'erano due finestrelle nascoste).
+- **Niente più bianco e nero**: i controlli selezionati (Chiaro/Scuro/Automatico, lingua, «Come voti di solito», lettere dei livelli, pulsante Impostazioni, avatar, pulsante del calice) usano il colore d'accento invece del nero o del bianco; lo stesso per le schede dello spazio di team.
+
 ## 1.8.0 — 8 ottobre 2026
 - **Spazio di team: chiudere la votazione di un solo vino.** Quando un vino lo assaggiano solo alcune persone del club (per esempio cinque o sei su venti), l'organizzatore — o chi ha il profilo «Organizzatore» — può chiudere la votazione di quel vino con «Chiudi la votazione di questo vino», mentre la serata e gli altri vini restano aperti. La media conta solo i voti espressi fino a quel momento e, dal secondo voto, la vedono tutti; non si può più votare né cambiare voto su quel vino (si può riaprire). Sempre solo aggregati: nessuno vede chi ha votato cosa.
 - **API v1**: ogni vino in `GET /tastings/{id}/results` ha ora `status` (`open` o `closed`).
