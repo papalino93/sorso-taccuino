@@ -134,6 +134,37 @@ const ok = (c, m) => { console.log((c ? "OK   " : "FAIL ") + m); if (!c) fails++
   await en.page.locator('[data-act="tab"][data-tab="ranking"]').click();
   await en.page.locator("main").getByText("Ranking by evening").waitFor();
   ok(/Winner/.test(await en.page.locator("main").innerText()), "in inglese: «Winner»");
+  /* --- giro di verifica 1.7: nomi lunghi, classifica provvisoria, media a serata chiusa, bozze --- */
+  {
+    const longName = "X".repeat(100);
+    const orgS = await sessionOf({ sub: "org2", name: "Olga", role: "organizer", team: "lungo" });
+    const tt = (await api({ op: "tasting.create", name: "S".repeat(80), blind: true }, orgS)).tasting;
+    const w1 = (await api({ op: "wine.add", tasting: tt.id, wine: { name: longName, producer: "P".repeat(60), vintage: "2020", type: "Rosso", grape: "Nebbiolo" } }, orgS)).wine;
+    const w2 = (await api({ op: "wine.add", tasting: tt.id, wine: { name: "Secondo", vintage: "2021", type: "Bianco" } }, orgS)).wine;
+    const v = (a, b, c) => ({ mode: "smart", giudizi: { occhio: a, naso: b, bocca: c } });
+    const sA = await sessionOf({ sub: "a1", name: "Anna", team: "lungo" }), sB = await sessionOf({ sub: "b1", name: "Bea", team: "lungo" });
+    /* provvisoria: un solo voto (il proprio) non basta per la classifica */
+    await api(Object.assign({ op: "vote", tasting: tt.id, wine: w1.id }, v(80, 80, 80)), sA);
+    const an = await open({ sub: "a1", name: "Anna", team: "lungo" }, { width: 320, height: 700 });
+    await an.page.locator('[data-act="open"]').first().click();
+    await an.page.locator("h2").first().waitFor();
+    ok(!/1 voto/.test(await an.page.locator(".ranking, .toplist").allInnerTexts().then(a => a.join(" ")).catch(() => "")), "classifica provvisoria: nessun vino con un solo voto");
+    ok(/chiusa|Vota e prova/.test(await an.page.locator("main").innerText()) && !(await overflow(an.page)), "cieca aperta a 320 px: nessun overflow");
+    /* bozza: scrivo un'ipotesi, apro l'ipotesi di un altro vino, torno: il testo c'è ancora */
+    await an.page.locator('[data-act="guess"]').first().click();
+    await an.page.locator("#g-grape").fill("Nebbiolo");
+    await an.page.locator('[data-act="guess"]').last().click();
+    const dopo = await an.page.locator('[data-act="guess"]').first().isVisible().catch(() => false);
+    if (dopo) { await an.page.locator('[data-act="guess"]').first().click(); ok(await an.page.locator("#g-grape").inputValue() === "Nebbiolo", "l'ipotesi scritta e lasciata a metà si ritrova"); }
+    /* cieca chiusa e non svelata: la nota non invita più a votare */
+    await api({ op: "vote", tasting: tt.id, wine: w1.id, ...v(90, 90, 90) }, sB);
+    await api({ op: "tasting.status", tasting: tt.id, status: "closed" }, orgS);
+    await an.page.locator('[data-act="refresh"]').click();
+    await an.page.locator(".notice", { hasText: /svelerà|sapranno/ }).waitFor({ timeout: 4000 }).then(() => ok(true, "cieca chiusa non svelata: nota «in attesa dello svelamento»"), () => ok(false, "nota della cieca chiusa"));
+    ok(!(await overflow(an.page)), "nomi lunghi: nessun overflow a 320 px");
+    await an.page.locator('[data-act="tab"][data-tab="stats"]').click().catch(() => {});
+    await an.ctx.close();
+  }
   ok(errs.length === 0, "nessun errore JavaScript: " + JSON.stringify(errs));
   await browser.close(); await d.stop();
   console.log(fails ? "\n" + fails + " CONTROLLI FALLITI" : "\nTUTTO OK");

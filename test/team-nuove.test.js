@@ -120,7 +120,8 @@ test("alla cieca: punteggio dell'ipotesi, casi limite", () => {
   const w = { type: "Rosso", grape: "Sangiovese", vintage: "2015" };
   assert.deepEqual(Team.scoreGuess(w, { y: "Rosso", g: "sangiovese grosso", a: "2016" }), { points: 4, max: 5, type: "ok", grape: "ok", year: "close" });
   assert.deepEqual(Team.scoreGuess(w, { y: "Bianco" }), { points: 0, max: 5, type: "ko", grape: "na", year: "na" });
-  assert.equal(Team.scoreGuess({ vintage: "NV" }, { a: "2016" }).max, 0, "senza dati veri non si assegnano punti");
+  assert.equal(Team.scoreGuess({}, { a: "2016" }).max, 0, "senza dati veri non si assegnano punti");
+  assert.equal(Team.scoreGuess({ vintage: "NV" }, { a: "2016" }).points, 0, "un vino NV indovinato con un anno è sbagliato");
   assert.equal(Team.scoreGuess({ grape: "Merlot" }, { g: "mer" }).grape, "ko", "troppo corto per valere come 'contenuto'");
 });
 test("alla cieca: l'ipotesi arrivata mentre si svela non resta", async () => {
@@ -401,4 +402,13 @@ test("eliminare una degustazione toglie le sue voci dall'elenco di chi ha votato
   assert.equal((await redis.smembers(Team.K.uv("demo", "a"))).length, 1);
   await post({ op: "tasting.delete", tasting: t.id }, org);
   assert.equal((await redis.smembers(Team.K.uv("demo", "a"))).length, 0);
+});
+
+test("ipotesi sull'annata: NV è giusto solo per un vino senza annata", () => {
+  const nv = { vintage: "NV" }, y = { vintage: "2022" };
+  assert.deepEqual([Team.scoreGuess(nv, { a: "NV" }).year, Team.scoreGuess(nv, { a: "NV" }).points], ["ok", 2]);
+  assert.equal(Team.scoreGuess(nv, { a: "2020" }).year, "ko");
+  assert.equal(Team.scoreGuess(y, { a: "NV" }).year, "ko");
+  assert.equal(Team.scoreGuess(y, { a: "NV" }).points, 0);
+  assert.equal(Team.scoreGuess(nv, {}).year, "na");
 });

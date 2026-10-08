@@ -335,11 +335,15 @@ function scoreGuess(w, g) {
       out.grape = ok ? "ok" : "ko"; if (ok) out.points += 2;
     }
   }
+  /* "NV" (senza annata): giusto solo se anche il vino lo è */
+  const nvW = /^nv$/i.test(String(w.vintage || "").trim()), nvG = /^nv$/i.test(String(g.a || "").trim());
+  if (nvW) { out.max += 2; if (String(g.a || "").trim()) { out.year = nvG ? "ok" : "ko"; if (nvG) out.points += 2; } }
   const wy = yearOf(w.vintage);
   if (wy !== null) {
     out.max += 2;
     const gy = yearOf(g.a);
-    if (gy !== null) {
+    if (nvG) out.year = "ko";
+    else if (gy !== null) {
       const d = Math.abs(gy - wy);
       if (d === 0) { out.year = "ok"; out.points += 2; } else if (d === 1) { out.year = "close"; out.points += 1; } else out.year = "ko";
     }
