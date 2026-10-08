@@ -216,7 +216,8 @@ def main():
                        ["<font name='Mono'>exp</font>", "sì", "Scadenza, in secondi Unix. Al massimo 15 minuti da adesso: consigliamo 5."],
                        ["<font name='Mono'>role</font>", "no", "<font name='Mono'>member</font> (predefinito) oppure <font name='Mono'>organizer</font>. Vedi il capitolo 5."],
                        ["<font name='Mono'>name</font>", "no", "Il nome da mostrare (fino a 60 caratteri). Non viene salvato: vive solo nella sessione."],
-                       ["<font name='Mono'>lang</font>", "no", "<font name='Mono'>it</font> oppure <font name='Mono'>en</font>. Se manca vale la lingua impostata per il tuo partner."]],
+                       ["<font name='Mono'>lang</font>", "no", "<font name='Mono'>it</font> oppure <font name='Mono'>en</font>. Se manca vale la lingua impostata per il tuo partner."],
+                       ["<font name='Mono'>mode</font>", "no", "La modalità di voto con cui si apre la scheda di <b>questo utente</b>: <font name='Mono'>smart</font> (voto rapido) oppure <font name='Mono'>full</font> (scheda completa). Deve essere tra quelle abilitate per il tuo partner, altrimenti è ignorata. Se manca vale quella predefinita del partner. L'utente può sempre cambiare modalità voto per voto."]],
                       [2.1, 2.2, 12.7]),
               Spacer(1, 6),
               riquadro("<b>Regole da rispettare.</b> Solo HS256 (qualunque altro algoritmo, compreso <font name='Mono'>none</font>, viene rifiutato). "

@@ -45,7 +45,7 @@ def main():
                        ["Domini che incorporeranno lo spazio", "Con <font name='Mono'>https://</font>, senza percorso: <font name='Mono'>https://www.enotecaruggeri.example</font>. Se hai un sito di prova e uno vero, mandaci entrambi. Da qualunque altro dominio il browser blocca la pagina."],
                        ["Lingua", "Italiano, inglese, o scelta per utente (nel token)."],
                        ["Logo e colori", "Indirizzo <font name='Mono'>https</font> di un'immagine; colore d'accento, sfondo e testo in formato <font name='Mono'>#rrggbb</font>. I colori vengono corretti da noi se il testo non fosse leggibile."],
-                       ["Modalità di voto", "Voto rapido (occhio, naso, bocca da 50 a 100), scheda completa, o entrambe; quale proporre per prima."],
+                       ["Modalità di voto", "Voto rapido (occhio, naso, bocca da 50 a 100), scheda completa, o entrambe; quale proporre per prima. Se vuoi, puoi decidere la modalità <b>utente per utente</b> col claim facoltativo <font name='Mono'>mode</font> nel token (<font name='Mono'>smart</font> o <font name='Mono'>full</font>)."],
                        ["Ruoli e gruppi", "Chi è organizzatore sul tuo sito e come raggruppi le persone in team (stesso team = stesse degustazioni)."],
                        ["Chi riceve le credenziali", "Un riferimento tecnico, con un canale sicuro (non l'email in chiaro)."]],
                       [5, 12]), Spacer(1, 6)]

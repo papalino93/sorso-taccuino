@@ -861,6 +861,10 @@
   .swatch[aria-pressed=true]{box-shadow:0 0 0 3px var(--card),0 0 0 6px var(--ink);}
   .look-custom{display:flex;align-items:center;gap:12px;min-height:48px;margin-top:10px;font:600 14px/1 'Geist','Inter';color:var(--ink-2);cursor:pointer;}
   .look-custom input[type=color]{width:48px;height:48px;padding:0;border:0;border-radius:14px;background:none;cursor:pointer;}
+  /* pulsanti a pillola: testo sempre centrato (anche quando sono <span>), stessa altezza affiancati */
+  .pill-solid,.pill-ghost,.pill-danger{display:inline-flex;align-items:center;justify-content:center;text-align:center;line-height:1.1;box-sizing:border-box;}
+  .drop-btns{align-items:center;}
+  .drop-btns .pill-solid,.drop-btns .pill-ghost{min-height:44px;}
   .wine-slot.no-photo{display:none;}
   .wine-slot{width:56px;height:70px;border:0;border-radius:14px;}
   .stats-section-head b{font-family:'Geist',sans-serif;font-style:normal;font-weight:800;font-size:22px;letter-spacing:-.03em;}
@@ -1059,6 +1063,16 @@
           <input type="file" id="importInput" accept="application/json,.json" hidden>
         </div>
         <div class="note-line" id="backupStatus"></div>
+      </div>
+
+      <div class="card" id="voteModeCard">
+        <div class="card-head"><span class="eyebrow" data-i18n="vmode.eyebrow">Come voti di solito</span><span class="fill"></span></div>
+        <p class="note-line" data-i18n="vmode.intro">Scegli con quale modalità si apre ogni nuova scheda. Puoi sempre cambiarla scheda per scheda.</p>
+        <div class="modes" id="vmodeSwitch" role="group" data-i18n-aria="vmode.eyebrow" aria-label="Come voti di solito">
+          <button type="button" data-defmode="" data-i18n="vmode.remember">Ricorda l'ultima</button>
+          <button type="button" data-defmode="smart" data-i18n="smart.mode.smart">Voto rapido</button>
+          <button type="button" data-defmode="completa" data-i18n="smart.mode.completa">Scheda completa</button>
+        </div>
       </div>
 
       <div class="card" id="lookCard">
@@ -1630,7 +1644,12 @@ const S = {
   g:{equilibrio:6, intensita:6, persistenza:6, qualita:6},
   f:{armonia:6},
   /* modalità di valutazione: l'ultima scelta resta tra una scheda e l'altra */
-  modalita:(function(){ try{ return window.localStorage.getItem("sorso-modalita") === "smart" ? "smart" : "completa"; }catch(e){ return "completa"; } })(),
+  /* modalità predefinita del profilo ("" = ricorda l'ultima usata) e modalità con cui si parte */
+  modeDefault:(function(){ try{ const d = window.localStorage.getItem("sorso-modo-predefinito"); return d === "smart" || d === "completa" ? d : ""; }catch(e){ return ""; } })(),
+  modalita:(function(){ try{
+    const d = window.localStorage.getItem("sorso-modo-predefinito");
+    if(d === "smart" || d === "completa") return d;
+    return window.localStorage.getItem("sorso-modalita") === "smart" ? "smart" : "completa"; }catch(e){ return "completa"; } })(),
   smart:{occhio:70, naso:70, bocca:70},
   desc:[], note:"", abbinamento:"",
   saved:[], query:"", filter:"Tutti", sortBy:"score-desc", picked:[], expanded:null,
@@ -1921,6 +1940,9 @@ const I18N = {
     "smart.sliderLabel":"{name}, da 50 a 100",
     "scale.note":"Ho ricalcolato i punteggi con la nuova scala 50–100: un vino ora va da 50 a 100 e il 100 è rarissimo. Il punteggio originale resta salvato in ogni scheda.",
     "scale.noteOk":"Ho capito",
+    "vmode.eyebrow":"Come voti di solito",
+    "vmode.intro":"Scegli con quale modalità si apre ogni nuova scheda. Puoi sempre cambiarla scheda per scheda.",
+    "vmode.remember":"Ricorda l'ultima",
     "look.eyebrow":"Aspetto",
     "look.intro":"Scegli i tuoi colori. La scelta resta su questo dispositivo e il testo resta sempre leggibile.",
     "look.accent":"Colore d'accento",
@@ -2434,6 +2456,9 @@ const I18N = {
     "smart.sliderLabel":"{name}, from 50 to 100",
     "scale.note":"I recalculated your scores on the new 50–100 scale: a wine now scores between 50 and 100, and 100 is very rare. The original score stays saved on every entry.",
     "scale.noteOk":"Got it",
+    "vmode.eyebrow":"How you usually rate",
+    "vmode.intro":"Choose which mode every new entry opens in. You can always change it entry by entry.",
+    "vmode.remember":"Remember the last one",
     "look.eyebrow":"Appearance",
     "look.intro":"Choose your colors. Your choice stays on this device and the text always stays readable.",
     "look.accent":"Accent color",
@@ -2714,6 +2739,7 @@ function setLang(lang){
   applyStaticText();
   try{ renderVersion(); }catch(e){}
   try{ renderLook(); }catch(e){}
+  try{ renderVoteMode(); }catch(e){}
   try{ renderAll(); }catch(e){}
   try{ renderAccount(); }catch(e){}
   /* la classifica dell'evento è già disegnata: va ridisegnata nella lingua nuova */
@@ -2976,7 +3002,8 @@ function smartBodyHTML(){
 function impostaModalita(m){
   const nuova = m === "smart" ? "smart" : "completa";
   S.modalita = nuova;
-  try{ window.localStorage.setItem("sorso-modalita", S.modalita); }catch(e){}
+  /* con una modalità predefinita nel profilo, il cambio vale per questa scheda soltanto */
+  if(!S.modeDefault){ try{ window.localStorage.setItem("sorso-modalita", S.modalita); }catch(e){} }
   renderSections(); renderHeader();
   const bt = document.querySelector('#modeTopWrap button[data-modalita="'+S.modalita+'"]');
   if(bt) bt.focus({preventScroll:true});
@@ -3272,11 +3299,16 @@ async function loadProfile(){
       const p = JSON.parse(r.value);
       if(p && typeof p.owner === "string") S.owner = p.owner;
       if(p && typeof p.brandName === "string" && p.brandName.trim()) S.brandName = p.brandName.trim();
+      if(p && (p.modoPredefinito === "smart" || p.modoPredefinito === "completa" || p.modoPredefinito === "")){
+        S.modeDefault = p.modoPredefinito;
+        try{ window.localStorage.setItem("sorso-modo-predefinito", S.modeDefault); }catch(e){}
+        if(S.modeDefault && !S.editingId && S.modalita !== S.modeDefault){ S.modalita = S.modeDefault; try{ renderSections(); renderHeader(); }catch(e){} }
+      }
     }
   }catch(e){}
 }
 async function saveProfile(){
-  try{ await DB.set(PROFILE_KEY, JSON.stringify({owner:S.owner, brandName:S.brandName}), false); }
+  try{ await DB.set(PROFILE_KEY, JSON.stringify({owner:S.owner, brandName:S.brandName, modoPredefinito:S.modeDefault}), false); }
   catch(e){}
 }
 $("brandBtn").addEventListener("click", async () => {
@@ -4674,6 +4706,7 @@ function resetForm(notify){
   S.smart = {occhio:70, naso:70, bocca:70};
   S.desc = []; S.note = ""; S.abbinamento = "";
   S.editingId = null; S.editThumb = null; S.editTimestamp = null;
+  if(S.modeDefault) S.modalita = S.modeDefault;      // una nuova scheda parte dalla modalità del profilo
   S.editFrozen = null; S.editTouched = false; S.editLegacy = null; S.editMode0 = null; S.editDaCieca = false;
   $("photoInput").value = "";
   if(notify) setStatus(t("new.cleared"));
@@ -5352,6 +5385,20 @@ $("accentSwatches").addEventListener("click", e => { const b = e.target.closest(
 $("bgSwatches").addEventListener("click", e => { const b = e.target.closest("[data-bg]"); if(b) setLook(S.theme === "dark" ? {bgDark:b.dataset.bg} : {bgLight:b.dataset.bg}); });
 $("accentCustom").addEventListener("input", e => setLook({accent:e.target.value}));
 $("bgCustom").addEventListener("input", e => setLook(S.theme === "dark" ? {bgDark:e.target.value} : {bgLight:e.target.value}));
+function renderVoteMode(){
+  Array.prototype.forEach.call($("vmodeSwitch").children, b => {
+    const on = b.dataset.defmode === S.modeDefault;
+    b.classList.toggle("on", on); b.setAttribute("aria-pressed", String(on));
+  });
+}
+$("vmodeSwitch").addEventListener("click", async e => {
+  const b = e.target.closest("[data-defmode]"); if(!b) return;
+  S.modeDefault = b.dataset.defmode;
+  try{ window.localStorage.setItem("sorso-modo-predefinito", S.modeDefault); }catch(err){}
+  if(S.modeDefault && !S.editingId){ S.modalita = S.modeDefault; }
+  renderVoteMode(); try{ renderSections(); renderHeader(); }catch(err){}
+  await saveProfile();            // con un account, la scelta segue il profilo su ogni dispositivo
+});
 $("lookReset").addEventListener("click", () => { S.look = {}; lookSave(); applyLook(); });
 function setLook(o){ S.look = Theme.sanitize(Object.assign({}, S.look, o)); lookSave(); applyLook(); }
 

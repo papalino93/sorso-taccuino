@@ -227,7 +227,10 @@ async function verifyPartnerToken(redis, token) {
   if (role !== "member" && role !== "organizer") throw new AuthError("claim_role", "Ruolo non valido: member oppure organizer.");
   const name = typeof c.name === "string" ? cleanText(c.name, 60) : "";
   const lang = c.lang === "en" || c.lang === "it" ? c.lang : null;
-  return { partner, ctx: { uid: c.sub, name, team: c.team, role, lang }, jti: c.jti, exp: c.exp };
+  /* modalità di voto preferita di questo utente (facoltativa): smart = voto rapido, full = scheda completa.
+     Se manca, non è valida o il partner non la consente, vale la modalità predefinita del partner. */
+  const mode = c.mode === "smart" || c.mode === "full" ? c.mode : null;
+  return { partner, ctx: { uid: c.sub, name, team: c.team, role, lang, mode }, jti: c.jti, exp: c.exp };
 }
 
 /* Il token si può usare una volta sola: si registra il jti fino a scadenza. */
