@@ -3,6 +3,11 @@
 La versione e la data dell'ultimo aggiornamento sono mostrate in fondo all'app e dello spazio di team
 (fonte: `public/js/version.js`, da tenere uguale a `package.json`).
 
+## 1.5.1 — 8 ottobre 2026
+- Spazio di team: l'elenco si chiama «Degustazioni del team», con una riga che spiega che le crea il responsabile del team e le vedono tutti i membri.
+- Nuovo favicon: l'anello del punteggio con il bicchiere visto dall'alto e il «sorriso» sotto; stesse immagini per iPhone, Android e scheda del browser.
+- Guide PDF rigenerate con la versione corrente.
+
 ## 1.5.0 — 8 ottobre 2026
 - Modalità di voto predefinita per ogni profilo (Taccuino → «Come voti di solito»): Voto rapido, Scheda completa, oppure ricorda l'ultima. Con un account segue il profilo su ogni dispositivo.
 - Spazio di team: claim facoltativo `mode` nel token (`smart` o `full`) per decidere la modalità iniziale utente per utente.
