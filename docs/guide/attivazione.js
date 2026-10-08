@@ -53,7 +53,7 @@ function build() {
     <h1 class="d">Prima la chiave, <em>poi lo spazio</em></h1>
     <h3 class="k">Prova A — la chiave API</h3>
     <p>Da un terminale del tuo server (sostituisci la chiave):</p>
-    ${code("curl -sS -H 'Authorization: Bearer sk_ID_PARTNER_…' \\\\\n  " + BASE + "/api/v1/tastings", "shell")}
+    ${code("curl -sS -H 'Authorization: Bearer sk_ID_PARTNER_…' \\\n  " + BASE + "/api/v1/tastings", "shell")}
     <p>Se è tutto a posto la risposta è un elenco, all'inizio vuoto: <code>{"tastings":[]}</code>. Con <code>401</code> la chiave non è giusta o è stata ruotata.</p>
     <h3 class="k">Prova B — lo spazio di team</h3>
     <p>Firma un token con uno degli esempi della guida all'integrazione (Node, Python o PHP) e apri questa pagina in un iframe del tuo sito di prova. Il token va <b>dopo il #</b>:</p>
