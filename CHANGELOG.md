@@ -3,6 +3,10 @@
 La versione e la data dell'ultimo aggiornamento sono mostrate in fondo all'app e dello spazio di team
 (fonte: `public/js/version.js`, da tenere uguale a `package.json`).
 
+## 1.5.2 — 8 ottobre 2026
+- Telefono: filtri per tipologia, filtri del Taccuino e pulsanti «+ Vitigno» / «+ Altro» alti almeno 44 px (si toccano senza sbagliare); a 320 px la didascalia sotto il punteggio («Statistiche», «Nuova degustazione») non esce più dallo schermo e va sotto il numero.
+- Campi di testo e menù: i testi troppo lunghi finiscono con i puntini invece di essere tagliati.
+
 ## 1.5.1 — 8 ottobre 2026
 - Spazio di team: l'elenco si chiama «Degustazioni del team», con una riga che spiega che le crea il responsabile del team e le vedono tutti i membri.
 - Nuovo favicon: l'anello del punteggio con il bicchiere visto dall'alto e il «sorriso» sotto; stesse immagini per iPhone, Android e scheda del browser.
