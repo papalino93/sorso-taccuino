@@ -165,6 +165,27 @@ const ok = (c, m) => { console.log((c ? "OK   " : "FAIL ") + m); if (!c) fails++
     await an.page.locator('[data-act="tab"][data-tab="stats"]').click().catch(() => {});
     await an.ctx.close();
   }
+  /* --- un vino assaggiato solo da alcuni: l'organizzatore chiude la sua votazione, la serata resta aperta --- */
+  {
+    const orgS = await sessionOf({ sub: "org3", name: "Olga", role: "organizer", team: "pochi" });
+    const tt = (await api({ op: "tasting.create", name: "Serata a gruppi" }, orgS)).tasting;
+    const wA = (await api({ op: "wine.add", tasting: tt.id, wine: { name: "Primo vino" } }, orgS)).wine;
+    const wB = (await api({ op: "wine.add", tasting: tt.id, wine: { name: "Secondo vino" } }, orgS)).wine;
+    for (const [sub, v] of [["p1", 80], ["p2", 90]]) { const ss = await sessionOf({ sub, name: sub, team: "pochi" }); await api({ op: "vote", tasting: tt.id, wine: wA.id, mode: "smart", giudizi: { occhio: v, naso: v, bocca: v } }, ss); }
+    const og = await open({ sub: "org3", name: "Olga", role: "organizer", team: "pochi" });
+    await og.page.locator('[data-act="open"]').first().click();
+    await og.page.locator(".wine .name", { hasText: "Primo vino" }).waitFor();
+    await og.page.locator('[data-act="wine-status"]').first().click();
+    await og.page.locator(".notice", { hasText: /Votazione chiusa/ }).waitFor({ timeout: 4000 }).then(() => ok(true, "l'organizzatore chiude la votazione di un vino"), () => ok(false, "avviso di chiusura del vino"));
+    const mp = await open({ sub: "p3", name: "Paolo", team: "pochi" });
+    await mp.page.locator('[data-act="open"]').first().click();
+    await mp.page.locator(".wine .name", { hasText: "Primo vino" }).waitFor();
+    const cardA = await mp.page.locator(".wine", { hasText: "Primo vino" }).innerText();
+    ok(/votazione chiusa/i.test(cardA) && /85/.test(cardA), "il partecipante vede la media 85 di chi ha votato e «votazione chiusa»");
+    ok(await mp.page.locator(".wine", { hasText: "Primo vino" }).locator('[data-act="vote"]').count() === 0, "sul vino chiuso non si può più votare");
+    ok(await mp.page.locator(".wine", { hasText: "Secondo vino" }).locator('[data-act="vote"]').count() === 1, "l'altro vino è ancora votabile");
+    ok(!(await overflow(mp.page)), "nessun overflow");
+  }
   ok(errs.length === 0, "nessun errore JavaScript: " + JSON.stringify(errs));
   await browser.close(); await d.stop();
   console.log(fails ? "\n" + fails + " CONTROLLI FALLITI" : "\nTUTTO OK");
