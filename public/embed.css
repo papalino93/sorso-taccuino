@@ -6,14 +6,14 @@
    valori calcolati con contrasto garantito). Niente stili inline nel markup: la CSP li blocca. */
 
 :root {
-  --bg: #fafaf7;
+  --bg: #fbf4e6;
   --ink: #0b0b10;
-  --accent: #5b2eff;
+  --accent: #8c1d3f;
   --on-accent: #ffffff;
-  --surface: #efefec;
-  --line: #dcdcd8;
-  --line-strong: #84848a;
-  --muted: #55555c;
+  --surface: #efe8db;
+  --line: #d9d3c8;
+  --line-strong: #7e7b77;
+  --muted: #535150;
   --ok: #0e7a3e;
   --warn: #8a5a00;
   --danger: #b3261e;
@@ -22,8 +22,8 @@
 }
 @media (prefers-color-scheme: dark) {
   :root {
-    --bg: #08080b; --ink: #f6f6f3; --surface: #17171c; --line: #2a2a31; --line-strong: #84848c; --muted: #a8a8b0;
-    --accent: #a58bff; --on-accent: #08080b; --ok: #5fd38d; --warn: #f0b95a; --danger: #ff8a80;
+    --bg: #0f080b; --ink: #f6f6f3; --surface: #20161a; --line: #2f292b; --line-strong: #837f7f; --muted: #b1afad;
+    --accent: #c8385c; --on-accent: #ffffff; --ok: #5fd38d; --warn: #f0b95a; --danger: #ff8a80;
   }
 }
 

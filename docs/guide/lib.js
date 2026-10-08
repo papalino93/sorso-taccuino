@@ -14,26 +14,26 @@ const BASE = "https://sorso-taccuino.vercel.app";
 const img = n => "data:image/png;base64," + fs.readFileSync(path.join(__dirname, "img", n)).toString("base64");
 const esc = s => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
-const MARCHIO = `<svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg"><rect width="64" height="64" rx="18" fill="#5B2EFF"/><path fill="#fff" d="M32 11c8.6 9.8 13.5 16.4 13.5 23.2A13.5 13.5 0 0 1 18.5 34.2C18.5 27.4 23.4 20.8 32 11z"/></svg>`;
+const MARCHIO = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="18" fill="#0B0B10"/><circle cx="32" cy="32" r="22.5" fill="none" stroke="#2c2c36" stroke-width="5.5"/><path d="M32 9.5a22.5 22.5 0 1 1-20.6 13.4" fill="none" stroke="#A58BFF" stroke-width="5.5" stroke-linecap="round"/><circle cx="32" cy="27" r="10" fill="#fff"/><circle cx="32" cy="27" r="7.8" fill="#A58BFF"/><path d="M27.2 24.2a6.2 6.2 0 0 1 5.2-2.9" fill="none" stroke="#fff" stroke-opacity=".8" stroke-width="1.9" stroke-linecap="round"/><path d="M19.4 41Q32 53.4 44.6 41Q32 48.6 19.4 41Z" fill="#fff"/></svg>`;
 const ROMBO = `<svg class="rombo" viewBox="0 0 10 10"><path d="M5 0l5 5-5 5-5-5z" fill="currentColor"/></svg>`;
 
 const CSS = `
 @import url("https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@400;450;500;600;700;800&family=Geist+Mono:wght@400;500&display=swap");
 @page { size: A4; margin: 0; }
-:root { --ink:#0B0B10; --paper:#FAFAF7; --card:#F1F1ED; --line:#DDDCD6; --violet:#5B2EFF; --lilac:#A58BFF; --mute:#5b5b64; --night:#0B0B10; --night2:#17102E; }
+:root { --ink:#0B0B10; --paper:#FBF4E6; --card:#F1E8D6; --line:#E0D5BD; --violet:#8C1D3F; --lilac:#E7849D; --mute:#5b5b64; --night:#120A0E; --night2:#2A0E19; }
 * { box-sizing: border-box; margin: 0; padding: 0; }
 html { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
 body { font: 450 10pt/1.55 'Geist', system-ui, sans-serif; color: var(--ink); background: #888; }
 em { font-family: 'Instrument Serif', serif; font-style: italic; font-weight: 400; }
 b, strong { font-weight: 650; }
 code, .mono { font-family: 'Geist Mono', ui-monospace, monospace; font-size: .92em; }
-code { background: rgba(91,46,255,.09); color: #3a1fb3; padding: .5pt 3.5pt; border-radius: 3pt; }
-.ink code, .cover code { background: rgba(255,255,255,.12); color: #dcd3ff; }
+code { background: rgba(140,29,63,.09); color: #7A1535; padding: .5pt 3.5pt; border-radius: 3pt; }
+.ink code, .cover code { background: rgba(255,255,255,.12); color: #F6D5DE; }
 
 .page { width: 210mm; height: 297mm; position: relative; overflow: hidden; page-break-after: always; break-after: page; background: var(--paper); }
-.page.ink { background: radial-gradient(900px 520px at 85% -5%, rgba(91,46,255,.35), transparent 62%), radial-gradient(700px 500px at 0% 105%, rgba(165,139,255,.16), transparent 60%), var(--night); color: #F4F2FF; }
-.frame { position: absolute; inset: 8mm; border: .25mm solid rgba(91,46,255,.45); pointer-events: none; }
-.ink .frame, .cover .frame { border-color: rgba(165,139,255,.5); }
+.page.ink { background: radial-gradient(900px 520px at 85% -5%, rgba(140,29,63,.35), transparent 62%), radial-gradient(700px 500px at 0% 105%, rgba(231,132,157,.16), transparent 60%), var(--night); color: #F4F2FF; }
+.frame { position: absolute; inset: 8mm; border: .25mm solid rgba(140,29,63,.45); pointer-events: none; }
+.ink .frame, .cover .frame { border-color: rgba(231,132,157,.5); }
 .frame .c { position: absolute; width: 3.2mm; height: 3.2mm; color: var(--violet); }
 .ink .frame .c, .cover .frame .c { color: var(--lilac); }
 .frame .c.a { left: -1.6mm; top: -1.6mm; } .frame .c.b { right: -1.6mm; top: -1.6mm; } .frame .c.c2 { left: -1.6mm; bottom: -1.6mm; } .frame .c.d { right: -1.6mm; bottom: -1.6mm; }
@@ -59,7 +59,7 @@ h2.s em { color: var(--violet); }
 h3.k { font-size: 7.2pt; letter-spacing: .2em; text-transform: uppercase; color: var(--violet); margin: 4mm 0 1.6mm; font-weight: 650; }
 .ink h3.k { color: var(--lilac); }
 .lead { font-family: 'Instrument Serif', serif; font-size: 13.2pt; line-height: 1.42; color: #2a2a33; max-width: 112mm; }
-.ink .lead { color: #E7E2FF; }
+.ink .lead { color: #F9E4EA; }
 p { margin-bottom: 2.4mm; }
 .mute { color: var(--mute); }
 .ink .mute { color: rgba(244,242,255,.7); }
@@ -69,8 +69,8 @@ ul.l li::before { content: ""; position: absolute; left: .6mm; top: 1.9mm; width
 .ink ul.l li::before { background: var(--lilac); }
 
 /* copertina */
-.cover { background: radial-gradient(1000px 700px at 80% 8%, rgba(91,46,255,.55), transparent 60%), radial-gradient(800px 700px at 5% 100%, rgba(165,139,255,.25), transparent 55%), var(--night); color: #fff; }
-.cover .big100 { position: absolute; right: -14mm; bottom: 38mm; font-family: 'Geist', sans-serif; font-weight: 800; font-size: 250pt; line-height: .8; letter-spacing: -.08em; color: transparent; -webkit-text-stroke: .35mm rgba(165,139,255,.35); }
+.cover { background: radial-gradient(1000px 700px at 80% 8%, rgba(140,29,63,.55), transparent 60%), radial-gradient(800px 700px at 5% 100%, rgba(231,132,157,.25), transparent 55%), var(--night); color: #fff; }
+.cover .big100 { position: absolute; right: -14mm; bottom: 38mm; font-family: 'Geist', sans-serif; font-weight: 800; font-size: 250pt; line-height: .8; letter-spacing: -.08em; color: transparent; -webkit-text-stroke: .35mm rgba(231,132,157,.35); }
 .cover .mk { position: absolute; left: 22mm; top: 24mm; width: 17mm; height: 17mm; }
 .cover .brand { position: absolute; left: 43mm; top: 27.5mm; font-size: 8pt; letter-spacing: .3em; text-transform: uppercase; color: rgba(255,255,255,.78); }
 .cover .brand b { display: block; font-family: 'Geist', sans-serif; font-weight: 800; letter-spacing: -.02em; font-size: 22pt; text-transform: none; color: #fff; margin-top: .5mm; }
@@ -84,9 +84,9 @@ ul.l li::before { content: ""; position: absolute; left: .6mm; top: 1.9mm; width
 
 /* numeri grandi */
 .stats { display: grid; grid-template-columns: repeat(4, 1fr); border-top: .25mm solid var(--line); border-bottom: .25mm solid var(--line); margin: 6mm 0; }
-.ink .stats { border-color: rgba(165,139,255,.35); }
+.ink .stats { border-color: rgba(231,132,157,.35); }
 .stats div { padding: 5mm 3mm; text-align: center; border-left: .25mm solid var(--line); }
-.ink .stats div { border-color: rgba(165,139,255,.35); }
+.ink .stats div { border-color: rgba(231,132,157,.35); }
 .stats div:first-child { border-left: 0; }
 .stats .v { font-family: 'Instrument Serif', serif; font-size: 30pt; line-height: 1; color: var(--violet); display: block; }
 .ink .stats .v { color: var(--lilac); }
@@ -95,19 +95,19 @@ ul.l li::before { content: ""; position: absolute; left: .6mm; top: 1.9mm; width
 .cards3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4mm; }
 .cards2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 4mm; }
 .card { background: var(--card); border-radius: 5mm; padding: 5mm 5mm 4mm; }
-.ink .card { background: rgba(255,255,255,.07); border: .2mm solid rgba(165,139,255,.28); }
+.ink .card { background: rgba(255,255,255,.07); border: .2mm solid rgba(231,132,157,.28); }
 .card h4 { font-family: 'Instrument Serif', serif; font-weight: 400; font-size: 14pt; line-height: 1.15; margin-bottom: 1.6mm; color: var(--violet); }
 .ink .card h4 { color: var(--lilac); }
 .card p { font-size: 9pt; line-height: 1.5; margin: 0; }
 .quote { border-left: .8mm solid var(--violet); padding: 1mm 0 1mm 5mm; margin: 5mm 0; font-family: 'Instrument Serif', serif; font-style: italic; font-size: 14.5pt; line-height: 1.35; color: #2a2a33; }
-.ink .quote { border-color: var(--lilac); color: #E7E2FF; }
-.call { background: #EFEBFF; border-left: .8mm solid var(--violet); border-radius: 0 3mm 3mm 0; padding: 3.4mm 4.4mm; margin: 3.5mm 0; font-size: 8.8pt; }
+.ink .quote { border-color: var(--lilac); color: #F9E4EA; }
+.call { background: #F8E8EC; border-left: .8mm solid var(--violet); border-radius: 0 3mm 3mm 0; padding: 3.4mm 4.4mm; margin: 3.5mm 0; font-size: 8.8pt; }
 .call.warn { background: #FFF1E6; border-color: #C2570C; }
 .ink .call { background: rgba(255,255,255,.08); border-color: var(--lilac); }
 
 /* telefono */
 .phone { position: relative; width: 56mm; border-radius: 8.5mm; background: #0B0B10; padding: 1.7mm; box-shadow: 0 6mm 10mm -4mm rgba(11,11,16,.45), 0 0 0 .3mm rgba(255,255,255,.1) inset; }
-.ink .phone { box-shadow: 0 8mm 14mm -4mm rgba(0,0,0,.7), 0 0 0 .3mm rgba(165,139,255,.35); }
+.ink .phone { box-shadow: 0 8mm 14mm -4mm rgba(0,0,0,.7), 0 0 0 .3mm rgba(231,132,157,.35); }
 .phone .scr { border-radius: 6.9mm; overflow: hidden; background: #fff; aspect-ratio: 390 / 800; position: relative; }
 .phone .scr img { width: 100%; display: block; }
 .phone .scr::before { content: ""; position: absolute; z-index: 2; top: 2mm; left: 50%; transform: translateX(-50%); width: 15mm; height: 4mm; border-radius: 3mm; background: #0B0B10; }
@@ -124,18 +124,18 @@ ul.l li::before { content: ""; position: absolute; left: .6mm; top: 1.9mm; width
 table.t { width: 100%; border-collapse: collapse; font-size: 8.7pt; margin: 2.5mm 0 4mm; }
 table.t th { text-align: left; font-size: 6.6pt; letter-spacing: .18em; text-transform: uppercase; color: var(--violet); padding: 0 3mm 2mm 0; border-bottom: .3mm solid var(--violet); font-weight: 650; }
 table.t td { padding: 2.2mm 3mm 2.2mm 0; border-bottom: .2mm solid var(--line); vertical-align: top; line-height: 1.45; }
-.ink table.t td { border-color: rgba(165,139,255,.25); } .ink table.t th { color: var(--lilac); border-color: var(--lilac); }
+.ink table.t td { border-color: rgba(231,132,157,.25); } .ink table.t th { color: var(--lilac); border-color: var(--lilac); }
 table.t td:first-child { white-space: nowrap; font-weight: 600; }
 table.t td.w { white-space: normal; }
 /* codice */
-pre.code { background: #0F0F18; color: #E8E6F5; border-radius: 3.6mm; padding: 4mm 4.5mm; font: 400 6.9pt/1.55 'Geist Mono', monospace; margin: 2mm 0 4mm; white-space: pre-wrap; word-break: break-word; position: relative; }
+pre.code { background: #160B10; color: #F3E8EB; border-radius: 3.6mm; padding: 4mm 4.5mm; font: 400 6.9pt/1.55 'Geist Mono', monospace; margin: 2mm 0 4mm; white-space: pre-wrap; word-break: break-word; position: relative; }
 pre.code.big { font-size: 7.7pt; line-height: 1.6; }
 pre.code .tag { position: absolute; right: 3.4mm; top: 2.4mm; font: 600 5.8pt 'Geist'; letter-spacing: .18em; text-transform: uppercase; color: var(--lilac); }
-pre.code .c { color: #8E8AA8; } pre.code .k { color: #C4B2FF; } pre.code .s { color: #8FE3B4; } pre.code .n { color: #FFC980; }
+pre.code .c { color: #A88F98; } pre.code .k { color: #F2A9BC; } pre.code .s { color: #8FE3B4; } pre.code .n { color: #FFC980; }
 /* schema di flusso */
 .flow { display: grid; grid-template-columns: repeat(5, 1fr); gap: 2.4mm; margin: 4mm 0; position: relative; }
 .flow .st { background: var(--card); border-radius: 4mm; padding: 5mm 3.2mm 4mm; position: relative; min-height: 52mm; }
-.ink .flow .st { background: rgba(255,255,255,.07); border: .2mm solid rgba(165,139,255,.28); }
+.ink .flow .st { background: rgba(255,255,255,.07); border: .2mm solid rgba(231,132,157,.28); }
 .flow .st .nn { font-family: 'Instrument Serif', serif; font-style: italic; font-size: 20pt; color: var(--violet); line-height: 1; display: block; margin-bottom: 1.4mm; }
 .ink .flow .st .nn { color: var(--lilac); }
 .flow .st b { display: block; font-size: 9pt; line-height: 1.25; margin-bottom: 1.2mm; }
@@ -160,7 +160,7 @@ pre.code .c { color: #8E8AA8; } pre.code .k { color: #C4B2FF; } pre.code .s { co
 /* anatomia del token */
 .anat { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 3mm; margin: 3mm 0 4mm; }
 .anat div { border-radius: 4mm; padding: 4mm; font-size: 8pt; line-height: 1.45; }
-.anat .h { background: #EFEBFF; } .anat .p { background: #E2F4EA; } .anat .f { background: #FFF1E6; }
+.anat .h { background: #F8E8EC; } .anat .p { background: #E2F4EA; } .anat .f { background: #FFF1E6; }
 .anat b { display: block; font-family: 'Instrument Serif', serif; font-weight: 400; font-style: italic; font-size: 14pt; margin-bottom: 1mm; }
 .anat .h b { color: var(--violet); } .anat .p b { color: #12804a; } .anat .f b { color: #C2570C; }
 .bigword { font-family: 'Instrument Serif', serif; font-size: 60pt; line-height: .95; color: var(--lilac); margin: 8mm 0 2mm; }

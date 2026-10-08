@@ -45,7 +45,7 @@ function build() {
       <div>
         <p class="lead">Premi <b>Nuova degustazione</b>, scrivi un nome che riconosceranno tutti e conferma.</p>
         ${passi([["Nuova degustazione", "Il pulsante in alto nell'elenco."], ["Scrivi il nome", "Per esempio «Serata Nebbiolo»."], ["Crea", "La serata compare subito, aperta."]])}
-        ${ul(["Il nome può essere lungo fino a <b>80 caratteri</b>; se lo lasci vuoto te lo ricorda.", "Puoi tenere fino a <b>200 degustazioni</b> per gruppo: se ne hai di vecchie che non servono, eliminale.", "Premendo due volte il pulsante non si crea una serata doppia."])}
+        ${ul(["Il nome può essere lungo fino a <b>80 caratteri</b>; se lo lasci vuoto te lo ricorda.", "Puoi tenere fino a <b>200 degustazioni</b> per gruppo: se ne hai di vecchie che non servono, eliminale.", "Premendo due volte il pulsante non si crea una serata doppia.", "La serata compare nell'elenco <b>«Degustazioni del team»</b>: la vedono tutti i membri del tuo gruppo, nessun altro gruppo."])}
       </div>
       ${fig("team-base-7-org-nuova.png", 1, "Il modulo: un solo campo. <b>Annulla</b> chiude senza creare niente.", "lg")}
     </div>
@@ -130,6 +130,7 @@ function build() {
       ["Qualcuno ha votato per sbaglio.", "Può rivotare finché la serata è aperta: conta l'ultimo voto."],
       ["Posso votare anch'io?", "Sì, come tutti. Anche tu vedi la media solo dopo aver votato."],
       ["Posso sapere chi ha votato cosa?", "No, a nessuno: si vede solo quante persone hanno votato."],
+      ["Chi vede le serate che creo?", "Tutti i membri del tuo gruppo, nell'elenco «Degustazioni del team». Gli altri gruppi non le vedono."],
       ["Non vedo «Nuova degustazione».", "Il tuo profilo non è organizzatore: chiedilo a chi cura il sito."],
       ["Compare «Devi rientrare».", "L'accesso è scaduto (dopo qualche ora). Ricarica la pagina del tuo club: di solito basta."],
       ["La media non compare.", "Vota prima quel vino: la media si sblocca dopo il tuo voto."],
