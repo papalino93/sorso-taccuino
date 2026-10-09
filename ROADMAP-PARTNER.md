@@ -1,8 +1,8 @@
 # Sorso — cosa devi fare tu per il partner
 
-Aggiornata l'8 ottobre 2026 · **Sorso 1.9.1**.
+Aggiornata il 9 ottobre 2026 · **Sorso 1.9.1**.
 
-**Dove siamo.** Il sito, l'app personale (con la vista da PC) e lo spazio di team per il partner sono pronti e online. Test automatici: tutti verdi. Le tre guide PDF sono aggiornate con la nuova grafica. **La prova sul database vero è stata fatta l'8 ottobre 2026 e non ha trovato difetti** (vedi il punto 2). Mancano solo le cose che dipendono dal partner.
+**Dove siamo.** Il sito, l'app personale (con la vista da PC) e lo spazio di team per il partner sono pronti e online. Test automatici: tutti verdi. Le quattro guide PDF sono aggiornate (l'ultima è la guida all'uso dentro il profilo). **La prova sul database vero è stata fatta l'8 ottobre 2026 e non ha trovato difetti** (vedi il punto 2). **Per completare l'API mancano solo le cose che dipendono dal partner (punti 1, 4, 5, 6, 7, 8): il codice è finito.**
 
 Legenda: ☐ da fare · ✅ fatto
 
@@ -28,11 +28,9 @@ Fatta sul sito e sul database di produzione con un partner di prova, poi cancell
 
 **Se serve rifarla** (dopo modifiche importanti): le variabili `KV_REST_API_URL` e `KV_REST_API_TOKEN` (da Vercel → progetto → Settings → Environment Variables, occhio per vedere il valore) vanno messe nell'ambiente cloud → **Modifica ambiente cloud** → casella **«Variabili d'ambiente»**, una per riga nel formato `NOME=valore`, **non** nello «Script di configurazione» (quello lancia comandi e, se ci scrivi le variabili, la sessione non parte). Poi una sessione nuova con il messaggio: «Leggi ROADMAP-PARTNER.md e PIANO.md. Fai la prova di accettazione dell'integrazione sul sito vero con un partner di prova, poi cancellalo.» A prova finita **cancella le variabili** dall'ambiente.
 
-**Ora da fare:** cancella le due variabili dall'ambiente cloud, se non l'hai già fatto.
-
 **Controlli su Vercel (fatti l'8 ottobre 2026):** il piano è Hobby (solo uso non commerciale, vedi il punto 1); Deployment Protection è «Standard» e la produzione si apre senza accedere. Il partner deve usare sempre https://sorso-taccuino.vercel.app, mai gli indirizzi dei singoli deploy.
 
-### 3. Guarda Sorso 1.6.1 con i tuoi occhi  ☐  *(10 minuti)*
+### 3. Guarda Sorso 1.9.1 con i tuoi occhi  ☐  *(10 minuti)*
 Aprilo su telefono e su PC, con il browser che usi di solito: https://sorso-taccuino.vercel.app/
 - **Telefono:** provi un Voto rapido e una Scheda completa, salvi, li ritrovi nel Taccuino? L'ingranaggio in alto apre le Impostazioni?
 - **PC:** menù a sinistra, Taccuino con elenco e dettaglio, Statistiche: tutto in vista senza scorrere troppo?
@@ -72,8 +70,9 @@ node scripts/partner.js token ID-PARTNER --sub prova --team test --role organize
 | Per chi | File | Cosa contiene |
 |---|---|---|
 | Chi sviluppa il sito del partner | `docs/guida-attivazione-api.pdf` (6 pagine) | Cosa mandare, cosa si riceve, prima prova, messa online |
-| Chi sviluppa il sito del partner | `docs/guida-integrazione-sorso.pdf` (20 pagine) | Tutti i dettagli tecnici: token, iframe, API, errori e limiti |
-| Chi organizza le serate | `docs/guida-gestione-degustazioni.pdf` (11 pagine) | In linguaggio semplice: creare, votare, chiudere, leggere i risultati |
+| Chi sviluppa il sito del partner | `docs/guida-integrazione-sorso.pdf` (23 pagine) | Tutti i dettagli tecnici: token, iframe, API, errori e limiti |
+| Chi organizza le serate | `docs/guida-gestione-degustazioni.pdf` (13 pagine) | In linguaggio semplice: creare, votare, chiudere (anche un solo vino), alla cieca, classifica e risultati |
+| Chi usa Sorso (anche i soci del club) | `docs/guida-uso-sorso.pdf` (13 pagine) | Punteggio, schede, alla cieca, statistiche, impostazioni e spazio del club; è anche nell'app (Impostazioni → Guida) |
 
 Si rigenerano con `node docs/guide/build.js` (dopo `npm install`). **Segreto e chiave non vanno nelle guide né nella stessa email.**
 
@@ -109,5 +108,8 @@ Capitolo «Prima di andare online» della guida di integrazione. In breve: l'ifr
 - Nuovo design, colori scelti dall'utente, **colori del vino come predefiniti**, tema Chiaro / Scuro / Automatico.
 - **Vista da PC** (menù a sinistra, due colonne, elenco + dettaglio) e pagina **Impostazioni**.
 - Nuovo favicon e logo.
-- Tre guide PDF con la nuova grafica.
-- Verifiche: 177 test automatici e sette scenari nel browser (telefono, PC, team, errori), tutti verdi.
+- Quattro guide PDF con la nuova grafica.
+- **Spazio di team completo**: degustazioni, **alla cieca** (con svelamento), **classifica**, **statistiche**, e la **chiusura della votazione di un singolo vino** (media su chi ha votato fino a quel momento, per i vini assaggiati solo da alcuni).
+- **API v1 completa** (sola lettura): `tastings`, `results` (anche CSV, con `status` per vino), `guesses`, `stats`, `events`, cancellazione utente.
+- Nome del taccuino in Impostazioni, controlli nel colore d'accento, vocabolario tradotto in inglese.
+- Verifiche: 200 test automatici e dieci scenari nel browser (app, PC, colori, team, errori, alla cieca, giro di verifica), tutti verdi; giro totale di revisione indipendente sul codice, sull'interfaccia e sulle guide.
