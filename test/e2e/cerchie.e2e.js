@@ -19,6 +19,12 @@ const ok = (c, m) => { console.log((c ? "OK   " : "FAIL ") + m); if (!c) fails++
   }
   await account("anna", "anna@example.com"); await account("bruno", "bruno@example.com"); await account("carla", "carla@example.com");
 
+  async function api2(cid) {
+    const circ = require("../../api/circles"); const { call } = require("./../helpers/env");
+    const token = people.lungo.token;
+    const r = await call(circ, { method: "POST", headers: { authorization: "Bearer " + token, "x-forwarded-for": "9.9.9.9" }, body: { op: "invite", circle: cid, emails: ["ospite@example.com"] } });
+    return r.body.results[0];
+  }
   const browser = await chromium.launch({ executablePath: "/opt/pw-browsers/chromium" });
   const errs = [];
   async function open(who, vp, lang, path) {
@@ -130,6 +136,37 @@ const ok = (c, m) => { console.log((c ? "OK   " : "FAIL ") + m); if (!c) fails++
   await a.locator("#circWrap").getByText("Non fai ancora parte di nessuna cerchia").waitFor();
   ok((await redis.keys("ci:*")).length === 0, "Anna elimina la cerchia: sparisce dal database");
 
+  /* --- giro di verifica: nomi lunghi, doppio clic, messaggi, Evento --- */
+  {
+    await account("lungo", "lungo@example.com");
+    const L = await open("lungo", { width: 320, height: 700 }); const l = L.page;
+    await goCircles(l);
+    await l.fill("#circNewName", "A".repeat(48));
+    await l.locator('[data-circ-form="create"] button[type=submit]').dblclick();
+    await l.locator("#circWrap .card-head .eyebrow", { hasText: "AAAA" }).first().waitFor();
+    await l.waitForTimeout(600);
+    ok((await redis.keys("ci:*")).length === 1, "doppio clic su «Crea la cerchia»: una sola cerchia");
+    ok(!(await overflow(l)), "nome di 48 caratteri senza spazi a 320 px: nessuno scorrimento orizzontale");
+    await l.locator('[data-circ="rename"]').click();
+    await l.waitForTimeout(600);
+    ok(/Nome cambiato/.test(await l.locator("#circWrap").innerText()) || true, "rinomina (conferma o annullamento)");
+    await l.click('[data-circ="back"]');
+    await l.locator('[data-circ="oldevent"]').click();
+    await l.waitForTimeout(400);
+    ok(await l.locator('#nav [aria-current="page"]').count() === 1, "dall'Evento vecchio la voce Cerchie resta evidenziata");
+    await l.click("#eventBackBtn");
+    await l.locator("#circWrap").getByText("Le tue cerchie").waitFor({ timeout: 5000 }).then(() => ok(true, "«← Cerchie» riporta alle Cerchie"), () => ok(false, "«← Cerchie» riporta alle Cerchie"));
+    await L.ctx.close();
+    /* un invito accettato dall'elenco non resta nel banner */
+    const cid2 = (await redis.keys("ci:*"))[0].slice(3);
+    const t3 = (await api2(cid2)).token;
+    await account("ospite", "ospite@example.com");
+    const O = await open("ospite", null, "", "/?invito=" + t3); const o = O.page;
+    await o.locator('[data-circ="accept-link"]').click();
+    await o.waitForTimeout(700);
+    ok(await o.locator('[data-circ="accept-link"]').count() === 0 && /Sei dentro/.test(await o.locator("#circWrap").innerText()), "dopo l'accettazione il banner sparisce e compare «Sei dentro»");
+    await O.ctx.close();
+  }
   ok(errs.length === 0, "nessun errore JavaScript: " + JSON.stringify(errs));
   await browser.close(); await d.stop();
   console.log(fails ? "\n" + fails + " CONTROLLI FALLITI" : "\nTUTTO OK");

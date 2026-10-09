@@ -3,6 +3,17 @@
 La versione e la data dell'ultimo aggiornamento sono mostrate in fondo all'app e dello spazio di team
 (fonte: `public/js/version.js`, da tenere uguale a `package.json`).
 
+## 2.0.0 — 9 ottobre 2026
+- **Cerchie** (passo 1): gruppi di amici, colleghi o corsisti dentro Sorso. Nuova voce **Cerchie** nel menù (prende il posto di «Evento», che resta raggiungibile da un link in fondo alla scheda e verrà sostituito dalle serate delle cerchie).
+  - **Ruoli**: Proprietario (uno solo), Amministratore, Membro. Ogni operazione controlla il ruolo sul server; chi non fa parte di una cerchia non sa nemmeno che esiste.
+  - **Inviti legati alla mail**: l'invito vale solo per quell'indirizzo e lo accetta solo chi entra con Google con la stessa mail (verificata da Google). Si vede nell'elenco inviti della persona e si può mandare anche come **link da copiare**; dura 14 giorni, si usa una volta, si revoca. Gli indirizzi Gmail con punti o «+etichetta» valgono come lo stesso.
+  - **Persone**: gli amministratori invitano e tolgono i Membri; il Proprietario nomina gli amministratori, passa la proprietà, rinomina ed elimina (scrivendo il nome); Membri e amministratori possono uscire.
+  - **Limiti**: 50 persone per cerchia (inviti in attesa compresi), 5 cerchie create e 20 di cui si fa parte, 10 inviti per volta, 100 mail invitabili al giorno per cerchia, 20 inviti in attesa verso la stessa persona.
+  - Tutto regge anche con richieste in parallelo (blocco breve per cerchia, tetti prenotati prima del controllo).
+  - Italiano e inglese, telefono e PC. Nuova guida PDF «Le cerchie».
+- **Accesso Google**: a ogni accesso si salvano mail e il segno «verificata» (servono per gli inviti).
+- Le serate di gruppo nelle cerchie arrivano nel prossimo aggiornamento (2.1.0).
+
 ## 1.9.2 — 9 ottobre 2026
 - **Sicurezza dell'Evento dell'app personale**: lo spazio condiviso degli eventi era scrivibile da qualunque utente collegato, che poteva leggere, sovrascrivere e cancellare gli eventi e i voti degli altri. Ora: si possono toccare solo l'indice degli eventi e i voti di un evento; un voto si scrive una sola volta e nessuno lo sovrascrive o lo cancella; l'indice può solo allungarsi (le voci altrui non si modificano né si tolgono) e il proprietario di una voce lo stabilisce il server; le scritture hanno un limite orario per persona; i voti non validi sono rifiutati. L'elenco delle chiavi usa SCAN a pezzi invece di KEYS (che leggeva tutto il database). Nessun cambiamento visibile per chi usa l'Evento.
 

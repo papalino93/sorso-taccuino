@@ -10,7 +10,7 @@ let fails = 0; const ok = (c, m) => { console.log((c ? "OK   " : "FAIL ") + m); 
   const v = name => page.evaluate(n => document.getElementById("root").style.getPropertyValue(n) || getComputedStyle(document.getElementById("root")).getPropertyValue(n), name);
   ok((await v("--sel-bg")).trim().toLowerCase() === "#8c1d3f", "predefinito: bordeaux");
   const foot = await page.locator("#appVersion").textContent();
-  ok(/v1\.\d+\.\d+/.test(foot) && /2026/.test(foot) && /aggiornamento/.test(foot), "versione e data nel piè di pagina: " + foot);
+  ok(/v\d+\.\d+\.\d+/.test(foot) && /2026/.test(foot) && /aggiornamento/.test(foot), "versione e data nel piè di pagina: " + foot);
   await page.click("#settingsBtn");
   await page.locator('#accentSwatches [data-accent="#0f7a4d"]').click();
   ok((await v("--sel-bg")).trim().toLowerCase() === "#0f7a4d", "scegliendo Bosco il colore cambia subito");

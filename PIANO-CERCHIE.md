@@ -1,6 +1,6 @@
 # Sorso — Piano delle cerchie
 
-Versione del piano: 9 ottobre 2026 · parte da Sorso **1.9.1** · scritto dopo l'intervista con Andrea.
+Versione del piano: 9 ottobre 2026 · scritto dopo l'intervista con Andrea. **Stato: passo 0 fatto (1.9.2), passo 1 fatto (2.0.0).**
 
 ## 1. Obiettivo
 
@@ -64,10 +64,10 @@ Regole: **un solo Proprietario**; se vuole uscire deve prima trasferire la propr
 
 Ogni passo è rilasciabile da solo, con test automatici, test nel browser e giro di verifica prima di passare al successivo.
 
-**Passo 0 — 1.9.2 (subito): chiudere la falla dello spazio condiviso.**
+**Passo 0 — 1.9.2 ✅ fatto: chiudere la falla dello spazio condiviso.**
 Permessi per proprietario sulle chiavi condivise, niente scansione completa, test. Nessuna novità visibile.
 
-**Passo 1 — 2.0.0: cerchie, ruoli, inviti.**
+**Passo 1 — 2.0.0 ✅ fatto: cerchie, ruoli, inviti.**
 Creare/rinominare/eliminare cerchie; inviti legati alla mail con link copiabile, scadenza e revoca; ruoli Proprietario/Amministratore/Membro con trasferimento di proprietà; uscire/togliere membri; «le mie cerchie» e «i miei inviti». Test dei permessi su **ogni** operazione e per **ogni** ruolo, e di isolamento tra cerchie.
 *Fine passo: tre persone di prova creano una cerchia, si invitano, si nominano e si tolgono, senza che nessuno veda ciò che non deve.*
 
@@ -106,6 +106,8 @@ Dopo ogni passo: guide aggiornate (guida all'uso e, per i passi 1–3, una guida
 | Chi esce: voti **restano senza nome**, con «Cancella i miei voti» | Medie stabili e diritto alla cancellazione rispettato |
 
 ## Domande aperte (rinviate)
+
+- **Lettura delle etichette con il catalogo Vino.com** (prototipo ricevuto: OCR nel browser con Tesseract.js, estrazione di produttore, denominazione, annata, gradazione, vitigni). Vino.com darebbe accesso alle sue etichette in cambio di un link al vino su vino.com come riconoscimento. Da chiarire: in che forma ci danno i dati (archivio, feed o API), le condizioni d'uso per iscritto, come si cita il link, se i dati si possono tenere in cache. Si fa come lavoro a sé, prima o dopo il passo 2.
 
 - **Persone senza account Google**: accettare il limite, o aggiungere un accesso con link via mail (richiede un servizio di posta)? Da decidere al passo 4.
 - **Cosa mostra il widget** (solo classifica? anche serate recenti? numero di partecipanti?) e se l'amministratore sceglie i blocchi: da definire al passo 3 guardando un widget di prova.
