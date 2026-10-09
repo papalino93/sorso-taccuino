@@ -22,7 +22,24 @@ const MAX_JOINED = 20;           // cerchie di cui una persona fa parte
 const INVITE_DAYS = 14;
 const MAX_INVITES_PER_CALL = 10;
 const MAX_INVITES_PER_DAY = 100; // per cerchia
+const MAX_PENDING_PER_RECIPIENT = 20;   // inviti in attesa verso lo stesso indirizzo (anti-spam)
 const ROLES = ["owner", "admin", "member"];
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+
+/* Un blocco breve per cerchia: le operazioni che cambiano membri, ruoli o proprietà non si
+   incrociano (due trasferimenti insieme non fanno due Proprietari, il tetto dei 50 regge). */
+async function locked(redis, cid, fn) {
+  if (typeof cid !== "string" || !ID.test(cid)) throw notFound("Cerchia");
+  const key = "cx:" + cid, mine = crypto.randomBytes(8).toString("hex");
+  let got = false;
+  for (let i = 0; i < 40 && !got; i++) {
+    got = !!(await redis.set(key, mine, { nx: true, ex: 8 }));
+    if (!got) await sleep(40 + Math.floor(Math.random() * 40));
+  }
+  if (!got) throw new HttpError(409, "busy", "Un'altra modifica è in corso: riprova fra un attimo.");
+  try { return await fn(); }
+  finally { try { if (String(await redis.get(key)) === mine) await redis.del(key); } catch (e) { /* scade da solo */ } }
+}
 
 const K = {
   ci: c => "ci:" + c, cm: c => "cm:" + c, cu: u => "cu:" + u, co: u => "co:" + u,
@@ -105,14 +122,20 @@ function pickMember(username, m, users, viewerRole) {
 async function create(redis, user, body) {
   const name = cleanText(body.name, 48);
   if (!name) throw bad("invalid_name", "Dai un nome alla cerchia.");
-  if ((await redis.scard(K.co(user.username))) >= MAX_OWNED) throw new HttpError(409, "limit", "Hai già creato " + MAX_OWNED + " cerchie: eliminane una prima di crearne un'altra.");
-  if ((await redis.scard(K.cu(user.username))) >= MAX_JOINED) throw new HttpError(409, "limit", "Fai già parte di " + MAX_JOINED + " cerchie.");
   const c = { id: rid(), name, owner: user.username, createdAt: Date.now() };
+  /* prima si prenota il posto, poi si controlla il tetto: due richieste insieme non lo superano */
+  const p0 = redis.pipeline();
+  p0.sadd(K.co(user.username), c.id); p0.sadd(K.cu(user.username), c.id); p0.scard(K.co(user.username)); p0.scard(K.cu(user.username));
+  const r0 = await p0.exec();
+  const tooMany = Number(r0[2]) > MAX_OWNED ? "Hai già creato " + MAX_OWNED + " cerchie: eliminane una prima di crearne un'altra." : (Number(r0[3]) > MAX_JOINED ? "Fai già parte di " + MAX_JOINED + " cerchie." : "");
+  if (tooMany) {
+    const u = redis.pipeline(); u.srem(K.co(user.username), c.id); u.srem(K.cu(user.username), c.id); await u.exec();
+    throw new HttpError(409, "limit", tooMany);
+  }
   const mid = crypto.randomBytes(6).toString("hex");
   const p = redis.pipeline();
   p.set(K.ci(c.id), JSON.stringify(c));
   p.hset(K.cm(c.id), { [user.username]: JSON.stringify({ role: "owner", mid, at: c.createdAt }) });
-  p.sadd(K.cu(user.username), c.id); p.sadd(K.co(user.username), c.id);
   await p.exec();
   return { circle: { id: c.id, name: c.name, role: "owner", members: 1, createdAt: c.createdAt } };
 }
@@ -121,13 +144,18 @@ async function list(redis, user) {
   const ids = ((await redis.smembers(K.cu(user.username))) || []).map(String).filter(x => ID.test(x));
   let circles = [];
   if (ids.length) {
+    const cs = await redis.mget(...ids.map(K.ci));
     const p = redis.pipeline();
-    ids.forEach(id => { p.get(K.ci(id)); p.hget(K.cm(id), user.username); p.hlen(K.cm(id)); });
+    ids.forEach(id => { p.hget(K.cm(id), user.username); p.hlen(K.cm(id)); });
     const r = await p.exec();
+    const orfane = [];
     ids.forEach((id, i) => {
-      const c = parse(r[3 * i]), m = parse(r[3 * i + 1]);
-      if (c && m) circles.push({ id, name: c.name, role: m.role, members: Number(r[3 * i + 2]) || 0, createdAt: c.createdAt });
+      const c = parse(cs[i]), m = parse(r[2 * i]);
+      if (c && m) circles.push({ id, name: c.name, role: m.role, members: Number(r[2 * i + 1]) || 0, createdAt: c.createdAt });
+      else orfane.push(id);
     });
+    /* voci di una cerchia che non c'è più (o in cui non si è più): si tolgono, per non occupare il tetto */
+    if (orfane.length) { const d = redis.pipeline(); orfane.forEach(id => { d.srem(K.cu(user.username), id); d.srem(K.co(user.username), id); }); await d.exec(); }
     circles.sort((a, b) => a.name.localeCompare(b.name, "it"));
   }
   return { circles, invites: await myInvites(redis, user), limits: { maxMembers: MAX_MEMBERS, maxOwned: MAX_OWNED, maxJoined: MAX_JOINED } };
@@ -163,6 +191,7 @@ async function get(redis, user, body) {
   const out = { circle: { id: circle.id, name: circle.name, role: me.role, createdAt: circle.createdAt, members: members.length }, members };
   if (me.role !== "member") {
     const hv = asObject(await redis.hgetall(K.cv(circle.id)));
+    await dropExpired(redis, circle.id, hv);
     out.invites = Object.values(hv).map(parse).filter(i => i && i.exp > Date.now())
       .map(i => ({ id: i.id, email: i.email, role: i.role, exp: i.exp, token: i.token, by: (i.by === user.username ? "tu" : ((users[i.by] || {}).name || "")) }))
       .sort((a, b) => b.exp - a.exp);
@@ -170,44 +199,57 @@ async function get(redis, user, body) {
   return out;
 }
 
-async function rename(redis, user, body) {
+/* gli inviti scaduti si tolgono (restano solo a pesare sulle letture) */
+async function dropExpired(redis, cid, hv) {
+  const scaduti = Object.values(hv).map(parse).filter(i => i && i.exp <= Date.now());
+  if (!scaduti.length) return;
+  const p = redis.pipeline();
+  scaduti.forEach(i => { p.hdel(K.cv(cid), i.id); p.del(K.cl(i.token)); p.srem(K.ce(i.eh), cid + "|" + i.id); });
+  await p.exec();
+  scaduti.forEach(i => { delete hv[i.id]; });
+}
+
+const rename = (redis, user, body) => locked(redis, body.circle, async () => {
   const { circle } = await requireRole(redis, user, body.circle, "owner");
   const name = cleanText(body.name, 48);
   if (!name) throw bad("invalid_name", "Dai un nome alla cerchia.");
   circle.name = name;
   await redis.set(K.ci(circle.id), JSON.stringify(circle));
   return { circle: { id: circle.id, name } };
-}
+});
 
-async function remove(redis, user, body) {
+const remove = (redis, user, body) => locked(redis, body.circle, async () => {
   const { circle } = await requireRole(redis, user, body.circle, "owner");
   if (body.confirm !== true) throw bad("confirm_required", "Conferma l'eliminazione.");
   const hm = asObject(await redis.hgetall(K.cm(circle.id)));
   const hv = asObject(await redis.hgetall(K.cv(circle.id)));
   const p = redis.pipeline();
   Object.keys(hm).forEach(u => p.srem(K.cu(u), circle.id));
-  p.srem(K.co(circle.owner), circle.id);
+  p.srem(K.co(user.username), circle.id);      // il Proprietario è chi sta eliminando (verificato sopra)
+  Object.keys(hm).forEach(u => p.srem(K.co(u), circle.id));
   Object.values(hv).map(parse).filter(Boolean).forEach(i => { p.del(K.cl(i.token)); p.srem(K.ce(i.eh), circle.id + "|" + i.id); });
   p.del(K.ci(circle.id)); p.del(K.cm(circle.id)); p.del(K.cv(circle.id));
   await p.exec();
   return { deleted: circle.id };
-}
+});
 
 /* ---- inviti ---- */
-async function invite(redis, user, body) {
+const invite = (redis, user, body) => locked(redis, body.circle, async () => {
   const { circle, me } = await requireRole(redis, user, body.circle, "admin");
   const role = body.role === "admin" ? "admin" : "member";
   if (role === "admin" && me.role !== "owner") throw forbidden("Solo il Proprietario può invitare un amministratore.");
   const list = Array.isArray(body.emails) ? body.emails : (typeof body.email === "string" ? [body.email] : []);
   if (!list.length) throw bad("invalid_email", "Scrivi almeno un indirizzo mail.");
   if (list.length > MAX_INVITES_PER_CALL) throw bad("too_many", "Al massimo " + MAX_INVITES_PER_CALL + " inviti per volta.");
-  const rl = await limit.hit(redis, "cinv:" + circle.id, MAX_INVITES_PER_DAY, 86400);
+  const validi = new Set(list.map(normEmail).filter(Boolean)).size;
+  const rl = await limit.hit(redis, "cinv:" + circle.id, MAX_INVITES_PER_DAY, 86400, Math.max(1, validi));
   if (!rl.ok) throw new HttpError(429, "rate_limited", "Troppi inviti oggi per questa cerchia: riprova domani.");
 
   const hm = asObject(await redis.hgetall(K.cm(circle.id)));
   const memberUsers = await getUsers(redis, Object.keys(hm));
   const memberEmails = new Set(Object.values(memberUsers).map(u => u.email).filter(Boolean));
   const hv = asObject(await redis.hgetall(K.cv(circle.id)));
+  await dropExpired(redis, circle.id, hv);
   const pending = Object.values(hv).map(parse).filter(i => i && i.exp > Date.now());
   const byEmail = new Map(pending.map(i => [i.email, i]));
   let count = Object.keys(hm).length + pending.length;
@@ -220,6 +262,8 @@ async function invite(redis, user, body) {
     if (memberEmails.has(email)) { results.push({ email, status: "already_member" }); continue; }
     if (byEmail.has(email)) { const i = byEmail.get(email); results.push({ email, status: "already_invited", id: i.id, token: i.token }); continue; }
     if (count >= MAX_MEMBERS) { results.push({ email, status: "full" }); continue; }
+    /* a una stessa persona non si può mandare una valanga di inviti */
+    if ((await redis.scard(K.ce(emailHash(email)))) >= MAX_PENDING_PER_RECIPIENT) { results.push({ email, status: "unavailable" }); continue; }
     count++;
     const inv = { id: rid(), email, eh: emailHash(email), role, by: user.username, at: Date.now(), exp: Date.now() + INVITE_DAYS * 86400000, token: crypto.randomBytes(24).toString("hex") };
     const p = redis.pipeline();
@@ -230,7 +274,7 @@ async function invite(redis, user, body) {
     results.push({ email, status: "invited", id: inv.id, token: inv.token, exp: inv.exp });
   }
   return { results };
-}
+});
 
 async function dropInvite(redis, circleId, inv) {
   const p = redis.pipeline();
@@ -238,13 +282,13 @@ async function dropInvite(redis, circleId, inv) {
   await p.exec();
 }
 
-async function revokeInvite(redis, user, body) {
+const revokeInvite = (redis, user, body) => locked(redis, body.circle, async () => {
   const { circle } = await requireRole(redis, user, body.circle, "admin");
   const inv = typeof body.invite === "string" && ID.test(body.invite) ? parse(await redis.hget(K.cv(circle.id), body.invite)) : null;
   if (!inv) throw notFound("Invito");
   await dropInvite(redis, circle.id, inv);
   return { revoked: inv.id };
-}
+});
 
 /* trova l'invito indicato (con il link o dall'elenco personale) e controlla che sia della persona */
 async function findInvite(redis, user, body) {
@@ -271,19 +315,23 @@ async function peekInvite(redis, user, body) {
 }
 
 async function acceptInvite(redis, user, body) {
-  const { inv, circle, matches } = await findInvite(redis, user, body);
-  if (!matches) throw new HttpError(403, "wrong_account", "Questo invito è per " + maskEmail(inv.email) + ": entra con quell'account Google.");
-  const cm = K.cm(circle.id);
-  const existing = parse(await redis.hget(cm, user.username));
-  if (!existing) {
-    if ((await redis.scard(K.cu(user.username))) >= MAX_JOINED) throw new HttpError(409, "limit", "Fai già parte di " + MAX_JOINED + " cerchie.");
-    if ((await redis.hlen(cm)) >= MAX_MEMBERS) throw new HttpError(409, "full", "Questa cerchia è al completo (" + MAX_MEMBERS + " persone).");
-    await redis.hset(cm, { [user.username]: JSON.stringify({ role: inv.role, mid: crypto.randomBytes(6).toString("hex"), at: Date.now() }) });
-    if ((await redis.hlen(cm)) > MAX_MEMBERS) { await redis.hdel(cm, user.username); throw new HttpError(409, "full", "Questa cerchia è al completo (" + MAX_MEMBERS + " persone)."); }
-    await redis.sadd(K.cu(user.username), circle.id);
-  }
-  await dropInvite(redis, circle.id, inv);
-  return { circle: { id: circle.id, name: circle.name, role: existing ? existing.role : inv.role } };
+  const first = await findInvite(redis, user, body);
+  return locked(redis, first.circle.id, async () => {
+    /* dentro il blocco si rilegge tutto: nel frattempo la cerchia potrebbe essere stata eliminata o l'invito usato */
+    const { inv, circle, matches } = await findInvite(redis, user, body);
+    if (!matches) throw new HttpError(403, "wrong_account", "Questo invito è per " + maskEmail(inv.email) + ": entra con quell'account Google.");
+    const cm = K.cm(circle.id);
+    const existing = parse(await redis.hget(cm, user.username));
+    if (!existing) {
+      if ((await redis.hlen(cm)) >= MAX_MEMBERS) throw new HttpError(409, "full", "Questa cerchia è al completo (" + MAX_MEMBERS + " persone).");
+      /* si prenota il posto tra le proprie cerchie, poi si controlla il tetto */
+      await redis.sadd(K.cu(user.username), circle.id);
+      if ((await redis.scard(K.cu(user.username))) > MAX_JOINED) { await redis.srem(K.cu(user.username), circle.id); throw new HttpError(409, "limit", "Fai già parte di " + MAX_JOINED + " cerchie."); }
+      await redis.hset(cm, { [user.username]: JSON.stringify({ role: inv.role, mid: crypto.randomBytes(6).toString("hex"), at: Date.now() }) });
+    }
+    await dropInvite(redis, circle.id, inv);
+    return { circle: { id: circle.id, name: circle.name, role: existing ? existing.role : inv.role } };
+  });
 }
 
 async function declineInvite(redis, user, body) {
@@ -301,7 +349,7 @@ async function findMember(redis, circleId, mid) {
   throw notFound("Persona");
 }
 
-async function setRole(redis, user, body) {
+const setRole = (redis, user, body) => locked(redis, body.circle, async () => {
   const { circle } = await requireRole(redis, user, body.circle, "owner");
   if (body.role !== "admin" && body.role !== "member") throw bad("invalid_role", "Il ruolo è admin oppure member.");
   const t = await findMember(redis, circle.id, body.member);
@@ -309,9 +357,9 @@ async function setRole(redis, user, body) {
   t.m.role = body.role;
   await redis.hset(K.cm(circle.id), { [t.username]: JSON.stringify(t.m) });
   return { member: body.member, role: body.role };
-}
+});
 
-async function removeMember(redis, user, body) {
+const removeMember = (redis, user, body) => locked(redis, body.circle, async () => {
   const { circle, me } = await requireRole(redis, user, body.circle, "admin");
   const t = await findMember(redis, circle.id, body.member);
   if (t.m.role === "owner") throw forbidden("Il Proprietario non si può togliere.");
@@ -321,18 +369,18 @@ async function removeMember(redis, user, body) {
   p.hdel(K.cm(circle.id), t.username); p.srem(K.cu(t.username), circle.id);
   await p.exec();
   return { removed: body.member };
-}
+});
 
-async function leave(redis, user, body) {
+const leave = (redis, user, body) => locked(redis, body.circle, async () => {
   const { circle, me } = await requireRole(redis, user, body.circle, "member");
   if (me.role === "owner") throw new HttpError(409, "owner_must_transfer", "Sei il Proprietario: trasferisci prima la proprietà a un'altra persona, oppure elimina la cerchia.");
   const p = redis.pipeline();
   p.hdel(K.cm(circle.id), user.username); p.srem(K.cu(user.username), circle.id);
   await p.exec();
   return { left: circle.id };
-}
+});
 
-async function transfer(redis, user, body) {
+const transfer = (redis, user, body) => locked(redis, body.circle, async () => {
   const { circle } = await requireRole(redis, user, body.circle, "owner");
   const t = await findMember(redis, circle.id, body.member);
   if (t.username === user.username) throw bad("same_user", "Sei già il Proprietario.");
@@ -346,7 +394,7 @@ async function transfer(redis, user, body) {
   p.srem(K.co(user.username), circle.id); p.sadd(K.co(t.username), circle.id);
   await p.exec();
   return { owner: body.member };
-}
+});
 
 const WRITES = new Set(["create", "rename", "delete", "invite", "invite.revoke", "invite.accept", "invite.decline", "member.role", "member.remove", "leave", "transfer"]);
 const OPS = {

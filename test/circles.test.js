@@ -194,3 +194,92 @@ test("id e token malformati non danno errori interni", async () => {
     assert.ok(r.statusCode >= 400 && r.statusCode < 500, JSON.stringify([body, r.statusCode, r.body]));
   }
 });
+
+/* ---- difetti emersi dalla revisione indipendente ---- */
+test("concorrenza: i tetti reggono anche con richieste in parallelo", async () => {
+  await account("anna", "anna@example.com");
+  const r = await Promise.all(Array.from({ length: 12 }, (_, i) => op("anna", { op: "create", name: "C" + i })));
+  assert.equal(r.filter(x => x.statusCode === 200).length, C.MAX_OWNED, "al massimo 5 cerchie create");
+  assert.equal((await redis.smembers("co:google:anna")).length, C.MAX_OWNED);
+  assert.equal((await redis.smembers("cu:google:anna")).length, C.MAX_OWNED);
+});
+
+test("concorrenza: due trasferimenti insieme non fanno due Proprietari", async () => {
+  const { cid, mid } = await scena();
+  const r = await Promise.all([op("anna", { op: "transfer", circle: cid, member: mid("bruno") }), op("anna", { op: "transfer", circle: cid, member: mid("carla") })]);
+  assert.equal(r.filter(x => x.statusCode === 200).length, 1, JSON.stringify(r.map(x => x.statusCode)));
+  const hm = await redis.hgetall("cm:" + cid);
+  const ruoli = []; for (let i = 0; i < hm.length; i += 2) ruoli.push(JSON.parse(hm[i + 1]).role);
+  assert.equal(ruoli.filter(x => x === "owner").length, 1);
+  const owner = JSON.parse(await redis.get("ci:" + cid)).owner;
+  assert.equal((await redis.smembers("co:" + owner)).includes(cid), true);
+  assert.equal((await redis.smembers("co:google:anna")).length, 0);
+});
+
+test("concorrenza: gli inviti non superano il tetto di 50 e le accettazioni nemmeno", async () => {
+  await account("anna", "anna@example.com");
+  const { circle } = await ok("anna", { op: "create", name: "Piena" });
+  const mails = k => Array.from({ length: 10 }, (_, i) => "p" + k + "x" + i + "@example.com");
+  await Promise.all([0, 1, 2, 3].map(k => op("anna", { op: "invite", circle: circle.id, emails: mails(k) })));
+  const hv = await redis.hgetall("cv:" + circle.id);
+  assert.ok(hv.length / 2 <= C.MAX_MEMBERS - 1, "inviti in attesa: " + hv.length / 2);
+});
+
+test("accettare un invito di una cerchia eliminata nel frattempo non lascia tracce", async () => {
+  await account("anna", "anna@example.com"); await account("bea", "bea@example.com");
+  const { circle } = await ok("anna", { op: "create", name: "Breve" });
+  const t = (await ok("anna", { op: "invite", circle: circle.id, emails: ["bea@example.com"] })).results[0].token;
+  await ok("anna", { op: "delete", circle: circle.id, confirm: true });
+  await err("bea", { op: "invite.accept", token: t }, 410);
+  assert.equal((await redis.smembers("cu:google:bea")).length, 0);
+  /* e una voce orfana in «le mie cerchie» si ripulisce da sola */
+  await redis.sadd("cu:google:bea", "aaaaaaaaaa");
+  assert.deepEqual((await ok("bea", { op: "list" })).circles, []);
+  assert.equal((await redis.smembers("cu:google:bea")).length, 0);
+});
+
+test("anti-spam: il limite giornaliero conta le mail, non le chiamate; tetto di inviti per destinatario", async () => {
+  await account("anna", "anna@example.com");
+  const { circle } = await ok("anna", { op: "create", name: "Spam" });
+  let ultimo = 200, invitate = 0;
+  for (let k = 0; k < 12 && ultimo === 200; k++) {
+    const r = await op("anna", { op: "invite", circle: circle.id, emails: Array.from({ length: 10 }, (_, i) => "s" + k + "x" + i + "@example.com") });
+    ultimo = r.statusCode;
+    if (r.statusCode === 200) {
+      invitate += r.body.results.filter(x => x.status === "invited").length;
+      await redis.del("cv:" + circle.id);      // libera i posti (come se fossero stati revocati o scaduti)
+    }
+  }
+  assert.equal(ultimo, 429, "dopo 100 mail in un giorno si ferma");
+  assert.ok(invitate <= 100);
+  /* la stessa persona non riceve più di 20 inviti in attesa */
+  await account("vittima", "vittima@example.com");
+  let stati = [];
+  for (let k = 0; k < 24; k++) {
+    await account("c" + k, "c" + k + "@example.com");
+    const c = (await ok("c" + k, { op: "create", name: "Cerchia " + k })).circle;
+    stati.push((await ok("c" + k, { op: "invite", circle: c.id, emails: ["vittima@example.com"] })).results[0].status);
+  }
+  assert.equal(stati.filter(s => s === "invited").length, 20);
+  assert.ok(stati.includes("unavailable"));
+  assert.equal((await ok("vittima", { op: "list" })).invites.length, 20);
+});
+
+test("inviti scaduti: si tolgono quando si legge la cerchia", async () => {
+  await account("anna", "anna@example.com");
+  const { circle } = await ok("anna", { op: "create", name: "Pulizia" });
+  const r = (await ok("anna", { op: "invite", circle: circle.id, emails: ["x@example.com"] })).results[0];
+  const rec = JSON.parse(await redis.hget("cv:" + circle.id, r.id)); rec.exp = Date.now() - 1;
+  await redis.hset("cv:" + circle.id, { [r.id]: JSON.stringify(rec) });
+  await ok("anna", { op: "get", circle: circle.id });
+  assert.equal((await redis.hgetall("cv:" + circle.id)).length, 0);
+  assert.equal((await redis.smembers("ce:" + rec.eh)).length, 0);
+});
+
+test("costo: «le mie cerchie» fa poche letture", async () => {
+  await account("anna", "anna@example.com");
+  for (let i = 0; i < 5; i++) await ok("anna", { op: "create", name: "C" + i });
+  srv.log.length = 0;
+  await ok("anna", { op: "list" });
+  assert.ok(srv.log.length <= 20, "comandi: " + srv.log.length);
+});

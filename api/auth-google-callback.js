@@ -102,7 +102,7 @@ module.exports = Quota.wrap(async (req, res) => {
     await redis.set(userKey, JSON.stringify({
       provider: "google",
       email: info.email || "",
-      emailVerified: info.email_verified !== false,
+      emailVerified: info.email_verified === true || info.email_verified === "true",
       name: info.name || "",
       createdAt: prev && prev.createdAt ? prev.createdAt : Date.now()
     }));
