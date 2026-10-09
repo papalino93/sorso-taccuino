@@ -3,6 +3,9 @@
 La versione e la data dell'ultimo aggiornamento sono mostrate in fondo all'app e dello spazio di team
 (fonte: `public/js/version.js`, da tenere uguale a `package.json`).
 
+## 1.9.2 — 9 ottobre 2026
+- **Sicurezza dell'Evento dell'app personale**: lo spazio condiviso degli eventi era scrivibile da qualunque utente collegato, che poteva leggere, sovrascrivere e cancellare gli eventi e i voti degli altri. Ora: si possono toccare solo l'indice degli eventi e i voti di un evento; un voto si scrive una sola volta e nessuno lo sovrascrive o lo cancella; l'indice può solo allungarsi (le voci altrui non si modificano né si tolgono) e il proprietario di una voce lo stabilisce il server; le scritture hanno un limite orario per persona; i voti non validi sono rifiutati. L'elenco delle chiavi usa SCAN a pezzi invece di KEYS (che leggeva tutto il database). Nessun cambiamento visibile per chi usa l'Evento.
+
 ## 1.9.1 — 8 ottobre 2026
 - **In inglese ora si traduce anche il vocabolario di degustazione**: tipologie (Red, White, Rosé, Sparkling), limpidezza, colore, consistenza, zuccheri, tannicità, evoluzione, descrittori, livelli (intensità, corpo, durezze e morbidezze), «Altro» nell'uvaggio, e le stesse voci nel Taccuino, nelle Statistiche e nell'esito della cieca. I valori restano salvati in italiano: le schede già scritte e il cambio di lingua non perdono niente.
 
