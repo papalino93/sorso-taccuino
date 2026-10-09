@@ -33,7 +33,9 @@ async function start(opts) {
   const handlers = {
     "/api/embed": require("../../api/embed"),
     "/api/embed-page": require("../../api/embed-page"),
-    "/api/v1": require("../../api/v1")
+    "/api/v1": require("../../api/v1"),
+    "/api/circles": require("../../api/circles"),
+    "/api/db": require("../../api/db")
   };
   const secret = opts.secret || "d".repeat(64);
   const apiKey = P.newApiKey("demo");
