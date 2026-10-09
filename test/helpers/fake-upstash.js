@@ -58,6 +58,20 @@ function create() {
         const re = new RegExp("^" + a[0].replace(/[.+^${}()|[\]\\]/g, "\\$&").replace(/\*/g, ".*").replace(/\?/g, ".") + "$");
         return Array.from(store.keys()).filter(k => live(k) && re.test(k));
       }
+      case "SCAN": {
+        /* un solo giro: restituisce tutte le chiavi che combaciano (con \ come escape, come in Redis) */
+        let pat = "*";
+        for (let i = 1; i < a.length; i++) if (a[i].toUpperCase() === "MATCH") pat = a[++i];
+        let re = "";
+        for (let i = 0; i < pat.length; i++) {
+          const c = pat[i];
+          if (c === "\\" && i + 1 < pat.length) { re += pat[++i].replace(/[.+^${}()|[\]\\*?]/g, "\\$&"); }
+          else if (c === "*") re += ".*"; else if (c === "?") re += ".";
+          else re += c.replace(/[.+^${}()|[\]\\]/g, "\\$&");
+        }
+        const rx = new RegExp("^" + re + "$");
+        return ["0", Array.from(store.keys()).filter(k => live(k) && rx.test(k))];
+      }
       case "DEL": { let n = 0; a.forEach(k => { if (live(k)) { store.delete(k); n++; } }); return n; }
       case "EXISTS": return a.filter(k => live(k)).length;
       case "INCR": case "INCRBY": {

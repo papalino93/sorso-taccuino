@@ -1,7 +1,7 @@
 {
   "name": "sorso-taccuino",
   "private": true,
-  "version": "1.9.1",
+  "version": "1.9.2",
   "dependencies": {
     "@upstash/redis": "^1.34.3"
   },
