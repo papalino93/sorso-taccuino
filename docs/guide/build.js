@@ -4,7 +4,7 @@
 const fs = require("fs");
 const path = require("path");
 const { chromium } = require(require("child_process").execSync("npm root -g").toString().trim() + "/playwright");
-const DOCS = { integrazione: ["integrazione.js", "guida-integrazione-sorso.pdf"], gestore: ["gestore.js", "guida-gestione-degustazioni.pdf"], attivazione: ["attivazione.js", "guida-attivazione-api.pdf"], utente: ["utente.js", "guida-uso-sorso.pdf"] };
+const DOCS = { integrazione: ["integrazione.js", "guida-integrazione-sorso.pdf"], gestore: ["gestore.js", "guida-gestione-degustazioni.pdf"], attivazione: ["attivazione.js", "guida-attivazione-api.pdf"], utente: ["utente.js", "guida-uso-sorso.pdf"], cerchie: ["cerchie.js", "guida-cerchie.pdf"] };
 (async () => {
   const quali = process.argv.slice(2).length ? process.argv.slice(2) : Object.keys(DOCS);
   const browser = await chromium.launch({ executablePath: "/opt/pw-browsers/chromium" });
