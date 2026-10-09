@@ -1,6 +1,7 @@
 const Quota = require("./_quota");
 const { getRedis } = require("./_redis");
 const limit = require("./_limit");
+const { cleanText } = require("./_http");
 
 /* Proxy generico chiave-valore usato dal modulo DB del frontend.
    Ogni richiesta è autenticata da un token di sessione; le chiavi
@@ -56,11 +57,11 @@ function mergeIndex(existingRaw, submittedRaw, username) {
   const out = existing.slice();
   for (const x of sub) {
     if (!x || typeof x !== "object" || typeof x.slug !== "string" || !SLUG.test(x.slug) || known.has(x.slug)) continue;
-    const name = typeof x.name === "string" ? x.name.replace(/[\u0000-\u001f]/g, " ").trim().slice(0, 48) : "";
+    if (out.length >= MAX_EVENTS) break;
+    const name = cleanText(x.name, 48);
     if (!name) continue;
     known.add(x.slug);
     out.push({ name, slug: x.slug, owner: x.owner ? username : null });
-    if (out.length >= MAX_EVENTS) break;
   }
   return out;
 }
@@ -137,8 +138,12 @@ module.exports = Quota.wrap(async (req, res) => {
           if (!v || typeof v !== "object" || Array.isArray(v) || value.length > 1000 || typeof v.wineLabel !== "string" || !(Number(v.score) >= 0 && Number(v.score) <= 100)) {
             res.status(400).json({ error: "Voto non valido." }); return;
           }
+          /* si salvano solo i campi previsti: nessuno può aggiungere un'identità finta */
+          value = JSON.stringify({ wineLabel: cleanText(v.wineLabel, 200), score: Number(v.score), scale: Number(v.scale) || 2, ts: Number(v.ts) || Date.now() });
           const ok = await redis.set(nsKey(username, key, true), value, { nx: true });
           if (!ok) { res.status(409).json({ error: "Voto già presente." }); return; }
+          /* l'elenco dei voti di un evento si tiene in un insieme: così leggerli costa un comando, non una scansione */
+          await redis.sadd("shared-idx:" + key.split(":")[1], key);
         }
       } else {
         await redis.set(nsKey(username, key, false), value);
@@ -159,7 +164,19 @@ module.exports = Quota.wrap(async (req, res) => {
       if (shared && !SHARED_PREFIX.test(prefix)) { res.status(403).json({ error: "Prefisso condiviso non consentito." }); return; }
       const base = shared ? "shared:" : "u:" + username + ":";
       const pattern = globEscape(base + prefix) + "*";
-      const full = await scanKeys(redis, pattern);
+      let full;
+      if (shared) {
+        const rl = await limit.hit(redis, "dbl:" + username, 120, 3600);
+        if (!rl.ok) { res.setHeader("Retry-After", String(rl.retryAfter)); res.status(429).json({ error: "Troppe richieste: riprova più tardi." }); return; }
+        const slug = prefix.split(":")[1];
+        const idx = ((await redis.smembers("shared-idx:" + slug)) || []).map(String);
+        if (idx.length) full = idx.map(k => "shared:" + k);
+        else {
+          /* eventi più vecchi: si scandisce una volta e si costruisce l'insieme */
+          full = await scanKeys(redis, pattern);
+          if (full.length) await redis.sadd("shared-idx:" + slug, ...full.map(k => k.slice("shared:".length)));
+        }
+      } else full = await scanKeys(redis, pattern);
       const keys = (full || []).map((k) => k.slice(base.length));
       res.status(200).json({ keys, prefix, shared });
       return;

@@ -17,8 +17,8 @@ function build() {
     ${eyebrow("01", "In breve")}
     <h1 class="d">Assaggi, <em>voti, ricordi</em></h1>
     <p class="lead">Sorso è il tuo taccuino: fotografi l'etichetta, dai il voto, e ritrovi ogni vino con le statistiche del tuo palato.</p>
-    ${stats([["50–100", "la scala<br>del voto"], ["2", "modi di votare:<br>rapido o completo"], ["5", "sezioni:<br>Nuova · Alla cieca · Taccuino · Statistiche · Evento"], ["0 €", "il costo<br>dell'app"]])}
-    ${cards([["Nuova", "Una scheda per ogni vino: etichetta, dati, giudizio. Il punteggio si calcola da solo."], ["Alla cieca", "Assaggi senza guardare l'etichetta e provi a indovinare. Poi confronti."], ["Taccuino", "Tutte le tue schede: cerchi, ordini, confronti due vini, modifichi."], ["Statistiche", "Il tuo profilo: vitigni preferiti, come giudichi, quanto conta il prezzo."], ["Evento", "Una serata con gli amici: tutti votano gli stessi vini e esce la classifica."], ["Impostazioni", "Colori, tema chiaro o scuro, copia dei dati, account e questa guida."]])}
+    ${stats([["50–100", "la scala<br>del voto"], ["2", "modi di votare:<br>rapido o completo"], ["5", "sezioni:<br>Nuova · Alla cieca · Taccuino · Statistiche · Cerchie"], ["0 €", "il costo<br>dell'app"]])}
+    ${cards([["Nuova", "Una scheda per ogni vino: etichetta, dati, giudizio. Il punteggio si calcola da solo."], ["Alla cieca", "Assaggi senza guardare l'etichetta e provi a indovinare. Poi confronti."], ["Taccuino", "Tutte le tue schede: cerchi, ordini, confronti due vini, modifichi."], ["Statistiche", "Il tuo profilo: vitigni preferiti, come giudichi, quanto conta il prezzo."], ["Cerchie", "Gruppi di amici, colleghi o corsisti: inviti per mail e tre ruoli. Le serate di gruppo arrivano presto."], ["Impostazioni", "Colori, tema chiaro o scuro, copia dei dati, account e questa guida."]])}
     <p class="mute">Funziona dal telefono e dal computer. Sul telefono le sezioni sono nella barra in alto; sul computer, nel menu a sinistra.</p>
   `));
 
@@ -83,10 +83,10 @@ function build() {
   `));
 
   P.push(pg("paper", "Evento", `
-    ${eyebrow("07", "Evento")}
+    ${eyebrow("07", "Evento (versione precedente)")}
     <h1 class="d">Una serata, <em>una classifica</em></h1>
     ${lato(`
-        <p class="lead">Serve solo se degusti <b>insieme ad altri</b>: una serata in enoteca, un corso, una fiera.</p>
+        <p class="lead">Serve solo se degusti <b>insieme ad altri</b>: una serata in enoteca, un corso, una fiera. Lo trovi in <b>Cerchie</b>, in fondo («Evento della versione precedente»): sarà sostituito dalle serate delle cerchie.</p>
         ${passi([["Crea l'evento", "Dal menu in fondo a «Nuova»."], ["Ognuno vota", "Le schede si collegano all'evento."], ["Classifica", "Si apre «Evento» e si aggiorna."]])}
         ${ul(["Tutti compilano la scheda degli stessi vini.", "La <b>classifica</b> mostra i vini più apprezzati dal gruppo.", "Per condividere davvero i voti serve l'<b>accesso con Google</b>, anche per gli altri partecipanti: senza accesso la classifica raccoglie solo i voti di questo dispositivo."])}
         ${call("Se bevi per conto tuo lascia «Nessun evento»: la scheda è personale.")}`,

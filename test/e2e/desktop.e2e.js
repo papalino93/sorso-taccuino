@@ -3,7 +3,7 @@ const { chromium } = require(require("child_process").execSync("npm root -g").to
 const fs = require("fs"), path = require("path");
 const seed = JSON.parse(fs.readFileSync(path.join(__dirname, "desktop-seed.json"), "utf8"));
 let fails = 0; const ok = (c, m) => { console.log((c ? "OK   " : "FAIL ") + m); if (!c) fails++; };
-const TABS = ["new", "blind", "book", "stats", "event", "settings"];
+const TABS = ["new", "blind", "book", "stats", "circles", "settings"];
 (async () => {
   const browser = await chromium.launch({ executablePath: "/opt/pw-browsers/chromium" });
   const errs = [];

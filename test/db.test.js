@@ -87,3 +87,29 @@ test("condiviso: limite orario di scritture", async () => {
 test("senza accesso: 401", async () => {
   assert.equal((await op("falso", { op: "get", key: "x" })).statusCode, 401);
 });
+
+test("condiviso: il voto salva solo i campi previsti; il nome dell'evento è ripulito; l'indice ha un tetto", async () => {
+  const a = await sess("anna");
+  const k = VOTE("serata", "qq11");
+  await op(a, { op: "set", key: k, value: JSON.stringify({ wineLabel: "Barolo", score: 80, scale: 2, ts: 5, user: "falso", voter: "bruno", name: "X" }), shared: true });
+  assert.deepEqual(Object.keys(JSON.parse((await op(a, { op: "get", key: k, shared: true })).body.value)).sort(), ["scale", "score", "ts", "wineLabel"]);
+  await op(a, { op: "set", key: "eventi-indice", value: JSON.stringify([{ name: "Serata‮​ bella", slug: "bella", owner: null }]), shared: true });
+  assert.equal(JSON.parse((await op(a, { op: "get", key: "eventi-indice", shared: true })).body.value)[0].name, "Serata bella");
+  const molti = Array.from({ length: 1200 }, (_, i) => ({ name: "E" + i, slug: "e" + i, owner: null }));
+  await op(a, { op: "set", key: "eventi-indice", value: JSON.stringify(molti.slice(0, 1000)), shared: true });
+  await op(a, { op: "set", key: "eventi-indice", value: JSON.stringify(molti.slice(0, 1000).concat([{ name: "Ancora", slug: "ancora", owner: null }])), shared: true });
+  assert.ok(JSON.parse((await op(a, { op: "get", key: "eventi-indice", shared: true })).body.value).length <= 1000);
+});
+
+test("condiviso: l'elenco dei voti di un evento si legge da un insieme, anche per i voti più vecchi", async () => {
+  const a = await sess("anna");
+  /* un voto vecchio, scritto prima dell'insieme */
+  await redis.set("shared:" + VOTE("vecchio", "aa11"), JSON.stringify({ wineLabel: "Vecchio", score: 70 }));
+  assert.deepEqual((await op(a, { op: "list", prefix: "evento:vecchio:", shared: true })).body.keys, [VOTE("vecchio", "aa11")]);
+  assert.equal((await redis.smembers("shared-idx:vecchio")).length, 1, "l'insieme si costruisce alla prima lettura");
+  await op(a, { op: "set", key: VOTE("vecchio", "bb22"), value: JSON.stringify({ wineLabel: "Nuovo", score: 75 }), shared: true });
+  assert.equal((await op(a, { op: "list", prefix: "evento:vecchio:", shared: true })).body.keys.length, 2);
+  srv.log.length = 0;
+  await op(a, { op: "list", prefix: "evento:vecchio:", shared: true });
+  assert.ok(!srv.log.includes("SCAN"), "niente scansione quando l'insieme c'è");
+});

@@ -79,7 +79,7 @@ test("la guida dice gli stessi numeri del codice", () => {
 test("le guide PDF esistono e portano la versione corrente", () => {
   const fs = require("node:fs"), { execFileSync } = require("node:child_process");
   const V = require("../public/js/version.js");
-  for (const f of ["guida-integrazione-sorso.pdf", "guida-gestione-degustazioni.pdf", "guida-attivazione-api.pdf", "guida-uso-sorso.pdf"]) {
+  for (const f of ["guida-integrazione-sorso.pdf", "guida-gestione-degustazioni.pdf", "guida-attivazione-api.pdf", "guida-uso-sorso.pdf", "guida-cerchie.pdf"]) {
     const file = path.join(__dirname, "../docs", f);
     assert.ok(fs.existsSync(file), f);
     let testo = "";

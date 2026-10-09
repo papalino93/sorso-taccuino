@@ -95,15 +95,17 @@ module.exports = Quota.wrap(async (req, res) => {
 
     const username = "google:" + info.sub;
     const userKey = "user:" + username;
-    const existing = await redis.get(userKey);
-    if (!existing) {
-      await redis.set(userKey, JSON.stringify({
-        provider: "google",
-        email: info.email || "",
-        name: info.name || "",
-        createdAt: Date.now()
-      }));
-    }
+    /* il profilo si aggiorna a ogni accesso: la mail (con il segno «verificata» di Google) serve per
+       gli inviti alle cerchie, e può cambiare */
+    let prev = null;
+    try { prev = JSON.parse(await redis.get(userKey)); } catch (e) { prev = null; }
+    await redis.set(userKey, JSON.stringify({
+      provider: "google",
+      email: info.email || "",
+      emailVerified: info.email_verified === true || info.email_verified === "true",
+      name: info.name || "",
+      createdAt: prev && prev.createdAt ? prev.createdAt : Date.now()
+    }));
 
     const token = await createSession(redis, username);
 

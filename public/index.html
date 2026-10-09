@@ -649,6 +649,23 @@
 
   .backup-card{margin-top:6px;}
   #nameCard .fld{display:block;margin-top:14px;}
+  .card-head .eyebrow{min-width:0;overflow-wrap:anywhere;line-height:1.3;}
+  #circNewName,#circEmails{min-height:44px;}
+  .circ-row{display:flex;gap:10px;align-items:center;justify-content:space-between;padding:12px 0;border-top:1px solid var(--line-soft);flex-wrap:wrap;}
+  .circ-row:first-of-type{border-top:0;}
+  .circ-main{min-width:0;flex:1 1 200px;}
+  .circ-name{font-weight:650;font-size:15px;overflow-wrap:anywhere;}
+  .circ-sub{font-size:12.5px;color:var(--ink-3);overflow-wrap:anywhere;}
+  .circ-actions{display:flex;gap:6px;flex-wrap:wrap;}
+  .circ-actions button,.circ-open{min-height:44px;}
+  .role-badge{display:inline-block;padding:3px 10px;border-radius:999px;font-size:11.5px;font-weight:650;background:var(--card-alt);color:var(--ink-2);margin-left:6px;vertical-align:middle;}
+  .role-badge.owner,.role-badge.admin{background:var(--sel-bg);color:var(--sel-fg);}
+  .circ-msg{margin:10px 0 0;font-size:13px;color:var(--ink-2);}
+  .circ-msg.err{color:var(--rust);}
+  .circ-links{display:flex;flex-direction:column;gap:8px;margin-top:10px;}
+  .circ-card-gap{margin-top:14px;}
+  .login-invite{margin:0 0 12px;padding:10px 12px;border-radius:12px;background:var(--card-alt);font-size:13px;line-height:1.45;text-align:center;}
+  .circ-back{margin-bottom:10px;}
   .name-preview{margin:14px 0 4px;padding:12px 14px;border-radius:12px;background:var(--card-alt);display:flex;flex-direction:column;gap:2px;min-width:0;}
   .name-preview b{font-size:20px;font-weight:750;letter-spacing:-.02em;overflow-wrap:anywhere;}
   .name-preview span{font-size:12.5px;color:var(--ink-3);overflow-wrap:anywhere;}
@@ -1085,6 +1102,7 @@ try{var _p=localStorage.getItem("sorso-theme");if(_p==="dark"||(_p!=="light"&&wi
     </div>
     <p class="login-explainer" data-i18n="login.explainer">Un taccuino di degustazione ispirato al metodo AIS: registra ogni vino con una scheda a punteggio, tieni un archivio con le tue statistiche, mettiti alla prova alla cieca e confrontati con altri in una degustazione di gruppo.</p>
     <p class="login-intro" data-i18n="login.intro">Accedi con Google per ritrovare le tue schede su ogni dispositivo.</p>
+    <p class="login-invite hidden" id="loginInviteNote" role="status" data-i18n="login.invite">Hai un invito a una cerchia: accedi con Google usando l'indirizzo mail a cui è stato mandato.</p>
     <div class="login-error" id="loginError"></div>
     <button type="button" class="login-google" id="loginGoogleBtn">
       <svg width="18" height="18" viewBox="0 0 48 48" aria-hidden="true"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.9 29.3 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.1 8 3l6-6C34.5 5.1 29.5 3 24 3 12.4 3 3 12.4 3 24s9.4 21 21 21 21-9.4 21-21c0-1.2-.1-2.4-.4-3.5z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.6 15.9 18.9 13 24 13c3.1 0 5.8 1.1 8 3l6-6C34.5 5.1 29.5 3 24 3 16.3 3 9.6 7.4 6.3 14.7z"/><path fill="#4CAF50" d="M24 45c5.3 0 10.2-2 13.9-5.4l-6.4-5.4C29.4 35.9 26.8 37 24 37c-5.3 0-9.7-3.5-11.3-8.2l-6.6 5.1C9.5 40.6 16.2 45 24 45z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.3-2.3 4.3-4.3 5.7l6.4 5.4C39.9 37.5 43 31.2 43 24c0-1.2-.1-2.4-.4-3.5z"/></svg>
@@ -1104,7 +1122,7 @@ try{var _p=localStorage.getItem("sorso-theme");if(_p==="dark"||(_p!=="light"&&wi
     <button type="button" data-tab="blind"><span class="dot"></span><span class="lbl" data-i18n="nav.blind">Alla cieca</span></button>
     <button type="button" data-tab="book"><span class="dot"></span><span class="lbl" data-i18n="nav.book">Taccuino</span></button>
     <button type="button" data-tab="stats"><span class="dot"></span><span class="lbl" data-i18n="nav.stats">Statistiche</span></button>
-    <button type="button" data-tab="event"><span class="dot"></span><span class="lbl" data-i18n="nav.event">Evento</span></button>
+    <button type="button" data-tab="circles"><span class="dot"></span><span class="lbl" data-i18n="nav.circles">Cerchie</span></button>
     <button type="button" data-tab="settings" class="nav-set"><span class="dot"></span><span class="lbl" data-i18n="nav.settings">Impostazioni</span></button>
   </nav>
 
@@ -1394,8 +1412,15 @@ try{var _p=localStorage.getItem("sorso-theme");if(_p==="dark"||(_p!=="light"&&wi
       </div></div>
     </section>
 
+    <!-- ============ CERCHIE ============ -->
+    <section class="tabpane hidden" id="pane-circles">
+      <div class="pane-head"><h1 class="pane-title" data-i18n="pane.circles.title">Cerchie</h1><p class="pane-sub" data-i18n="pane.circles.sub">Gruppi di amici, colleghi o corsisti, con i loro ruoli.</p></div>
+      <div id="circWrap"></div>
+    </section>
+
     <!-- ============ EVENTO ============ -->
     <section class="tabpane hidden" id="pane-event">
+      <button type="button" class="pill-ghost circ-back" id="eventBackBtn" data-i18n="circ.backFromEvent">← Cerchie</button>
       <div class="pane-head"><h1 class="pane-title" data-i18n="pane.event.title"></h1><p class="pane-sub" data-i18n="pane.event.sub"></p></div>
       <div class="card">
         <div class="card-head"><span class="eyebrow" data-i18n="event.leaderboardEyebrow">Classifica evento</span><span class="fill"></span></div>
@@ -1941,7 +1966,7 @@ function vaInCima(morbido){
 const I18N = {
   it: {
     "nav.new":"Nuova", "nav.blind":"Alla cieca", "nav.book":"Taccuino",
-    "nav.stats":"Statistiche", "nav.event":"Evento",
+    "nav.stats":"Statistiche", "nav.event":"Evento", "nav.circles":"Cerchie",
 
     "theme.light":"Tema chiaro", "theme.dark":"Tema scuro",
     "nav.settings":"Impostazioni",
@@ -2463,6 +2488,37 @@ const I18N = {
     "ac.sufficiency":"sufficienza (60%)",
     "ac.scoreAtPrice":"{score} a {price}",
 
+    "pane.circles.title":"Cerchie", "pane.circles.sub":"Gruppi di amici, colleghi o corsisti, con i loro ruoli.",
+    "login.invite":"Hai un invito a una cerchia: accedi con Google usando l'indirizzo mail a cui è stato mandato.",
+    "circ.needLogin":"Accedi con Google per creare una cerchia o entrare in quelle a cui sei stato invitato.",
+    "circ.loading":"Carico le cerchie…", "circ.loadError":"Non riesco a caricare le cerchie. Riprova.", "circ.retry":"Riprova",
+    "circ.invitesTitle":"Inviti", "circ.inviteLine":"{by} ti ha invitato in «{circle}» come {role}.",
+    "circ.accept":"Accetta", "circ.decline":"Rifiuta", "circ.accepted":"Sei dentro: «{circle}».", "circ.declined":"Invito rifiutato.",
+    "circ.mine":"Le tue cerchie", "circ.none":"Non fai ancora parte di nessuna cerchia.",
+    "circ.membersOne":"1 persona", "circ.membersMany":"{n} persone", "circ.open":"Apri",
+    "circ.new":"Nuova cerchia", "circ.newLabel":"Nome della cerchia", "circ.newPh":"es. Corso del giovedì", "circ.create":"Crea la cerchia",
+    "circ.created":"Cerchia creata.", "circ.hdrUnit":"cerchie", "circ.hdrUnitOne":"cerchia",
+    "role.owner":"Proprietario", "role.admin":"Amministratore", "role.member":"Membro",
+    "circ.back":"← Cerchie", "circ.people":"Persone", "circ.you":"tu",
+    "circ.rename":"Rinomina", "circ.renameAsk":"Nuovo nome della cerchia:", "circ.renamed":"Nome cambiato.",
+    "circ.invite":"Invita", "circ.inviteHint":"Scrivi uno o più indirizzi mail, separati da virgola o a capo. L'invito vale per quell'indirizzo: entra solo chi accede con Google con la stessa mail. Dura 14 giorni.",
+    "circ.emails":"Indirizzi mail", "circ.emailsPh":"nome@esempio.it, altro@esempio.it", "circ.inviteAs":"Come", "circ.sendInvite":"Crea gli inviti",
+    "circ.pending":"Inviti in attesa", "circ.pendingNone":"Nessun invito in attesa.", "circ.copyLink":"Copia il link", "circ.copied":"Link copiato.", "circ.copyFailed":"Non riesco a copiare: tieni premuto sul link e copialo a mano.",
+    "circ.revoke":"Revoca", "circ.revoked":"Invito revocato.", "circ.expires":"scade il {d}",
+    "circ.st.invited":"invitato", "circ.st.already_member":"è già nella cerchia", "circ.st.already_invited":"ha già un invito in attesa", "circ.st.invalid":"indirizzo non valido", "circ.st.full":"cerchia al completo", "circ.st.unavailable":"non invitabile ora (ha già troppi inviti in attesa)",
+    "circ.makeAdmin":"Rendi amministratore", "circ.makeMember":"Togli amministratore", "circ.remove":"Togli dalla cerchia", "circ.transfer":"Passa la proprietà",
+    "circ.removeAsk":"Togliere {name} dalla cerchia?", "circ.transferAsk":"Passare la proprietà a {name}? Diventerai amministratore e non potrai più eliminare la cerchia.",
+    "circ.roleSet":"Ruolo cambiato.", "circ.removed":"Persona tolta.", "circ.transferred":"Proprietà passata.",
+    "circ.leave":"Esci dalla cerchia", "circ.leaveAsk":"Uscire da «{circle}»? Per tornare servirà un nuovo invito.", "circ.left":"Sei uscito dalla cerchia.",
+    "circ.delete":"Elimina la cerchia", "circ.deleteAsk":"Per eliminare la cerchia per tutti scrivi il suo nome. Non si può annullare:", "circ.deleted":"Cerchia eliminata.",
+    "circ.ownerHint":"Il Proprietario nomina gli amministratori, passa la proprietà ed elimina la cerchia.", "circ.adminHint":"Gli amministratori invitano e tolgono i membri.",
+    "circ.soon":"Le serate di degustazione della cerchia (anche alla cieca, con classifica e statistiche) arrivano nel prossimo aggiornamento.",
+    "circ.oldEvent":"Evento della versione precedente", "circ.oldEventNote":"L'Evento sarà sostituito dalle serate delle cerchie.",
+    "circ.inviteBanner":"Invito a «{circle}»", "circ.wrongAccount":"Questo invito è per {email}: esci e accedi con quell'account Google.",
+    "circ.err.limit":"Hai raggiunto un limite: controlla il numero di cerchie o di persone.", "circ.err.full":"La cerchia è al completo.", "circ.err.forbidden":"Non hai il permesso di farlo.",
+    "circ.err.not_found":"Non trovo la cerchia: forse non ne fai più parte.", "circ.err.invite_expired":"L'invito è scaduto o è già stato usato.", "circ.err.wrong_account":"Questo invito è per un altro indirizzo mail.",
+    "circ.err.rate_limited":"Troppe richieste: riprova fra poco.", "circ.err.owner_must_transfer":"Sei il Proprietario: passa prima la proprietà o elimina la cerchia.",
+    "circ.err.invalid_name":"Scrivi un nome.", "circ.err.invalid_email":"Scrivi almeno un indirizzo mail.", "circ.err.too_many":"Al massimo 10 inviti per volta.", "circ.err.generic":"Qualcosa non ha funzionato. Riprova.", "circ.err.nameMismatch":"Il nome non coincide: la cerchia non è stata eliminata.", "circ.err.busy":"Un'altra modifica è in corso: riprova fra un attimo.", "circ.backFromEvent":"← Cerchie",
     "name.eyebrow":"Nome del taccuino", "name.intro":"Dai un nome al tuo taccuino, per esempio «Taccuino di Mario Rossi» o «Sorso di vino». Compare in alto, accanto al logo.",
     "name.title":"Titolo", "name.titlePh":"Sorso", "name.owner":"Di chi è (facoltativo)", "name.ownerPh":"es. Mario Rossi",
     "name.save":"Salva il nome", "name.reset":"Ripristina", "name.saved":"Nome salvato.", "name.restored":"Nome originale ripristinato.",
@@ -2471,7 +2527,7 @@ const I18N = {
   },
   en: {
     "nav.new":"New", "nav.blind":"Blind", "nav.book":"Notebook",
-    "nav.stats":"Stats", "nav.event":"Event",
+    "nav.stats":"Stats", "nav.event":"Event", "nav.circles":"Circles",
 
     "theme.light":"Light theme", "theme.dark":"Dark theme",
     "nav.settings":"Settings",
@@ -2993,6 +3049,37 @@ const I18N = {
     "ac.sufficiency":"passing mark (60%)",
     "ac.scoreAtPrice":"{score} at {price}",
 
+    "pane.circles.title":"Circles", "pane.circles.sub":"Groups of friends, colleagues or students, with their roles.",
+    "login.invite":"You have an invitation to a circle: sign in with Google using the email address it was sent to.",
+    "circ.needLogin":"Sign in with Google to create a circle or join the ones you were invited to.",
+    "circ.loading":"Loading circles…", "circ.loadError":"I can't load the circles. Try again.", "circ.retry":"Try again",
+    "circ.invitesTitle":"Invitations", "circ.inviteLine":"{by} invited you to “{circle}” as {role}.",
+    "circ.accept":"Accept", "circ.decline":"Decline", "circ.accepted":"You're in: “{circle}”.", "circ.declined":"Invitation declined.",
+    "circ.mine":"Your circles", "circ.none":"You're not in any circle yet.",
+    "circ.membersOne":"1 person", "circ.membersMany":"{n} people", "circ.open":"Open",
+    "circ.new":"New circle", "circ.newLabel":"Circle name", "circ.newPh":"e.g. Thursday course", "circ.create":"Create the circle",
+    "circ.created":"Circle created.", "circ.hdrUnit":"circles", "circ.hdrUnitOne":"circle",
+    "role.owner":"Owner", "role.admin":"Admin", "role.member":"Member",
+    "circ.back":"← Circles", "circ.people":"People", "circ.you":"you",
+    "circ.rename":"Rename", "circ.renameAsk":"New name for the circle:", "circ.renamed":"Name changed.",
+    "circ.invite":"Invite", "circ.inviteHint":"Write one or more email addresses, separated by commas or new lines. The invitation is for that address: only someone signing in with Google with the same email can join. It lasts 14 days.",
+    "circ.emails":"Email addresses", "circ.emailsPh":"name@example.com, other@example.com", "circ.inviteAs":"As", "circ.sendInvite":"Create the invitations",
+    "circ.pending":"Pending invitations", "circ.pendingNone":"No pending invitations.", "circ.copyLink":"Copy link", "circ.copied":"Link copied.", "circ.copyFailed":"I can't copy: press and hold the link and copy it by hand.",
+    "circ.revoke":"Revoke", "circ.revoked":"Invitation revoked.", "circ.expires":"expires {d}",
+    "circ.st.invited":"invited", "circ.st.already_member":"is already in the circle", "circ.st.already_invited":"already has a pending invitation", "circ.st.invalid":"invalid address", "circ.st.full":"circle is full", "circ.st.unavailable":"can't be invited now (too many pending invitations)",
+    "circ.makeAdmin":"Make admin", "circ.makeMember":"Remove admin", "circ.remove":"Remove from circle", "circ.transfer":"Transfer ownership",
+    "circ.removeAsk":"Remove {name} from the circle?", "circ.transferAsk":"Transfer ownership to {name}? You will become an admin and won't be able to delete the circle.",
+    "circ.roleSet":"Role changed.", "circ.removed":"Person removed.", "circ.transferred":"Ownership transferred.",
+    "circ.leave":"Leave the circle", "circ.leaveAsk":"Leave “{circle}”? You'll need a new invitation to come back.", "circ.left":"You left the circle.",
+    "circ.delete":"Delete the circle", "circ.deleteAsk":"To delete the circle for everyone, type its name. This cannot be undone:", "circ.deleted":"Circle deleted.",
+    "circ.ownerHint":"The Owner appoints admins, transfers ownership and deletes the circle.", "circ.adminHint":"Admins invite people and remove members.",
+    "circ.soon":"The circle's tasting evenings (blind too, with ranking and statistics) arrive in the next update.",
+    "circ.oldEvent":"Event from the previous version", "circ.oldEventNote":"Event will be replaced by the circles' evenings.",
+    "circ.inviteBanner":"Invitation to “{circle}”", "circ.wrongAccount":"This invitation is for {email}: sign out and sign in with that Google account.",
+    "circ.err.limit":"You've reached a limit: check the number of circles or people.", "circ.err.full":"The circle is full.", "circ.err.forbidden":"You don't have permission to do that.",
+    "circ.err.not_found":"I can't find the circle: maybe you're no longer in it.", "circ.err.invite_expired":"The invitation has expired or was already used.", "circ.err.wrong_account":"This invitation is for another email address.",
+    "circ.err.rate_limited":"Too many requests: try again shortly.", "circ.err.owner_must_transfer":"You're the Owner: transfer ownership first or delete the circle.",
+    "circ.err.invalid_name":"Write a name.", "circ.err.invalid_email":"Write at least one email address.", "circ.err.too_many":"At most 10 invitations at a time.", "circ.err.generic":"Something went wrong. Try again.", "circ.err.nameMismatch":"The name doesn't match: the circle was not deleted.", "circ.err.busy":"Another change is in progress: try again in a moment.", "circ.backFromEvent":"← Circles",
     "name.eyebrow":"Notebook name", "name.intro":"Give your notebook a name, for example “Mario Rossi's notebook” or “Wine sip”. It appears at the top, next to the logo.",
     "name.title":"Title", "name.titlePh":"Sorso", "name.owner":"Whose it is (optional)", "name.ownerPh":"e.g. Mario Rossi",
     "name.save":"Save the name", "name.reset":"Restore", "name.saved":"Name saved.", "name.restored":"Original name restored.",
@@ -3093,6 +3180,9 @@ function renderHeader(){
     const bsc = bScores();
     num = bsc.total; unit = t("hdr.of100"); caption = t("hdr.blindCaption"); showSegs = !bsc.frozen;
     if(!bsc.frozen) paintSegs(bsc);
+  } else if(S.tab === "circles"){
+    const n = CIRC.data ? CIRC.data.circles.length : 0;
+    num = n; unit = n === 1 ? t("circ.hdrUnitOne") : t("circ.hdrUnit"); caption = t("nav.circles"); showSegs = false;
   } else if(S.tab === "event"){
     const n = S.lb ? S.lb.length : 0;
     num = n; unit = n===1 ? t("hdr.wineInRace") : t("hdr.wineInRacePl");
@@ -5684,15 +5774,16 @@ async function handleFile(file){
    RENDER + EVENTI
    ============================================================ */
 function renderAll(){
-  ["new","book","blind","stats","event","settings"].forEach(t => $("pane-"+t).classList.toggle("hidden", S.tab !== t));
+  ["new","book","blind","stats","circles","event","settings"].forEach(t => $("pane-"+t).classList.toggle("hidden", S.tab !== t));
   $("bottomBar").classList.toggle("hidden", S.tab !== "new");
   document.querySelector(".body").style.paddingBottom = S.tab === "new" ? "110px" : "40px";
-  Array.prototype.forEach.call($("nav").children, b => { b.classList.toggle("on", b.dataset.tab === S.tab); if(b.dataset.tab === S.tab) b.setAttribute("aria-current", "page"); else b.removeAttribute("aria-current"); });
+  Array.prototype.forEach.call($("nav").children, b => { const on = b.dataset.tab === S.tab || (b.dataset.tab === "circles" && S.tab === "event"); b.classList.toggle("on", on); if(on) b.setAttribute("aria-current", "page"); else b.removeAttribute("aria-current"); });
   if(S.tab === "new"){ renderIdentity(); renderSections(); renderEvtQuick(); }
   if(S.tab === "book"){ renderBook(); descriviArchivio(); }
   if(S.tab === "blind"){ renderBlindForm(); renderBlindList(); }
   if(S.tab === "stats") renderStats();
   if(S.tab === "event") renderEventPicker();
+  if(S.tab === "circles") renderCircles();
   if(S.tab === "settings"){ descriviArchivio(); renderLook(); renderVoteMode(); renderThemePref(); }
   $("settingsBtn").setAttribute("aria-pressed", String(S.tab === "settings"));
   renderHeader();
@@ -5710,9 +5801,11 @@ $("nav").addEventListener("click", e => {
   // classifica", e nel frattempo l'intestazione mostrava "0 vini in gara"
   // anche quando un voto era già stato registrato.
   if(S.tab === "event" && S.currentEvent && !S.newEventMode) loadLeaderboard();
+  if(S.tab === "circles"){ CIRC.view = null; CIRC.detail = null; CIRC.msg = null; circLoad(); }
 });
 
 $("settingsBtn").addEventListener("click", () => { S.tab = "settings"; renderAll(); vaInCima(false); });
+$("eventBackBtn").addEventListener("click", () => { S.tab = "circles"; CIRC.view = null; CIRC.detail = null; renderAll(); vaInCima(false); circLoad(); });
 $("themeLight").addEventListener("click", () => setTheme("light", true));
 $("themeDark").addEventListener("click", () => setTheme("dark", true));
 const THEME_KEY = "sorso-theme";
@@ -6323,6 +6416,286 @@ window.__sorsoOnSessionExpired = () => {
   location.reload();
 };
 
+
+/* ============================================================
+   CERCHIE — gruppi con Proprietario, Amministratori e Membri (api/circles.js)
+   Tutti i permessi si controllano sul server: qui si nascondono solo i pulsanti inutili.
+   ============================================================ */
+const INVITE_KEY = "sorso-invito";
+const CIRC = {data:null, view:null, detail:null, loading:false, error:false, msg:null, results:null, invitePeek:null, busy:false};
+function circRole(r){ return t("role."+r); }
+async function circApi(body){
+  const res = await fetch("/api/circles", {method:"POST", headers:{"Content-Type":"application/json", "Authorization":"Bearer "+AUTH.token}, body:JSON.stringify(body)});
+  let j = null; try{ j = await res.json(); }catch(e){}
+  if(!res.ok){
+    const code = j && j.error ? j.error.code : "generic";
+    if(res.status === 401 && code === "session" && window.__sorsoOnSessionExpired){ AUTH.logout(); window.__sorsoOnSessionExpired(); }
+    const e = new Error(j && j.error ? j.error.message : "errore"); e.code = code; e.status = res.status; throw e;
+  }
+  return j;
+}
+/* il messaggio si salva come chiave (non come testo): cambiando lingua si rilegge nella lingua nuova */
+function circErrKey(e){ const k = "circ.err."+e.code; return t(k) === k ? "circ.err.generic" : k; }
+function circSay(key, vars, isErr){ CIRC.msg = key ? {key, vars:vars || null, err:!!isErr} : null; }
+function circSayErr(e){ circSay(circErrKey(e), null, true); }
+function circMsgHTML(){
+  if(!CIRC.msg) return "";
+  const m = CIRC.msg, txt = m.vars ? tf(m.key, m.vars) : t(m.key);
+  return '<p class="circ-msg'+(m.err?' err':'')+'" id="circMsg" role="status" tabindex="-1">'+esc(txt)+'</p>';
+}
+function circDate(ms){ try{ return new Date(ms).toLocaleDateString(S.lang === "en" ? "en-GB" : "it-IT", {day:"numeric", month:"short"}); }catch(e){ return ""; } }
+function circLink(token){ return location.origin + "/?invito=" + token; }
+const circAria = (txt, who) => ' aria-label="'+esc(txt+(who ? ": "+who : ""))+'"';
+
+/* un solo gesto alla volta: doppio clic o doppio Invio non mandano due richieste */
+async function circGuard(fn){
+  if(CIRC.busy) return;
+  CIRC.busy = true;
+  try{ await fn(); } finally{ CIRC.busy = false; }
+}
+async function circLoad(){
+  if(!AUTH.isLoggedIn) { renderCircles(); return; }
+  CIRC.loading = true; CIRC.error = false; renderCircles();
+  try{ CIRC.data = await circApi({op:"list"}); }catch(e){ CIRC.error = true; }
+  CIRC.loading = false; renderCircles();
+  try{ renderHeader(); }catch(e){}
+}
+async function circOpen(id, keepMsg){
+  CIRC.view = id; if(!CIRC.detail || CIRC.detail.circle.id !== id) CIRC.detail = null;
+  if(!keepMsg) CIRC.msg = null;
+  CIRC.results = keepMsg ? CIRC.results : null; renderCircles();
+  try{ CIRC.detail = await circApi({op:"get", circle:id}); }
+  catch(e){ CIRC.view = null; CIRC.detail = null; circSayErr(e); await circLoad(); return; }
+  renderCircles();
+}
+/* esegue un'azione, mostra l'esito (in cima alla vista) e ridisegna */
+async function circAct(body, okKey, okVars, after){
+  try{ await circApi(body); circSay(okKey, okVars, false); if(after) await after(); }
+  catch(e){ circSayErr(e); if(CIRC.view) await circOpen(CIRC.view, true); else renderCircles(); }
+}
+
+/* il ridisegno non deve far perdere posizione, focus e testo scritto */
+function circSnapshot(){
+  const w = $("circWrap"), a = document.activeElement, snap = {y:window.scrollY, fields:{}, focus:null};
+  ["circNewName","circEmails","circInviteRole"].forEach(id => { const el = $(id); if(el) snap.fields[id] = el.value; });
+  if(a && w && w.contains(a)){
+    snap.focus = a.id ? "#"+a.id : (a.dataset && a.dataset.circ ? '[data-circ="'+a.dataset.circ+'"]'+(a.dataset.c ? '[data-c="'+a.dataset.c+'"]' : "")+(a.dataset.i ? '[data-i="'+a.dataset.i+'"]' : "")+(a.dataset.m ? '[data-m="'+a.dataset.m+'"]' : "") : null);
+  }
+  return snap;
+}
+function circRestore(snap, sameView){
+  Object.keys(snap.fields).forEach(id => { const el = $(id); if(el && snap.fields[id]) el.value = snap.fields[id]; });
+  if(sameView) window.scrollTo(0, snap.y);
+  let el = null;
+  if(snap.focus){ try{ el = $("circWrap").querySelector(snap.focus); }catch(e){} }
+  if(el){ try{ el.focus({preventScroll:true}); }catch(e){} }
+  const m = $("circMsg");
+  if(m && CIRC.msg && !(el)){ try{ m.scrollIntoView({block:"nearest"}); }catch(e){} }
+}
+let circLastView = null;
+function renderCircles(){
+  const w = $("circWrap"); if(!w) return;
+  const snap = circSnapshot(), sameView = circLastView === (CIRC.view || "list");
+  circLastView = CIRC.view || "list";
+  w.innerHTML = circBody();
+  circRestore(snap, sameView);
+}
+function circBody(){
+  if(!AUTH.isLoggedIn){
+    let pend = ""; try{ pend = localStorage.getItem(INVITE_KEY) ? '<p class="circ-msg">'+esc(t("login.invite"))+'</p>' : ""; }catch(e){}
+    return '<div class="card"><p class="note-line">'+esc(t("circ.needLogin"))+'</p>'+pend+'<div class="backup-actions"><button type="button" class="pill-solid" data-circ="login">'+esc(t("account.loginPrompt"))+'</button></div></div>'+circOldEventHTML();
+  }
+  if(CIRC.view) return circDetailHTML();
+  if(CIRC.loading && !CIRC.data) return '<p class="note-line" aria-busy="true">'+esc(t("circ.loading"))+'</p>';
+  if(CIRC.error || !CIRC.data) return '<div class="card"><p class="note-line">'+esc(t("circ.loadError"))+'</p><div class="backup-actions"><button type="button" class="pill-solid" data-circ="reload">'+esc(t("circ.retry"))+'</button></div></div>';
+  const d = CIRC.data, pk = CIRC.invitePeek;
+  let h = circMsgHTML();
+  if(pk) h += circPeekHTML();
+  const invites = d.invites.filter(i => !(pk && i.circleId === pk.circleId && i.id === pk.id));
+  if(invites.length){
+    h += '<div class="card circ-card-gap"><div class="card-head"><span class="eyebrow">'+esc(t("circ.invitesTitle"))+'</span><span class="fill"></span></div>'+
+      invites.map(i => '<div class="circ-row"><div class="circ-main"><div class="circ-name">'+esc(i.circleName)+'</div><div class="circ-sub">'+esc(tf("circ.inviteLine",{by:i.by, circle:i.circleName, role:circRole(i.role)}))+'</div></div>'+
+        '<div class="circ-actions"><button type="button" class="pill-solid" data-circ="accept" data-c="'+esc(i.circleId)+'" data-i="'+esc(i.id)+'"'+circAria(t("circ.accept"), i.circleName)+'>'+esc(t("circ.accept"))+'</button>'+
+        '<button type="button" class="pill-ghost" data-circ="decline" data-c="'+esc(i.circleId)+'" data-i="'+esc(i.id)+'"'+circAria(t("circ.decline"), i.circleName)+'>'+esc(t("circ.decline"))+'</button></div></div>').join("")+'</div>';
+  }
+  h += '<div class="card circ-card-gap"><div class="card-head"><span class="eyebrow">'+esc(t("circ.mine"))+'</span><span class="fill"></span></div>';
+  if(!d.circles.length) h += '<p class="note-line">'+esc(t("circ.none"))+'</p>';
+  h += d.circles.map(c => '<div class="circ-row"><div class="circ-main"><div class="circ-name">'+esc(c.name)+'<span class="role-badge '+esc(c.role)+'">'+esc(circRole(c.role))+'</span></div>'+
+      '<div class="circ-sub">'+esc(c.members === 1 ? t("circ.membersOne") : tf("circ.membersMany",{n:c.members}))+'</div></div>'+
+      '<div class="circ-actions"><button type="button" class="pill-ghost circ-open" data-circ="open" data-c="'+esc(c.id)+'"'+circAria(t("circ.open"), c.name)+'>'+esc(t("circ.open"))+'</button></div></div>').join("")+'</div>';
+  h += '<div class="card circ-card-gap"><div class="card-head"><span class="eyebrow">'+esc(t("circ.new"))+'</span><span class="fill"></span></div>'+
+    '<form data-circ-form="create"><label class="fld"><span class="fld-lab">'+esc(t("circ.newLabel"))+'</span><input class="in-line" id="circNewName" maxlength="48" autocomplete="off" placeholder="'+esc(t("circ.newPh"))+'"></label>'+
+    '<div class="backup-actions"><button type="submit" class="pill-solid">'+esc(t("circ.create"))+'</button></div></form></div>';
+  return h + circOldEventHTML();
+}
+function circOldEventHTML(){
+  return '<p class="note-line circ-card-gap">'+esc(t("circ.oldEventNote"))+' <button type="button" class="pill-ghost" data-circ="oldevent">'+esc(t("circ.oldEvent"))+'</button></p>';
+}
+function circPeekHTML(){
+  const i = CIRC.invitePeek;
+  let body;
+  if(!i.matches) body = '<p class="circ-msg err">'+esc(tf("circ.wrongAccount",{email:i.emailMasked}))+'</p><div class="backup-actions"><button type="button" class="pill-ghost" data-circ="logout">'+esc(t("account.logoutFull"))+'</button></div>';
+  else body = '<div class="backup-actions"><button type="button" class="pill-solid" data-circ="accept-link">'+esc(t("circ.accept"))+'</button><button type="button" class="pill-ghost" data-circ="decline-link">'+esc(t("circ.decline"))+'</button></div>';
+  return '<div class="card circ-card-gap" role="region" aria-label="'+esc(tf("circ.inviteBanner",{circle:i.circleName}))+'"><div class="card-head"><span class="eyebrow">'+esc(tf("circ.inviteBanner",{circle:i.circleName}))+'</span><span class="fill"></span></div>'+
+    '<p class="note-line">'+esc(tf("circ.inviteLine",{by:i.by, circle:i.circleName, role:circRole(i.role)}))+'</p>'+body+'</div>';
+}
+function circDetailHTML(){
+  const back = '<button type="button" class="pill-ghost circ-back" data-circ="back">'+esc(t("circ.back"))+'</button>';
+  if(!CIRC.detail) return back+circMsgHTML()+'<p class="note-line" aria-busy="true">'+esc(t("circ.loading"))+'</p>';
+  const d = CIRC.detail, c = d.circle, owner = c.role === "owner", admin = c.role !== "member";
+  let h = back + circMsgHTML() + '<div class="card"><div class="card-head"><span class="eyebrow">'+esc(c.name)+'</span><span class="fill"></span><span class="role-badge '+esc(c.role)+'">'+esc(circRole(c.role))+'</span></div>'+
+    (owner || admin ? '<p class="note-line">'+esc(owner ? t("circ.ownerHint") : t("circ.adminHint"))+'</p>' : "")+
+    (owner ? '<div class="backup-actions"><button type="button" class="pill-ghost" data-circ="rename">'+esc(t("circ.rename"))+'</button></div>' : "")+'</div>';
+  /* persone */
+  h += '<div class="card circ-card-gap"><div class="card-head"><span class="eyebrow">'+esc(t("circ.people"))+'</span><span class="fill"></span><span class="status">'+esc(d.members.length === 1 ? t("circ.membersOne") : tf("circ.membersMany",{n:d.members.length}))+'</span></div>'+
+    d.members.map(m => {
+      const acts = [];
+      if(!m.you && m.role !== "owner"){
+        if(owner){
+          acts.push('<button type="button" class="pill-ghost" data-circ="role" data-m="'+esc(m.mid)+'" data-r="'+(m.role === "admin" ? "member" : "admin")+'"'+circAria(t(m.role === "admin" ? "circ.makeMember" : "circ.makeAdmin"), m.name)+'>'+esc(t(m.role === "admin" ? "circ.makeMember" : "circ.makeAdmin"))+'</button>');
+          acts.push('<button type="button" class="pill-ghost" data-circ="transfer" data-m="'+esc(m.mid)+'" data-n="'+esc(m.name)+'"'+circAria(t("circ.transfer"), m.name)+'>'+esc(t("circ.transfer"))+'</button>');
+        }
+        if(owner || (admin && m.role === "member")) acts.push('<button type="button" class="pill-danger" data-circ="remove" data-m="'+esc(m.mid)+'" data-n="'+esc(m.name)+'"'+circAria(t("circ.remove"), m.name)+'>'+esc(t("circ.remove"))+'</button>');
+      }
+      return '<div class="circ-row"><div class="circ-main"><div class="circ-name">'+esc(m.name)+(m.you?' <span class="circ-sub">('+esc(t("circ.you"))+')</span>':'')+'<span class="role-badge '+esc(m.role)+'">'+esc(circRole(m.role))+'</span></div>'+
+        (m.email ? '<div class="circ-sub">'+esc(m.email)+'</div>' : '')+'</div>'+(acts.length ? '<div class="circ-actions">'+acts.join("")+'</div>' : '')+'</div>';
+    }).join("")+'</div>';
+  /* inviti */
+  if(admin){
+    h += '<div class="card circ-card-gap"><div class="card-head"><span class="eyebrow">'+esc(t("circ.invite"))+'</span><span class="fill"></span></div>'+
+      '<p class="note-line">'+esc(t("circ.inviteHint"))+'</p>'+
+      '<form data-circ-form="invite"><label class="fld"><span class="fld-lab">'+esc(t("circ.emails"))+'</span><textarea class="ta" id="circEmails" rows="3" placeholder="'+esc(t("circ.emailsPh"))+'"></textarea></label>'+
+      (owner ? '<label class="fld"><span class="fld-lab">'+esc(t("circ.inviteAs"))+'</span><span class="sel-wrap"><select class="sel" id="circInviteRole"><option value="member">'+esc(circRole("member"))+'</option><option value="admin">'+esc(circRole("admin"))+'</option></select></span></label>' : "")+
+      '<div class="backup-actions"><button type="submit" class="pill-solid">'+esc(t("circ.sendInvite"))+'</button></div></form>';
+    if(CIRC.results) h += '<div class="circ-links">'+CIRC.results.map(r => '<div class="circ-sub"><b>'+esc(r.email)+'</b> — '+esc(t("circ.st."+r.status))+'</div>').join("")+'</div>';
+    h += '</div><div class="card circ-card-gap"><div class="card-head"><span class="eyebrow">'+esc(t("circ.pending"))+'</span><span class="fill"></span></div>';
+    if(!d.invites.length) h += '<p class="note-line">'+esc(t("circ.pendingNone"))+'</p>';
+    h += d.invites.map(i => '<div class="circ-row"><div class="circ-main"><div class="circ-name">'+esc(i.email)+'<span class="role-badge '+esc(i.role)+'">'+esc(circRole(i.role))+'</span></div><div class="circ-sub">'+esc(tf("circ.expires",{d:circDate(i.exp)}))+'</div></div>'+
+      '<div class="circ-actions"><button type="button" class="pill-solid" data-circ="copy" data-t="'+esc(i.token)+'"'+circAria(t("circ.copyLink"), i.email)+'>'+esc(t("circ.copyLink"))+'</button><button type="button" class="pill-ghost" data-circ="revoke" data-i="'+esc(i.id)+'"'+circAria(t("circ.revoke"), i.email)+'>'+esc(t("circ.revoke"))+'</button></div></div>').join("")+'</div>';
+  }
+  h += '<div class="card circ-card-gap"><p class="note-line">'+esc(t("circ.soon"))+'</p></div>';
+  h += '<div class="card circ-card-gap"><div class="backup-actions">'+
+    (owner ? '<button type="button" class="pill-danger" data-circ="delete">'+esc(t("circ.delete"))+'</button>' : '<button type="button" class="pill-danger" data-circ="leave">'+esc(t("circ.leave"))+'</button>')+'</div></div>';
+  return h;
+}
+
+async function circBack(){ CIRC.view = null; CIRC.detail = null; CIRC.results = null; await circLoad(); }
+function circForgetInvite(){ try{ localStorage.removeItem(INVITE_KEY); }catch(e){} CIRC.invitePeek = null; }
+document.addEventListener("click", (e) => {
+  const b = e.target.closest("[data-circ]"); if(!b || !$("circWrap") || !$("circWrap").contains(b)) return;
+  const a = b.dataset.circ, c = CIRC.view;
+  if(a === "login"){ openGate(); return; }
+  if(a === "logout"){ doLogout(); return; }
+  if(a === "oldevent"){ S.tab = "event"; renderAll(); vaInCima(false); if(S.currentEvent && !S.newEventMode) loadLeaderboard(); return; }
+  circGuard(async () => {
+    if(a === "reload"){ await circLoad(); return; }
+    if(a === "open"){ await circOpen(b.dataset.c); return; }
+    if(a === "back"){ CIRC.msg = null; await circBack(); return; }
+    if(a === "accept" || a === "decline"){
+      const name = (CIRC.data.invites.find(i => i.id === b.dataset.i) || {}).circleName || "";
+      if(CIRC.invitePeek && CIRC.invitePeek.id === b.dataset.i) circForgetInvite();
+      await circAct({op:a === "accept" ? "invite.accept" : "invite.decline", circle:b.dataset.c, invite:b.dataset.i}, a === "accept" ? "circ.accepted" : "circ.declined", {circle:name}, circLoad);
+      return;
+    }
+    if(a === "accept-link" || a === "decline-link"){
+      let tok = null; try{ tok = localStorage.getItem(INVITE_KEY); }catch(err){}
+      const name = CIRC.invitePeek ? CIRC.invitePeek.circleName : "";
+      try{
+        await circApi({op:a === "accept-link" ? "invite.accept" : "invite.decline", token: tok});
+        circSay(a === "accept-link" ? "circ.accepted" : "circ.declined", {circle:name}, false);
+      }catch(err){ circSayErr(err); }
+      circForgetInvite(); await circLoad(); return;
+    }
+    if(a === "rename"){
+      const n = prompt(t("circ.renameAsk"), CIRC.detail.circle.name); if(n === null) return;
+      await circAct({op:"rename", circle:c, name:n}, "circ.renamed", null, () => circOpen(c, true)); return;
+    }
+    if(a === "role"){ await circAct({op:"member.role", circle:c, member:b.dataset.m, role:b.dataset.r}, "circ.roleSet", null, () => circOpen(c, true)); return; }
+    if(a === "remove"){
+      if(!confirm(tf("circ.removeAsk",{name:b.dataset.n}))) return;
+      await circAct({op:"member.remove", circle:c, member:b.dataset.m}, "circ.removed", null, () => circOpen(c, true)); return;
+    }
+    if(a === "transfer"){
+      if(!confirm(tf("circ.transferAsk",{name:b.dataset.n}))) return;
+      await circAct({op:"transfer", circle:c, member:b.dataset.m}, "circ.transferred", null, () => circOpen(c, true)); return;
+    }
+    if(a === "revoke"){ await circAct({op:"invite.revoke", circle:c, invite:b.dataset.i}, "circ.revoked", null, () => circOpen(c, true)); return; }
+    if(a === "copy"){
+      const url = circLink(b.dataset.t);
+      try{ await navigator.clipboard.writeText(url); circSay("circ.copied", null, false); }
+      catch(err){ circSay("circ.copyFailed", null, true); }
+      renderCircles(); return;
+    }
+    if(a === "leave"){
+      if(!confirm(tf("circ.leaveAsk",{circle:CIRC.detail.circle.name}))) return;
+      try{ await circApi({op:"leave", circle:c}); circSay("circ.left", null, false); }catch(err){ circSayErr(err); renderCircles(); return; }
+      await circBack(); return;
+    }
+    if(a === "delete"){
+      const name = CIRC.detail.circle.name;
+      const typed = prompt(t("circ.deleteAsk") + "\n" + name); if(typed === null) return;
+      if(typed.trim() !== name){ circSay("circ.err.nameMismatch", null, true); renderCircles(); return; }
+      try{ await circApi({op:"delete", circle:c, confirm:true}); circSay("circ.deleted", null, false); }catch(err){ circSayErr(err); renderCircles(); return; }
+      await circBack(); return;
+    }
+  });
+});
+document.addEventListener("submit", (e) => {
+  const f = e.target.closest("[data-circ-form]"); if(!f || !$("circWrap") || !$("circWrap").contains(f)) return;
+  e.preventDefault();
+  const kind = f.dataset.circForm;
+  circGuard(async () => {
+    if(kind === "create"){
+      const name = $("circNewName").value;
+      try{
+        const r = await circApi({op:"create", name});
+        $("circNewName").value = ""; circSay("circ.created", null, false);
+        await circLoad(); await circOpen(r.circle.id, true);
+      }catch(err){ circSayErr(err); renderCircles(); }
+    }
+    if(kind === "invite"){
+      const emails = $("circEmails").value.split(/[\s,;]+/).map(x => x.trim()).filter(Boolean);
+      const role = $("circInviteRole") ? $("circInviteRole").value : "member";
+      try{
+        const r = await circApi({op:"invite", circle:CIRC.view, emails, role});
+        $("circEmails").value = "";
+        CIRC.results = r.results; circSay(null);
+        await circOpen(CIRC.view, true);
+      }catch(err){ circSayErr(err); renderCircles(); }
+    }
+  });
+});
+/* Il link d'invito (…/?invito=<codice>) si ricorda e si toglie dall'indirizzo; si usa appena si è dentro con Google. */
+(function(){
+  try{
+    const u = new URL(location.href), tok = u.searchParams.get("invito");
+    if(tok !== null){
+      if(/^[0-9a-f]{48}$/.test(tok)) localStorage.setItem(INVITE_KEY, tok);
+      u.searchParams.delete("invito");
+      history.replaceState(null, "", u.pathname + (u.search || "") + u.hash);
+    }
+  }catch(e){}
+})();
+async function circCheckInvite(){
+  let tok = null; try{ tok = localStorage.getItem(INVITE_KEY); }catch(e){}
+  if(!tok) return;
+  if(!AUTH.isLoggedIn){
+    const n = $("loginInviteNote"); if(n) n.classList.remove("hidden");
+    if(!hasSkipped()) openGate();
+    else { S.tab = "circles"; renderAll(); }
+    return;
+  }
+  try{
+    const r = await circApi({op:"invite.peek", token:tok});
+    CIRC.invitePeek = r.invite;
+    S.tab = "circles"; renderAll(); await circLoad();
+  }catch(e){
+    /* l'invito si dimentica solo se non esiste più: un errore temporaneo non lo butta */
+    if(e.status === 404 || e.status === 410 || e.status === 400) circForgetInvite();
+    S.tab = "circles"; renderAll(); circSayErr(e); await circLoad();
+  }
+}
+
 /* ============================================================
    AVVIO
    ============================================================ */
@@ -6342,6 +6715,7 @@ async function avviaApp(){
   await loadOwnEvents();
   renderAll();
   renderAccount();
+  circCheckInvite();
 }
 
 /* Al ritorno da Google, l'URL contiene "?g=<codice monouso>" (successo)
@@ -6399,6 +6773,7 @@ async function handleGoogleRedirect(){
     avviaApp();
   }else{
     openGate();
+    circCheckInvite();
   }
 })();
 

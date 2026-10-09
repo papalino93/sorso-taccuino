@@ -10,7 +10,7 @@ const path = require("path");
 const fake = require("./fake-upstash");
 
 const PUBLIC = path.join(__dirname, "../../public");
-const TYPES = { ".html": "text/html; charset=utf-8", ".js": "text/javascript; charset=utf-8", ".css": "text/css; charset=utf-8", ".png": "image/png", ".txt": "text/plain", ".xml": "application/xml" };
+const TYPES = { ".html": "text/html; charset=utf-8", ".js": "text/javascript; charset=utf-8", ".css": "text/css; charset=utf-8", ".png": "image/png", ".txt": "text/plain", ".xml": "application/xml", ".svg": "image/svg+xml", ".webmanifest": "application/manifest+json", ".pdf": "application/pdf" };
 
 function vercelRes(res) {
   res.status = c => { res.statusCode = c; return res; };
@@ -33,7 +33,9 @@ async function start(opts) {
   const handlers = {
     "/api/embed": require("../../api/embed"),
     "/api/embed-page": require("../../api/embed-page"),
-    "/api/v1": require("../../api/v1")
+    "/api/v1": require("../../api/v1"),
+    "/api/circles": require("../../api/circles"),
+    "/api/db": require("../../api/db")
   };
   const secret = opts.secret || "d".repeat(64);
   const apiKey = P.newApiKey("demo");
