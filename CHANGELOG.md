@@ -3,6 +3,13 @@
 La versione e la data dell'ultimo aggiornamento sono mostrate in fondo all'app e dello spazio di team
 (fonte: `public/js/version.js`, da tenere uguale a `package.json`).
 
+## 2.3.0 — 11 ottobre 2026
+- **Serate nelle cerchie**: aprendo una cerchia, in alto c'è «Serate e degustazioni». Proprietario e amministratori creano una serata con più vini (anche alla cieca) oppure **«Un solo vino»** (la degustazione nasce con il vino, pronta da votare, con l'etichetta «un vino»); i membri votano dal telefono, voto rapido o scheda completa; media visibile dopo il proprio voto, chiusura della votazione di un singolo vino, classifica e statistiche della cerchia. Stesso motore dello spazio di team, con i colori e la lingua dell'app; il ruolo si rilegge dalla cerchia a ogni richiesta.
+- **I voti e i dati**: «Cancella i miei voti» (solo in quella cerchia, le medie si ricalcolano); Proprietario e amministratori scaricano le medie di tutte le serate in **CSV** o **JSON** (anonime, la media solo da 2 voti).
+- Eliminando una cerchia si cancellano anche le sue serate, i vini e i voti.
+- **L'Evento è ritirato**: dalla scheda «Nuova» non si collega più un evento e non se ne creano di nuovi; i vecchi eventi restano consultabili in fondo a Cerchie.
+- Correzioni: gestione della cerchia (persone, inviti) sotto le serate senza ricaricarle a ogni azione; messaggio «Invito non trovato» corretto.
+
 ## 2.2.1 — 11 ottobre 2026
 - **Nuovi colori predefiniti «Inchiostro»**: blu inchiostro su pietra di giorno, lo stesso blu schiarito su ardesia di notte (al posto di bordeaux su crema e ciliegia su nero-vino). Chi aveva scelto un colore lo tiene; il bordeaux resta tra i colori proposti («Vinaccia»), insieme ai fondi Crema e Cantina. Nuovi nomi: Inchiostro, Pietra, Ardesia.
 - Mail degli inviti con il pulsante nel nuovo blu; schermate delle guide rifatte con i colori nuovi.

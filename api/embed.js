@@ -1,10 +1,11 @@
 const { getRedis } = require("./_redis");
 const { AuthError } = require("./_jwt");
-const { HttpError, parseBody, clientIp, bearer, sendJson, sendError } = require("./_http");
+const { HttpError, parseBody, clientIp, bearer, sendJson, sendError, cleanText } = require("./_http");
 const Partner = require("./_partner");
 const Team = require("./_team");
 const Quota = require("./_quota");
 const limit = require("./_limit");
+const Circles = require("./_circles");
 
 /* API interna dell'embed: la usa solo la pagina /embed dentro l'iframe.
    POST con un corpo JSON { op, ... }. L'unica operazione senza sessione è
@@ -34,7 +35,24 @@ module.exports = async (req, res) => {
     const op = typeof body.op === "string" ? body.op : "";
     if (Quota.level() !== "ok") res.setHeader("X-Sorso-Quota", Quota.level());
 
-    if (op === "session") {
+    /* serate di una cerchia (dentro l'app, stessa origine): sessione Sorso + ruolo letto dalla cerchia */
+    let partner, ctx;
+    if (typeof body.circle === "string" && body.circle) {
+      const c = await Circles.embedContext(redis, bearer(req), body.circle);
+      partner = c.partner; ctx = c.ctx;
+      if (op === "session") {
+        const rs = await limit.hit(redis, "u:" + partner.id + ":" + ctx.uid, OPS_PER_USER, 60);
+        if (!rs.ok) { res.setHeader("Retry-After", String(rs.retryAfter)); throw new HttpError(429, "rate_limited", "Troppe richieste: riprova fra poco."); }
+        const u = await Circles.getUser(redis, c.username);
+        const mode = body.mode === "full" || body.mode === "smart" ? body.mode : "smart";
+        sendJson(res, 200, {
+          session: "circle", user: { name: u.name, role: ctx.role, team: ctx.team, circleRole: ctx.circleRole },
+          config: { modes: partner.modes, defaultMode: mode, lang: body.lang === "en" ? "en" : "it", title: cleanText(c.circle.name, 60), logo: "", circle: true },
+          quota: Quota.level() === "readonly" ? "readonly" : "ok"
+        });
+        return;
+      }
+    } else if (op === "session") {
       const rl = await limit.hit(redis, "sess:" + clientIp(req), SESSIONS_PER_IP, 60);
       if (!rl.ok) { res.setHeader("Retry-After", String(rl.retryAfter)); throw new HttpError(429, "rate_limited", "Troppi tentativi: riprova fra poco."); }
       const { partner, ctx, jti, exp } = await Partner.verifyPartnerToken(redis, body.token);
@@ -57,7 +75,7 @@ module.exports = async (req, res) => {
       return;
     }
 
-    const { partner, ctx } = await Partner.verifySession(redis, bearer(req));
+    if (!partner) ({ partner, ctx } = await Partner.verifySession(redis, bearer(req)));
     const rl = await limit.hit(redis, "u:" + partner.id + ":" + ctx.uid, OPS_PER_USER, 60);
     if (!rl.ok) { res.setHeader("Retry-After", String(rl.retryAfter)); throw new HttpError(429, "rate_limited", "Troppe richieste: riprova fra poco."); }
     if (WRITES[op]) Quota.assertWritable();
@@ -72,9 +90,18 @@ module.exports = async (req, res) => {
         sendJson(res, 200, state);
         return;
       }
-      case "tasting.create":
-        sendJson(res, 200, { tasting: await Team.createTasting(redis, partner.id, ctx, body) });
+      case "tasting.create": {
+        /* «un solo vino»: la degustazione nasce con il suo vino; se il vino non va, non resta una degustazione vuota */
+        const single = body.wine && typeof body.wine === "object";
+        const tasting = await Team.createTasting(redis, partner.id, ctx, Object.assign({}, body, { single: !!single, blind: single ? false : body.blind }));
+        let wine = null;
+        if (single) {
+          try { wine = await Team.addWine(redis, partner.id, ctx, tasting.id, body.wine); }
+          catch (e) { await Team.deleteTasting(redis, partner.id, ctx, tasting.id).catch(() => {}); throw e; }
+        }
+        sendJson(res, 200, wine ? { tasting, wine } : { tasting });
         return;
+      }
       case "tasting.status": {
         const t = await Team.setTastingStatus(redis, partner.id, ctx, body.tasting, body.status);
         sendJson(res, 200, { tasting: { id: t.id, name: t.name, status: t.status, blind: !!t.blind, revealed: !!t.revealed } });

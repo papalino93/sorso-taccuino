@@ -1,6 +1,6 @@
 # Sorso — Taccuino di degustazione
 
-Versione corrente: **2.2.1** — ultimo aggiornamento: 11 ottobre 2026 (cronologia in `CHANGELOG.md`). La versione e la data si leggono anche in fondo all'app e dello spazio di team.
+Versione corrente: **2.3.0** — ultimo aggiornamento: 11 ottobre 2026 (cronologia in `CHANGELOG.md`). La versione e la data si leggono anche in fondo all'app e dello spazio di team.
 
 App per registrare degustazioni di vino con scheda di valutazione, statistiche personali, degustazioni alla cieca ed eventi condivisi.
 
@@ -60,6 +60,10 @@ Ne basta uno fra Resend e Brevo. Le chiavi non vanno mai in chat né nel reposit
 **Se la mail finisce in spam (e non vuoi spendere).** Sorso avvisa chi invita («Controlla lo spam») e per ogni invito offre «Scrivi tu la mail» e «Condividi»: il messaggio parte dalla casella di chi invita e arriva sempre. La soluzione definitiva e gratuita è mandare dal dominio dell'azienda: in Brevo, Domini → Aggiungi un dominio, e chi gestisce il DNS aggiunge i 3-4 record indicati (DKIM, DMARC, codice di verifica); poi `MAIL_FROM` diventa un indirizzo di quel dominio.
 
 **Se la mail non parte.** In Brevo, Transactional → Logs mostra il motivo del rifiuto. Un account nuovo può dover essere attivato da Brevo prima del primo invio. Dopo aver cambiato le variabili serve un nuovo deploy. In ogni caso il link dell'invito si può copiare e mandare a mano.
+
+## Serate nelle cerchie
+
+Dentro una cerchia, «Serate e degustazioni» è la stessa interfaccia dello spazio di team (`public/embed.js`), aperta in un riquadro dell'app all'indirizzo `/embed?c=<cerchia>` (stessa origine, incorporabile solo da Sorso). Il motore è lo stesso (`api/_team.js`): per lui una cerchia è il team di un partner interno, `cerchie` (id riservato in `scripts/partner.js`). Ogni richiesta a `/api/embed` porta la sessione di Sorso e l'id della cerchia; il ruolo si rilegge dalla cerchia a ogni richiesta (Proprietario e amministratori = organizzatori, membri = partecipanti), quindi chi viene tolto perde subito l'accesso. Voti anonimi come nello spazio di team. In più: «Un solo vino» (la degustazione nasce con il suo vino), «Cancella i miei voti» per una cerchia (`votes.delete`), esportazione CSV/JSON per Proprietario e amministratori (`export`, medie solo da 2 voti), e alla cancellazione della cerchia si cancellano anche serate e voti. L'Evento della versione precedente è ritirato: i vecchi eventi restano consultabili, non se ne creano di nuovi.
 
 ## Lettura dell'etichetta
 

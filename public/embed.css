@@ -40,6 +40,8 @@ main { display: block; }
 :focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
 
 #app { max-width: 640px; margin: 0 auto; padding: 18px 16px 44px; }
+/* dentro l'app di Sorso (serate di una cerchia): tutta la larghezza della colonna, allineato al resto */
+html[data-host="app"] #app { max-width: none; margin: 0; padding: 4px 0 12px; }
 
 /* intestazione: marchio, titolo, chi sei */
 .top { display: flex; align-items: center; flex-wrap: wrap; gap: 6px 12px; margin-bottom: 22px; }

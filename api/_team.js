@@ -110,6 +110,7 @@ async function createTasting(redis, pid, ctx, body) {
   }
   const t = { id: rid(), team: ctx.team, name, status: "open", createdAt: Date.now() };
   if (body && body.blind === true) { t.blind = true; t.revealed = false; }
+  if (body && body.single === true && !t.blind) t.single = true;   // degustazione di un solo vino
   try {
     const p = redis.pipeline();
     p.hset(K.tl(pid, ctx.team), { [t.id]: JSON.stringify(t) });
@@ -118,7 +119,7 @@ async function createTasting(redis, pid, ctx, body) {
     const res = await p.exec();
     if (Number(res[2]) === 1) {                       // team nuovo
       const T = await redis.hincrby(K.cn(pid), "T", 1);
-      if (T > MAX_TEAMS) {
+      if (T > (pid === "cerchie" ? 100000 : MAX_TEAMS)) {   // le cerchie sono molte più dei team di un partner
         const r = redis.pipeline();
         r.hdel(K.tl(pid, ctx.team), t.id); r.hdel(K.ti(pid), t.id); r.srem(K.tm(pid), ctx.team); r.hincrby(K.cn(pid), "T", -1);
         await r.exec();
@@ -472,14 +473,14 @@ async function getState(redis, partner, ctx, tid) {
   const all = parseHash(await redis.hgetall(K.tl(pid, ctx.team)));
   const tastings = Object.values(all)
     .sort((a, b) => b.createdAt - a.createdAt)
-    .map(t => ({ id: t.id, name: t.name, status: t.status, createdAt: t.createdAt, blind: !!t.blind, revealed: !!t.revealed }));
+    .map(t => ({ id: t.id, name: t.name, status: t.status, createdAt: t.createdAt, blind: !!t.blind, revealed: !!t.revealed, single: !!t.single }));
   const state = { tastings, tasting: null, wines: [] };
   if (!tid) return state;
   const t = typeof tid === "string" && ID_RE.test(tid) ? all[tid] : null;
   if (!t) throw notFound("Degustazione");
   const winesById = parseHash(await redis.hgetall(K.wn(pid, tid)));
   const wines = Object.values(winesById).sort((a, b) => a.createdAt - b.createdAt);
-  state.tasting = { id: t.id, name: t.name, status: t.status, blind: !!t.blind, revealed: !!t.revealed };
+  state.tasting = { id: t.id, name: t.name, status: t.status, blind: !!t.blind, revealed: !!t.revealed, single: !!t.single };
   if (!wines.length) return state;
   /* alla cieca e non ancora svelata: ai partecipanti non si manda NULLA che riveli il vino */
   const hide = !!t.blind && !t.revealed && ctx.role !== "organizer";
@@ -598,8 +599,15 @@ function resultsCsv(r) {
    chi la ripete (o ne lancia due insieme) non toglie due volte. Il suo "voto
    nell'elenco dell'utente" si toglie voce per voce, non tutto insieme, così un nuovo
    voto arrivato nel frattempo non va perso. */
-async function deleteUser(redis, pid, uid) {
-  const members = ((await redis.smembers(K.uv(pid, uid))) || []).map(String).filter(m => /^[0-9a-f]{10}\|[0-9a-f]{10}$/.test(m));
+async function deleteUser(redis, pid, uid, team) {
+  let members = ((await redis.smembers(K.uv(pid, uid))) || []).map(String).filter(m => /^[0-9a-f]{10}\|[0-9a-f]{10}$/.test(m));
+  /* con «team» si cancellano solo i voti di quel team (le cerchie: «Cancella i miei voti» vale per una cerchia sola) */
+  if (team != null && members.length) {
+    const tids = [...new Set(members.map(m => m.split("|")[0]))];
+    const tp = redis.pipeline(); tids.forEach(t => tp.hget(K.ti(pid), t));
+    const owner = {}; (await tp.exec()).forEach((tm, i) => { owner[tids[i]] = tm == null ? null : String(tm); });
+    members = members.filter(m => owner[m.split("|")[0]] === String(team));
+  }
   let removed = 0, guessesRemoved = 0;
   for (let i0 = 0; i0 < members.length; i0 += 200) {      // a blocchi: una richiesta enorme non passerebbe
     const blocco = members.slice(i0, i0 + 200);
@@ -673,6 +681,18 @@ async function deleteUser(redis, pid, uid) {
     if (teams.length) { const d = redis.pipeline(); teams.forEach(tm => d.del(K.st(pid, tm))); await d.exec(); }
   }
   return { votesRemoved: removed, guessesRemoved };
+}
+
+/* Elimina tutte le degustazioni di un team, con voti e contatori (una cerchia eliminata non lascia dati). */
+async function deleteTeam(redis, pid, team) {
+  const ids = Object.keys(asObject(await redis.hgetall(K.tl(pid, team))));
+  const ctx = { team, role: "organizer", uid: "" };
+  for (const tid of ids) { try { await deleteTasting(redis, pid, ctx, tid); } catch (e) { if (!(e instanceof HttpError) || e.status !== 404) throw e; } }
+  const p = redis.pipeline();
+  p.srem(K.tm(pid), team); p.hdel(K.cn(pid), "t:" + team); p.del(K.tl(pid, team), K.st(pid, team));
+  const res = await p.exec();
+  if (Number(res[0]) === 1) await redis.hincrby(K.cn(pid), "T", -1);
+  return { tastings: ids.length };
 }
 
 /* Ricalcola somma e conteggio di una degustazione dai voti veri: strumento di riparazione
@@ -824,6 +844,6 @@ async function getEventsApi(redis, pid, team) {
 module.exports = {
   MAX_TASTINGS_PER_TEAM, MAX_TEAMS, MAX_WINES, MIN_VOTES_API,
   WINE_TYPES, STATS_TTL, STATS_WINDOW, KEY_PATTERNS, scoreGuess,
-  validateVote, createTasting, setTastingStatus, setWineStatus, deleteTasting, addWine, castVote, castGuess, revealTasting, getState, getStats,
+  validateVote, createTasting, setTastingStatus, setWineStatus, deleteTasting, deleteTeam, addWine, castVote, castGuess, revealTasting, getState, getStats,
   listTastings, getResults, getGuesses, getTeamStatsApi, getEventsApi, resultsCsv, csvCell, deleteUser, recount, getTasting, K, asObject
 };
