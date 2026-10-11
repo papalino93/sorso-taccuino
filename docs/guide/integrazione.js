@@ -181,7 +181,7 @@ function build() {
   P.push(pg("ink", "Altre sezioni", `
     ${eyebrow("09", "Classifica, statistiche e alla cieca")}
     <h1 class="d">Non solo il voto: <em>tre sezioni in più</em></h1>
-    <p class="lead" style="max-width:140mm">Lo spazio di team ha tre sezioni in alto: <b>Degustazioni</b>, <b>Classifica</b> e <b>Statistiche</b>. L'«alla cieca» è un modo di creare la degustazione.</p>
+    <p class="lead" style="max-width:140mm">Lo spazio di team ha quattro sezioni in alto: <b>Degustazioni</b>, <b>Taccuino</b> (i vini assaggiati, col proprio voto accanto alla media), <b>Classifica</b> e <b>Statistiche</b>. L'«alla cieca» è un modo di creare la degustazione.</p>
     <div class="phones" style="gap:3mm;margin:4mm 0">
       ${fig("team-cieca-2.png", 1, "<b>Alla cieca</b>: «Vino 1», e l'ipotesi su tipologia, vitigno, annata.", "sm")}
       ${fig("team-svelata-2.png", 2, "<b>Svelata</b>: i nomi, il punteggio dell'ipotesi, il gruppo.", "sm")}
@@ -195,7 +195,7 @@ function build() {
       </div>
       <div>
         <h3 class="k">Classifica e statistiche</h3>
-        ${ul(["<b>Classifica</b>: nella degustazione, i vini ordinati per media (pari merito compresi); nella sezione Classifica, le serate chiuse con il vincitore.", "<b>Statistiche</b>: dalle ultime 30 degustazioni <b>chiuse</b> del team, con medie, distribuzione, vini migliori, tipologie e, per ognuno, i propri numeri.", "A degustazione chiusa la media di un vino la vedono tutti, ma solo dal <b>secondo voto</b>. Nessuno vede mai chi ha votato cosa."])}
+        ${ul(["<b>Classifica</b>: nella degustazione, i vini ordinati per media (pari merito compresi); nella sezione Classifica, le serate chiuse con il vincitore.", "<b>Statistiche</b>: dalle ultime 30 degustazioni <b>chiuse</b> del team, con medie, distribuzione, vini migliori, tipologie, vitigni e, per ognuno, i propri numeri.", "A degustazione chiusa la media di un vino la vedono tutti, ma solo dal <b>secondo voto</b>. Nessuno vede mai chi ha votato cosa."])}
       </div>
     </div>
   `));

@@ -88,7 +88,7 @@ function build() {
     ${lato(`
         <p class="lead">Per una serata in enoteca, un corso o una cena: apri una <b>cerchia</b> e trovi in alto <b>Serate e degustazioni</b>.</p>
         ${passi([["Crea", "Una serata con più vini, o «Un solo vino»."], ["Vota", "Ognuno dal suo telefono."], ["Classifica", "Medie e statistiche della cerchia."]])}
-        ${ul(["Le creano il Proprietario e gli amministratori; i membri votano.", "La media di un vino compare <b>dopo il tuo voto</b>; anche <b>alla cieca</b>.", "I voti sono anonimi; con <b>Cancella i miei voti</b> li togli da una cerchia.", "Gli <b>eventi</b> della versione precedente restano consultabili in fondo a Cerchie."])}`,
+        ${ul(["Le creano il Proprietario e gli amministratori; i membri votano.", "La media di un vino compare <b>dopo il tuo voto</b>; anche <b>alla cieca</b>.", "Nel <b>Taccuino</b> della cerchia ritrovi ogni vino col tuo voto accanto alla media.", "I voti sono anonimi; con <b>Cancella i miei voti</b> li togli da una cerchia.", "Gli <b>eventi</b> della versione precedente restano consultabili in fondo a Cerchie."])}`,
       fig("cerchie-serate.png", 1, "Le <b>serate</b> di una cerchia: una serata con tre vini e una degustazione di un solo vino.", "lg"))}
   `));
 
@@ -116,7 +116,7 @@ function build() {
     <p class="lead">Alcuni siti ospitano Sorso al loro interno: nello spazio del tuo club puoi votare insieme agli altri soci.</p>
     <div class="two">
       <div>
-        ${table(["Scheda", "Cosa trovi"], [["<b>Degustazioni</b>", "Le serate del tuo gruppo: apri, vota, vedi la media. Se un vino lo assaggiano in pochi, l'organizzatore ne chiude la votazione e la media conta chi ha votato."], ["<b>Classifica</b>", "I vini ordinati per media; provvisoria finché la serata è aperta, finale a serata chiusa."], ["<b>Statistiche</b>", "I numeri delle ultime degustazioni chiuse del gruppo."]], [1])}
+        ${table(["Scheda", "Cosa trovi"], [["<b>Degustazioni</b>", "Le serate del tuo gruppo: apri, vota, vedi la media. Se un vino lo assaggiano in pochi, l'organizzatore ne chiude la votazione e la media conta chi ha votato."], ["<b>Taccuino</b>", "Tutti i vini assaggiati col gruppo, col tuo voto accanto alla media."], ["<b>Classifica</b>", "I vini ordinati per media; provvisoria finché la serata è aperta, finale a serata chiusa."], ["<b>Statistiche</b>", "I numeri delle ultime degustazioni chiuse del gruppo."]], [1])}
         <h3 class="k">Alla cieca di gruppo</h3>
         ${ul(["I vini compaiono come <b>Vino 1, Vino 2…</b>.", "Oltre al voto puoi <b>indovinare</b> tipologia, vitigno e annata: 1, 2 e 2 punti.", "Quando l'organizzatore <b>svela</b> i vini, tutti vedono i nomi e il punteggio delle ipotesi."])}
       </div>

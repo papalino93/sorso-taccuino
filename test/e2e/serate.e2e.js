@@ -85,6 +85,20 @@ const ok = (c, m) => { console.log((c ? "OK   " : "FAIL ") + m); if (!c) fails++
   await B.frame.locator(".big.team").first().waitFor({ timeout: 8000 });
   ok(/77/.test(await B.frame.locator(".wine").first().textContent()), "Carla vota dal telefono dentro l'app: 77");
   ok(!(await B.page.evaluate(() => document.documentElement.scrollWidth > document.documentElement.clientWidth)), "telefono: nessuno scorrimento orizzontale");
+  /* il taccuino della cerchia: il mio voto accanto alla media, ricerca */
+  await B.frame.locator('[data-act="back"]').click();
+  await B.frame.locator('[data-act="tab"][data-tab="notebook"]').click();
+  await B.frame.locator(".nb-row").first().waitFor({ timeout: 8000 });
+  const nbText = await B.frame.locator("main").innerText();
+  ok(/Taccuino della cerchia/.test(nbText) && await B.frame.locator(".nb-row").count() === 3, "Taccuino della cerchia: i 3 vini assaggiati insieme");
+  ok(/Barolo[\s\S]*Tu\s*77/.test(nbText), "accanto al Barolo il mio voto (77)");
+  await B.frame.locator("#nb-q").fill("brunello"); await B.page.waitForTimeout(300);
+  ok(await B.frame.locator(".nb-row").count() === 1 && (await B.frame.locator("#nb-q").evaluate(e => document.activeElement === e)), "ricerca «brunello»: 1 vino, e il cursore resta nel campo");
+  await B.frame.locator("#nb-q").fill(""); await B.frame.locator("#nb-only").check(); await B.page.waitForTimeout(200);
+  ok(await B.frame.locator(".nb-row").count() === 1, "«Solo quelli che ho votato»: 1 vino");
+  ok(!(await B.page.evaluate(() => document.documentElement.scrollWidth > document.documentElement.clientWidth)), "taccuino sul telefono: nessuno scorrimento orizzontale");
+  await B.frame.locator(".nb-row").first().click(); await B.frame.locator(".wine").first().waitFor();
+  ok(/Barolo/.test(await B.frame.locator("#h-main").textContent()), "toccando un vino del taccuino si apre la sua degustazione");
   ok(await B.page.locator('[data-circ="export-csv"]').count() === 0, "il Membro non vede l'esportazione");
   /* Carla cancella i suoi voti */
   await B.page.click('[data-circ="myvotes"]');

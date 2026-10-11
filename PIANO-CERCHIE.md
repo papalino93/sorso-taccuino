@@ -1,6 +1,6 @@
 # Sorso — Piano delle cerchie
 
-Versione del piano: 9 ottobre 2026 · scritto dopo l'intervista con Andrea. **Stato: passo 0 fatto (1.9.2), passo 1 fatto (2.0.0), mail degli inviti e barra in alto in 2.1.0. Link d'invito, avviso spam e barra colorata in 2.1.1. Lettura delle etichette in 2.2.0, colori «Inchiostro» in 2.2.1, serate nelle cerchie in 2.3.0, widget in 2.4.0. Prossimo: storico e taccuino della cerchia (i tuoi voti accanto a quelli della cerchia, statistiche più ricche).**
+Versione del piano: 9 ottobre 2026 · scritto dopo l'intervista con Andrea. **Stato: passo 0 fatto (1.9.2), passo 1 fatto (2.0.0), mail degli inviti e barra in alto in 2.1.0. Link d'invito, avviso spam e barra colorata in 2.1.1. Lettura delle etichette in 2.2.0, colori «Inchiostro» in 2.2.1, serate nelle cerchie in 2.3.0, widget in 2.4.0, taccuino della cerchia e statistiche per vitigno in 2.5.0. Prossimo: riconoscimento dell'etichetta più preciso.**
 
 ## 1. Obiettivo
 

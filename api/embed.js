@@ -118,6 +118,9 @@ module.exports = async (req, res) => {
       case "guess":
         sendJson(res, 200, await Team.castGuess(redis, partner, ctx, body));
         return;
+      case "notebook":
+        sendJson(res, 200, { notebook: await Team.getNotebook(redis, partner, ctx) });
+        return;
       case "stats":
         sendJson(res, 200, { stats: await Team.getStats(redis, partner, ctx) });
         return;

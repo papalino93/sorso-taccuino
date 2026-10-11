@@ -122,7 +122,7 @@ function build() {
     ${lato(`
         <p class="lead">Apri la cerchia: in alto c'è <b>Serate e degustazioni</b>.</p>
         ${passi([["Crea", "«Nuova degustazione» con più vini, o «Un solo vino»."], ["Vota", "Ognuno dal suo telefono."], ["Classifica", "Medie, classifica e statistiche."]])}
-        ${ul(["Le creano il <b>Proprietario</b> e gli <b>amministratori</b>; i membri votano.", "La media di un vino compare <b>dopo il tuo voto</b>.", "Anche <b>alla cieca</b>, con le ipotesi su tipologia, vitigno e annata.", "Proprietario e amministratori <b>scaricano le medie</b> in CSV o JSON."])}`,
+        ${ul(["Le creano il <b>Proprietario</b> e gli <b>amministratori</b>; i membri votano.", "La media di un vino compare <b>dopo il tuo voto</b>.", "Anche <b>alla cieca</b>, con le ipotesi su tipologia, vitigno e annata.", "<b>Taccuino della cerchia</b>: tutti i vini assaggiati insieme, col tuo voto accanto alla media; cerca, ordina e scopri dove la pensi diversamente.", "Proprietario e amministratori <b>scaricano le medie</b> in CSV o JSON."])}`,
       fig("cerchie-unvino.png", 1, "Una degustazione di <b>un solo vino</b> dopo il voto: il tuo voto e la media della cerchia.", "lg"))}
   `));
 

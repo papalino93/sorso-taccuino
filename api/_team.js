@@ -518,6 +518,56 @@ async function getState(redis, partner, ctx, tid) {
   return state;
 }
 
+/* ---- taccuino del team (cerchia): tutti i vini assaggiati insieme, con il proprio voto accanto alla media ----
+   Stesse regole di getState: la media si vede dopo il proprio voto, oppure a vino o serata chiusi dal secondo voto;
+   alla cieca non svelata il vino resta «Vino N» per i partecipanti. Solo i voti di chi chiede: nessun dato degli altri. */
+const NOTEBOOK_TASTINGS = 100;
+async function getNotebook(redis, partner, ctx) {
+  const pid = partner.id;
+  const all = Object.values(parseHash(await redis.hgetall(K.tl(pid, ctx.team)))).sort((a, b) => b.createdAt - a.createdAt).slice(0, NOTEBOOK_TASTINGS);
+  const rows = [];
+  if (all.length) {
+    const p = redis.pipeline();
+    all.forEach(t => { p.hgetall(K.wn(pid, t.id)); p.hgetall(K.ct(pid, t.id)); p.hgetall(K.sm(pid, t.id)); });
+    const res = await p.exec();
+    const lists = all.map((t, i) => Object.values(parseHash(res[3 * i])).sort((a, b) => a.createdAt - b.createdAt));
+    const keys = []; all.forEach((t, i) => lists[i].forEach(w => keys.push(K.vt(pid, t.id, w.id, ctx.uid))));
+    const mine = [];
+    for (let i = 0; i < keys.length; i += 200) mine.push(...(await redis.mget(...keys.slice(i, i + 200))));
+    let k = 0;
+    all.forEach((t, i) => {
+      const cts = asObject(res[3 * i + 1]), sms = asObject(res[3 * i + 2]);
+      const hide = !!t.blind && !t.revealed && ctx.role !== "organizer";
+      lists[i].forEach((w, j) => {
+        const m = mine[k] ? parse(mine[k]) : null; k++;
+        const count = Math.max(0, Number(cts[w.id]) || 0), sum = Number(sms[w.id]) || 0;
+        const chiuso = t.status === "closed" || !!w.closed;
+        const team = (m && count > 0) || (chiuso && count >= MIN_VOTES_API) ? round1(sum / count) : null;
+        rows.push({
+          tasting: { id: t.id, name: t.name, createdAt: t.createdAt, status: t.status, single: !!t.single, blind: !!t.blind },
+          wine: hide ? { id: w.id, index: j + 1, hidden: true, name: "", producer: "", vintage: "", type: "", grape: "" }
+                     : { id: w.id, index: j + 1, hidden: false, name: w.name, producer: w.producer, vintage: w.vintage, type: w.type || "", grape: w.grape || "" },
+          mine: m && Number.isFinite(m.s) ? m.s : null, team, count: team != null ? count : null, closed: chiuso
+        });
+      });
+    });
+  }
+  /* riepilogo: i tuoi voti e, sui vini dove ci sono entrambi, quanto ti discosti dalla cerchia */
+  const voted = rows.filter(r => r.mine != null), both = voted.filter(r => r.team != null && r.count >= MIN_VOTES_API);
+  const avg = a => a.length ? round1(a.reduce((x, y) => x + y, 0) / a.length) : null;
+  const diffs = both.map(r => ({ r, d: Scoring.roundHalfUp(r.mine - r.team, 1) }));
+  const pick = r => ({ tasting: r.tasting.id, tastingName: r.tasting.name, wine: r.wine, mine: r.mine, team: r.team });
+  return {
+    rows,
+    summary: {
+      wines: rows.length, tastings: all.length, votes: voted.length, myAverage: avg(voted.map(r => r.mine)),
+      shared: both.length, mineOnShared: avg(both.map(r => r.mine)), teamOnShared: avg(both.map(r => r.team)),
+      apart: diffs.filter(x => Math.abs(x.d) >= 3).sort((a, b) => Math.abs(b.d) - Math.abs(a.d)).slice(0, 3).map(x => Object.assign(pick(x.r), { diff: x.d })),
+      agree: diffs.filter(x => Math.abs(x.d) < 3).sort((a, b) => Math.abs(a.d) - Math.abs(b.d)).slice(0, 3).map(x => Object.assign(pick(x.r), { diff: x.d }))
+    }
+  };
+}
+
 /* ---- API di sola lettura ---- */
 async function listTastings(redis, pid, filter) {
   const teams = filter.team ? [filter.team] : ((await redis.smembers(K.tm(pid))) || []);
@@ -735,7 +785,7 @@ async function computeTeamStats(redis, pid, team) {
   })() : [];
   let wineN = 0, voteN = 0, sumAll = 0, cntAll = 0;
   const dist = {}; BUCKETS.forEach(b => { dist[b[0]] = 0; });
-  const rated = [], types = Object.create(null), events = [], wm = {}, tids = [];
+  const rated = [], types = Object.create(null), grapes = Object.create(null), events = [], wm = {}, tids = [];
   win.forEach((t, i) => {
     tids.push(t.id);
     const hide = !!t.blind && !t.revealed;
@@ -757,6 +807,8 @@ async function computeTeamStats(redis, pid, team) {
       /* stesso criterio della classifica: si confrontano le medie arrotondate al decimale */
       if (!best || row.avg > best.avg) { best = row; tie = false; } else if (row.avg === best.avg) tie = true;
       if (w.type && !hide) { const e = types[w.type] || (types[w.type] = { sum: 0, count: 0, wines: 0 }); e.sum += sum; e.count += count; e.wines++; }
+      const gk = !hide && w.grape ? String(w.grape).trim().toLowerCase() : "";
+      if (gk) { const e = grapes[gk] || (grapes[gk] = { name: String(w.grape).trim(), sum: 0, count: 0, wines: 0 }); e.sum += sum; e.count += count; e.wines++; }
     });
     events.push({
       id: t.id, name: t.name, createdAt: t.createdAt, blind: !!t.blind, revealed: !!t.revealed, wines: wines.length, votes: tVotes,
@@ -766,13 +818,14 @@ async function computeTeamStats(redis, pid, team) {
   });
   rated.sort((a, b) => b.avg - a.avg || b.votes - a.votes);
   return {
-    v: 1, at: Date.now(),
+    v: 2, at: Date.now(),
     window: { tastings: win.length, closedTotal: closed.length, open },
     totals: { tastings: closed.length + open, open, closed: closed.length, wines: wineN, votes: voteN },
     average: cntAll ? round1(sumAll / cntAll) : null,
     distribution: BUCKETS.map(b => ({ key: b[0], wines: dist[b[0]] })),
     top: rated.slice(0, 5),
     byType: Object.keys(types).map(k => ({ type: k, wines: types[k].wines, average: round1(types[k].sum / types[k].count) })).sort((a, b) => b.average - a.average),
+    byGrape: Object.keys(grapes).map(k => ({ grape: grapes[k].name, wines: grapes[k].wines, average: round1(grapes[k].sum / grapes[k].count) })).sort((a, b) => b.average - a.average || b.wines - a.wines).slice(0, 12),
     events, tids, wm
   };
 }
@@ -781,13 +834,13 @@ const wn_ok = wm => Object.keys(wm).length < 1500;       // tetto di sicurezza s
 async function teamStats(redis, pid, team) {
   const raw = await redis.get(K.st(pid, team));
   const hit = raw ? parse(raw) : null;
-  if (hit && hit.v === 1) return hit;
+  if (hit && hit.v === 2) return hit;
   const st = await computeTeamStats(redis, pid, team);
   await redis.set(K.st(pid, team), JSON.stringify(st), { ex: STATS_TTL }).catch(() => {});
   return st;
 }
 
-const publicStats = st => ({ at: st.at, window: st.window, totals: st.totals, average: st.average, distribution: st.distribution, top: st.top, byType: st.byType, events: st.events });
+const publicStats = st => ({ at: st.at, window: st.window, totals: st.totals, average: st.average, distribution: st.distribution, top: st.top, byType: st.byType, byGrape: st.byGrape || [], events: st.events });
 
 /* statistiche personali: solo i voti di chi le chiede, nelle degustazioni chiuse delle statistiche del team */
 async function myStats(redis, pid, uid, st) {
@@ -844,6 +897,6 @@ async function getEventsApi(redis, pid, team) {
 module.exports = {
   MAX_TASTINGS_PER_TEAM, MAX_TEAMS, MAX_WINES, MIN_VOTES_API,
   WINE_TYPES, STATS_TTL, STATS_WINDOW, KEY_PATTERNS, scoreGuess,
-  validateVote, createTasting, setTastingStatus, setWineStatus, deleteTasting, deleteTeam, addWine, castVote, castGuess, revealTasting, getState, getStats,
+  validateVote, getNotebook, createTasting, setTastingStatus, setWineStatus, deleteTasting, deleteTeam, addWine, castVote, castGuess, revealTasting, getState, getStats,
   listTastings, getResults, getGuesses, getTeamStatsApi, getEventsApi, resultsCsv, csvCell, deleteUser, recount, getTasting, K, asObject
 };
