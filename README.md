@@ -55,6 +55,10 @@ Sorso non ha un server di posta: per mandare le mail degli inviti usa un servizi
 
 Ne basta uno fra Resend e Brevo. Le chiavi non vanno mai in chat né nel repository.
 
+**Mittente con indirizzo gratuito (Gmail, Proton…).** Brevo lo accetta dopo la verifica con il codice, ma segnala «Firma DKIM: predefinito» e «dominio email gratuito non consigliato»: le mail partono, però possono finire in spam. Va bene per provare; per un uso vero conviene un indirizzo di un dominio tuo, autenticato in Brevo (Domini → Aggiungi un dominio, con i record DNS indicati).
+
+**Se la mail non parte.** In Brevo, Transactional → Logs mostra il motivo del rifiuto. Un account nuovo può dover essere attivato da Brevo prima del primo invio. Dopo aver cambiato le variabili serve un nuovo deploy. In ogni caso il link dell'invito si può copiare e mandare a mano.
+
 ## Guida all'uso
 
 Nell'app: Impostazioni → Guida → «Apri la guida» (`public/guida-uso-sorso.pdf`). Le guide PDF si rigenerano con `node docs/guide/build.js` (servono Playwright e le schermate in `docs/guide/img`; `shots-nuove.js` produce quelle di team e desktop).
