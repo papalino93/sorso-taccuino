@@ -1,6 +1,6 @@
 # Sorso — Taccuino di degustazione
 
-Versione corrente: **2.1.1** — ultimo aggiornamento: 11 ottobre 2026 (cronologia in `CHANGELOG.md`). La versione e la data si leggono anche in fondo all'app e dello spazio di team.
+Versione corrente: **2.2.0** — ultimo aggiornamento: 11 ottobre 2026 (cronologia in `CHANGELOG.md`). La versione e la data si leggono anche in fondo all'app e dello spazio di team.
 
 App per registrare degustazioni di vino con scheda di valutazione, statistiche personali, degustazioni alla cieca ed eventi condivisi.
 
@@ -60,6 +60,10 @@ Ne basta uno fra Resend e Brevo. Le chiavi non vanno mai in chat né nel reposit
 **Se la mail finisce in spam (e non vuoi spendere).** Sorso avvisa chi invita («Controlla lo spam») e per ogni invito offre «Scrivi tu la mail» e «Condividi»: il messaggio parte dalla casella di chi invita e arriva sempre. La soluzione definitiva e gratuita è mandare dal dominio dell'azienda: in Brevo, Domini → Aggiungi un dominio, e chi gestisce il DNS aggiunge i 3-4 record indicati (DKIM, DMARC, codice di verifica); poi `MAIL_FROM` diventa un indirizzo di quel dominio.
 
 **Se la mail non parte.** In Brevo, Transactional → Logs mostra il motivo del rifiuto. Un account nuovo può dover essere attivato da Brevo prima del primo invio. Dopo aver cambiato le variabili serve un nuovo deploy. In ogni caso il link dell'invito si può copiare e mandare a mano.
+
+## Lettura dell'etichetta
+
+In «Nuova», dopo aver scelto la foto, «Leggi l'etichetta» riconosce il testo direttamente nel browser con [Tesseract.js](https://github.com/naptha/tesseract.js) (Apache 2.0): la foto non viene inviata a nessun server. La prima volta il browser scarica il motore (da jsDelivr) e i dati delle lingue italiano e inglese (circa 10 MB in tutto), poi restano in cache. L'analisi del testo (produttore, nome, annata, denominazione, tipologia, vitigni, gradazione) è in `public/js/label-reader.js`, provata in `test/label-reader.test.js`; il lettore è `public/js/label-ocr.js`; la prova nel browser è `test/e2e/etichetta.e2e.js` (serve la rete). I dati proposti non entrano nella scheda finché non si preme «Compila la scheda», e una voce già compilata non viene sovrascritta se non la si spunta.
 
 ## Guida all'uso
 

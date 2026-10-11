@@ -62,19 +62,19 @@ const TABS = ["new", "blind", "book", "stats", "circles", "settings"];
     /* il riquadro dei contenuti torna in cima quando si cambia scheda */
     await go(page, "stats", 1440); await page.evaluate(() => document.querySelector(".body").scrollTo(0, 600)); await go(page, "new", 1440);
     ok((await page.evaluate(() => document.querySelector(".body").scrollTop)) === 0, "cambiando scheda si riparte dall'alto");
-    /* punteggio 96+: la barra in alto resta nel colore d'accento e tutto ciò che ci sta sopra si legge */
+    /* punteggio 96+: la barra in alto si stacca dalla pagina (tinta neutra, bordo) e tutto ciò che ci sta sopra si legge */
     await page.click('#modeTopWrap button[data-modalita="smart"]');
     await page.evaluate(() => document.querySelectorAll("[data-smart-range]").forEach(el => { el.value = 100; el.dispatchEvent(new Event("input", { bubbles: true })); }));
     await page.waitForTimeout(250);
     const fl = await page.evaluate(() => {
-      const root = document.getElementById("root"), bar = getComputedStyle(document.querySelector(".panel"), "::after").backgroundColor, cs = e => getComputedStyle(document.querySelector(e));
-      return { flood: document.querySelector(".hdr").classList.contains("flood"), bar, root: getComputedStyle(root).getPropertyValue("--sel-bg").trim(),
+      const bar = getComputedStyle(document.querySelector(".panel"), "::after"), cs = e => getComputedStyle(document.querySelector(e));
+      const rgb = c => { const k = document.createElement("canvas").getContext("2d"); k.fillStyle = c; k.fillRect(0, 0, 1, 1); const d = k.getImageData(0, 0, 1, 1).data; return "rgb(" + d[0] + ", " + d[1] + ", " + d[2] + ")"; };
+      return { flood: document.querySelector(".hdr").classList.contains("flood"), bar: rgb(bar.backgroundColor), border: bar.borderBottomWidth, page: cs(".body").backgroundColor === "rgba(0, 0, 0, 0)" ? cs(".panel").getPropertyValue("--panel").trim() : cs(".body").backgroundColor,
         txt: [".brand-name", "#nav button:not(.on) .lbl", ".hdr-ctrl .lang-switch button:not(.on)", ".hdr-ctrl .gear-btn"].map(e => cs(e).color), on: [cs("#nav button.on .lbl").color, cs("#nav button.on").backgroundColor] };
     });
-    const rgbOf = c => c.match(/\d+(\.\d+)?/g).slice(0, 3).map(Number);
     ok(fl.flood, "punteggio 100: rail a tutto colore");
-    ok(fl.bar !== "rgba(0, 0, 0, 0)" && fl.bar === (await page.evaluate(h => { const d = document.createElement("i"); d.style.color = h; document.body.appendChild(d); const c = getComputedStyle(d).color; d.remove(); return c; }, fl.root)), "la barra in alto è nel colore d'accento (" + fl.bar + ")");
-    ok(fl.txt.every(c => ct([c, 0, 0, fl.bar]) >= 3.2) && ct([fl.on[0], 0, 0, fl.on[1]]) >= 4.5, "marchio, voci e comandi si leggono sulla barra " + fl.txt.join(" | "));
+    ok(fl.bar !== "rgba(0, 0, 0, 0)" && parseFloat(fl.border) >= 1, "la barra in alto ha una tinta propria e un bordo (" + fl.bar + ")");
+    ok(fl.txt.every(c => ct([c, 0, 0, fl.bar]) >= 4.5) && ct([fl.on[0], 0, 0, fl.on[1]]) >= 4.5, "marchio, voci e comandi si leggono sulla barra " + fl.txt.join(" | "));
     await page.click("#resetBtn");
     /* Impostazioni */
     await go(page, "settings", 1440);
@@ -88,9 +88,23 @@ const TABS = ["new", "blind", "book", "stats", "circles", "settings"];
     });
     ok(bar.n === 5 && bar.sameRow && bar.navTop < 64 && bar.brandTop < 64 && bar.bodyTop >= 60, "PC: sezioni in fila nella barra in alto (" + bar.n + " voci)");
     ok(bar.navRight < bar.ctrlLeft && bar.look && bar.gear && bar.avatar, "PC: i comandi a destra (Aspetto, impostazioni, utente) non coprono le sezioni");
-    await page.click("#lookBtn"); await page.waitForTimeout(500);
-    ok(await page.locator("#lookCard").isVisible() && await page.evaluate(() => document.querySelector(".body").getBoundingClientRect().top > 0), "il pulsante Aspetto apre le Impostazioni sui colori");
-    await page.click("#avatarBtn").catch(() => {});
+    /* tavolozza ≠ ingranaggio: la tavolozza apre il pannello rapido sotto la barra, senza cambiare pagina */
+    const tabBefore = await page.evaluate(() => S.tab);
+    await page.click("#lookBtn"); await page.waitForTimeout(300);
+    ok(await page.locator("#lookPop").isVisible() && (await page.evaluate(() => S.tab)) === tabBefore, "la tavolozza apre i colori rapidi, resto nella stessa scheda");
+    ok(await page.locator("#popAccent [data-accent]").count() >= 4 && await page.locator("#popBg [data-bg]").count() >= 3, "nel pannello: colori d'accento e sfondi");
+    const lp = await page.evaluate(() => { const r = document.getElementById("lookPop").getBoundingClientRect(); return { r: r.right, b: r.bottom, el: (() => { const e = document.elementFromPoint(r.left + 20, r.top + 30); return !!(e && e.closest("#lookPop")); })() }; });
+    ok(lp.r <= 1440 && lp.el, "il pannello sta dentro lo schermo e niente lo copre");
+    const accBefore = await page.evaluate(() => getComputedStyle(document.getElementById("root")).getPropertyValue("--sel-bg").trim());
+    await page.locator('#popAccent [data-accent]').nth(2).click(); await page.waitForTimeout(200);
+    ok((await page.evaluate(() => getComputedStyle(document.getElementById("root")).getPropertyValue("--sel-bg").trim())) !== accBefore && await page.locator("#lookPop").isVisible(), "un colore del pannello si applica subito e il pannello resta aperto");
+    await page.keyboard.press("Escape"); await page.waitForTimeout(150);
+    ok(!(await page.locator("#lookPop").isVisible()), "Esc chiude il pannello");
+    await page.evaluate(() => { localStorage.removeItem("sorso-colori"); }); await page.reload(); await page.waitForTimeout(700);
+    await page.click("#lookBtn"); await page.click("#popMoreBtn"); await page.waitForTimeout(500);
+    ok(await page.locator("#lookCard").isVisible(), "«Tutte le opzioni dei colori» porta alle Impostazioni");
+    await page.click("#settingsBtn"); await page.waitForTimeout(300);
+    ok(!(await page.locator("#lookPop").isVisible()), "l'ingranaggio porta alle Impostazioni (il pannello è chiuso)");
     /* palette a vino */
     const acc = await page.evaluate(() => getComputedStyle(document.getElementById("root")).getPropertyValue("--accent").trim());
     ok(acc === "#8c1d3f", "chiaro: bordeaux (" + acc + ")");
