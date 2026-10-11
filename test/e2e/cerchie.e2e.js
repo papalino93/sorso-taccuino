@@ -180,7 +180,7 @@ const ok = (c, m) => { console.log((c ? "OK   " : "FAIL ") + m); if (!c) fails++
     await a2.locator("#circWrap").getByText("mail inviata").waitFor({ timeout: 5000 }).then(() => ok(true, "dopo l'invito compare «mail inviata»"), () => ok(false, "«mail inviata»"));
     ok(inviate.length === 1 && inviate[0].to[0] === "nuova.persona@example.com" && /\?invito=[0-9a-f]{48}/.test(inviate[0].text), "la mail è partita verso l'indirizzo giusto, con il link");
     ok(/Controlla lo spam/.test(await a2.locator("#circWrap").innerText()), "dopo l'invio: avviso «Controlla lo spam»");
-    const mt = await a2.locator('a[href^="mailto:"]').first().getAttribute("href");
+    const mt = await a2.locator('a[href^="mailto:nuova.persona"]').first().getAttribute("href");
     ok(/^mailto:nuova\.persona@example\.com\?subject=/.test(mt) && decodeURIComponent(mt).includes("/?invito=") && decodeURIComponent(mt).includes("Corso del giovedì"), "«Scrivi tu la mail»: mailto verso l'invitato, con cerchia e link");
     ok(/Scrivi tu la mail/.test(await a2.locator("#circWrap").innerText()), "il pulsante «Scrivi tu la mail» c'è");
     await a2.locator('[data-circ="resend"]').first().click();

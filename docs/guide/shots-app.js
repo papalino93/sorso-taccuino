@@ -32,7 +32,7 @@ const seed = {
   await page.screenshot({ path: out + "/app-statistiche.png" });
   await page.click('#nav [data-tab="blind"]'); await page.waitForTimeout(500); await page.evaluate(() => window.scrollTo(0,0));
   await page.screenshot({ path: out + "/app-cieca.png" });
-  await page.click('#nav [data-tab="event"]'); await page.waitForTimeout(500); await page.evaluate(() => window.scrollTo(0,0));
+  await page.evaluate(() => { S.tab = "event"; renderAll(); }); await page.waitForTimeout(500); await page.evaluate(() => window.scrollTo(0,0));   // l'Evento ora si apre da Cerchie
   await page.screenshot({ path: out + "/app-evento.png" });
   await browser.close();
 })();

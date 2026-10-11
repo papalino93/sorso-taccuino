@@ -62,7 +62,7 @@ function inviteMail({ to, circleName, byName, role, link, days }) {
     "Non conosci questa persona o non te lo aspettavi? Ignora questo messaggio: non succede niente se non apri il link.";
   const html = '<div style="font-family:Arial,Helvetica,sans-serif;font-size:15px;line-height:1.5;color:#1a1a1a;max-width:520px">' +
     "<p><b>" + esc(by) + "</b> ti ha invitato nella cerchia <b>«" + esc(circle) + "»</b> su Sorso, il taccuino di degustazione, come " + esc(ruolo) + ".</p>" +
-    '<p><a href="' + esc(link) + '" style="display:inline-block;background:#8c1d3f;color:#ffffff;text-decoration:none;padding:12px 20px;border-radius:999px;font-weight:bold">Apri l\'invito</a></p>' +
+    '<p><a href="' + esc(link) + '" style="display:inline-block;background:#2b4c7e;color:#ffffff;text-decoration:none;padding:12px 20px;border-radius:999px;font-weight:bold">Apri l\'invito</a></p>' +
     "<p>Accedi con Google usando questo indirizzo mail (" + esc(to) + "). L'invito vale " + days + " giorni e si usa una volta sola.</p>" +
     '<p style="color:#666;font-size:13px">Se il pulsante non funziona, copia questo link nel browser:<br>' + esc(link) + "</p>" +
     '<p style="color:#666;font-size:13px">Non conosci questa persona o non te lo aspettavi? Ignora questo messaggio: non succede niente se non apri il link.</p></div>';
