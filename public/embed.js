@@ -22,6 +22,7 @@
     partner: "", circle: "", token: "", session: "", user: null, config: null, fatal: null,
     view: "list", tab: "tastings", tastings: [], tasting: null, wines: [], quota: "ok",
     stats: null, statsLoading: false, statsError: null, gform: null,
+    nb: null, nbLoading: false, nbError: null, nbq: "", nbsort: "date", nbOnly: false,
     loading: true, loadError: null,
     sheet: null, drafts: {}, gdrafts: {}, form: null, confirm: null, pending: {}, saved: null, notice: null
   };
@@ -95,7 +96,12 @@
       w0: "difetto grave", w1: "gravemente carente", w2: "carente", w3: "scarso", w4: "mediocre", w5: "quasi sufficiente", w6: "sufficiente", w7: "discreto", w8: "buono", w9: "ottimo", w10: "eccellente",
       stTastingOne: "{n} degustazione chiusa", stTastingMany: "{n} degustazioni chiuse",
       sliderOf: "{name}, da {min} a {max}", asOrganizer: "Organizzatore", asMember: "Partecipante", loadFail: "Non riesco a caricare i dati.",
-      tabTastings: "Degustazioni", tabRanking: "Classifica", tabStats: "Statistiche", tabsLabel: "Sezioni",
+      tabTastings: "Degustazioni", tabRanking: "Classifica", tabStats: "Statistiche", tabsLabel: "Sezioni", tabNotebook: "Taccuino",
+      nbHeading: "Taccuino del team", nbHint: "Tutti i vini assaggiati insieme, con il tuo voto accanto alla media. Solo tu vedi i tuoi voti.", nbEmpty: "Ancora nessun vino: compariranno qui dopo la prima degustazione.",
+      nbWines: "Vini assaggiati", nbInTastings: "in {n} degustazioni", nbInOne: "in 1 degustazione", nbMyVotes: "I tuoi voti", nbMyAvg: "La tua media", nbTeamAvg: "Media del team", nbOnShared: "sui {n} vini votati da te e da altri",
+      nbApart: "Dove la pensi diversamente", nbAgree: "Dove siete d'accordo", nbSearch: "Cerca un vino, un produttore, una serata", nbSort: "Ordina", nbOnly: "Solo quelli che ho votato",
+      so_date: "Più recenti", so_team: "Media del team", so_mine: "Il mio voto", so_diff: "Differenza", nbYou: "Tu", nbTeam: "Team", nbNoVote: "non votato", nbHiddenAvg: "media non ancora visibile", nbNone: "Nessun vino trovato.",
+      nbCount: "{n} vini", nbOne: "1 vino", byGrapeHeading: "Media per vitigno",
       blindBadge: "alla cieca", revealedBadge: "svelata", blindLabel: "Vino {n}",
       blindCreate: "Alla cieca: i vini restano nascosti fino allo svelamento",
       blindNote: "Degustazione alla cieca: i vini restano nascosti finché l'organizzatore non li svela. Vota e prova a indovinare.",
@@ -198,7 +204,12 @@
       w0: "serious flaw", w1: "gravely lacking", w2: "lacking", w3: "poor", w4: "mediocre", w5: "nearly sufficient", w6: "sufficient", w7: "fair", w8: "good", w9: "very good", w10: "excellent",
       stTastingOne: "{n} closed tasting", stTastingMany: "{n} closed tastings",
       sliderOf: "{name}, from {min} to {max}", asOrganizer: "Organizer", asMember: "Participant", loadFail: "I can't load the data.",
-      tabTastings: "Tastings", tabRanking: "Ranking", tabStats: "Statistics", tabsLabel: "Sections",
+      tabTastings: "Tastings", tabRanking: "Ranking", tabStats: "Statistics", tabsLabel: "Sections", tabNotebook: "Notebook",
+      nbHeading: "Team notebook", nbHint: "Every wine tasted together, with your vote next to the average. Only you see your votes.", nbEmpty: "No wines yet: they will appear here after the first tasting.",
+      nbWines: "Wines tasted", nbInTastings: "in {n} tastings", nbInOne: "in 1 tasting", nbMyVotes: "Your votes", nbMyAvg: "Your average", nbTeamAvg: "Team average", nbOnShared: "on the {n} wines voted by you and others",
+      nbApart: "Where you disagree", nbAgree: "Where you agree", nbSearch: "Search a wine, a producer, an evening", nbSort: "Sort", nbOnly: "Only the ones I voted",
+      so_date: "Most recent", so_team: "Team average", so_mine: "My vote", so_diff: "Difference", nbYou: "You", nbTeam: "Team", nbNoVote: "not voted", nbHiddenAvg: "average not visible yet", nbNone: "No wine found.",
+      nbCount: "{n} wines", nbOne: "1 wine", byGrapeHeading: "Average by grape",
       blindBadge: "blind", revealedBadge: "revealed", blindLabel: "Wine {n}",
       blindCreate: "Blind: wines stay hidden until the reveal",
       blindNote: "Blind tasting: the wines stay hidden until the organizer reveals them. Vote and try to guess.",
@@ -241,12 +252,14 @@
       noTastingsOrg: "Crea la prima degustazione della cerchia: una serata con più vini o un solo vino.", closedNoVote: "Degustazione chiusa e non hai votato questo vino: la media della cerchia non è visibile.",
       teamAvg: "Media della cerchia", voteToSee: "Vota questo vino per vedere la media della cerchia.", eventsHint: "Le degustazioni chiuse della cerchia e il vino che ha vinto.",
       statsHint: "Dalle ultime {n} degustazioni chiuse della cerchia. Sono dati aggregati: nessuno vede chi ha votato cosa.", statsHintOne: "Dall'ultima degustazione chiusa della cerchia. Sono dati aggregati: nessuno vede chi ha votato cosa.",
-      teamHeading: "La cerchia", stAverage: "Media della cerchia", vsTeam: "Rispetto alla cerchia", sevSame: "In linea con la cerchia" },
+      teamHeading: "La cerchia", stAverage: "Media della cerchia", vsTeam: "Rispetto alla cerchia", sevSame: "In linea con la cerchia",
+      nbHeading: "Taccuino della cerchia", nbTeamAvg: "Media della cerchia", nbAgree: "Dove sei d'accordo con la cerchia", so_team: "Media della cerchia", nbTeam: "Cerchia" },
     en: { tastings: "Circle tastings", tastingsHint: "Created by the Owner and admins: every member can see them.", tastingsHintOrg: "The tastings you create here are visible to every member of the circle.",
       noTastingsOrg: "Create the circle's first tasting: an evening with several wines or just one wine.", closedNoVote: "The tasting is closed and you did not vote on this wine: the circle average is not visible.",
       teamAvg: "Circle average", voteToSee: "Vote on this wine to see the circle average.", eventsHint: "The circle's closed tastings and the wine that won.",
       statsHint: "From the circle's last {n} closed tastings. The data is aggregated: nobody sees who voted what.", statsHintOne: "From the circle's last closed tasting. The data is aggregated: nobody sees who voted what.",
-      teamHeading: "The circle", stAverage: "Circle average", vsTeam: "Compared to the circle", sevSame: "In line with the circle" }
+      teamHeading: "The circle", stAverage: "Circle average", vsTeam: "Compared to the circle", sevSame: "In line with the circle",
+      nbHeading: "Circle notebook", nbTeamAvg: "Circle average", nbAgree: "Where you agree with the circle", so_team: "Circle average", nbTeam: "Circle" }
   };
   function t(k, vars) {
     var d = TXT[S.lang] || TXT.it, dc = S.circle ? (TXT_CIRCLE[S.lang] || TXT_CIRCLE.it) : null;
@@ -420,6 +433,22 @@
     });
   }
 
+  var nbSeq = 0;
+  function loadNotebook() {
+    var my = ++nbSeq;
+    S.nbLoading = true; S.nbError = null; render();
+    return api({ op: "notebook" }).then(function (r) {
+      if (my !== nbSeq) return;
+      if (!r.notebook || !Array.isArray(r.notebook.rows)) throw mkErr("network");
+      S.nb = r.notebook; S.nbLoading = false; render();
+    }).catch(function (e) {
+      if (my !== nbSeq) return;
+      S.nbLoading = false;
+      if (e.status === 401) return handleError(e);
+      S.nbError = { text: errText(e) }; render();
+    });
+  }
+
   /* ---------------- accesso ---------------- */
   function cleanUrl() {
     try { history.replaceState({ v: "list" }, "", location.pathname + (S.circle ? "?c=" + encodeURIComponent(S.circle) : "?p=" + encodeURIComponent(S.partner))); } catch (e) { /* ok */ }
@@ -505,7 +534,7 @@
   }
 
   function tabsHtml() {
-    var tabs = [["tastings", "tabTastings"], ["ranking", "tabRanking"], ["stats", "tabStats"]];
+    var tabs = [["tastings", "tabTastings"], ["notebook", "tabNotebook"], ["ranking", "tabRanking"], ["stats", "tabStats"]];
     return '<nav class="tabs" aria-label="' + esc(t("tabsLabel")) + '">' + tabs.map(function (x) {
       var on = S.tab === x[0];
       return '<button type="button" class="tab' + (on ? " on" : "") + '" data-act="tab" data-tab="' + x[0] + '" data-fk="tab-' + x[0] + '"' + (on ? ' aria-current="page"' : "") + '>' + esc(t(x[1])) + '</button>';
@@ -572,8 +601,63 @@
     var maxW = Math.max.apply(null, st.distribution.map(function (b) { return b.wines; }).concat([1]));
     if (st.distribution.some(function (b) { return b.wines > 0; })) h += '<h4 class="grp">' + esc(t("distHeading")) + '</h4>' + st.distribution.map(function (b) { return bar(t("d_" + b.key), b.wines, maxW, String(b.wines)); }).join("");
     if (st.byType.length) h += '<h4 class="grp">' + esc(t("byTypeHeading")) + '</h4>' + st.byType.map(function (b) { return bar(t("tp_" + b.type), b.average, 100, dec(b.average)); }).join("");
+    if (st.byGrape && st.byGrape.length) h += '<h4 class="grp">' + esc(t("byGrapeHeading")) + '</h4>' + st.byGrape.map(function (b) { return bar(b.grape + " (" + b.wines + ")", b.average, 100, dec(b.average)); }).join("");
     var trend = st.events.filter(function (e) { return e.average != null; }).slice(0, 10).reverse();
     if (trend.length > 1) h += '<h4 class="grp">' + esc(t("trendHeading")) + '</h4>' + trend.map(function (e) { return bar(e.name, e.average, 100, dec(e.average)); }).join("");
+    return h;
+  }
+
+  /* taccuino del team / della cerchia: i vini assaggiati insieme, con il proprio voto e la media */
+  function nbMatch(r, q) {
+    if (!q) return true;
+    var hay = [r.wine.hidden ? t("blindLabel", { n: r.wine.index }) : r.wine.name, r.wine.producer, r.wine.vintage, r.wine.grape, r.tasting.name].join(" ").toLowerCase();
+    return q.toLowerCase().split(/\s+/).every(function (w) { return !w || hay.indexOf(w) >= 0; });
+  }
+  function nbDiffChip(d) {
+    if (d == null) return "";
+    var a = Math.abs(d), txt = a < 0.05 ? "=" : (d > 0 ? "+" : "−") + dec(a);
+    return '<span class="nb-diff' + (a >= 3 ? (d > 0 ? " up" : " down") : "") + '">' + esc(txt) + '</span>';
+  }
+  function nbMini(x) {
+    return '<li><button type="button" class="nb-mini" data-act="open" data-id="' + esc(x.tasting) + '"><span class="nm" dir="auto"><b>' + esc(nameOf(x.wine)) + '</b><span class="small muted" dir="auto">' + esc(x.tastingName) + '</span></span>' +
+      '<span class="nb-nums"><span>' + esc(t("nbYou")) + ' <b>' + x.mine + '</b></span><span>' + esc(t("nbTeam")) + ' <b>' + dec(x.team) + '</b></span>' + nbDiffChip(x.diff) + '</span></button></li>';
+  }
+  function viewNotebook() {
+    var h = '<div class="row spread"><h2 id="h-main" tabindex="-1">' + esc(t("nbHeading")) + '</h2>' + btn("refresh-nb", t("refresh"), { cls: "small ghost", fk: "refresh" }) + '</div>';
+    h += '<p class="muted small">' + esc(t("nbHint")) + '</p>';
+    if (S.nbError) return h + '<div class="card"><p class="err-text">' + esc(S.nbError.text) + '</p><div class="row">' + btn("refresh-nb", t("retry"), { cls: "primary", fk: "retry" }) + '</div></div>';
+    var nb = S.nb;
+    if (!nb) return h + '<p class="muted" aria-busy="true">' + esc(t("loading")) + '</p>';
+    if (!nb.rows.length) return h + '<p class="muted">' + esc(t("nbEmpty")) + '</p>';
+    var sm = nb.summary;
+    h += '<div class="score-line nb-tiles"><div class="tile"><div class="band">' + esc(t("nbWines")) + '</div><div class="big">' + sm.wines + '</div><div class="band">' + esc(sm.tastings === 1 ? t("nbInOne") : t("nbInTastings", { n: sm.tastings })) + '</div></div>' +
+      '<div class="tile hi"><div class="band">' + esc(t("nbMyAvg")) + '</div><div class="big">' + (sm.myAverage == null ? "—" : dec(sm.myAverage)) + '</div><div class="band">' + esc(t("nbMyVotes")) + ': ' + sm.votes + '</div></div></div>';
+    if (sm.shared) {
+      var d = Scoring.roundHalfUp(sm.mineOnShared - sm.teamOnShared, 1);
+      h += '<p class="chips"><span class="chip">' + esc(Math.abs(d) < 0.05 ? t("sevSame") : d < 0 ? t("sevMore", { n: dec(Math.abs(d)) }) : t("sevLess", { n: dec(d) })) + '</span> <span class="small muted">' +
+        esc(t("nbYou") + " " + dec(sm.mineOnShared) + " · " + t("nbTeam") + " " + dec(sm.teamOnShared) + " — " + t("nbOnShared", { n: sm.shared })) + '</span></p>';
+    }
+    if (sm.apart && sm.apart.length) h += '<h4 class="grp">' + esc(t("nbApart")) + '</h4><ul class="nb-minis">' + sm.apart.map(nbMini).join("") + '</ul>';
+    if (sm.agree && sm.agree.length) h += '<h4 class="grp">' + esc(t("nbAgree")) + '</h4><ul class="nb-minis">' + sm.agree.map(nbMini).join("") + '</ul>';
+    /* ricerca, ordinamento, filtro */
+    h += '<div class="nb-ctl"><label class="f" for="nb-q">' + esc(t("nbSearch")) + '</label><input type="search" id="nb-q" data-fk="nb-q" autocomplete="off" value="' + esc(S.nbq) + '">' +
+      '<div class="row spread nb-ctl2"><label class="small" for="nb-sort">' + esc(t("nbSort")) + ' <select id="nb-sort" data-fk="nb-sort">' + ["date", "team", "mine", "diff"].map(function (k) { return '<option value="' + k + '"' + (S.nbsort === k ? " selected" : "") + '>' + esc(t("so_" + k)) + '</option>'; }).join("") + '</select></label>' +
+      '<label class="check small"><input type="checkbox" id="nb-only" data-fk="nb-only"' + (S.nbOnly ? " checked" : "") + '> <span>' + esc(t("nbOnly")) + '</span></label></div></div>';
+    var rows = nb.rows.filter(function (r) { return (!S.nbOnly || r.mine != null) && nbMatch(r, S.nbq.trim()); });
+    var key = { date: function (r) { return r.tasting.createdAt; }, team: function (r) { return r.team == null ? -1 : r.team; }, mine: function (r) { return r.mine == null ? -1 : r.mine; },
+      diff: function (r) { return r.mine == null || r.team == null ? -1 : Math.abs(r.mine - r.team); } }[S.nbsort] || function (r) { return r.tasting.createdAt; };
+    rows = rows.slice().sort(function (a, b) { return key(b) - key(a) || b.tasting.createdAt - a.tasting.createdAt; });
+    h += '<p class="small muted" role="status">' + esc(rows.length === 1 ? t("nbOne") : t("nbCount", { n: rows.length })) + '</p>';
+    if (!rows.length) return h + '<p class="muted">' + esc(t("nbNone")) + '</p>';
+    h += '<ul class="nb-list">' + rows.slice(0, 300).map(function (r) {
+      var w = r.wine, sub = [w.hidden ? "" : w.producer, w.hidden ? "" : w.vintage].filter(Boolean).join(" · ");
+      var d = r.mine != null && r.team != null && r.count >= 2 ? r.mine - r.team : null;
+      return '<li><button type="button" class="card link nb-row" data-act="open" data-id="' + esc(r.tasting.id) + '" data-fk="nb-' + esc(r.tasting.id + "-" + w.id) + '">' +
+        '<span class="nm" dir="auto"><b>' + esc(nameOf(w)) + '</b>' + (sub ? '<span class="small muted" dir="auto">' + esc(sub) + '</span>' : "") +
+        '<span class="small muted" dir="auto">' + esc(r.tasting.name + " · " + whenText(r.tasting.createdAt)) + '</span></span>' +
+        '<span class="nb-nums"><span>' + esc(t("nbYou")) + ' <b>' + (r.mine == null ? "—" : r.mine) + '</b></span><span>' + esc(t("nbTeam")) + ' <b>' + (r.team == null ? "—" : dec(r.team)) + '</b></span>' +
+        (r.mine == null ? '<span class="small muted">' + esc(t("nbNoVote")) + '</span>' : r.team == null ? '<span class="small muted">' + esc(t("nbHiddenAvg")) + '</span>' : nbDiffChip(d)) + '</span></button></li>';
+    }).join("") + '</ul>';
     return h;
   }
 
@@ -581,6 +665,7 @@
     var org = isOrg(), h = head() + notices() + tabsHtml();
     if (S.tab === "ranking") return h + viewRanking();
     if (S.tab === "stats") return h + viewStats();
+    if (S.tab === "notebook") return h + viewNotebook();
     h += '<div class="row spread"><h2 id="h-main" tabindex="-1">' + esc(t("tastings")) + '</h2>' + btn("refresh", t("refresh"), { cls: "small ghost", fk: "refresh" }) + '</div>';
     h += '<p class="muted small">' + esc(t(org ? "tastingsHintOrg" : "tastingsHint")) + '</p>';
     if (S.loadError) return h + loadErrorHtml();
@@ -821,7 +906,7 @@
     else html = S.view === "tasting" && S.tasting ? viewTasting() : viewList();
     app.innerHTML = '<main>' + html + '</main>' + (S.circle ? "" : versionHtml());
     var logo = app.querySelector(".logo"); if (logo) logo.addEventListener("error", function () { logo.remove(); reportHeight(); });
-    var title = ((S.config && S.config.title) || "Sorso") + (S.user && !S.fatal ? " — " + (S.view === "tasting" && S.tasting ? S.tasting.name : t(S.tab === "ranking" ? "tabRanking" : S.tab === "stats" ? "tabStats" : "tastings")) : "");
+    var title = ((S.config && S.config.title) || "Sorso") + (S.user && !S.fatal ? " — " + (S.view === "tasting" && S.tasting ? S.tasting.name : t(S.tab === "ranking" ? "tabRanking" : S.tab === "stats" ? "tabStats" : S.tab === "notebook" ? "tabNotebook" : "tastings")) : "");
     if (title !== lastTitle) { document.title = title; lastTitle = title; }
     /* il focus resta dov'era: un lettore di schermo o chi usa la tastiera non riparte dall'inizio */
     var target = null;
@@ -847,6 +932,7 @@
 
   app.addEventListener("input", function (e) {
     var el = e.target, form = el.form;
+    if (el.id === "nb-q") { S.nbq = el.value; render(); return; }
     if (form && form.getAttribute("data-form") === "guess" && S.gform) { S.gform.vals = Object.assign(S.gform.vals, formVals(form)); S.gform.error = ""; return; }
     if (form && form.getAttribute("data-form") !== "vote" && form.getAttribute("data-form") !== "guess" && S.form) { S.form.vals = Object.assign(S.form.vals, formVals(form)); S.form.error = ""; return; }
     if (!S.sheet) return;
@@ -857,6 +943,11 @@
     else return;
     S.sheet.touched[el.id] = true; S.sheet.error = "";
     updateSheetReadout(el.id);
+  });
+  app.addEventListener("change", function (e) {
+    var el = e.target;
+    if (el.id === "nb-sort") { S.nbsort = el.value; render(); }
+    else if (el.id === "nb-only") { S.nbOnly = el.checked; render(); }
   });
   /* toccare il cursore senza spostarlo (o usare la tastiera) vale come dare quel giudizio */
   function markTouched(e) {
@@ -976,7 +1067,8 @@
       case "retry-login": return login();
       case "reauth": S.fatal.asked = true; askReauth("user"); render(); return;
       case "retry-load": return loadState(S.loadError && S.loadError.tasting);
-      case "tab": S.tab = b.getAttribute("data-tab"); S.notice = null; S.form = null; focusAfter("tab-" + S.tab); render(); if (S.tab !== "tastings") return loadStats(); return loadState("", true);
+      case "tab": S.tab = b.getAttribute("data-tab"); S.notice = null; S.form = null; focusAfter("tab-" + S.tab); render(); if (S.tab === "notebook") return loadNotebook(); if (S.tab !== "tastings") return loadStats(); return loadState("", true);
+      case "refresh-nb": return loadNotebook();
       case "refresh-stats": return loadStats();
       case "wine-status": return wineStatus(id);
       case "guess": { var gw = S.wines.filter(function (x) { return x.id === id; })[0]; if (!gw) return; var g0 = gw.guess || {}; stashGuess(); S.gform = { wine: id, vals: S.gdrafts[id] || { type: g0.type || "", grape: g0.grape || "", year: g0.year || "" }, error: "" }; delete S.gdrafts[id]; S.notice = null; S.saved = null; focusAfter("g-type"); return render(); }

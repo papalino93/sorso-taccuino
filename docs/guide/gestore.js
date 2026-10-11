@@ -144,7 +144,7 @@ function build() {
     <h1 class="d">La classifica, <em>poi i numeri</em></h1>
     <div style="display:grid;grid-template-columns:1fr 100mm;gap:7mm;align-items:start">
       <div>
-        <p class="lead">Nella serata compare la <b>Classifica</b>: i vini ordinati per media, con il pari merito dove serve.</p>
+        <p class="lead">Nella serata compare la <b>Classifica</b>: i vini ordinati per media, con il pari merito dove serve. Nel <b>Taccuino</b> ognuno ritrova tutti i vini assaggiati, col proprio voto accanto alla media.</p>
         ${ul(["Mentre la serata è aperta è <b>provvisoria</b>: conta solo ciò che hai già votato e i vini con almeno due voti.", "A serata chiusa diventa <b>finale</b>, uguale per tutti.", "La scheda <b>Statistiche</b> riassume le ultime 30 degustazioni chiuse del gruppo: vini più votati, medie, partecipazione.", "Sono sempre dati aggregati: nessuno vede chi ha votato cosa."])}
         ${call("<b>Per il tuo sito.</b> Classifica, statistiche ed elenco degli eventi sono disponibili anche con l'API, per chi cura il sito.")}
       </div>

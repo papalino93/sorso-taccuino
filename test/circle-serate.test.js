@@ -141,3 +141,41 @@ test("una sessione di partner non apre le cerchie; la pagina della cerchia si in
   assert.match(r.headers["content-security-policy"], /frame-ancestors 'self'/);
   assert.match(String(r.body), /embed\.js/);
 });
+
+test("taccuino della cerchia: i miei voti accanto alla media, con le stesse regole delle serate", async () => {
+  const cid = await scena();
+  const t1 = await ok(E, "anna", { op: "tasting.create", circle: cid, name: "Prima", wine: { name: "Barolo", producer: "Cascina", vintage: "2016", grape: "Nebbiolo" } });
+  const t2 = (await ok(E, "anna", { op: "tasting.create", circle: cid, name: "Seconda" })).tasting;
+  const wA = (await ok(E, "anna", { op: "wine.add", circle: cid, tasting: t2.id, wine: { name: "Chianti", grape: "Sangiovese" } })).wine;
+  const wB = (await ok(E, "anna", { op: "wine.add", circle: cid, tasting: t2.id, wine: { name: "Montepulciano" } })).wine;
+  await ok(E, "carla", Object.assign({ op: "vote", circle: cid, tasting: t1.tasting.id, wine: t1.wine.id }, smart(90, 90, 90)));
+  await ok(E, "bruno", Object.assign({ op: "vote", circle: cid, tasting: t1.tasting.id, wine: t1.wine.id }, smart(80, 80, 80)));
+  await ok(E, "bruno", Object.assign({ op: "vote", circle: cid, tasting: t2.id, wine: wA.id }, smart(70, 70, 70)));
+  await ok(E, "anna", Object.assign({ op: "vote", circle: cid, tasting: t2.id, wine: wA.id }, smart(72, 72, 72)));
+  const nb = (await ok(E, "carla", { op: "notebook", circle: cid })).notebook;
+  assert.equal(nb.rows.length, 3);
+  const row = n => nb.rows.find(r => r.wine.name === n);
+  assert.equal(row("Barolo").mine, 90); assert.equal(row("Barolo").team, 85); assert.equal(row("Barolo").count, 2);
+  assert.equal(row("Chianti").mine, null); assert.equal(row("Chianti").team, null, "serata aperta e non votato: media nascosta");
+  assert.equal(row("Montepulciano").team, null);
+  assert.equal(nb.summary.votes, 1); assert.equal(nb.summary.shared, 1); assert.equal(nb.summary.mineOnShared, 90); assert.equal(nb.summary.teamOnShared, 85);
+  assert.equal(nb.summary.apart.length, 1); assert.equal(nb.summary.apart[0].diff, 5);
+  /* chiusa la serata, la media del Chianti (2 voti) si vede anche a chi non ha votato */
+  await ok(E, "anna", { op: "tasting.status", circle: cid, tasting: t2.id, status: "closed" });
+  const nb2 = (await ok(E, "carla", { op: "notebook", circle: cid })).notebook;
+  assert.equal(nb2.rows.find(r => r.wine.name === "Chianti").team, 71);
+  assert.equal(nb2.rows.find(r => r.wine.name === "Montepulciano").team, null, "nessun voto: niente media");
+  assert.ok(!/Anna|Bruno|google:/.test(JSON.stringify(nb2)), "nessun dato degli altri");
+  /* alla cieca non svelata: il vino resta «Vino N» per i membri */
+  const b = (await ok(E, "anna", { op: "tasting.create", circle: cid, name: "Cieca", blind: true })).tasting;
+  await ok(E, "anna", { op: "wine.add", circle: cid, tasting: b.id, wine: { name: "Segretissimo" } });
+  const nb3 = (await ok(E, "carla", { op: "notebook", circle: cid })).notebook;
+  assert.ok(!/Segretissimo/.test(JSON.stringify(nb3))); assert.ok(nb3.rows.some(r => r.wine.hidden));
+  assert.ok(/Segretissimo/.test(JSON.stringify((await ok(E, "anna", { op: "notebook", circle: cid })).notebook)), "l'organizzatore vede i nomi");
+  /* statistiche per vitigno */
+  await redis.del("st:cerchie:" + cid);
+  await ok(E, "anna", { op: "tasting.status", circle: cid, tasting: t1.tasting.id, status: "closed" });
+  const st = (await ok(E, "carla", { op: "stats", circle: cid })).stats;
+  assert.deepEqual(st.byGrape.map(g => g.grape).sort(), ["Nebbiolo", "Sangiovese"]);
+  assert.equal(st.byGrape.find(g => g.grape === "Nebbiolo").average, 85);
+});

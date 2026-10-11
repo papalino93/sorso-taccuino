@@ -3,6 +3,10 @@
 La versione e la data dell'ultimo aggiornamento sono mostrate in fondo all'app e dello spazio di team
 (fonte: `public/js/version.js`, da tenere uguale a `package.json`).
 
+## 2.5.0 — 11 ottobre 2026
+- **Taccuino della cerchia** (e del team, nello spazio dei partner): nuova scheda «Taccuino» accanto a «Degustazioni». Tutti i vini assaggiati insieme, con il tuo voto accanto alla media della cerchia e la differenza; riepilogo (vini assaggiati, la tua media, quanto sei più generoso o severo della cerchia sui vini votati da te e da altri), «Dove la pensi diversamente» e «Dove sei d'accordo»; ricerca per vino, produttore, vitigno o serata, ordinamento (più recenti, media, il mio voto, differenza) e «Solo quelli che ho votato». Toccando un vino si apre la sua degustazione. Stesse regole delle serate: la media si vede dopo il tuo voto o a serata chiusa dal secondo voto, alla cieca il vino resta nascosto finché non viene svelato; solo i tuoi voti, mai quelli degli altri.
+- **Statistiche per vitigno** nelle statistiche della cerchia (e del team).
+
 ## 2.4.0 — 11 ottobre 2026
 - **Widget per i siti**: in fondo alla cerchia, «Widget per un sito» (Proprietario e amministratori). «Crea il widget», scegli lingua, tema (automatico, chiaro, scuro), sfondo trasparente, il tuo colore d'accento, quanti vini e cosa mostrare (i numeri della cerchia, i vini migliori, le ultime serate), guarda l'anteprima e «Copia il codice» da incollare nel sito. «Rinnova il link» e «Revoca» per spegnerlo.
 - Il widget: nome della cerchia, riquadri con serate, vini, voti e media, il vino preferito in evidenza con il podio dei migliori e le barre dei punteggi, la cronologia delle ultime serate con il vino preferito di ciascuna. Si adatta da solo a una colonna stretta o a una pagina larga, chiaro o scuro, e l'altezza si regola da sola. Solo medie anonime delle serate chiuse; fatto tutto sul server, senza script esterni, in cache per due minuti.

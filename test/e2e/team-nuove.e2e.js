@@ -31,7 +31,7 @@ const ok = (c, m) => { console.log((c ? "OK   " : "FAIL ") + m); if (!c) fails++
   /* --- l'organizzatore crea una degustazione alla cieca con due vini --- */
   const org = await open({ sub: "org", name: "Olga", role: "organizer" });
   const o = org.page;
-  ok(await o.locator(".tab").count() === 3, "tre sezioni: Degustazioni, Classifica, Statistiche");
+  ok(await o.locator(".tab").count() === 4, "quattro sezioni: Degustazioni, Taccuino, Classifica, Statistiche");
   await o.locator('[data-act="new-tasting"]').click();
   await o.locator("#f-name").fill("Alla cieca di giovedì");
   await o.locator('input[name="blind"]').check();
