@@ -3,6 +3,11 @@
 La versione e la data dell'ultimo aggiornamento sono mostrate in fondo all'app e dello spazio di team
 (fonte: `public/js/version.js`, da tenere uguale a `package.json`).
 
+## 2.6.0 — 11 ottobre 2026
+- **Lettura dell'etichetta molto più precisa su foto vere** (provata sulle prime foto mandate dall'utente): Sorso trova da solo l'etichetta nella foto e la ritaglia, ignorando strofinacci, legno, piastrelle e bottiglie accanto; la legge quattro volte con filtri diversi (anche il canale verde, che fa uscire le scritte rosse) e unisce le letture; corregge gli errori tipici confrontando con elenchi ampi di denominazioni, vitigni e cantine note («ORrCIA» → Orcia, «NTEFAL… \\GRANTI» → Montefalco Sagrantino, «RUFF] NO» → Ruffino). Una DOCG nota viene indicata come DOCG anche se la scritta è letta a metà; anni come «2O2O» diventano 2020; nomi senza senso e pezzi di numeri (gradazione) non vengono più proposti.
+- Prima e dopo, sulle tre foto di prova: Giovesone da «eso!» a «Orcia DOC · Sangiovese · 2020»; Mevante da «Mevant» a «Montefalco Sagrantino DOCG · Sagrantino»; Rosso di Marte da «Ross Arte» a «Ruffino · Marte».
+- Nuovo banco di prova `scripts/label-bench.js` per misurare la lettura su una cartella di foto.
+
 ## 2.5.0 — 11 ottobre 2026
 - **Taccuino della cerchia** (e del team, nello spazio dei partner): nuova scheda «Taccuino» accanto a «Degustazioni». Tutti i vini assaggiati insieme, con il tuo voto accanto alla media della cerchia e la differenza; riepilogo (vini assaggiati, la tua media, quanto sei più generoso o severo della cerchia sui vini votati da te e da altri), «Dove la pensi diversamente» e «Dove sei d'accordo»; ricerca per vino, produttore, vitigno o serata, ordinamento (più recenti, media, il mio voto, differenza) e «Solo quelli che ho votato». Toccando un vino si apre la sua degustazione. Stesse regole delle serate: la media si vede dopo il tuo voto o a serata chiusa dal secondo voto, alla cieca il vino resta nascosto finché non viene svelato; solo i tuoi voti, mai quelli degli altri.
 - **Statistiche per vitigno** nelle statistiche della cerchia (e del team).
