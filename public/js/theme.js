@@ -13,10 +13,11 @@
   var HEX_RE = /^#[0-9a-fA-F]{6}$/;
   var NERO = [0, 0, 0], BIANCO = [255, 255, 255];
 
-  /* ---- predefiniti: i colori del vino ----
-     chiaro: crema e bordeaux; scuro: nero con una punta di vino e un bordeaux acceso
-     (il bordeaux profondo, su nero, non si leggerebbe nei testi piccoli). */
+  /* ---- predefiniti: «Inchiostro» (scelto l'11 ottobre 2026) ----
+     chiaro: pietra e blu inchiostro; scuro: ardesia e lo stesso blu schiarito
+     (il blu profondo, sul fondo scuro, non si leggerebbe nei testi piccoli). */
   var ACCENTS = [
+    { id: "inchiostro", hex: "#2b4c7e" },
     { id: "vinaccia", hex: "#8c1d3f" },
     { id: "uva", hex: "#5b2eff" },
     { id: "bosco", hex: "#0f7a4d" },
@@ -26,16 +27,16 @@
     { id: "grafite", hex: "#2b2b33" }
   ];
   var BG_LIGHT = [
-    { id: "crema", hex: "#fbf4e6" }, { id: "carta", hex: "#fafaf7" }, { id: "bianco", hex: "#ffffff" },
+    { id: "pietra", hex: "#f6f6f3" }, { id: "crema", hex: "#fbf4e6" }, { id: "carta", hex: "#fafaf7" }, { id: "bianco", hex: "#ffffff" },
     { id: "salvia", hex: "#f2f6f1" }, { id: "nebbia", hex: "#f1f4f9" }
   ];
   var BG_DARK = [
-    { id: "cantina", hex: "#0f080b" }, { id: "nero", hex: "#08080b" }, { id: "grafite", hex: "#17181c" },
+    { id: "ardesia", hex: "#121418" }, { id: "cantina", hex: "#0f080b" }, { id: "nero", hex: "#08080b" }, { id: "grafite", hex: "#17181c" },
     { id: "notte", hex: "#0b1020" }, { id: "bosco", hex: "#0e1512" }
   ];
-  var DEFAULT_ACCENT = "#8c1d3f";
-  /* l'accento predefinito, sul fondo scuro, è un bordeaux più acceso scelto a mano */
-  var DEFAULT_ACCENT_DARK = "#c8385c";
+  var DEFAULT_ACCENT = "#2b4c7e";
+  /* l'accento predefinito, sul fondo scuro: lo stesso blu, schiarito quanto basta (è quello delle proposte) */
+  var DEFAULT_ACCENT_DARK = "#597299";
 
   /* ---- colori ---- */
   function hex2rgb(h) { return [1, 3, 5].map(function (i) { return parseInt(h.slice(i, i + 2), 16); }); }
@@ -75,7 +76,7 @@
     if (!dark && contrast(ink, bg) < 12) { bg = garantisci(bg, ink, BIANCO, 12); adjusted = true; }
     if (contrast(ink, bg) < 9) { ink = polo(bg); }
 
-    /* nel buio le schede prendono un velo del colore d'accento, così il fondo resta «vino» e non grigio */
+    /* nel buio le schede prendono un velo del colore d'accento, così il fondo non è un grigio piatto */
     var acc0 = hex2rgb(accentChosen ? opt.accent : (dark ? DEFAULT_ACCENT_DARK : DEFAULT_ACCENT));
     var velo = dark ? mix(ink, acc0, 0.3) : ink;
     var card = mix(bg, velo, dark ? 0.08 : 0.05);

@@ -3,6 +3,10 @@
 La versione e la data dell'ultimo aggiornamento sono mostrate in fondo all'app e dello spazio di team
 (fonte: `public/js/version.js`, da tenere uguale a `package.json`).
 
+## 2.2.1 — 11 ottobre 2026
+- **Nuovi colori predefiniti «Inchiostro»**: blu inchiostro su pietra di giorno, lo stesso blu schiarito su ardesia di notte (al posto di bordeaux su crema e ciliegia su nero-vino). Chi aveva scelto un colore lo tiene; il bordeaux resta tra i colori proposti («Vinaccia»), insieme ai fondi Crema e Cantina. Nuovi nomi: Inchiostro, Pietra, Ardesia.
+- Mail degli inviti con il pulsante nel nuovo blu; schermate delle guide rifatte con i colori nuovi.
+
 ## 2.2.0 — 11 ottobre 2026
 - **«Leggi l'etichetta»** in «Nuova»: dopo la foto, Sorso legge il testo dell'etichetta nel browser (Tesseract.js, la foto non esce dal dispositivo) e propone nome, produttore, annata, denominazione, tipologia (bollicine, passito, rosato) e vitigni; la gradazione viene segnalata. Ogni voce si controlla e si corregge; si applicano solo quelle spuntate, e quelle già compilate non sono spuntate (si vede cosa c'è ora nella scheda). Testo letto correggibile con «Analizza di nuovo». Se il testo è poco o incerto prova anche «chiaro su scuro». La prima volta scarica il motore (qualche MB), poi lo ricorda. Dal prototipo «lettore-etichette-vino».
 - **Barra in alto su PC più sobria**: tinta neutra appena diversa dalla pagina, bordo e ombra leggera (al posto del bordeaux pieno); l'accento resta sulla voce attiva.
