@@ -351,6 +351,14 @@ async function peekInvite(redis, user, body) {
   return { invite: { id: inv.id, circleId: circle.id, circleName: circle.name, role: inv.role, by: by ? by.name : "Un amico", exp: inv.exp, matches, emailMasked: maskEmail(inv.email) } };
 }
 
+/* Anteprima pubblica dell'invito, per chi apre il link senza aver ancora fatto l'accesso: chi lo manda, la cerchia,
+   il ruolo e l'indirizzo mascherato. Il codice del link (192 bit) è già la prova; niente elenchi, niente altri dati. */
+async function previewInvite(redis, _user, body) {
+  const { inv, circle } = await findInvite(redis, { email: "", verified: false }, body);
+  const by = (await getUsers(redis, [inv.by]))[inv.by];
+  return { invite: { circleName: circle.name, role: inv.role, by: by ? by.name : "Un amico", exp: inv.exp, emailMasked: maskEmail(inv.email) } };
+}
+
 async function acceptInvite(redis, user, body) {
   const first = await findInvite(redis, user, body);
   return locked(redis, first.circle.id, async () => {
@@ -435,8 +443,11 @@ const transfer = (redis, user, body) => locked(redis, body.circle, async () => {
 
 const WRITES = new Set(["create", "rename", "delete", "invite", "invite.resend", "invite.revoke", "invite.accept", "invite.decline", "member.role", "member.remove", "leave", "transfer"]);
 const OPS = {
-  list, create, get, rename, delete: remove, invite, "invite.revoke": revokeInvite, "invite.resend": resendInvite, "invite.peek": peekInvite,
+  list, create, get, rename, delete: remove, invite, "invite.revoke": revokeInvite, "invite.resend": resendInvite, "invite.peek": peekInvite, "invite.preview": previewInvite,
   "invite.accept": acceptInvite, "invite.decline": declineInvite, "member.role": setRole, "member.remove": removeMember, leave, transfer
 };
 
-module.exports = { OPS, WRITES, getUser, normEmail, emailHash, MAX_MEMBERS, MAX_OWNED, MAX_JOINED, INVITE_DAYS, K };
+/* operazioni che non chiedono l'accesso */
+const PUBLIC = new Set(["invite.preview"]);
+
+module.exports = { OPS, WRITES, PUBLIC, getUser, normEmail, emailHash, MAX_MEMBERS, MAX_OWNED, MAX_JOINED, INVITE_DAYS, K };

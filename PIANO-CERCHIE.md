@@ -1,6 +1,6 @@
 # Sorso — Piano delle cerchie
 
-Versione del piano: 9 ottobre 2026 · scritto dopo l'intervista con Andrea. **Stato: passo 0 fatto (1.9.2), passo 1 fatto (2.0.0), mail degli inviti e barra in alto in 2.1.0. Prossimo: serate (2.2.0).**
+Versione del piano: 9 ottobre 2026 · scritto dopo l'intervista con Andrea. **Stato: passo 0 fatto (1.9.2), passo 1 fatto (2.0.0), mail degli inviti e barra in alto in 2.1.0. Link d'invito, avviso spam e barra colorata in 2.1.1. Ordine scelto l'11 ottobre: prima il widget, poi la lettura delle etichette, per ultime le serate nelle cerchie (le versioni si numerano nell'ordine di uscita).**
 
 ## 1. Obiettivo
 

@@ -3,6 +3,11 @@
 La versione e la data dell'ultimo aggiornamento sono mostrate in fondo all'app e dello spazio di team
 (fonte: `public/js/version.js`, da tenere uguale a `package.json`).
 
+## 2.1.1 — 11 ottobre 2026
+- **Barra in alto su PC nel colore d'accento**: ora si stacca dalla pagina (bordeaux di default, oppure il colore scelto in «Aspetto e colori»), con testo e comandi a contrasto, in tema chiaro e scuro.
+- **Link d'invito**: chi apre il link senza aver fatto l'accesso vede subito chi lo invita, in quale cerchia e con quale ruolo (indirizzo mascherato), e il pulsante diventa «Accedi con Google e accetta l'invito»; dopo l'accesso arriva dritto alle Cerchie con l'invito pronto. Un invito scaduto, usato o falso lo dice chiaro. Nuova operazione pubblica `invite.preview` (solo cerchia, chi invita, ruolo, mail mascherata; limite 30 richieste al minuto per indirizzo IP).
+- **Mail in spam**: dopo ogni invio compare l'avviso «Controlla lo spam»; per ogni invito in attesa ci sono «Scrivi tu la mail» (apre la tua posta con testo e link già pronti: dalla tua casella non finisce in spam) e «Condividi» (WhatsApp, Telegram… dove il dispositivo lo consente).
+
 ## 2.1.0 — 11 ottobre 2026
 - **Barra in alto su PC** (ispirata a Team): marchio e sezioni (Nuova, Alla cieca, Taccuino, Statistiche, Cerchie) a sinistra; a destra Aspetto e colori, tema chiaro/scuro, lingua, Impostazioni e il menù dell'utente. Il punteggio e «Salva» restano nella colonna a sinistra. Su telefono non cambia.
 - **Menù utente**: ora si apre sotto la barra (prima, a PC, si apriva verso l'alto e restava coperto da «Salva»), e ha tre voci: Impostazioni, Aspetto e colori, Esci.

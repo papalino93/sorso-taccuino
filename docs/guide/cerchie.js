@@ -37,7 +37,7 @@ function build() {
     ${lato(`
         <p class="lead">Entra in una cerchia, scrivi uno o più indirizzi mail e premi <b>Crea gli inviti</b>.</p>
         ${ul(["L'invito è <b>legato a quell'indirizzo</b>: lo può usare solo chi accede con Google con la stessa mail.", "Compare nella sezione <b>Inviti</b> della persona, oppure puoi premere <b>Copia il link</b> e mandarglielo con WhatsApp o per mail.", "Vale <b>14 giorni</b>, si usa una volta sola e lo puoi <b>revocare</b> in ogni momento.", "Gli indirizzi Gmail con i punti o con «+etichetta» valgono come lo stesso indirizzo."])}
-        ${call("<b>La mail.</b> Se il servizio di posta è attivo, Sorso manda anche una mail all'indirizzo (puoi rimandarla fino a 3 volte); altrimenti l'app lo dice e il link lo mandi tu. In ogni caso l'invito aspetta la persona nel suo account.")}
+        ${call("<b>La mail.</b> Se il servizio di posta è attivo, Sorso manda anche una mail all'indirizzo (puoi rimandarla fino a 3 volte); altrimenti l'app lo dice e il link lo mandi tu. In ogni caso l'invito aspetta la persona nel suo account. <b>Può finire in spam:</b> avvisa chi inviti, oppure usa <b>Scrivi tu la mail</b> o <b>Condividi</b> (dalla tua posta o da WhatsApp arriva sempre).")}
         ${call("Dopo 14 giorni, o se lo revochi, il link smette di funzionare.", true)}`,
       fig("cerchie-invita.png", 1, "Il modulo per invitare e l'elenco degli <b>inviti in attesa</b>, con «Copia il link» e «Revoca».", "lg"))}
   `));
@@ -47,7 +47,7 @@ function build() {
     <h1 class="d">Un tocco <em>per entrare</em></h1>
     ${lato(`
         <p class="lead">Chi riceve un link apre Sorso, accede con Google e trova l'invito pronto.</p>
-        ${passi([["Apri il link", "Il codice sparisce dall'indirizzo."], ["Accedi", "Con la mail giusta."], ["Accetta", "Sei dentro."]])}
+        ${passi([["Apri il link", "Vedi chi ti invita e in quale cerchia."], ["Accedi", "Con la mail giusta."], ["Accetta", "Sei dentro."]])}
         ${ul(["Se accedi con un <b>altro account</b> Google, l'app lo dice (mostrando l'indirizzo solo in parte) e non ti fa entrare.", "Gli inviti si accettano o si rifiutano anche dalla scheda <b>Cerchie</b>, senza link.", "Un invito scaduto o già usato lo spiega con un messaggio chiaro."])}
         ${call("<b>Hai scelto la mail sbagliata?</b> Esci dall'account e accedi con quello giusto: l'invito è ancora lì.")}`,
       fig("cerchie-invito.png", 1, "L'invito aperto da un link: <b>Accetta</b> o <b>Rifiuta</b>.", "lg"))}

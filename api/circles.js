@@ -1,5 +1,5 @@
 const { getRedis } = require("./_redis");
-const { HttpError, parseBody, bearer, sendJson, sendError } = require("./_http");
+const { HttpError, parseBody, bearer, clientIp, sendJson, sendError } = require("./_http");
 const Quota = require("./_quota");
 const limit = require("./_limit");
 const C = require("./_circles");
@@ -21,6 +21,14 @@ module.exports = async (req, res) => {
   try {
     await Quota.ensure(redis);
     if (Quota.level() !== "ok") res.setHeader("X-Sorso-Quota", Quota.level());
+    /* l'anteprima dell'invito si può vedere senza accesso (chi apre il link dalla mail): limite per indirizzo IP */
+    const pre = parseBody(req);
+    if (typeof pre.op === "string" && C.PUBLIC.has(pre.op)) {
+      const rlp = await limit.hit(redis, "circp:" + clientIp(req), 30, 60);
+      if (!rlp.ok) { res.setHeader("Retry-After", String(rlp.retryAfter)); throw new HttpError(429, "rate_limited", "Troppe richieste: riprova fra poco."); }
+      sendJson(res, 200, await C.OPS[pre.op](redis, null, pre, {}));
+      return;
+    }
     const token = bearer(req);
     const username = token ? await redis.get("session:" + token) : null;
     if (!username) throw new HttpError(401, "session", "Sessione scaduta: accedi di nuovo.");

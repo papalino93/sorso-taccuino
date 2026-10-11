@@ -62,12 +62,19 @@ const TABS = ["new", "blind", "book", "stats", "circles", "settings"];
     /* il riquadro dei contenuti torna in cima quando si cambia scheda */
     await go(page, "stats", 1440); await page.evaluate(() => document.querySelector(".body").scrollTo(0, 600)); await go(page, "new", 1440);
     ok((await page.evaluate(() => document.querySelector(".body").scrollTop)) === 0, "cambiando scheda si riparte dall'alto");
-    /* punteggio 96+: il rail non diventa illeggibile (marchio e comandi restano scuri sul fondo chiaro) */
+    /* punteggio 96+: la barra in alto resta nel colore d'accento e tutto ciò che ci sta sopra si legge */
     await page.click('#modeTopWrap button[data-modalita="smart"]');
     await page.evaluate(() => document.querySelectorAll("[data-smart-range]").forEach(el => { el.value = 100; el.dispatchEvent(new Event("input", { bubbles: true })); }));
     await page.waitForTimeout(250);
-    const fl = await page.evaluate(() => ({ flood: document.querySelector(".hdr").classList.contains("flood"), brand: getComputedStyle(document.querySelector(".brand-name")).color, panel: getComputedStyle(document.querySelector(".panel")).getPropertyValue("--panel").trim() }));
-    ok(fl.flood && fl.brand !== "rgb(255, 255, 255)", "punteggio 100: marchio leggibile nel menù (" + fl.brand + ")");
+    const fl = await page.evaluate(() => {
+      const root = document.getElementById("root"), bar = getComputedStyle(document.querySelector(".panel"), "::after").backgroundColor, cs = e => getComputedStyle(document.querySelector(e));
+      return { flood: document.querySelector(".hdr").classList.contains("flood"), bar, root: getComputedStyle(root).getPropertyValue("--sel-bg").trim(),
+        txt: [".brand-name", "#nav button:not(.on) .lbl", ".hdr-ctrl .lang-switch button:not(.on)", ".hdr-ctrl .gear-btn"].map(e => cs(e).color), on: [cs("#nav button.on .lbl").color, cs("#nav button.on").backgroundColor] };
+    });
+    const rgbOf = c => c.match(/\d+(\.\d+)?/g).slice(0, 3).map(Number);
+    ok(fl.flood, "punteggio 100: rail a tutto colore");
+    ok(fl.bar !== "rgba(0, 0, 0, 0)" && fl.bar === (await page.evaluate(h => { const d = document.createElement("i"); d.style.color = h; document.body.appendChild(d); const c = getComputedStyle(d).color; d.remove(); return c; }, fl.root)), "la barra in alto è nel colore d'accento (" + fl.bar + ")");
+    ok(fl.txt.every(c => ct([c, 0, 0, fl.bar]) >= 3.2) && ct([fl.on[0], 0, 0, fl.on[1]]) >= 4.5, "marchio, voci e comandi si leggono sulla barra " + fl.txt.join(" | "));
     await page.click("#resetBtn");
     /* Impostazioni */
     await go(page, "settings", 1440);
