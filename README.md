@@ -1,6 +1,6 @@
 # Sorso — Taccuino di degustazione
 
-Versione corrente: **2.0.0** — ultimo aggiornamento: 9 ottobre 2026 (cronologia in `CHANGELOG.md`). La versione e la data si leggono anche in fondo all'app e dello spazio di team.
+Versione corrente: **2.1.0** — ultimo aggiornamento: 11 ottobre 2026 (cronologia in `CHANGELOG.md`). La versione e la data si leggono anche in fondo all'app e dello spazio di team.
 
 App per registrare degustazioni di vino con scheda di valutazione, statistiche personali, degustazioni alla cieca ed eventi condivisi.
 
@@ -41,6 +41,19 @@ Un sito esterno può incorporare Sorso come spazio di team: i suoi utenti votano
 - **Partner**: si creano a mano con `node scripts/partner.js create <id> --name "..." --origin https://...` (servono le variabili del database nell'ambiente). Il segreto e la chiave compaiono una volta sola.
 - **Costo**: pensato per il piano gratuito di Redis (500.000 comandi al mese). Un voto costa circa 12 comandi, un caricamento della degustazione circa 8. Il consumo si legge con `node scripts/usage.js`; all'80% le risposte portano `X-Sorso-Quota: warn`, al 90% le scritture si fermano (sola lettura).
 - **Prova in locale**: `node test/helpers/dev-server.js` avvia il tutto con un Redis finto; `node test/e2e/team.e2e.js` prova il flusso nel browser con un finto sito partner.
+
+## Mail degli inviti (cerchie)
+
+Sorso non ha un server di posta: per mandare le mail degli inviti usa un servizio esterno, scelto con variabili d'ambiente del progetto Vercel (Settings → Environment Variables, poi un nuovo deploy). Senza variabili le mail non partono e l'app dice di copiare il link.
+
+| Variabile | A cosa serve |
+|---|---|
+| `MAIL_FROM` | mittente, per esempio `Sorso <inviti@tuodominio.it>` (obbligatoria) |
+| `RESEND_API_KEY` | chiave di [Resend](https://resend.com): per scrivere a chiunque serve un dominio tuo verificato (record DNS) |
+| `BREVO_API_KEY` | chiave di [Brevo](https://brevo.com) (300 mail al giorno gratis): basta verificare l'indirizzo del mittente, senza dominio |
+| `APP_ORIGIN` | (facoltativa) indirizzo del sito nei link, di default `https://sorso-taccuino.vercel.app` |
+
+Ne basta uno fra Resend e Brevo. Le chiavi non vanno mai in chat né nel repository.
 
 ## Guida all'uso
 

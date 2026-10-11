@@ -1,6 +1,7 @@
 const crypto = require("crypto");
 const { HttpError, cleanText } = require("./_http");
 const limit = require("./_limit");
+const mail = require("./_mail");
 
 /* Le cerchie: gruppi di persone (amici, colleghi, corsisti) con un Proprietario, degli
    Amministratori e dei Membri. Un invito è legato a un indirizzo mail: lo può accettare solo
@@ -22,6 +23,9 @@ const MAX_JOINED = 20;           // cerchie di cui una persona fa parte
 const INVITE_DAYS = 14;
 const MAX_INVITES_PER_CALL = 10;
 const MAX_INVITES_PER_DAY = 100; // per cerchia
+const MAIL_PER_INVITER_DAY = 30;        // mail di invito al giorno per chi invita
+const MAIL_PER_RECIPIENT_DAY = 5;       // mail al giorno verso lo stesso indirizzo (da qualunque cerchia)
+const MAX_RESENDS = 3;                  // quante volte si può rimandare la mail di uno stesso invito
 const MAX_PENDING_PER_RECIPIENT = 20;   // inviti in attesa verso lo stesso indirizzo (anti-spam)
 const ROLES = ["owner", "admin", "member"];
 const sleep = ms => new Promise(r => setTimeout(r, ms));
@@ -158,7 +162,7 @@ async function list(redis, user) {
     if (orfane.length) { const d = redis.pipeline(); orfane.forEach(id => { d.srem(K.cu(user.username), id); d.srem(K.co(user.username), id); }); await d.exec(); }
     circles.sort((a, b) => a.name.localeCompare(b.name, "it"));
   }
-  return { circles, invites: await myInvites(redis, user), limits: { maxMembers: MAX_MEMBERS, maxOwned: MAX_OWNED, maxJoined: MAX_JOINED } };
+  return { circles, invites: await myInvites(redis, user), limits: { maxMembers: MAX_MEMBERS, maxOwned: MAX_OWNED, maxJoined: MAX_JOINED }, mail: mail.enabled() };
 }
 
 async function myInvites(redis, user) {
@@ -190,6 +194,7 @@ async function get(redis, user, body) {
     .sort((a, b) => ROLES.indexOf(a.role) - ROLES.indexOf(b.role) || a.name.localeCompare(b.name, "it"));
   const out = { circle: { id: circle.id, name: circle.name, role: me.role, createdAt: circle.createdAt, members: members.length }, members };
   if (me.role !== "member") {
+    out.mail = mail.enabled();
     const hv = asObject(await redis.hgetall(K.cv(circle.id)));
     await dropExpired(redis, circle.id, hv);
     out.invites = Object.values(hv).map(parse).filter(i => i && i.exp > Date.now())
@@ -234,7 +239,7 @@ const remove = (redis, user, body) => locked(redis, body.circle, async () => {
 });
 
 /* ---- inviti ---- */
-const invite = (redis, user, body) => locked(redis, body.circle, async () => {
+const inviteCore = (redis, user, body) => locked(redis, body.circle, async () => {
   const { circle, me } = await requireRole(redis, user, body.circle, "admin");
   const role = body.role === "admin" ? "admin" : "member";
   if (role === "admin" && me.role !== "owner") throw forbidden("Solo il Proprietario può invitare un amministratore.");
@@ -253,7 +258,7 @@ const invite = (redis, user, body) => locked(redis, body.circle, async () => {
   const pending = Object.values(hv).map(parse).filter(i => i && i.exp > Date.now());
   const byEmail = new Map(pending.map(i => [i.email, i]));
   let count = Object.keys(hm).length + pending.length;
-  const results = [], seen = new Set();
+  const results = [], seen = new Set(), toMail = [];
   for (const raw of list) {
     const email = normEmail(raw);
     if (!email) { results.push({ email: String(raw).slice(0, 80), status: "invalid" }); continue; }
@@ -271,10 +276,42 @@ const invite = (redis, user, body) => locked(redis, body.circle, async () => {
     p.set(K.cl(inv.token), circle.id + "|" + inv.id, { ex: INVITE_DAYS * 86400 });
     p.sadd(K.ce(inv.eh), circle.id + "|" + inv.id);
     await p.exec();
-    results.push({ email, status: "invited", id: inv.id, token: inv.token, exp: inv.exp });
+    const row = { email, status: "invited", id: inv.id, token: inv.token, exp: inv.exp };
+    results.push(row);
+    toMail.push({ row, inv });
   }
-  return { results };
+  return { results, circle: { id: circle.id, name: circle.name }, toMail };
 });
+
+/* La mail dell'invito (se è configurato un servizio di posta). Si manda DOPO aver creato gli inviti e
+   fuori dal blocco; ogni persona ha dei limiti, così Sorso non diventa un modo per fare spam. */
+async function mailInvite(redis, user, circle, inv, ctx) {
+  if (!mail.enabled()) return "off";
+  const a = await limit.hit(redis, "cmail:u:" + user.username, MAIL_PER_INVITER_DAY, 86400);
+  const b = await limit.hit(redis, "cmail:r:" + inv.eh, MAIL_PER_RECIPIENT_DAY, 86400);
+  if (!a.ok || !b.ok) return "limited";
+  const link = ((ctx && ctx.origin) || "") + "/?invito=" + inv.token;
+  const r = await mail.send(mail.inviteMail({ to: inv.email, circleName: circle.name, byName: user.name, role: inv.role, link, days: INVITE_DAYS }));
+  return r.sent ? "sent" : "failed";
+}
+async function invite(redis, user, body, ctx) {
+  const out = await inviteCore(redis, user, body);
+  const rows = await Promise.all(out.toMail.map(({ row, inv }) => mailInvite(redis, user, out.circle, inv, ctx).then(m => { row.mail = m; })));
+  void rows;
+  return { results: out.results, mail: mail.enabled() };
+}
+
+/* «Rimanda la mail»: per un invito ancora valido, al massimo 3 volte */
+async function resendInvite(redis, user, body, ctx) {
+  const { circle } = await requireRole(redis, user, body.circle, "admin");
+  const inv = typeof body.invite === "string" && ID.test(body.invite) ? parse(await redis.hget(K.cv(circle.id), body.invite)) : null;
+  if (!inv || inv.exp < Date.now()) throw notFound("Invito");
+  if (!mail.enabled()) return { mail: "off" };
+  if ((inv.sent || 1) >= MAX_RESENDS + 1) return { mail: "limited" };
+  const m = await mailInvite(redis, user, circle, inv, ctx);
+  if (m === "sent") { inv.sent = (inv.sent || 1) + 1; await redis.hset(K.cv(circle.id), { [inv.id]: JSON.stringify(inv) }); }
+  return { mail: m };
+}
 
 async function dropInvite(redis, circleId, inv) {
   const p = redis.pipeline();
@@ -396,9 +433,9 @@ const transfer = (redis, user, body) => locked(redis, body.circle, async () => {
   return { owner: body.member };
 });
 
-const WRITES = new Set(["create", "rename", "delete", "invite", "invite.revoke", "invite.accept", "invite.decline", "member.role", "member.remove", "leave", "transfer"]);
+const WRITES = new Set(["create", "rename", "delete", "invite", "invite.resend", "invite.revoke", "invite.accept", "invite.decline", "member.role", "member.remove", "leave", "transfer"]);
 const OPS = {
-  list, create, get, rename, delete: remove, invite, "invite.revoke": revokeInvite, "invite.peek": peekInvite,
+  list, create, get, rename, delete: remove, invite, "invite.revoke": revokeInvite, "invite.resend": resendInvite, "invite.peek": peekInvite,
   "invite.accept": acceptInvite, "invite.decline": declineInvite, "member.role": setRole, "member.remove": removeMember, leave, transfer
 };
 

@@ -1,6 +1,6 @@
 # Sorso — cosa devi fare tu per il partner
 
-Aggiornata il 9 ottobre 2026 · **Sorso 2.0.0**.
+Aggiornata l'11 ottobre 2026 · **Sorso 2.1.0**.
 
 **Dove siamo.** Il sito, l'app personale (con la vista da PC) e lo spazio di team per il partner sono pronti e online. Test automatici: tutti verdi. Le quattro guide PDF sono aggiornate (l'ultima è la guida all'uso dentro il profilo). **La prova sul database vero è stata fatta l'8 ottobre 2026 e non ha trovato difetti** (vedi il punto 2). **Per completare l'API mancano solo le cose che dipendono dal partner (punti 1, 4, 5, 6, 7, 8): il codice è finito.**
 
@@ -33,7 +33,7 @@ Fatta sul sito e sul database di produzione con un partner di prova, poi cancell
 ### 3. Guarda Sorso 1.9.1 con i tuoi occhi  ☐  *(10 minuti)*
 Aprilo su telefono e su PC, con il browser che usi di solito: https://sorso-taccuino.vercel.app/
 - **Telefono:** provi un Voto rapido e una Scheda completa, salvi, li ritrovi nel Taccuino? L'ingranaggio in alto apre le Impostazioni?
-- **PC:** menù a sinistra, Taccuino con elenco e dettaglio, Statistiche: tutto in vista senza scorrere troppo?
+- **PC:** barra in alto (sezioni a sinistra; Aspetto, tema, lingua, impostazioni e utente a destra), Taccuino con elenco e dettaglio, Statistiche: tutto in vista senza scorrere troppo?
 - **Colori:** crema e bordeaux di giorno, nero e ciliegia di notte; in Impostazioni la scelta Chiaro / Scuro / Automatico.
 - Se qualcosa non ti convince, mandami lo screenshot così com'è.
 
@@ -106,7 +106,7 @@ Capitolo «Prima di andare online» della guida di integrazione. In breve: l'ifr
 - Scala 50–100 con arrotondamento classico, Voto rapido e Scheda completa, migrazione delle schede.
 - Spazio di team per il partner (iframe con token firmato), API di lettura, limiti, quota, cancellazione dei dati.
 - Nuovo design, colori scelti dall'utente, **colori del vino come predefiniti**, tema Chiaro / Scuro / Automatico.
-- **Vista da PC** (menù a sinistra, due colonne, elenco + dettaglio) e pagina **Impostazioni**.
+- **Vista da PC** (barra in alto, punteggio a sinistra, due colonne, elenco + dettaglio) e pagina **Impostazioni**.
 - Nuovo favicon e logo.
 - Quattro guide PDF con la nuova grafica.
 - **Spazio di team completo**: degustazioni, **alla cieca** (con svelamento), **classifica**, **statistiche**, e la **chiusura della votazione di un singolo vino** (media su chi ha votato fino a quel momento, per i vini assaggiati solo da alcuni).

@@ -19,7 +19,7 @@ function build() {
     <p class="lead">Sorso è il tuo taccuino: fotografi l'etichetta, dai il voto, e ritrovi ogni vino con le statistiche del tuo palato.</p>
     ${stats([["50–100", "la scala<br>del voto"], ["2", "modi di votare:<br>rapido o completo"], ["5", "sezioni:<br>Nuova · Alla cieca · Taccuino · Statistiche · Cerchie"], ["0 €", "il costo<br>dell'app"]])}
     ${cards([["Nuova", "Una scheda per ogni vino: etichetta, dati, giudizio. Il punteggio si calcola da solo."], ["Alla cieca", "Assaggi senza guardare l'etichetta e provi a indovinare. Poi confronti."], ["Taccuino", "Tutte le tue schede: cerchi, ordini, confronti due vini, modifichi."], ["Statistiche", "Il tuo profilo: vitigni preferiti, come giudichi, quanto conta il prezzo."], ["Cerchie", "Gruppi di amici, colleghi o corsisti: inviti per mail e tre ruoli. Le serate di gruppo arrivano presto."], ["Impostazioni", "Colori, tema chiaro o scuro, copia dei dati, account e questa guida."]])}
-    <p class="mute">Funziona dal telefono e dal computer. Sul telefono le sezioni sono nella barra in alto; sul computer, nel menu a sinistra.</p>
+    <p class="mute">Funziona dal telefono e dal computer. Sul telefono le sezioni sono nella barra in alto; sul computer, nella barra in alto.</p>
   `));
 
   P.push(pg("ink", "Il punteggio", `
@@ -97,7 +97,7 @@ function build() {
     ${eyebrow("08", "Impostazioni")}
     <h1 class="d">Tutto sul tuo profilo, <em>in un posto</em></h1>
     ${lato(`
-        <p class="lead">Si apre dall'ingranaggio in alto; sul computer anche dal menu a sinistra.</p>
+        <p class="lead">Si apre dall'ingranaggio in alto (e dal menù del tuo avatar); sul computer c'è anche il pulsante «Aspetto e colori».</p>
         ${table(["Sezione", "A cosa serve"], [["<b>Nome del taccuino</b>", "Il titolo (per esempio «Sorso di vino») e di chi è («il taccuino di Mario Rossi»): compare in alto. Con «Ripristina» torni a Sorso."], ["<b>Aspetto</b>", "Tema <b>Chiaro</b>, <b>Scuro</b> o <b>Automatico</b> (segue il tuo dispositivo). Colore d'accento e sfondo a scelta."], ["<b>Come voti di solito</b>", "Con quale modo si apre ogni nuova scheda: l'ultima usata, Voto rapido o Scheda completa."], ["<b>Il tuo archivio</b>", "<b>Salva copia</b> scarica un file con le tue schede; <b>Ripristina da copia</b> le rimette a posto."], ["<b>Guida</b>", "Questo documento, sempre a portata di mano."], ["<b>Account</b>", "Accedi con Google per ritrovare le schede ovunque; esci quando vuoi."]], [1])}
         ${call("Il testo resta sempre leggibile: se scegli un colore troppo chiaro o troppo scuro, l'app lo corregge leggermente e te lo dice.")}`,
       fig("app-impostazioni.png", 1, "Le <b>Impostazioni</b>: l'aspetto in alto; voto, archivio, guida e account più sotto.", "lg"))}
@@ -106,7 +106,7 @@ function build() {
   P.push(pg("paper", "Dal computer", `
     ${eyebrow("09", "Dal computer")}
     <h1 class="d">Più spazio, <em>tutto in vista</em></h1>
-    <p class="lead">Su schermi larghi le sezioni stanno nel menu a sinistra e il contenuto si dispone su due colonne, per vedere tutto senza scorrere.</p>
+    <p class="lead">Su schermi larghi le sezioni stanno in una barra in alto (con Aspetto e colori, tema, lingua, impostazioni e avatar) e il contenuto va su due colonne, per vedere tutto senza scorrere.</p>
     ${wide("desk-taccuino.png", 1, "<b>Taccuino</b> sul computer: l'elenco a sinistra, la scheda del vino scelto a destra.")}
     ${wide("desk-nuova.png", 2, "<b>Nuova</b> sul computer: i dati a sinistra, il giudizio a destra.")}
   `));

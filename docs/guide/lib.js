@@ -132,7 +132,7 @@ ul.l li::before { content: ""; position: absolute; left: .6mm; top: 1.9mm; width
 .ink .cap .nb { background: var(--lilac); color: var(--night); }
 .fig { display: flex; flex-direction: column; align-items: center; }
 .fig .cap { max-width: 56mm; }
-.wide { margin: 3mm auto 2mm; width: 138mm; }
+.wide { margin: 3mm auto 2mm; width: 132mm; }
 .wide .scr { border: .3mm solid var(--line); border-radius: 2.4mm; overflow: hidden; background: #fff; }
 .wide .scr img { width: 100%; display: block; }
 .ink .wide .scr { border-color: rgba(231,132,157,.4); }
