@@ -35,7 +35,8 @@ async function start(opts) {
     "/api/embed-page": require("../../api/embed-page"),
     "/api/v1": require("../../api/v1"),
     "/api/circles": require("../../api/circles"),
-    "/api/db": require("../../api/db")
+    "/api/db": require("../../api/db"),
+    "/api/widget": require("../../api/widget")
   };
   const secret = opts.secret || "d".repeat(64);
   const apiKey = P.newApiKey("demo");
@@ -57,6 +58,7 @@ async function start(opts) {
         const m = /^\/api\/v1(?:\/(.*))?$/.exec(route);
         if (m) { route = "/api/v1"; search = "?path=" + encodeURIComponent(m[1] || "") + (u.search ? "&" + u.search.slice(1) : ""); }
         if (route === "/embed") route = "/api/embed-page";
+        if (route === "/widget") route = "/api/widget";
         if (handlers[route]) {
           req.url = route + search;
           req.query = Object.fromEntries(new URL(req.url, "http://x").searchParams);

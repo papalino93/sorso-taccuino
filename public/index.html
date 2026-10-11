@@ -664,6 +664,14 @@
   .card-head .eyebrow{min-width:0;overflow-wrap:anywhere;line-height:1.3;}
   #circNewName,#circEmails{min-height:44px;}
   #pane-new .evt-card{display:none !important;}
+  .wdg-opts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;}
+  .wdg-show{display:flex;flex-wrap:wrap;gap:4px 16px;}
+  @media (max-width:520px){ .wdg-opts{grid-template-columns:1fr 1fr;} }
+  .wdg-show-lab{margin:10px 0 0;}
+  .wdg-check{display:flex;gap:8px;align-items:center;font-size:13.5px;margin:8px 0;color:var(--ink-2);}
+  .wdg-check input{width:20px;height:20px;accent-color:var(--sel-bg);}
+  .wdg-code{font:12px/1.4 ui-monospace,Menlo,Consolas,monospace;min-height:110px;}
+  .wdg-prev{display:block;width:100%;max-width:640px;height:320px;border:1px dashed var(--line-strong);border-radius:12px;margin-top:6px;background:transparent;}
   .circ-frame{display:block;width:100%;height:420px;border:0;background:transparent;color-scheme:normal;}
   .circ-serate-head{margin-top:14px;margin-bottom:4px;}
   #circSerate,#circMore{scroll-margin-top:72px;}
@@ -2574,6 +2582,13 @@ const I18N = {
     "circ.leave":"Esci dalla cerchia", "circ.leaveAsk":"Uscire da «{circle}»? Per tornare servirà un nuovo invito.", "circ.left":"Sei uscito dalla cerchia.",
     "circ.delete":"Elimina la cerchia", "circ.deleteAsk":"Per eliminare la cerchia per tutti scrivi il suo nome. Non si può annullare:", "circ.deleted":"Cerchia eliminata.",
     "circ.ownerHint":"Il Proprietario nomina gli amministratori, passa la proprietà ed elimina la cerchia.", "circ.adminHint":"Gli amministratori invitano e tolgono i membri.",
+    "wdg.title":"Widget per un sito", "wdg.active":"attivo", "wdg.hint":"Mostra su un sito (per esempio quello del club o della scuola) la classifica e le serate chiuse di questa cerchia: solo medie anonime, in sola lettura. Puoi revocarlo quando vuoi.",
+    "wdg.create":"Crea il widget", "wdg.rows":"Quanti vini", "wdg.show":"Cosa mostrare", "wdg.s.totals":"I numeri della cerchia", "wdg.s.top":"I vini migliori", "wdg.s.events":"Le ultime serate", "wdg.lang":"Lingua", "wdg.theme":"Tema", "wdg.th.auto":"Automatico", "wdg.th.light":"Chiaro", "wdg.th.dark":"Scuro",
+    "wdg.transparent":"Sfondo trasparente (prende quello del sito)", "wdg.accent":"Usa il mio colore d'accento", "wdg.code":"Codice da incollare nel sito",
+    "wdg.copy":"Copia il codice", "wdg.open":"Apri il widget", "wdg.rotate":"Rinnova il link", "wdg.revoke":"Revoca", "wdg.preview":"Anteprima",
+    "wdg.created":"Widget creato: copia il codice e incollalo nel sito.", "wdg.rotated":"Link rinnovato: il vecchio codice non funziona più, incolla quello nuovo.", "wdg.revoked":"Widget revocato: sui siti non si vede più (entro un paio di minuti).",
+    "wdg.copied":"Codice copiato.", "wdg.copyFailed":"Non riesco a copiare: seleziona il testo e copialo a mano.",
+    "wdg.rotateAsk":"Rinnovare il link? Il codice già incollato nei siti smetterà di funzionare.", "wdg.revokeAsk":"Revocare il widget? Sui siti non si vedrà più.",
     "circ.serate":"Serate e degustazioni", "circ.serateTitle":"Serate della cerchia {circle}",
     "circ.data":"I voti e i dati", "circ.dataHint":"I voti sono anonimi: nella cerchia si vedono solo medie e conteggi. Puoi cancellare i tuoi voti di questa cerchia; Proprietario e amministratori possono scaricare le medie di tutte le serate.",
     "circ.exportCsv":"Scarica CSV", "circ.exportJson":"Scarica JSON", "circ.exported":"File scaricato.", "circ.exportFailed":"Non riesco a scaricare il file.",
@@ -3150,6 +3165,13 @@ const I18N = {
     "circ.leave":"Leave the circle", "circ.leaveAsk":"Leave “{circle}”? You'll need a new invitation to come back.", "circ.left":"You left the circle.",
     "circ.delete":"Delete the circle", "circ.deleteAsk":"To delete the circle for everyone, type its name. This cannot be undone:", "circ.deleted":"Circle deleted.",
     "circ.ownerHint":"The Owner appoints admins, transfers ownership and deletes the circle.", "circ.adminHint":"Admins invite people and remove members.",
+    "wdg.title":"Widget for a website", "wdg.active":"active", "wdg.hint":"Shows this circle's ranking and closed evenings on a website (for example the club's or the school's): only anonymous averages, read-only. You can revoke it at any time.",
+    "wdg.create":"Create the widget", "wdg.rows":"How many wines", "wdg.show":"What to show", "wdg.s.totals":"The circle's numbers", "wdg.s.top":"Best wines", "wdg.s.events":"Latest evenings", "wdg.lang":"Language", "wdg.theme":"Theme", "wdg.th.auto":"Automatic", "wdg.th.light":"Light", "wdg.th.dark":"Dark",
+    "wdg.transparent":"Transparent background (takes the site's)", "wdg.accent":"Use my accent colour", "wdg.code":"Code to paste into the site",
+    "wdg.copy":"Copy the code", "wdg.open":"Open the widget", "wdg.rotate":"Renew the link", "wdg.revoke":"Revoke", "wdg.preview":"Preview",
+    "wdg.created":"Widget created: copy the code and paste it into the site.", "wdg.rotated":"Link renewed: the old code no longer works, paste the new one.", "wdg.revoked":"Widget revoked: it no longer shows on websites (within a couple of minutes).",
+    "wdg.copied":"Code copied.", "wdg.copyFailed":"I can't copy: select the text and copy it by hand.",
+    "wdg.rotateAsk":"Renew the link? The code already pasted into websites will stop working.", "wdg.revokeAsk":"Revoke the widget? It will no longer show on websites.",
     "circ.serate":"Evenings and tastings", "circ.serateTitle":"Evenings of the circle {circle}",
     "circ.data":"Votes and data", "circ.dataHint":"Votes are anonymous: the circle only sees averages and counts. You can delete your votes in this circle; the Owner and admins can download the averages of every evening.",
     "circ.exportCsv":"Download CSV", "circ.exportJson":"Download JSON", "circ.exported":"File downloaded.", "circ.exportFailed":"I can't download the file.",
@@ -6785,6 +6807,68 @@ function circDetailHTML(){
     (owner ? '<div class="backup-actions"><button type="button" class="pill-ghost" data-circ="rename">'+esc(t("circ.rename"))+'</button></div>' : "")+'</div>';
   return h;
 }
+/* Widget per un sito: link di sola lettura, colori e lingua a scelta, codice da incollare */
+function circWidgetOpts(){
+  if(!CIRC.wopt) CIRC.wopt = {lang:S.lang === "en" ? "en" : "it", theme:"auto", transparent:false, accent:true, rows:"5", top:true, events:true, totals:true};
+  return CIRC.wopt;
+}
+function circWidgetUrl(token){
+  const o = circWidgetOpts(), q = new URLSearchParams({t:token});
+  if(o.lang === "en") q.set("lang", "en");
+  if(o.theme !== "auto") q.set("theme", o.theme);
+  if(o.transparent) q.set("bg", "none");
+  if(o.rows !== "5") q.set("rows", o.rows);
+  const show = ["top","events","totals"].filter(k => o[k]);
+  if(show.length && show.length < 3) q.set("show", show.join(","));
+  const acc = (S.look && S.look.accent) || "";
+  if(o.accent && /^#[0-9a-f]{6}$/i.test(acc)) q.set("accent", acc.slice(1).toLowerCase());
+  return location.origin + "/widget?" + q.toString();
+}
+function circWidgetCode(token, name){
+  const url = circWidgetUrl(token), o = location.origin;
+  return '<iframe src="'+url+'" title="'+String("Sorso — "+name).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]))+'" style="width:100%;max-width:640px;height:520px;border:0" loading="lazy"></iframe>\n'+
+    '<script>addEventListener("message",function(e){if(e.origin!=="'+o+'"||!e.data||e.data.type!=="sorso:widget-height")return;document.querySelectorAll(\'iframe[src^="'+o+'/widget"]\').forEach(function(f){if(f.contentWindow===e.source)f.style.height=e.data.height+"px"})});<\/script>';
+}
+function circWidgetHTML(d){
+  const w = d.widget, o = circWidgetOpts();
+  let h = '<div class="card circ-card-gap" id="circWidget"><div class="card-head"><span class="eyebrow">'+esc(t("wdg.title"))+'</span><span class="fill"></span>'+(w ? '<span class="status">'+esc(t("wdg.active"))+'</span>' : '')+'</div>'+
+    '<p class="note-line">'+esc(t("wdg.hint"))+'</p>';
+  if(!w) return h + '<div class="backup-actions"><button type="button" class="pill-solid" data-circ="wdg-create">'+esc(t("wdg.create"))+'</button></div></div>';
+  const sel = (id, cur, opts) => '<span class="sel-wrap"><select class="sel" id="'+id+'" data-wopt="'+id+'">'+opts.map(x => '<option value="'+x[0]+'"'+(cur === x[0] ? " selected" : "")+'>'+esc(x[1])+'</option>').join("")+'</select></span>';
+  h += '<div class="wdg-opts">'+
+    '<label class="fld"><span class="fld-lab">'+esc(t("wdg.lang"))+'</span>'+sel("wdgLang", o.lang, [["it","Italiano"],["en","English"]])+'</label>'+
+    '<label class="fld"><span class="fld-lab">'+esc(t("wdg.theme"))+'</span>'+sel("wdgTheme", o.theme, [["auto",t("wdg.th.auto")],["light",t("wdg.th.light")],["dark",t("wdg.th.dark")]])+'</label>'+
+    '<label class="fld"><span class="fld-lab">'+esc(t("wdg.rows"))+'</span>'+sel("wdgRows", o.rows, [["3","3"],["5","5"],["10","10"]])+'</label></div>'+
+    '<p class="fld-lab wdg-show-lab">'+esc(t("wdg.show"))+'</p><div class="wdg-show">'+
+    ["totals","top","events"].map(k => '<label class="wdg-check"><input type="checkbox" data-wopt="wdgShow_'+k+'"'+(o[k] ? " checked" : "")+'> '+esc(t("wdg.s."+k))+'</label>').join("")+'</div>'+
+    '<label class="wdg-check"><input type="checkbox" id="wdgTransparent" data-wopt="wdgTransparent"'+(o.transparent ? " checked" : "")+'> '+esc(t("wdg.transparent"))+'</label>'+
+    '<label class="wdg-check"><input type="checkbox" id="wdgAccent" data-wopt="wdgAccent"'+(o.accent ? " checked" : "")+'> '+esc(t("wdg.accent"))+'</label>'+
+    '<label class="fld"><span class="fld-lab">'+esc(t("wdg.code"))+'</span><textarea class="ta wdg-code" id="wdgCode" readonly rows="5">'+esc(circWidgetCode(w.token, d.circle.name))+'</textarea></label>'+
+    '<div class="backup-actions"><button type="button" class="pill-solid" data-circ="wdg-copy">'+esc(t("wdg.copy"))+'</button>'+
+    '<a class="pill-ghost" href="'+esc(circWidgetUrl(w.token))+'" target="_blank" rel="noopener" id="wdgOpen">'+esc(t("wdg.open"))+'</a>'+
+    '<button type="button" class="pill-ghost" data-circ="wdg-rotate">'+esc(t("wdg.rotate"))+'</button>'+
+    '<button type="button" class="pill-danger" data-circ="wdg-revoke">'+esc(t("wdg.revoke"))+'</button></div>'+
+    '<p class="lbl-now">'+esc(t("wdg.preview"))+'</p><iframe class="wdg-prev" id="wdgPreview" src="'+esc(circWidgetUrl(w.token))+'" title="'+esc(t("wdg.preview"))+'"></iframe></div>';
+  return h;
+}
+/* le opzioni del widget aggiornano codice, anteprima e link senza ridisegnare la scheda */
+document.addEventListener("change", e => {
+  const k = e.target && e.target.dataset && e.target.dataset.wopt; if(!k || !CIRC.detail || !CIRC.detail.widget) return;
+  const o = circWidgetOpts();
+  if(k === "wdgLang") o.lang = e.target.value; if(k === "wdgTheme") o.theme = e.target.value;
+  if(k === "wdgTransparent") o.transparent = e.target.checked; if(k === "wdgAccent") o.accent = e.target.checked;
+  if(k === "wdgRows") o.rows = e.target.value;
+  if(k.indexOf("wdgShow_") === 0){
+    const key = k.slice(8); o[key] = e.target.checked;
+    if(!o.top && !o.events && !o.totals){ o[key] = true; e.target.checked = true; }   // almeno un blocco
+  }
+  const w = CIRC.detail.widget, url = circWidgetUrl(w.token);
+  $("wdgCode").value = circWidgetCode(w.token, CIRC.detail.circle.name); $("wdgOpen").href = url; $("wdgPreview").src = url;
+});
+window.addEventListener("message", e => {
+  const f = $("wdgPreview");
+  if(f && e.source === f.contentWindow && e.data && e.data.type === "sorso:widget-height" && Number.isFinite(e.data.height)) f.style.height = Math.max(160, Math.min(1400, Math.ceil(e.data.height))) + "px";
+});
 /* la parte di gestione della cerchia, sotto le serate: persone, inviti, i tuoi voti, esportazione, uscita */
 function circMoreHTML(){
   const d = CIRC.detail, c = d.circle, owner = c.role === "owner", admin = c.role !== "member";
@@ -6822,6 +6906,7 @@ function circMoreHTML(){
     '<p class="note-line">'+esc(t("circ.dataHint"))+'</p><div class="backup-actions">'+
     (admin ? '<button type="button" class="pill-ghost" data-circ="export-csv">'+esc(t("circ.exportCsv"))+'</button><button type="button" class="pill-ghost" data-circ="export-json">'+esc(t("circ.exportJson"))+'</button>' : '')+
     '<button type="button" class="pill-danger" data-circ="myvotes">'+esc(t("circ.myVotes"))+'</button></div></div>';
+  if(admin) h += circWidgetHTML(d);
   h += '<div class="card circ-card-gap"><div class="backup-actions">'+
     (owner ? '<button type="button" class="pill-danger" data-circ="delete">'+esc(t("circ.delete"))+'</button>' : '<button type="button" class="pill-danger" data-circ="leave">'+esc(t("circ.leave"))+'</button>')+'</div></div>';
   return h;
@@ -6846,6 +6931,23 @@ document.addEventListener("click", (e) => {
         else circDownload(base + ".json", JSON.stringify(r.json, null, 2), "application/json");
         circSay("circ.exported", null, false);
       }catch(err){ circSayErr(err); }
+      renderCircles(); return;
+    }
+    if(a === "wdg-create" || a === "wdg-rotate"){
+      if(a === "wdg-rotate" && !confirm(t("wdg.rotateAsk"))) return;
+      try{ const r = await circApi({op:"widget.create", circle:c, rotate:a === "wdg-rotate"}); CIRC.detail.widget = r.widget; circSay(a === "wdg-rotate" ? "wdg.rotated" : "wdg.created", null, false); }
+      catch(err){ circSayErr(err); }
+      renderCircles(); return;
+    }
+    if(a === "wdg-revoke"){
+      if(!confirm(t("wdg.revokeAsk"))) return;
+      try{ await circApi({op:"widget.revoke", circle:c}); CIRC.detail.widget = null; circSay("wdg.revoked", null, false); }
+      catch(err){ circSayErr(err); }
+      renderCircles(); return;
+    }
+    if(a === "wdg-copy"){
+      try{ await navigator.clipboard.writeText($("wdgCode").value); circSay("wdg.copied", null, false); }
+      catch(err){ try{ $("wdgCode").select(); }catch(e2){} circSay("wdg.copyFailed", null, true); }
       renderCircles(); return;
     }
     if(a === "myvotes"){

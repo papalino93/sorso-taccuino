@@ -48,7 +48,8 @@ async function locked(redis, cid, fn) {
 
 const K = {
   ci: c => "ci:" + c, cm: c => "cm:" + c, cu: u => "cu:" + u, co: u => "co:" + u,
-  cv: c => "cv:" + c, ce: h => "ce:" + h, cl: t => "cl:" + t
+  cv: c => "cv:" + c, ce: h => "ce:" + h, cl: t => "cl:" + t,
+  cw: c => "cw:" + c, wt: t => "wt:" + t          // widget: la cerchia → {token,…}; il token → la cerchia
 };
 const ID = /^[0-9a-f]{10}$/, TOKEN = /^[0-9a-f]{48}$/, MID = /^[0-9a-f]{12}$/;
 const rid = () => crypto.randomBytes(5).toString("hex");
@@ -201,6 +202,8 @@ async function get(redis, user, body) {
     out.invites = Object.values(hv).map(parse).filter(i => i && i.exp > Date.now())
       .map(i => ({ id: i.id, email: i.email, role: i.role, exp: i.exp, token: i.token, by: (i.by === user.username ? "tu" : ((users[i.by] || {}).name || "")) }))
       .sort((a, b) => b.exp - a.exp);
+    const w = parse(await redis.get(K.cw(circle.id)));
+    out.widget = w && TOKEN.test(w.token) ? { token: w.token, createdAt: w.at } : null;
   }
   return out;
 }
@@ -235,6 +238,9 @@ const remove = (redis, user, body) => locked(redis, body.circle, async () => {
   Object.keys(hm).forEach(u => p.srem(K.co(u), circle.id));
   Object.values(hv).map(parse).filter(Boolean).forEach(i => { p.del(K.cl(i.token)); p.srem(K.ce(i.eh), circle.id + "|" + i.id); });
   p.del(K.ci(circle.id)); p.del(K.cm(circle.id)); p.del(K.cv(circle.id));
+  const wg = parse(await redis.get(K.cw(circle.id)));
+  if (wg && TOKEN.test(wg.token)) p.del(K.wt(wg.token));
+  p.del(K.cw(circle.id));
   await p.exec();
   await Team.deleteTeam(redis, CIRCLE_PARTNER.id, circle.id);   // le serate della cerchia, con i voti
   return { deleted: circle.id };
@@ -443,11 +449,11 @@ const transfer = (redis, user, body) => locked(redis, body.circle, async () => {
   return { owner: body.member };
 });
 
-const WRITES = new Set(["votes.delete", "create", "rename", "delete", "invite", "invite.resend", "invite.revoke", "invite.accept", "invite.decline", "member.role", "member.remove", "leave", "transfer"]);
+const WRITES = new Set(["widget.create", "widget.revoke", "votes.delete", "create", "rename", "delete", "invite", "invite.resend", "invite.revoke", "invite.accept", "invite.decline", "member.role", "member.remove", "leave", "transfer"]);
 const OPS = {
   list, create, get, rename, delete: remove, invite, "invite.revoke": revokeInvite, "invite.resend": resendInvite, "invite.peek": peekInvite, "invite.preview": previewInvite,
   "invite.accept": acceptInvite, "invite.decline": declineInvite, "member.role": setRole, "member.remove": removeMember, leave, transfer,
-  "votes.delete": deleteMyVotes, export: exportCircle
+  "votes.delete": deleteMyVotes, export: exportCircle, "widget.create": widgetCreate, "widget.revoke": widgetRevoke
 };
 
 /* ---- serate della cerchia: lo stesso motore dello spazio di team (api/_team.js) ----
@@ -494,7 +500,38 @@ async function exportCircle(redis, user, body) {
   return { csv, json };
 }
 
+/* ---- widget per i siti: un link di sola lettura con le statistiche della cerchia (api/widget.js) ----
+   Uno per cerchia; lo creano e lo revocano Proprietario e amministratori. Mostra solo aggregati. */
+function widgetCreate(redis, user, body) { return locked(redis, body.circle, async () => {
+  const { circle } = await requireRole(redis, user, body.circle, "admin");
+  const old = parse(await redis.get(K.cw(circle.id)));
+  if (old && TOKEN.test(old.token) && body.rotate !== true) return { widget: { token: old.token, createdAt: old.at } };
+  const token = crypto.randomBytes(24).toString("hex"), at = Date.now();
+  const p = redis.pipeline();
+  if (old && TOKEN.test(old.token)) p.del(K.wt(old.token));
+  p.set(K.wt(token), circle.id); p.set(K.cw(circle.id), JSON.stringify({ token, by: user.username, at }));
+  await p.exec();
+  return { widget: { token, createdAt: at } };
+}); }
+function widgetRevoke(redis, user, body) { return locked(redis, body.circle, async () => {
+  const { circle } = await requireRole(redis, user, body.circle, "admin");
+  const old = parse(await redis.get(K.cw(circle.id)));
+  const p = redis.pipeline();
+  if (old && TOKEN.test(old.token)) p.del(K.wt(old.token));
+  p.del(K.cw(circle.id));
+  await p.exec();
+  return { revoked: !!old };
+}); }
+/* per la pagina pubblica del widget: dal token alla cerchia (null se revocato o inesistente) */
+async function widgetCircle(redis, token) {
+  if (typeof token !== "string" || !TOKEN.test(token)) return null;
+  const cid = await redis.get(K.wt(token));
+  if (!cid || !ID.test(String(cid))) return null;
+  const c = parse(await redis.get(K.ci(String(cid))));
+  return c ? { id: c.id, name: c.name } : null;
+}
+
 /* operazioni che non chiedono l'accesso */
 const PUBLIC = new Set(["invite.preview"]);
 
-module.exports = { OPS, WRITES, PUBLIC, CIRCLE_PARTNER, embedContext, getUser, normEmail, emailHash, MAX_MEMBERS, MAX_OWNED, MAX_JOINED, INVITE_DAYS, K };
+module.exports = { OPS, WRITES, PUBLIC, CIRCLE_PARTNER, embedContext, widgetCircle, getUser, normEmail, emailHash, MAX_MEMBERS, MAX_OWNED, MAX_JOINED, INVITE_DAYS, K };

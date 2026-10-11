@@ -1,6 +1,6 @@
 # Sorso — Piano delle cerchie
 
-Versione del piano: 9 ottobre 2026 · scritto dopo l'intervista con Andrea. **Stato: passo 0 fatto (1.9.2), passo 1 fatto (2.0.0), mail degli inviti e barra in alto in 2.1.0. Link d'invito, avviso spam e barra colorata in 2.1.1. Lettura delle etichette in 2.2.0, colori «Inchiostro» in 2.2.1, serate nelle cerchie in 2.3.0. Prossimo: il widget.**
+Versione del piano: 9 ottobre 2026 · scritto dopo l'intervista con Andrea. **Stato: passo 0 fatto (1.9.2), passo 1 fatto (2.0.0), mail degli inviti e barra in alto in 2.1.0. Link d'invito, avviso spam e barra colorata in 2.1.1. Lettura delle etichette in 2.2.0, colori «Inchiostro» in 2.2.1, serate nelle cerchie in 2.3.0, widget in 2.4.0. Prossimo: storico e taccuino della cerchia (i tuoi voti accanto a quelli della cerchia, statistiche più ricche).**
 
 ## 1. Obiettivo
 
@@ -75,7 +75,7 @@ Creare/rinominare/eliminare cerchie; inviti legati alla mail con link copiabile,
 Le serate (anche alla cieca, chiusura del singolo vino, classifica, statistiche) dentro la cerchia con la sessione interna; ritiro della scheda Evento e conversione dei vecchi eventi; esportazione CSV/JSON delle statistiche di gruppo per gli amministratori; «Cancella i miei voti».
 *Fine passo: una serata completa di cerchia, dall'invito alla classifica, e un CSV corretto.*
 
-**Passo 3 — prossimo: widget per i siti.**
+**Passo 3 — 2.4.0 ✅ fatto: widget per i siti.**
 Link di sola lettura revocabile; pagina del widget (classifica, medie, serate, nei colori del sito, con un frammento HTML da incollare); solo aggregati; limiti di richieste. Guida in PDF.
 *Fine passo: il widget funziona incollato in una pagina di prova e smette di funzionare appena revocato.*
 
