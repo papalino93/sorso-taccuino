@@ -3,6 +3,11 @@
 La versione e la data dell'ultimo aggiornamento sono mostrate in fondo all'app e dello spazio di team
 (fonte: `public/js/version.js`, da tenere uguale a `package.json`).
 
+## 2.2.0 — 11 ottobre 2026
+- **«Leggi l'etichetta»** in «Nuova»: dopo la foto, Sorso legge il testo dell'etichetta nel browser (Tesseract.js, la foto non esce dal dispositivo) e propone nome, produttore, annata, denominazione, tipologia (bollicine, passito, rosato) e vitigni; la gradazione viene segnalata. Ogni voce si controlla e si corregge; si applicano solo quelle spuntate, e quelle già compilate non sono spuntate (si vede cosa c'è ora nella scheda). Testo letto correggibile con «Analizza di nuovo». Se il testo è poco o incerto prova anche «chiaro su scuro». La prima volta scarica il motore (qualche MB), poi lo ricorda. Dal prototipo «lettore-etichette-vino».
+- **Barra in alto su PC più sobria**: tinta neutra appena diversa dalla pagina, bordo e ombra leggera (al posto del bordeaux pieno); l'accento resta sulla voce attiva.
+- **Tavolozza ≠ ingranaggio**: la tavolozza apre un pannello rapido sotto la barra (colore d'accento e sfondo, si applicano subito, Esc per chiudere, «Tutte le opzioni dei colori»); l'ingranaggio porta alle Impostazioni.
+
 ## 2.1.1 — 11 ottobre 2026
 - **Barra in alto su PC nel colore d'accento**: ora si stacca dalla pagina (bordeaux di default, oppure il colore scelto in «Aspetto e colori»), con testo e comandi a contrasto, in tema chiaro e scuro.
 - **Link d'invito**: chi apre il link senza aver fatto l'accesso vede subito chi lo invita, in quale cerchia e con quale ruolo (indirizzo mascherato), e il pulsante diventa «Accedi con Google e accetta l'invito»; dopo l'accesso arriva dritto alle Cerchie con l'invito pronto. Un invito scaduto, usato o falso lo dice chiaro. Nuova operazione pubblica `invite.preview` (solo cerchia, chi invita, ruolo, mail mascherata; limite 30 richieste al minuto per indirizzo IP).

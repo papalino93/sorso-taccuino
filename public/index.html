@@ -180,6 +180,18 @@
   .label-thumb{width:64px;height:80px;flex:none;border-radius:4px;border:1px solid var(--line);overflow:hidden;background:var(--card-alt);}
   .label-thumb img{width:100%;height:100%;object-fit:cover;display:block;}
   .label-name{font:500 13.5px/1.3 'Geist','Inter';color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .lbl-read{margin-top:12px;padding:12px 14px;border-radius:14px;background:var(--card-alt);font-size:13px;line-height:1.5;color:var(--ink);}
+  .lbl-bar{height:6px;border-radius:6px;background:var(--line);overflow:hidden;margin-top:8px;}
+  .lbl-bar i{display:block;height:100%;width:0;background:var(--sel-bg);transition:width .2s;}
+  .lbl-row{display:grid;grid-template-columns:auto 92px minmax(0,1fr);gap:8px;align-items:center;margin:8px 0;}
+  .lbl-row input[type=checkbox]{width:20px;height:20px;accent-color:var(--sel-bg);}
+  .lbl-row label.lab{font:600 11px/1.2 'Geist','Inter';letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);}
+  .lbl-row .in-line{min-width:0;width:100%;}
+  .lbl-row .lbl-now{grid-column:2 / -1;font-size:11.5px;color:var(--ink-4);margin-top:-4px;}
+  .lbl-raw{margin-top:8px;}
+  .lbl-raw textarea{width:100%;min-height:90px;border-radius:10px;border:1px solid var(--line-strong);background:var(--field);color:var(--ink);padding:8px;font:13px/1.4 'Geist','Inter';}
+  .lbl-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;}
+  .lbl-actions .pill-solid,.lbl-actions .pill-ghost,.lbl-read .pill-solid,.lbl-read .pill-ghost{min-height:44px;}
 
   /* campi a filo: niente riquadri, solo una riga sotto — stile editoriale */
   .in-title{width:100%;padding:2px 0 9px;border:0;border-bottom:1px solid var(--line-strong);background:none;
@@ -933,6 +945,12 @@
   .set-grid{display:flex;flex-direction:column;gap:12px;}
   .gear-btn{width:44px;height:44px;border-radius:50%;border:1.5px solid var(--line-strong);background:none;color:var(--ink-3);display:grid;place-items:center;cursor:pointer;padding:0;}
   .look-btn{display:none;}
+  .look-wrap{position:relative;display:flex;}
+  .look-pop{position:absolute;top:calc(100% + 8px);right:0;z-index:70;width:280px;background:var(--panel);border:1px solid var(--line-strong);border-radius:12px;box-shadow:0 10px 26px rgba(0,0,0,.3);padding:12px;}
+  .look-pop.hidden{display:none;}
+  .look-pop-t{margin:2px 0 8px;font:600 10.5px/1.2 'Geist','Inter';letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3);}
+  .look-pop .swatches{margin-bottom:12px;}
+  .look-pop .avatar-menu-item{border-top:1px solid var(--line);border-radius:0 0 7px 7px;padding-top:11px;}
   .gear-btn[aria-pressed=true]{background:var(--sel-bg);color:var(--sel-fg);border-color:var(--sel-bg);}
   .brand{align-items:center;}
   .brand-logo{width:28px;height:28px;border-radius:8px;flex:none;display:block;}
@@ -983,25 +1001,13 @@
     .hdr-score{grid-column:1;grid-row:3;z-index:1;margin:10px 14px 0;padding:14px 8px 4px;flex-wrap:wrap;align-items:flex-end;gap:6px 12px;border-radius:24px;}
     .hdr-num{font-size:100px;}
     .hdr.flood .hdr-score{background:var(--accent);padding:16px 18px 14px;}
-    /* la barra è nel colore d'accento (--sel-bg) con testo --sel-fg: si stacca dalla pagina e segue i colori scelti */
-    #root .panel::after{background:var(--sel-bg);border-bottom:0;}
-    #root .panel .brand-name{color:var(--sel-fg);}
-    #root .panel .brand-tag{color:var(--sel-fg);opacity:.74;}
-    #root .panel .brand:hover .brand-tag{color:var(--sel-fg);opacity:1;}
-    #root .panel .nav .lbl{color:var(--sel-fg);opacity:.86;}
-    #root .panel .nav button:hover:not(.on){background:color-mix(in srgb,var(--sel-fg) 16%,transparent);}
-    #root .panel .nav button:hover:not(.on) .lbl{opacity:1;}
-    #root .panel .nav button.on{background:var(--sel-fg);}
-    #root .panel .nav button.on .lbl{color:var(--sel-bg);opacity:1;}
-    #root .panel .hdr-ctrl .lang-switch,#root .panel .hdr-ctrl .theme-switch{border:1.5px solid color-mix(in srgb,var(--sel-fg) 50%,transparent);}
-    #root .panel .hdr-ctrl .lang-switch button,#root .panel .hdr-ctrl .theme-switch button{color:var(--sel-fg);opacity:.82;}
-    #root .panel .hdr-ctrl .lang-switch button.on,#root .panel .hdr-ctrl .theme-switch button.on{background:var(--sel-fg);color:var(--sel-bg);opacity:1;}
-    #root .panel .hdr-ctrl .gear-btn{border:1.5px solid color-mix(in srgb,var(--sel-fg) 50%,transparent);color:var(--sel-fg);background:none;}
-    #root .panel .hdr-ctrl .gear-btn:hover{background:color-mix(in srgb,var(--sel-fg) 16%,transparent);}
-    #root .panel .hdr-ctrl .gear-btn[aria-pressed=true]{background:var(--sel-fg);color:var(--sel-bg);border-color:var(--sel-fg);}
-    #root .panel .hdr-ctrl .avatar-btn{background:var(--sel-fg);color:var(--sel-bg);border:0;}
-    #root .panel .hdr-ctrl .avatar-btn.guest{background:none;color:var(--sel-fg);border:1.5px dashed color-mix(in srgb,var(--sel-fg) 60%,transparent);}
-    #root .panel .brand:focus-visible,#root .panel .nav button:focus-visible,#root .panel .hdr-ctrl .lang-switch button:focus-visible,#root .panel .hdr-ctrl .theme-switch button:focus-visible,#root .panel .hdr-ctrl .gear-btn:focus-visible,#root .panel .hdr-ctrl .avatar-btn:focus-visible{outline-color:var(--sel-fg);}
+    /* la barra si stacca dalla pagina con una tinta neutra (5% d'inchiostro sul fondo: un poco più scura di giorno, un poco più chiara di notte), bordo e ombra leggera; l'accento resta sulla voce attiva */
+    #root .panel::after{background:color-mix(in srgb,var(--ink) 6%,var(--panel));border-bottom:1px solid var(--line-strong);box-shadow:0 10px 22px -16px rgba(0,0,0,.45);z-index:1;}
+    .hdr.flood .brand-name{color:var(--ink);}
+    .hdr.flood .brand-tag{color:var(--ink-3);}
+    .hdr.flood .lang-switch,.hdr.flood .theme-switch{border-color:var(--line-strong);}
+    .hdr.flood .lang-switch button,.hdr.flood .theme-switch button{color:var(--ink-3);}
+    .hdr.flood .lang-switch button.on,.hdr.flood .theme-switch button.on,.hdr.flood .avatar-btn{background:var(--sel-bg);color:var(--sel-fg);}
     .segs{grid-column:1;grid-row:4;z-index:1;margin:12px 22px 0;}
     .hdr.flood .segs{--head-fg:var(--ink);--head-dim:var(--ink-3);--head-line:var(--line-strong);--head-gold:var(--accent);}
     .hdr-ctrl{grid-column:2;grid-row:1;align-self:center;justify-self:end;z-index:3;margin:0 24px 0 0;justify-content:flex-end;gap:8px;}
@@ -1160,7 +1166,16 @@ try{var _p=localStorage.getItem("sorso-theme");if(_p==="dark"||(_p!=="light"&&wi
           <button type="button" id="themeLight" class="on" data-i18n-title="theme.light" title="Tema chiaro">&#9728;</button>
           <button type="button" id="themeDark" data-i18n-title="theme.dark" title="Tema scuro">&#9790;</button>
         </div>
-        <button type="button" class="gear-btn look-btn" id="lookBtn" data-i18n-title="menu.look" title="Aspetto e colori" aria-label="Aspetto e colori"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3a9 9 0 1 0 0 18c1.1 0 1.8-.8 1.8-1.7 0-.5-.2-.9-.5-1.3-.3-.4-.5-.8-.5-1.3 0-1 .8-1.7 1.8-1.7H17a4 4 0 0 0 4-4c0-4.4-4-8-9-8z"/><circle cx="7.5" cy="11" r="1"/><circle cx="10" cy="7" r="1"/><circle cx="14.5" cy="7" r="1"/></svg></button>
+        <div class="look-wrap">
+        <button type="button" class="gear-btn look-btn" id="lookBtn" aria-haspopup="true" aria-expanded="false" aria-controls="lookPop" data-i18n-title="menu.look" title="Aspetto e colori" aria-label="Aspetto e colori"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3a9 9 0 1 0 0 18c1.1 0 1.8-.8 1.8-1.7 0-.5-.2-.9-.5-1.3-.3-.4-.5-.8-.5-1.3 0-1 .8-1.7 1.8-1.7H17a4 4 0 0 0 4-4c0-4.4-4-8-9-8z"/><circle cx="7.5" cy="11" r="1"/><circle cx="10" cy="7" r="1"/><circle cx="14.5" cy="7" r="1"/></svg></button>
+          <div class="look-pop hidden" id="lookPop" role="dialog" data-i18n-aria="look.quick" aria-label="Colori rapidi">
+            <p class="look-pop-t" data-i18n="look.accent">Colore d'accento</p>
+            <div class="swatches" id="popAccent" role="group"></div>
+            <p class="look-pop-t" data-i18n="look.bg">Sfondo</p>
+            <div class="swatches" id="popBg" role="group"></div>
+            <button type="button" class="avatar-menu-item" id="popMoreBtn" data-i18n="look.more">Tutte le opzioni dei colori</button>
+          </div>
+        </div>
         <button type="button" class="gear-btn" id="settingsBtn" data-i18n-title="nav.settings" title="Impostazioni" aria-label="Impostazioni"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3.2"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.87l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.7 1.7 0 0 0-1.87-.34 1.7 1.7 0 0 0-1.03 1.56V21a2 2 0 1 1-4 0v-.09A1.7 1.7 0 0 0 9 19.4a1.7 1.7 0 0 0-1.87.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.7 1.7 0 0 0 4.6 15a1.7 1.7 0 0 0-1.56-1.03H3a2 2 0 1 1 0-4h.09A1.7 1.7 0 0 0 4.6 9a1.7 1.7 0 0 0-.34-1.87l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.7 1.7 0 0 0 9 4.6a1.7 1.7 0 0 0 1.03-1.56V3a2 2 0 1 1 4 0v.09A1.7 1.7 0 0 0 15 4.6a1.7 1.7 0 0 0 1.87-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.7 1.7 0 0 0 19.4 9a1.7 1.7 0 0 0 1.56 1.03H21a2 2 0 1 1 0 4h-.09A1.7 1.7 0 0 0 19.4 15z"/></svg></button>
         <div class="avatar-wrap" id="avatarWrap">
           <button type="button" class="avatar-btn" id="avatarBtn"><span id="avatarInitials">?</span></button>
@@ -1223,10 +1238,12 @@ try{var _p=localStorage.getItem("sorso-theme");if(_p==="dark"||(_p!=="light"&&wi
           <div style="flex:1;min-width:0">
             <div class="label-name" id="labelName"></div>
             <div class="drop-btns">
+              <button type="button" class="pill-solid" id="readLabelBtn" data-i18n="lbl.read">Leggi l'etichetta</button>
               <button type="button" class="pill-ghost" id="removeLabelBtn" data-i18n="label.remove">Rimuovi</button>
             </div>
           </div>
         </div>
+        <div class="lbl-read hidden" id="labelRead" aria-live="polite"></div>
       </div>
 
       <div class="id-fields" id="idFields">
@@ -1480,6 +1497,8 @@ try{var _p=localStorage.getItem("sorso-theme");if(_p==="dark"||(_p!=="light"&&wi
 </div>
 
 <script src="js/scoring.js"></script>
+<script src="js/label-reader.js"></script>
+<script src="js/label-ocr.js"></script>
 <script src="js/theme.js"></script>
 <script src="js/version.js"></script>
 <script>
@@ -2049,7 +2068,12 @@ const I18N = {
     "account.googleFailed":"Accesso con Google non riuscito.",
 
     "card.label":"Etichetta",
-    "label.none":"Nessuna foto",
+    "label.none":"Nessuna foto", "look.quick":"Colori rapidi", "look.more":"Tutte le opzioni dei colori",
+    "lbl.read":"Leggi l'etichetta", "lbl.reading":"Lettura in corso…", "lbl.privacy":"La foto resta sul tuo dispositivo: la lettura avviene qui, nel browser. La prima volta scarica il motore di riconoscimento (qualche MB), poi lo ricorda.",
+    "lbl.st.engine":"Scarico il motore di lettura (solo la prima volta)", "lbl.st.lang":"Scarico i dati della lingua (solo la prima volta)", "lbl.st.init":"Preparo la lettura", "lbl.st.read":"Leggo il testo", "lbl.st.prep":"Preparo la foto",
+    "lbl.found":"Ho letto questi dati. Controllali e correggili: compilo solo le voci spuntate.", "lbl.nothing":"Non sono riuscito a leggere dati utili. Riprova con una foto più nitida, ben illuminata e frontale, oppure compila a mano.", "lbl.offline":"Non riesco a scaricare il motore di lettura: serve la connessione la prima volta. Riprova, o compila a mano.", "lbl.fail":"La lettura non è riuscita. Riprova o compila a mano.",
+    "lbl.f.nome":"Nome", "lbl.f.produttore":"Produttore", "lbl.f.annata":"Annata", "lbl.f.denominazione":"Denominaz.", "lbl.f.tipologia":"Tipo", "lbl.f.vitigni":"Vitigni", "lbl.now":"Ora nella scheda: {v}",
+    "lbl.extra":"Gradazione letta: {alc}. Non c'è un campo apposta: la puoi scrivere nelle note.", "lbl.apply":"Compila la scheda", "lbl.close":"Chiudi", "lbl.raw":"Testo letto (puoi correggerlo)", "lbl.again":"Analizza di nuovo", "lbl.done":"Scheda compilata: controlla i campi qui sotto.", "lbl.vitHint":"I vitigni si aggiungono all'uvaggio senza percentuale: scrivila tu.",
     "label.loaded":"Foto caricata",
     "label.dropTitle":"Fotografa o trascina l'etichetta",
     "label.dropSub":"La allega alla scheda, da compilare a mano qui sotto.",
@@ -2617,7 +2641,12 @@ const I18N = {
     "account.googleFailed":"Sign-in with Google failed.",
 
     "card.label":"Label",
-    "label.none":"No photo",
+    "label.none":"No photo", "look.quick":"Quick colours", "look.more":"All colour options",
+    "lbl.read":"Read the label", "lbl.reading":"Reading…", "lbl.privacy":"The photo stays on your device: reading happens here, in the browser. The first time it downloads the recognition engine (a few MB), then remembers it.",
+    "lbl.st.engine":"Downloading the reading engine (first time only)", "lbl.st.lang":"Downloading the language data (first time only)", "lbl.st.init":"Getting ready", "lbl.st.read":"Reading the text", "lbl.st.prep":"Preparing the photo",
+    "lbl.found":"Here is what I read. Check and fix it: I only fill the ticked rows.", "lbl.nothing":"I couldn't read useful data. Try a sharper, well-lit, front-on photo, or fill it in by hand.", "lbl.offline":"I can't download the reading engine: you need a connection the first time. Try again, or fill it in by hand.", "lbl.fail":"Reading failed. Try again or fill it in by hand.",
+    "lbl.f.nome":"Name", "lbl.f.produttore":"Producer", "lbl.f.annata":"Vintage", "lbl.f.denominazione":"Appellation", "lbl.f.tipologia":"Type", "lbl.f.vitigni":"Grapes", "lbl.now":"Now in the sheet: {v}",
+    "lbl.extra":"Alcohol read: {alc}. There is no field for it: you can write it in the notes.", "lbl.apply":"Fill in the sheet", "lbl.close":"Close", "lbl.raw":"Text read (you can fix it)", "lbl.again":"Analyze again", "lbl.done":"Sheet filled in: check the fields below.", "lbl.vitHint":"Grapes are added to the blend without a percentage: add it yourself.",
     "label.loaded":"Photo uploaded",
     "label.dropTitle":"Photograph or drag the label here",
     "label.dropSub":"It's attached to the entry, to fill in by hand below.",
@@ -3820,6 +3849,7 @@ function renderIdentity(){
   $("dropZone").classList.toggle("hidden", has);
   $("labelLoaded").classList.toggle("hidden", !has);
   if(has){ $("labelThumb").src = S.photo; $("labelName").textContent = S.photoName || t("label.defaultName"); }
+  if(typeof lblRender === "function") lblRender();
 }
 
 /* ============================================================
@@ -5806,6 +5836,7 @@ async function handleFile(file){
   if(!/^image\//.test(file.type||"")){ $("labelStatus").textContent = t("label.invalidType"); return; }
   const {dataUrl, base64, mediaType} = await fileToBase64(file);
   S.photo = dataUrl; S.photoB64 = base64; S.photoMedia = mediaType; S.photoName = file.name || t("label.defaultName");
+  LBL.fields = null; LBL.err = "";
   $("labelStatus").textContent = t("label.loaded");
   renderIdentity();
 }
@@ -5849,7 +5880,23 @@ function apriAspetto(){
   S.tab = "settings"; renderAll(); vaInCima(false);
   setTimeout(() => { try{ $("lookCard").scrollIntoView({block:"start", behavior:"smooth"}); $("themePrefSwitch").querySelector("button").focus({preventScroll:true}); }catch(e){} }, 60);
 }
-$("lookBtn").addEventListener("click", apriAspetto);
+/* la tavolozza apre un pannello rapido (accento e sfondo) sotto la barra; l'ingranaggio porta alle Impostazioni */
+function closeLookPop(){ $("lookPop").classList.add("hidden"); $("lookBtn").setAttribute("aria-expanded", "false"); }
+$("lookBtn").addEventListener("click", e => {
+  e.stopPropagation();
+  const open = $("lookPop").classList.contains("hidden");
+  closeAvatarMenu();
+  $("lookPop").classList.toggle("hidden", !open); $("lookBtn").setAttribute("aria-expanded", String(open));
+  if(open){ renderLook(); setTimeout(() => { const b = $("popAccent").querySelector("[aria-pressed=true]") || $("popAccent").querySelector("button"); if(b) b.focus(); }, 0); }
+});
+$("lookPop").addEventListener("click", e => {
+  e.stopPropagation();
+  const a = e.target.closest("[data-accent]"); if(a){ setLook({accent:a.dataset.accent}); return; }
+  const g = e.target.closest("[data-bg]"); if(g){ setLook(S.theme === "dark" ? {bgDark:g.dataset.bg} : {bgLight:g.dataset.bg}); return; }
+});
+$("popMoreBtn").addEventListener("click", () => { closeLookPop(); apriAspetto(); });
+document.addEventListener("click", e => { if(!$("lookPop").classList.contains("hidden") && !e.target.closest(".look-wrap")) closeLookPop(); });
+document.addEventListener("keydown", e => { if(e.key === "Escape" && !$("lookPop").classList.contains("hidden")){ closeLookPop(); $("lookBtn").focus(); } });
 $("menuLookBtn").addEventListener("click", () => { closeAvatarMenu(); apriAspetto(); });
 $("menuSettingsBtn").addEventListener("click", () => { closeAvatarMenu(); S.tab = "settings"; renderAll(); vaInCima(false); });
 $("eventBackBtn").addEventListener("click", () => { S.tab = "circles"; CIRC.view = null; CIRC.detail = null; renderAll(); vaInCima(false); circLoad(); });
@@ -5884,6 +5931,9 @@ function renderLook(){
   $("bgSwatches").innerHTML = bgList.map(b =>
     '<button type="button" class="swatch" data-bg="'+b.hex+'" style="background:'+b.hex+'" aria-pressed="'+(bg === b.hex)+'" aria-label="'+esc(t("look.b."+b.id))+'" title="'+esc(t("look.b."+b.id))+'"></button>').join("");
   $("accentCustom").value = acc; $("bgCustom").value = bg;
+  const pa = $("popAccent"), pb = $("popBg");
+  if(pa){ pa.innerHTML = $("accentSwatches").innerHTML; pa.setAttribute("aria-label", t("look.accent")); }
+  if(pb){ pb.innerHTML = $("bgSwatches").innerHTML; pb.setAttribute("aria-label", t("look.bg")); }
 }
 $("accentSwatches").addEventListener("click", e => { const b = e.target.closest("[data-accent]"); if(b) setLook({accent:b.dataset.accent}); });
 $("bgSwatches").addEventListener("click", e => { const b = e.target.closest("[data-bg]"); if(b) setLook(S.theme === "dark" ? {bgDark:b.dataset.bg} : {bgLight:b.dataset.bg}); });
@@ -6032,6 +6082,101 @@ $("typeChips").addEventListener("click", e => {
 // foto
 $("photoInput").addEventListener("change", e => handleFile(e.target.files[0]));
 $("removeLabelBtn").addEventListener("click", () => { S.photo=null; S.photoName=""; $("photoInput").value=""; $("labelStatus").textContent=t("label.none"); renderIdentity(); });
+
+/* ---- «Leggi l'etichetta»: OCR nel browser (public/js/label-ocr.js) + analisi del testo (public/js/label-reader.js) ----
+   La foto non esce dal dispositivo. Il risultato non scrive niente da solo: si controlla e si spuntano le voci da usare. */
+const LBL = {busy:false, status:"", p:0, fields:null, text:"", alc:"", err:""};
+const LBL_ORDER = ["nome","produttore","annata","denominazione","tipologia","vitigni"];
+function lblStatusKey(st){
+  st = String(st||"");
+  if(/loading tesseract core/.test(st)) return "lbl.st.engine";
+  if(/loading language/.test(st)) return "lbl.st.lang";
+  if(/recognizing/.test(st)) return "lbl.st.read";
+  return "lbl.st.init";
+}
+function lblNow(k){
+  const w = S.wine;
+  if(k === "vitigni") return (w.uvaggi||[]).map(r => r.v).filter(Boolean).join(", ");
+  return String(w[k] || "");
+}
+function lblRender(){
+  const box = $("labelRead"), btn = $("readLabelBtn");
+  if(!box || !btn) return;
+  if(!S.photo){ LBL.fields = null; LBL.err = ""; LBL.busy = false; box.classList.add("hidden"); box.innerHTML = ""; return; }
+  btn.disabled = LBL.busy; btn.textContent = t(LBL.busy ? "lbl.reading" : "lbl.read");
+  let h = "";
+  if(LBL.busy){
+    h = '<div role="status">'+esc(t(LBL.status || "lbl.st.prep"))+'</div><div class="lbl-bar"><i style="width:'+Math.round((LBL.p||0)*100)+'%"></i></div>';
+  }else if(LBL.err){
+    h = '<p role="status">'+esc(t(LBL.err))+'</p>';
+  }else if(LBL.fields){
+    h = '<p role="status"><b>'+esc(t("lbl.found"))+'</b></p>' + LBL_ORDER.filter(k => LBL.fields[k]).map(k => {
+      const f = LBL.fields[k], now = lblNow(k);
+      const field = k === "tipologia"
+        ? '<span class="sel-wrap"><select class="sel" id="lblF_'+k+'" data-lbl-f="'+k+'">'+TYPES.map(x => '<option value="'+x+'"'+(f.value===x?" selected":"")+'>'+esc(tv(x))+'</option>').join("")+'</select></span>'
+        : '<input class="in-line" id="lblF_'+k+'" data-lbl-f="'+k+'" value="'+esc(f.value)+'"'+(k==="annata" ? ' inputmode="numeric" maxlength="4"' : ' maxlength="90"')+'>';
+      return '<div class="lbl-row"><input type="checkbox" id="lblC_'+k+'" data-lbl-c="'+k+'"'+(f.checked?" checked":"")+' aria-label="'+esc(t("lbl.f."+k))+'"><label class="lab" for="lblF_'+k+'">'+esc(t("lbl.f."+k))+'</label>'+field+
+        (now && now !== f.value ? '<div class="lbl-now">'+esc(tf("lbl.now",{v:now}))+'</div>' : "")+'</div>';
+    }).join("") +
+      (LBL.fields.vitigni ? '<p class="lbl-now">'+esc(t("lbl.vitHint"))+'</p>' : "") +
+      (LBL.alc ? '<p class="lbl-now">'+esc(tf("lbl.extra",{alc:LBL.alc}))+'</p>' : "") +
+      '<div class="lbl-actions"><button type="button" class="pill-solid" data-lbl="apply">'+esc(t("lbl.apply"))+'</button><button type="button" class="pill-ghost" data-lbl="close">'+esc(t("lbl.close"))+'</button></div>' +
+      '<details class="lbl-raw"><summary>'+esc(t("lbl.raw"))+'</summary><textarea id="lblRawText" aria-label="'+esc(t("lbl.raw"))+'">'+esc(LBL.text)+'</textarea><div class="lbl-actions"><button type="button" class="pill-ghost" data-lbl="again">'+esc(t("lbl.again"))+'</button></div></details>';
+  }else{
+    h = '<p class="lbl-now">'+esc(t("lbl.privacy"))+'</p>';
+  }
+  box.innerHTML = h; box.classList.remove("hidden");
+}
+function lblShow(text, lines){
+  const parsed = LabelReader.parseLabel(text, lines || []), w = LabelReader.toWineFields(parsed);
+  LBL.text = text; LBL.alc = w.gradazione || "";
+  const fields = {};
+  ["nome","produttore","annata","denominazione"].forEach(k => { if(w[k]) fields[k] = {value:w[k], checked:!lblNow(k)}; });
+  if(w.tipologia) fields.tipologia = {value:w.tipologia, checked:S.wine.tipologia !== w.tipologia};
+  if(w.vitigni) { const have = lblNow("vitigni").toLowerCase(); const nuovi = w.vitigni.filter(g => !have.includes(g.toLowerCase())); if(nuovi.length) fields.vitigni = {value:nuovi.join(", "), checked:!have}; }
+  LBL.fields = Object.keys(fields).length ? fields : null;
+  LBL.err = LBL.fields ? "" : "lbl.nothing";
+}
+async function lblRead(){
+  if(LBL.busy || !S.photo) return;
+  LBL.busy = true; LBL.err = ""; LBL.fields = null; LBL.status = "lbl.st.prep"; LBL.p = 0; lblRender();
+  try{
+    const img = await new Promise((res, rej) => { const i = new Image(); i.onload = () => res(i); i.onerror = () => rej(new Error("img")); i.src = S.photo; });
+    const r = await LabelOCR.read(img, {onProgress: m => { LBL.status = lblStatusKey(m.status); LBL.p = m.progress || 0; lblRender(); }});
+    lblShow(r.text, r.lines);
+  }catch(e){ LBL.err = e && e.message === "offline" ? "lbl.offline" : "lbl.fail"; }
+  LBL.busy = false; lblRender();
+  try{ $("labelRead").scrollIntoView({block:"nearest", behavior:"smooth"}); }catch(e){}
+}
+function lblApply(){
+  const f = LBL.fields; if(!f) return;
+  const on = k => f[k] && f[k].checked && String(f[k].value).trim();
+  const w = S.wine;
+  if(on("nome")) w.nome = String(f.nome.value).trim().slice(0, 90);
+  if(on("produttore")) w.produttore = String(f.produttore.value).trim().slice(0, 90);
+  if(on("annata") && /^\d{4}$/.test(String(f.annata.value).trim())) w.annata = String(f.annata.value).trim();
+  if(on("denominazione")) w.denominazione = String(f.denominazione.value).trim().slice(0, 90);
+  if(on("tipologia") && TYPES.indexOf(f.tipologia.value) > -1) w.tipologia = f.tipologia.value;
+  if(on("vitigni")){
+    const have = (w.uvaggi||[]).map(r => String(r.v).toLowerCase());
+    String(f.vitigni.value).split(/[,;]+/).map(x => x.trim()).filter(Boolean).slice(0, 8).forEach(g => { if(have.indexOf(g.toLowerCase()) < 0 && w.uvaggi.length < 12) w.uvaggi.push({v:g, p:""}); });
+  }
+  LBL.fields = null; LBL.err = "";
+  renderIdentity();
+  $("labelStatus").textContent = t("lbl.done");
+}
+$("readLabelBtn").addEventListener("click", lblRead);
+$("labelRead").addEventListener("click", e => {
+  const b = e.target.closest("[data-lbl]"); if(!b) return;
+  if(b.dataset.lbl === "apply") lblApply();
+  else if(b.dataset.lbl === "close"){ LBL.fields = null; LBL.err = ""; lblRender(); }
+  else if(b.dataset.lbl === "again"){ lblShow($("lblRawText").value, []); lblRender(); }
+});
+$("labelRead").addEventListener("input", e => { const k = e.target.dataset && e.target.dataset.lblF; if(k && LBL.fields && LBL.fields[k]){ LBL.fields[k].value = e.target.value; } });
+$("labelRead").addEventListener("change", e => {
+  const c = e.target.dataset && e.target.dataset.lblC; if(c && LBL.fields && LBL.fields[c]) LBL.fields[c].checked = e.target.checked;
+  const k = e.target.dataset && e.target.dataset.lblF; if(k && LBL.fields && LBL.fields[k]){ LBL.fields[k].value = e.target.value; }
+});
 const dz = $("dropZone");
 ["dragenter","dragover"].forEach(ev => dz.addEventListener(ev, e => { e.preventDefault(); dz.classList.add("over"); }));
 ["dragleave","dragend"].forEach(ev => dz.addEventListener(ev, () => dz.classList.remove("over")));
@@ -6431,7 +6576,7 @@ function renderAccount(){
   $("loginPromptBtn").innerHTML = tf("account.loginPromptHtml", {icon: GOOGLE_G_ICON});
 }
 
-function openAvatarMenu(){ $("avatarMenu").classList.remove("hidden"); }
+function openAvatarMenu(){ try{ closeLookPop(); }catch(e){} $("avatarMenu").classList.remove("hidden"); }
 function closeAvatarMenu(){ $("avatarMenu").classList.add("hidden"); }
 function toggleAvatarMenu(){ $("avatarMenu").classList.contains("hidden") ? openAvatarMenu() : closeAvatarMenu(); }
 
