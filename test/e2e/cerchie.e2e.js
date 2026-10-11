@@ -126,6 +126,42 @@ const ok = (c, m) => { console.log((c ? "OK   " : "FAIL ") + m); if (!c) fails++
   ok(clip === "" || /\/\?invito=[0-9a-f]{48}$/.test(clip), "il link copiato ha la forma giusta");
   await P.ctx.close();
 
+  /* --- menù utente nella barra in alto (PC): si apre sotto la barra e non è coperto da niente --- */
+  {
+    const U = await open("anna", { width: 1366, height: 800 }); const u = U.page;
+    await u.click("#avatarBtn"); await u.waitForTimeout(300);
+    const m = await u.evaluate(() => {
+      const menu = document.getElementById("avatarMenu"), r = menu.getBoundingClientRect(), bar = document.querySelector(".hdr-ctrl").getBoundingClientRect();
+      const items = [...menu.querySelectorAll("button")].map(b => { const q = b.getBoundingClientRect(); const top = document.elementFromPoint(q.left + q.width / 2, q.top + q.height / 2); return { id: b.id, free: top === b || b.contains(top) }; });
+      return { open: !menu.classList.contains("hidden"), below: r.top >= bar.bottom - 1, inside: r.right <= innerWidth && r.bottom <= innerHeight, items };
+    });
+    ok(m.open && m.below && m.inside, "PC: il menù utente si apre sotto la barra, dentro lo schermo");
+    ok(m.items.length === 3 && m.items.every(i => i.free), "PC: le tre voci (Impostazioni, Aspetto e colori, Esci) non sono coperte da niente");
+    await u.click("#menuLookBtn"); await u.waitForTimeout(500);
+    ok(await u.locator("#lookCard").isVisible(), "«Aspetto e colori» dal menù utente apre le Impostazioni");
+    await U.ctx.close();
+  }
+
+  /* --- mail: senza servizio lo dice; con il servizio (finto) la mail parte e si può rimandare --- */
+  {
+    const A2 = await open("anna", { width: 390, height: 844 }); const a2 = A2.page;
+    await goCircles(a2); await a2.locator('[data-circ="open"]').first().click(); await a2.locator('form[data-circ-form="invite"]').waitFor();
+    ok(/non manda mail da solo/.test(await a2.locator("#circWrap").innerText()) && await a2.locator('[data-circ="resend"]').count() === 0, "senza servizio di posta: «Sorso non manda mail da solo», niente «Rimanda la mail»");
+    const realFetch = global.fetch, inviate = [];
+    global.fetch = async (url, opts) => { if (/api\.resend\.com/.test(String(url))) { inviate.push(JSON.parse(opts.body)); return { ok: true, status: 200 }; } return realFetch(url, opts); };
+    process.env.RESEND_API_KEY = "re_finta"; process.env.MAIL_FROM = "Sorso <inviti@esempio.it>";
+    await a2.reload(); await a2.waitForTimeout(900); await goCircles(a2); await a2.locator('[data-circ="open"]').first().click(); await a2.locator('form[data-circ-form="invite"]').waitFor();
+    ok(/Sorso manda anche una mail/.test(await a2.locator("#circWrap").innerText()), "con il servizio: «Sorso manda anche una mail»");
+    await a2.fill("#circEmails", "nuova.persona@example.com"); await a2.click('[data-circ-form="invite"] button[type=submit]');
+    await a2.locator("#circWrap").getByText("mail inviata").waitFor({ timeout: 5000 }).then(() => ok(true, "dopo l'invito compare «mail inviata»"), () => ok(false, "«mail inviata»"));
+    ok(inviate.length === 1 && inviate[0].to[0] === "nuova.persona@example.com" && /\?invito=[0-9a-f]{48}/.test(inviate[0].text), "la mail è partita verso l'indirizzo giusto, con il link");
+    await a2.locator('[data-circ="resend"]').first().click();
+    await a2.locator("#circWrap").getByText("Mail rimandata").waitFor({ timeout: 5000 }).then(() => ok(true, "«Rimanda la mail» funziona"), () => ok(false, "«Mail rimandata»"));
+    ok(!(await overflow(a2)), "nessuno scorrimento orizzontale con i pulsanti in più");
+    global.fetch = realFetch; delete process.env.RESEND_API_KEY; delete process.env.MAIL_FROM;
+    await A2.ctx.close();
+  }
+
   /* --- uscire ed eliminare --- */
   await c.reload(); await c.waitForTimeout(900); await goCircles(c);
   await c.locator('[data-circ="open"]').click(); await c.locator('[data-circ="leave"]').click();

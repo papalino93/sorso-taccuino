@@ -37,7 +37,7 @@ function build() {
     ${lato(`
         <p class="lead">Entra in una cerchia, scrivi uno o più indirizzi mail e premi <b>Crea gli inviti</b>.</p>
         ${ul(["L'invito è <b>legato a quell'indirizzo</b>: lo può usare solo chi accede con Google con la stessa mail.", "Compare nella sezione <b>Inviti</b> della persona, oppure puoi premere <b>Copia il link</b> e mandarglielo con WhatsApp o per mail.", "Vale <b>14 giorni</b>, si usa una volta sola e lo puoi <b>revocare</b> in ogni momento.", "Gli indirizzi Gmail con i punti o con «+etichetta» valgono come lo stesso indirizzo."])}
-        ${call("<b>Sorso non manda mail da solo</b> (per ora). L'invito aspetta la persona nel suo account; il link serve a farglielo sapere.")}
+        ${call("<b>La mail.</b> Se il servizio di posta è attivo, Sorso manda anche una mail all'indirizzo (puoi rimandarla fino a 3 volte); altrimenti l'app lo dice e il link lo mandi tu. In ogni caso l'invito aspetta la persona nel suo account.")}
         ${call("Dopo 14 giorni, o se lo revochi, il link smette di funzionare.", true)}`,
       fig("cerchie-invita.png", 1, "Il modulo per invitare e l'elenco degli <b>inviti in attesa</b>, con «Copia il link» e «Revoca».", "lg"))}
   `));

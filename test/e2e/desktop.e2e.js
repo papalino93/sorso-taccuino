@@ -15,7 +15,7 @@ const TABS = ["new", "blind", "book", "stats", "circles", "settings"];
     await page.goto("http://localhost:8765/", { waitUntil: "load" }); await page.waitForTimeout(800);
     return { ctx, page };
   }
-  const go = async (page, t, w) => { if (w < 1100 && t === "settings") await page.click("#settingsBtn"); else await page.click(`#nav [data-tab="${t}"]`); await page.waitForTimeout(350); };
+  const go = async (page, t, w) => { if (t === "settings") await page.click("#settingsBtn"); else await page.click(`#nav [data-tab="${t}"]`); await page.waitForTimeout(350); };
 
   /* nessun elemento fuori dallo schermo, a nessuna larghezza, in nessuna scheda */
   for (const [w, h] of [[1100, 760], [1280, 720], [1440, 900], [1920, 1080], [2560, 1300]]) {
@@ -37,7 +37,7 @@ const TABS = ["new", "blind", "book", "stats", "circles", "settings"];
     const { ctx, page } = await open(1440, 900);
     const box = s => page.evaluate(s => { const b = document.querySelector(s).getBoundingClientRect(); return { l: b.left, r: b.right, t: b.top, b: b.bottom }; }, s);
     const nav = await box("#nav"), body = await box(".body");
-    ok(nav.r <= body.l + 1, "il menù sta a sinistra del contenuto");
+    ok(nav.b <= body.t + 1, "il menù sta in alto, sopra il contenuto");
     const dsk = await page.evaluate(() => document.querySelectorAll("#nav button").length);
     ok(dsk === 6, "voci del menù: 5 sezioni + Impostazioni");
     const sv = await box("#saveBtn"), score = await box("#ringNum");
@@ -72,6 +72,18 @@ const TABS = ["new", "blind", "book", "stats", "circles", "settings"];
     /* Impostazioni */
     await go(page, "settings", 1440);
     ok(await page.locator("#lookCard").isVisible() && await page.locator("#voteModeCard").isVisible() && await page.locator("#accountCard").isVisible(), "Impostazioni: aspetto, voto e account in una pagina");
+    /* barra in alto, come in Team: marchio e sezioni a sinistra, Aspetto/tema/lingua/impostazioni/utente a destra */
+    const bar = await page.evaluate(() => {
+      const r = s => { const e = document.querySelector(s); return e ? e.getBoundingClientRect() : null; };
+      const nav = [...document.querySelectorAll("#nav button")].filter(b => getComputedStyle(b).display !== "none").map(b => b.getBoundingClientRect());
+      const ctrl = r(".hdr-ctrl"), last = nav[nav.length - 1], brand = r("#brandBtn"), body = r(".body");
+      return { n: nav.length, sameRow: new Set(nav.map(b => Math.round(b.top))).size === 1, navTop: nav[0].top, ctrlLeft: ctrl.left, navRight: last.right, brandTop: brand.top, bodyTop: body.top, look: !!r("#lookBtn") && r("#lookBtn").width > 0, gear: r("#settingsBtn").width > 0, avatar: r("#avatarBtn").width > 0 };
+    });
+    ok(bar.n === 5 && bar.sameRow && bar.navTop < 64 && bar.brandTop < 64 && bar.bodyTop >= 60, "PC: sezioni in fila nella barra in alto (" + bar.n + " voci)");
+    ok(bar.navRight < bar.ctrlLeft && bar.look && bar.gear && bar.avatar, "PC: i comandi a destra (Aspetto, impostazioni, utente) non coprono le sezioni");
+    await page.click("#lookBtn"); await page.waitForTimeout(500);
+    ok(await page.locator("#lookCard").isVisible() && await page.evaluate(() => document.querySelector(".body").getBoundingClientRect().top > 0), "il pulsante Aspetto apre le Impostazioni sui colori");
+    await page.click("#avatarBtn").catch(() => {});
     /* palette a vino */
     const acc = await page.evaluate(() => getComputedStyle(document.getElementById("root")).getPropertyValue("--accent").trim());
     ok(acc === "#8c1d3f", "chiaro: bordeaux (" + acc + ")");
@@ -90,6 +102,7 @@ const TABS = ["new", "blind", "book", "stats", "circles", "settings"];
     const { ctx, page } = await open(w, h);
     const m = await page.evaluate(() => { const n = [...document.querySelectorAll("#nav button")].filter(b => getComputedStyle(b).display !== "none"); const ys = new Set(n.map(b => Math.round(b.getBoundingClientRect().top))); return { n: n.length, rows: ys.size, gear: getComputedStyle(document.getElementById("settingsBtn")).display !== "none", head: getComputedStyle(document.querySelector(".pane-head")).display }; });
     ok(m.n === 5 && m.rows === 1 && m.gear && m.head === "none", w + "px: barra in alto a 5 voci, ingranaggio visibile, niente titoli di pagina");
+    ok(await page.evaluate(() => getComputedStyle(document.getElementById("lookBtn")).display === "none"), w + "px: sul telefono il pulsante Aspetto non compare (ci sono le Impostazioni)");
     await go(page, "settings", w);
     ok(await page.locator("#lookCard").isVisible(), w + "px: Impostazioni raggiungibile dall'ingranaggio");
     await ctx.close();

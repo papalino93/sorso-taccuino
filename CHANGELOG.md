@@ -3,6 +3,11 @@
 La versione e la data dell'ultimo aggiornamento sono mostrate in fondo all'app e dello spazio di team
 (fonte: `public/js/version.js`, da tenere uguale a `package.json`).
 
+## 2.1.0 — 11 ottobre 2026
+- **Barra in alto su PC** (ispirata a Team): marchio e sezioni (Nuova, Alla cieca, Taccuino, Statistiche, Cerchie) a sinistra; a destra Aspetto e colori, tema chiaro/scuro, lingua, Impostazioni e il menù dell'utente. Il punteggio e «Salva» restano nella colonna a sinistra. Su telefono non cambia.
+- **Menù utente**: ora si apre sotto la barra (prima, a PC, si apriva verso l'alto e restava coperto da «Salva»), e ha tre voci: Impostazioni, Aspetto e colori, Esci.
+- **Mail degli inviti alle cerchie**: se il progetto ha un servizio di posta (Resend o Brevo, vedi README) Sorso manda la mail di invito, con link e istruzioni; altrimenti l'app dice «copia il link e mandalo tu». «Rimanda la mail» (fino a 3 volte), limiti anti-spam (30 mail al giorno per chi invita, 5 al giorno verso lo stesso indirizzo), oggetto fisso, nome della cerchia ripulito, link sempre verso il sito (mai ricavato dalla richiesta). Se il servizio non risponde l'invito resta valido e l'app lo dice.
+
 ## 2.0.0 — 9 ottobre 2026
 - **Cerchie** (passo 1): gruppi di amici, colleghi o corsisti dentro Sorso. Nuova voce **Cerchie** nel menù (prende il posto di «Evento», che resta raggiungibile da un link in fondo alla scheda e verrà sostituito dalle serate delle cerchie).
   - **Ruoli**: Proprietario (uno solo), Amministratore, Membro. Ogni operazione controlla il ruolo sul server; chi non fa parte di una cerchia non sa nemmeno che esiste.

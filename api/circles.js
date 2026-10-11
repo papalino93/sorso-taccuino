@@ -4,6 +4,13 @@ const Quota = require("./_quota");
 const limit = require("./_limit");
 const C = require("./_circles");
 
+/* L'indirizzo del sito nei link delle mail: fisso (o da APP_ORIGIN), mai ricavato dalla richiesta —
+   altrimenti qualcuno potrebbe far partire mail con un link a un altro sito. */
+function appOrigin() {
+  const o = String(process.env.APP_ORIGIN || "").trim().replace(/\/+$/, "");
+  return /^https?:\/\/[a-z0-9.\-]+(:\d+)?$/i.test(o) ? o : "https://sorso-taccuino.vercel.app";
+}
+
 /* Cerchie: POST con un corpo JSON { op, ... } e  Authorization: Bearer <sessione Sorso>.
    La sessione è quella dell'accesso con Google (la stessa dell'app). */
 module.exports = async (req, res) => {
@@ -25,7 +32,7 @@ module.exports = async (req, res) => {
     if (!fn) throw new HttpError(400, "unknown_op", "Operazione sconosciuta.");
     if (C.WRITES.has(op)) Quota.assertWritable();
     const user = await C.getUser(redis, String(username));
-    sendJson(res, 200, await fn(redis, user, body));
+    sendJson(res, 200, await fn(redis, user, body, { origin: appOrigin() }));
   } catch (e) {
     sendError(res, e);
   } finally {
