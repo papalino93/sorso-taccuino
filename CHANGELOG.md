@@ -3,6 +3,10 @@
 La versione e la data dell'ultimo aggiornamento sono mostrate in fondo all'app e dello spazio di team
 (fonte: `public/js/version.js`, da tenere uguale a `package.json`).
 
+## 2.4.0 — 11 ottobre 2026
+- **Widget per i siti**: in fondo alla cerchia, «Widget per un sito» (Proprietario e amministratori). «Crea il widget», scegli lingua, tema (automatico, chiaro, scuro), sfondo trasparente, il tuo colore d'accento, quanti vini e cosa mostrare (i numeri della cerchia, i vini migliori, le ultime serate), guarda l'anteprima e «Copia il codice» da incollare nel sito. «Rinnova il link» e «Revoca» per spegnerlo.
+- Il widget: nome della cerchia, riquadri con serate, vini, voti e media, il vino preferito in evidenza con il podio dei migliori e le barre dei punteggi, la cronologia delle ultime serate con il vino preferito di ciascuna. Si adatta da solo a una colonna stretta o a una pagina larga, chiaro o scuro, e l'altezza si regola da sola. Solo medie anonime delle serate chiuse; fatto tutto sul server, senza script esterni, in cache per due minuti.
+
 ## 2.3.0 — 11 ottobre 2026
 - **Serate nelle cerchie**: aprendo una cerchia, in alto c'è «Serate e degustazioni». Proprietario e amministratori creano una serata con più vini (anche alla cieca) oppure **«Un solo vino»** (la degustazione nasce con il vino, pronta da votare, con l'etichetta «un vino»); i membri votano dal telefono, voto rapido o scheda completa; media visibile dopo il proprio voto, chiusura della votazione di un singolo vino, classifica e statistiche della cerchia. Stesso motore dello spazio di team, con i colori e la lingua dell'app; il ruolo si rilegge dalla cerchia a ogni richiesta.
 - **I voti e i dati**: «Cancella i miei voti» (solo in quella cerchia, le medie si ricalcolano); Proprietario e amministratori scaricano le medie di tutte le serate in **CSV** o **JSON** (anonime, la media solo da 2 voti).

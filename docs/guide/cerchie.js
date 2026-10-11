@@ -1,6 +1,6 @@
 /* Guida «Le cerchie»: per chi crea e gestisce una cerchia (Proprietario e Amministratori). Linguaggio semplice. */
 const L = require("./lib");
-const { fig, stats, cards, table, call, ul, check, eyebrow } = L;
+const { fig, wide, stats, cards, table, call, ul, check, eyebrow } = L;
 const DOC = "Guida alle cerchie";
 let n = 1;
 const pg = (cls, label, inner) => L.page({ cls, label, doc: DOC, n: ++n, big: true }, inner);
@@ -126,12 +126,19 @@ function build() {
       fig("cerchie-unvino.png", 1, "Una degustazione di <b>un solo vino</b> dopo il voto: il tuo voto e la media della cerchia.", "lg"))}
   `));
 
-  P.push(pg("ink", "Cosa arriva dopo", `
-    ${eyebrow("10", "Cosa arriva dopo")}
-    <h1 class="d">Poi, <em>il sito</em></h1>
-    ${ul(["<b>Widget</b>: un frammento da incollare in un sito, in sola lettura e revocabile, con la classifica e le medie della cerchia.", "Gli <b>eventi</b> della versione precedente restano consultabili in fondo a Cerchie; i nuovi si fanno come serate."])}
-    <h3 class="k" style="margin-top:6mm">In pratica, per cominciare</h3>
-    ${check(["Apro Cerchie e creo la mia prima cerchia.", "Invito le persone con le loro mail e, se serve, mando il link.", "Nomino un amministratore di fiducia.", "Tengo d'occhio gli inviti in attesa e revoco quelli sbagliati."])}
+  P.push(pg("ink", "Il widget", `
+    ${eyebrow("10", "Il widget")}
+    <h1 class="d">La classifica <em>sul vostro sito</em></h1>
+    <p class="lead">In fondo alla cerchia, <b>Widget per un sito</b> (Proprietario e amministratori): <b>Crea il widget</b>, scegli lingua, tema e cosa mostrare, poi <b>Copia il codice</b> e incollalo nella pagina del sito.</p>
+    ${wide("cerchie-widget-sito.png", 1, "Il widget incollato nel sito di un club: sfondo trasparente e il colore del sito.")}
+    ${ul(["Mostra solo <b>medie anonime</b> delle serate chiuse (dal secondo voto in su); i vini alla cieca restano nascosti finché non li sveli.", "<b>Revoca</b> lo spegne su tutti i siti; <b>Rinnova il link</b> ne crea uno nuovo e spegne il vecchio. Il sito si aggiorna da solo entro un paio di minuti."])}
+  `));
+
+  P.push(pg("paper", "Per cominciare", `
+    ${eyebrow("11", "Per cominciare")}
+    <h1 class="d">In pratica, <em>tre passi</em></h1>
+    ${ul(["Gli <b>eventi</b> della versione precedente restano consultabili in fondo a Cerchie; i nuovi si fanno come serate."])}
+    ${check(["Apro Cerchie e creo la mia prima cerchia.", "Invito le persone con le loro mail e, se serve, mando il link.", "Nomino un amministratore di fiducia.", "Creo la prima serata (o «Un solo vino») e faccio votare tutti.", "Se il club ha un sito, ci incollo il widget."])}
     <div class="bigword">Buone degustazioni.</div>
     <p class="mute">Versione ${L.VERSIONE} · ultimo aggiornamento: ${L.DATA}</p>
   `));

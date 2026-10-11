@@ -1,11 +1,30 @@
 {
   "rewrites": [
-    { "source": "/api/v1/:path*", "destination": "/api/v1?path=:path*" },
-    { "source": "/embed", "destination": "/api/embed-page" }
+    {
+      "source": "/api/v1/:path*",
+      "destination": "/api/v1?path=:path*"
+    },
+    {
+      "source": "/embed",
+      "destination": "/api/embed-page"
+    },
+    {
+      "source": "/widget",
+      "destination": "/api/widget"
+    }
   ],
   "functions": {
-    "api/embed.js": { "includeFiles": "public/js/scoring.js" },
-    "api/embed-page.js": { "includeFiles": "public/js/scoring.js" },
-    "api/v1.js": { "includeFiles": "public/js/scoring.js" }
+    "api/embed.js": {
+      "includeFiles": "public/js/scoring.js"
+    },
+    "api/embed-page.js": {
+      "includeFiles": "public/js/scoring.js"
+    },
+    "api/v1.js": {
+      "includeFiles": "public/js/scoring.js"
+    },
+    "api/widget.js": {
+      "includeFiles": "public/js/{scoring,theme}.js"
+    }
   }
 }
