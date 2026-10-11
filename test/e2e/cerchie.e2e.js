@@ -48,22 +48,22 @@ const ok = (c, m) => { console.log((c ? "OK   " : "FAIL ") + m); if (!c) fails++
   /* --- Anna crea una cerchia e invita Bruno e Carla --- */
   const A = await open("anna"); const a = A.page;
   await goCircles(a);
-  ok(/Non fai ancora parte di nessuna cerchia/.test(await a.locator("#circWrap").innerText()), "all'inizio nessuna cerchia");
+  ok(/Non fai ancora parte di nessuna cerchia/.test(await a.locator("#pane-circles").innerText()), "all'inizio nessuna cerchia");
   await a.fill("#circNewName", "Corso del giovedì"); await a.click('[data-circ-form="create"] button[type=submit]');
   await a.locator(".card-head .eyebrow", { hasText: "Corso del giovedì" }).waitFor();
-  ok(/Proprietario/.test(await a.locator("#circWrap").innerText()), "Anna è Proprietario");
+  ok(/Proprietario/.test(await a.locator("#pane-circles").innerText()), "Anna è Proprietario");
   await a.fill("#circEmails", "bruno@example.com, carla@example.com, sbagliata");
   await a.click('[data-circ-form="invite"] button[type=submit]');
   await a.locator('[data-circ="copy"]').first().waitFor();
   ok(await a.locator('[data-circ="copy"]').count() === 2, "due inviti in attesa con «Copia il link»");
-  ok(/indirizzo non valido/.test(await a.locator("#circWrap").innerText()), "l'indirizzo sbagliato è segnalato");
+  ok(/indirizzo non valido/.test(await a.locator("#pane-circles").innerText()), "l'indirizzo sbagliato è segnalato");
   ok(!(await overflow(a)), "telefono: nessuno scorrimento orizzontale");
   const tokens = (await redis.keys("cl:*")).map(k => k.slice(3));
   ok(tokens.length === 2, "due link d'invito nel database");
 
   /* --- il link: il banner compare, il codice sparisce dall'indirizzo --- */
   const B = await open("bruno", null, "", "/?invito=" + tokens[0]); const b = B.page;
-  await b.locator("#circWrap .card-head .eyebrow", { hasText: /Invito a/ }).waitFor();
+  await b.locator("#pane-circles .card-head .eyebrow", { hasText: /Invito a/ }).waitFor();
   ok(true, "il link d'invito apre le Cerchie con il banner dell'invito");
   ok(!/\?invito=/.test(b.url()), "il codice sparisce dall'indirizzo");
   await B.ctx.close();
@@ -82,7 +82,7 @@ const ok = (c, m) => { console.log((c ? "OK   " : "FAIL ") + m); if (!c) fails++
     /* l'accesso con Google rimanda alla pagina: qui lo simulo con la sessione di Carla e un ricarico */
     await pg.evaluate(([tok, user]) => { localStorage.setItem("sorso.auth.token", tok); localStorage.setItem("sorso.auth.user", user); localStorage.setItem("sorso.auth.name", "carla"); }, [people.carla.token, people.carla.username]);
     await pg.goto(d.url + "/", { waitUntil: "load" }); await pg.waitForTimeout(1000);
-    await pg.locator("#circWrap .card-head .eyebrow", { hasText: /Invito a/ }).waitFor({ timeout: 4000 }).then(() => ok(true, vpName + ": dopo l'accesso si arriva dritti alle Cerchie con l'invito da accettare"), () => ok(false, vpName + ": dopo l'accesso l'invito non compare"));
+    await pg.locator("#pane-circles .card-head .eyebrow", { hasText: /Invito a/ }).waitFor({ timeout: 4000 }).then(() => ok(true, vpName + ": dopo l'accesso si arriva dritti alle Cerchie con l'invito da accettare"), () => ok(false, vpName + ": dopo l'accesso l'invito non compare"));
     await ctx.close();
   }
   { /* un invito non più valido: lo dice chiaro */
@@ -99,17 +99,17 @@ const ok = (c, m) => { console.log((c ? "OK   " : "FAIL ") + m); if (!c) fails++
   const tokOf = email => invs.find(i => i.email === email).token;
 
   const Bn = await open("bruno", null, "", "/?invito=" + tokOf("carla@example.com")); const bn = Bn.page;
-  ok(/è per ca•••@example\.com/.test(await bn.locator("#circWrap").innerText()), "con il link di un altro: «questo invito è per ca•••@…», mail mascherata");
+  ok(/è per ca•••@example\.com/.test(await bn.locator("#pane-circles").innerText()), "con il link di un altro: «questo invito è per ca•••@…», mail mascherata");
   ok(await bn.locator('[data-circ="accept-link"]').count() === 0, "nessun pulsante «Accetta» per l'account sbagliato");
   await Bn.ctx.close();
 
   const Bo = await open("bruno", null, "", "/?invito=" + tokOf("bruno@example.com")); const bo = Bo.page;
   await bo.locator('[data-circ="accept-link"]').click();
   await bo.locator(".circ-name", { hasText: "Corso del giovedì" }).waitFor();
-  ok(/Membro/.test(await bo.locator("#circWrap").innerText()), "Bruno accetta con il link ed entra come Membro");
+  ok(/Membro/.test(await bo.locator("#pane-circles").innerText()), "Bruno accetta con il link ed entra come Membro");
   await bo.click('[data-circ="open"]'); await bo.locator(".card-head .eyebrow", { hasText: "Corso del giovedì" }).waitFor();
   ok(await bo.locator('[data-circ="remove"], [data-circ="role"], [data-circ="rename"], form[data-circ-form="invite"]').count() === 0, "il Membro non vede comandi da amministratore");
-  ok(!/anna@example\.com/.test(await bo.locator("#circWrap").innerText()), "il Membro non vede le mail degli altri");
+  ok(!/anna@example\.com/.test(await bo.locator("#pane-circles").innerText()), "il Membro non vede le mail degli altri");
 
   /* --- Carla accetta dall'elenco, senza link --- */
   const C = await open("carla"); const c = C.page;
@@ -138,14 +138,14 @@ const ok = (c, m) => { console.log((c ? "OK   " : "FAIL ") + m); if (!c) fails++
   /* --- PC e inglese --- */
   const P = await open("anna", { width: 1366, height: 800 }, "en"); const pc = P.page;
   await goCircles(pc, true);
-  await pc.locator("#circWrap").getByText("Your circles").waitFor();
-  ok(/Owner/.test(await pc.locator("#circWrap").innerText()), "inglese: «Your circles», «Owner»");
+  await pc.locator("#pane-circles").getByText("Your circles").waitFor();
+  ok(/Owner/.test(await pc.locator("#pane-circles").innerText()), "inglese: «Your circles», «Owner»");
   ok(!(await overflow(pc)), "PC: nessuno scorrimento orizzontale");
   await pc.locator('[data-circ="open"]').first().click(); await pc.locator('form[data-circ-form="invite"]').waitFor();
   await pc.fill("#circEmails", "nuovo@example.com"); await pc.click('[data-circ-form="invite"] button[type=submit]');
   await pc.locator('[data-circ="copy"]').first().waitFor();
   await pc.locator('[data-circ="copy"]').first().click(); await pc.waitForTimeout(300);
-  ok(/Link copied|I can't copy/.test(await pc.locator("#circWrap").innerText()), "«Copy link» risponde (inglese)");
+  ok(/Link copied|I can't copy/.test(await pc.locator("#pane-circles").innerText()), "«Copy link» risponde (inglese)");
   const clip = await pc.evaluate(() => navigator.clipboard.readText().catch(() => ""));
   ok(clip === "" || /\/\?invito=[0-9a-f]{48}$/.test(clip), "il link copiato ha la forma giusta");
   await P.ctx.close();
@@ -170,21 +170,21 @@ const ok = (c, m) => { console.log((c ? "OK   " : "FAIL ") + m); if (!c) fails++
   {
     const A2 = await open("anna", { width: 390, height: 844 }); const a2 = A2.page;
     await goCircles(a2); await a2.locator('[data-circ="open"]').first().click(); await a2.locator('form[data-circ-form="invite"]').waitFor();
-    ok(/non manda mail da solo/.test(await a2.locator("#circWrap").innerText()) && await a2.locator('[data-circ="resend"]').count() === 0, "senza servizio di posta: «Sorso non manda mail da solo», niente «Rimanda la mail»");
+    ok(/non manda mail da solo/.test(await a2.locator("#pane-circles").innerText()) && await a2.locator('[data-circ="resend"]').count() === 0, "senza servizio di posta: «Sorso non manda mail da solo», niente «Rimanda la mail»");
     const realFetch = global.fetch, inviate = [];
     global.fetch = async (url, opts) => { if (/api\.resend\.com/.test(String(url))) { inviate.push(JSON.parse(opts.body)); return { ok: true, status: 200 }; } return realFetch(url, opts); };
     process.env.RESEND_API_KEY = "re_finta"; process.env.MAIL_FROM = "Sorso <inviti@esempio.it>";
     await a2.reload(); await a2.waitForTimeout(900); await goCircles(a2); await a2.locator('[data-circ="open"]').first().click(); await a2.locator('form[data-circ-form="invite"]').waitFor();
-    ok(/Sorso manda anche una mail/.test(await a2.locator("#circWrap").innerText()), "con il servizio: «Sorso manda anche una mail»");
+    ok(/Sorso manda anche una mail/.test(await a2.locator("#pane-circles").innerText()), "con il servizio: «Sorso manda anche una mail»");
     await a2.fill("#circEmails", "nuova.persona@example.com"); await a2.click('[data-circ-form="invite"] button[type=submit]');
-    await a2.locator("#circWrap").getByText("mail inviata").waitFor({ timeout: 5000 }).then(() => ok(true, "dopo l'invito compare «mail inviata»"), () => ok(false, "«mail inviata»"));
+    await a2.locator("#pane-circles").getByText("mail inviata").waitFor({ timeout: 5000 }).then(() => ok(true, "dopo l'invito compare «mail inviata»"), () => ok(false, "«mail inviata»"));
     ok(inviate.length === 1 && inviate[0].to[0] === "nuova.persona@example.com" && /\?invito=[0-9a-f]{48}/.test(inviate[0].text), "la mail è partita verso l'indirizzo giusto, con il link");
-    ok(/Controlla lo spam/.test(await a2.locator("#circWrap").innerText()), "dopo l'invio: avviso «Controlla lo spam»");
+    ok(/Controlla lo spam/.test(await a2.locator("#pane-circles").innerText()), "dopo l'invio: avviso «Controlla lo spam»");
     const mt = await a2.locator('a[href^="mailto:nuova.persona"]').first().getAttribute("href");
     ok(/^mailto:nuova\.persona@example\.com\?subject=/.test(mt) && decodeURIComponent(mt).includes("/?invito=") && decodeURIComponent(mt).includes("Corso del giovedì"), "«Scrivi tu la mail»: mailto verso l'invitato, con cerchia e link");
-    ok(/Scrivi tu la mail/.test(await a2.locator("#circWrap").innerText()), "il pulsante «Scrivi tu la mail» c'è");
+    ok(/Scrivi tu la mail/.test(await a2.locator("#pane-circles").innerText()), "il pulsante «Scrivi tu la mail» c'è");
     await a2.locator('[data-circ="resend"]').first().click();
-    await a2.locator("#circWrap").getByText("Mail rimandata").waitFor({ timeout: 5000 }).then(() => ok(true, "«Rimanda la mail» funziona"), () => ok(false, "«Mail rimandata»"));
+    await a2.locator("#pane-circles").getByText("Mail rimandata").waitFor({ timeout: 5000 }).then(() => ok(true, "«Rimanda la mail» funziona"), () => ok(false, "«Mail rimandata»"));
     ok(!(await overflow(a2)), "nessuno scorrimento orizzontale con i pulsanti in più");
     global.fetch = realFetch; delete process.env.RESEND_API_KEY; delete process.env.MAIL_FROM;
     await A2.ctx.close();
@@ -193,11 +193,11 @@ const ok = (c, m) => { console.log((c ? "OK   " : "FAIL ") + m); if (!c) fails++
   /* --- uscire ed eliminare --- */
   await c.reload(); await c.waitForTimeout(900); await goCircles(c);
   await c.locator('[data-circ="open"]').click(); await c.locator('[data-circ="leave"]').click();
-  await c.locator("#circWrap").getByText("Non fai ancora parte di nessuna cerchia").waitFor();
+  await c.locator("#pane-circles").getByText("Non fai ancora parte di nessuna cerchia").waitFor();
   ok(true, "Carla esce dalla cerchia");
   a._promptAnswer = "Corso del giovedì";
   await a.click('[data-circ="open"]'); await a.locator('[data-circ="delete"]').click();
-  await a.locator("#circWrap").getByText("Non fai ancora parte di nessuna cerchia").waitFor();
+  await a.locator("#pane-circles").getByText("Non fai ancora parte di nessuna cerchia").waitFor();
   ok((await redis.keys("ci:*")).length === 0, "Anna elimina la cerchia: sparisce dal database");
 
   /* --- giro di verifica: nomi lunghi, doppio clic, messaggi, Evento --- */
@@ -207,19 +207,19 @@ const ok = (c, m) => { console.log((c ? "OK   " : "FAIL ") + m); if (!c) fails++
     await goCircles(l);
     await l.fill("#circNewName", "A".repeat(48));
     await l.locator('[data-circ-form="create"] button[type=submit]').dblclick();
-    await l.locator("#circWrap .card-head .eyebrow", { hasText: "AAAA" }).first().waitFor();
+    await l.locator("#pane-circles .card-head .eyebrow", { hasText: "AAAA" }).first().waitFor();
     await l.waitForTimeout(600);
     ok((await redis.keys("ci:*")).length === 1, "doppio clic su «Crea la cerchia»: una sola cerchia");
     ok(!(await overflow(l)), "nome di 48 caratteri senza spazi a 320 px: nessuno scorrimento orizzontale");
     await l.locator('[data-circ="rename"]').click();
     await l.waitForTimeout(600);
-    ok(/Nome cambiato/.test(await l.locator("#circWrap").innerText()) || true, "rinomina (conferma o annullamento)");
+    ok(/Nome cambiato/.test(await l.locator("#pane-circles").innerText()) || true, "rinomina (conferma o annullamento)");
     await l.click('[data-circ="back"]');
     await l.locator('[data-circ="oldevent"]').click();
     await l.waitForTimeout(400);
     ok(await l.locator('#nav [aria-current="page"]').count() === 1, "dall'Evento vecchio la voce Cerchie resta evidenziata");
     await l.click("#eventBackBtn");
-    await l.locator("#circWrap").getByText("Le tue cerchie").waitFor({ timeout: 5000 }).then(() => ok(true, "«← Cerchie» riporta alle Cerchie"), () => ok(false, "«← Cerchie» riporta alle Cerchie"));
+    await l.locator("#pane-circles").getByText("Le tue cerchie").waitFor({ timeout: 5000 }).then(() => ok(true, "«← Cerchie» riporta alle Cerchie"), () => ok(false, "«← Cerchie» riporta alle Cerchie"));
     await L.ctx.close();
     /* un invito accettato dall'elenco non resta nel banner */
     const cid2 = (await redis.keys("ci:*"))[0].slice(3);
@@ -228,7 +228,7 @@ const ok = (c, m) => { console.log((c ? "OK   " : "FAIL ") + m); if (!c) fails++
     const O = await open("ospite", null, "", "/?invito=" + t3); const o = O.page;
     await o.locator('[data-circ="accept-link"]').click();
     await o.waitForTimeout(700);
-    ok(await o.locator('[data-circ="accept-link"]').count() === 0 && /Sei dentro/.test(await o.locator("#circWrap").innerText()), "dopo l'accettazione il banner sparisce e compare «Sei dentro»");
+    ok(await o.locator('[data-circ="accept-link"]').count() === 0 && /Sei dentro/.test(await o.locator("#pane-circles").innerText()), "dopo l'accettazione il banner sparisce e compare «Sei dentro»");
     await O.ctx.close();
   }
   ok(errs.length === 0, "nessun errore JavaScript: " + JSON.stringify(errs));

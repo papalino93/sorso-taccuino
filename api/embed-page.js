@@ -51,8 +51,17 @@ module.exports = async (req, res) => {
     res.status(405).send("Metodo non consentito.");
     return;
   }
-  let pid = "";
-  try { pid = new URL(req.url, "http://x").searchParams.get("p") || ""; } catch (e) { pid = ""; }
+  let pid = "", cid = "";
+  try { const q = new URL(req.url, "http://x").searchParams; pid = q.get("p") || ""; cid = q.get("c") || ""; } catch (e) { pid = ""; }
+
+  /* serate di una cerchia: la pagina vive dentro l'app di Sorso (stessa origine), incorporabile solo da lì.
+     Chi entra e con che ruolo lo decide l'API a ogni richiesta (sessione Sorso + ruolo nella cerchia). */
+  if (/^[0-9a-f]{10}$/.test(cid)) {
+    const nonce = crypto.randomBytes(16).toString("base64");
+    res.setHeader("Content-Security-Policy", ["default-src 'none'", "script-src 'self'", "style-src 'self' 'nonce-" + nonce + "'", "img-src 'self' data:", "connect-src 'self'", "base-uri 'none'", "form-action 'none'", "frame-ancestors 'self'"].join("; "));
+    res.status(200).send(SHELL(nonce)("")("it"));
+    return;
+  }
 
   let partner = null, redis;
   try {

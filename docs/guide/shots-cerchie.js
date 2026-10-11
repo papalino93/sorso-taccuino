@@ -28,6 +28,16 @@ const out = n => path.join(OUT, n);
   await api("mario", { op: "member.role", circle: c1.id, member: g.members.find(m => m.name.startsWith("Giulia")).mid, role: "admin" });
   await api("mario", { op: "invite", circle: c1.id, emails: ["sara@example.com"] });
   /* un invito in attesa per Sara, anche in una seconda cerchia */
+  /* le serate della cerchia: una serata con tre vini e una degustazione di un solo vino */
+  const E = async (who, body) => (await (await fetch(d.url + "/api/embed", { method: "POST", headers: { "Content-Type": "application/json", Authorization: "Bearer " + P[who].token }, body: JSON.stringify(Object.assign({ circle: c1.id }, body)) })).json());
+  const sm = (a, b, c) => ({ mode: "smart", giudizi: { occhio: a, naso: b, bocca: c } });
+  const sv = (await E("giulia", { op: "tasting.create", name: "Brunello 2018", wine: { name: "Brunello di Montalcino", producer: "Podere Esempio", vintage: "2018", type: "Rosso" } }));
+  const ser = (await E("mario", { op: "tasting.create", name: "Serata Toscana" })).tasting;
+  const vini = [];
+  for (const w of [["Chianti Classico", "Castello Prova", "2020"], ["Vino Nobile", "Fattoria Esempio", "2019"], ["Bolgheri Rosso", "Tenuta Demo", "2021"]]) vini.push((await E("mario", { op: "wine.add", tasting: ser.id, wine: { name: w[0], producer: w[1], vintage: w[2], type: "Rosso" } })).wine);
+  for (const [who, vs] of [["mario", [86, 82, 78]], ["giulia", [90, 80, 84]], ["luca", [88, 76, 80]]]) for (let i = 0; i < 3; i++) await E(who, Object.assign({ op: "vote", tasting: ser.id, wine: vini[i].id }, sm(vs[i], vs[i], vs[i])));
+  await E("giulia", Object.assign({ op: "vote", tasting: sv.tasting.id, wine: sv.wine.id }, sm(92, 90, 91)));
+  await E("luca", Object.assign({ op: "vote", tasting: sv.tasting.id, wine: sv.wine.id }, sm(86, 88, 87)));
   const c2 = (await api("giulia", { op: "create", name: "Cena di fine corso" })).circle;
   await api("giulia", { op: "invite", circle: c2.id, emails: ["luca@example.com"] });
 
@@ -51,11 +61,24 @@ const out = n => path.join(OUT, n);
   a = await open("mario", VP);
   await a.page.click('[data-tab="circles"]'); await a.page.waitForTimeout(500);
   await a.page.locator('[data-circ="open"]').first().click(); await a.page.waitForTimeout(700);
-  await a.page.evaluate(() => window.scrollTo(0, 0));
+  await a.page.locator("#circFrame").waitFor(); await a.page.waitForTimeout(1200);
+  await a.page.evaluate(() => document.getElementById("circMore").scrollIntoView({ block: "start" })); await a.page.waitForTimeout(300);
   await a.page.screenshot({ path: out("cerchie-persone.png") });
   await a.page.evaluate(() => document.querySelector('form[data-circ-form="invite"]').scrollIntoView({ block: "start" }));
   await a.page.waitForTimeout(300);
   await a.page.screenshot({ path: out("cerchie-invita.png") });
+  await a.ctx.close();
+  /* Luca (Membro): le serate della cerchia, poi la degustazione di un solo vino dopo il voto */
+  a = await open("luca", VP);
+  await a.page.click('[data-tab="circles"]'); await a.page.waitForTimeout(500);
+  await a.page.locator('[data-circ="open"][data-c="' + c1.id + '"]').first().click();
+  const fr = a.page.frameLocator("#circFrame");
+  await fr.locator('[data-act="open"]').first().waitFor(); await a.page.waitForTimeout(600);
+  await a.page.evaluate(() => document.getElementById("circSerate").scrollIntoView({ block: "start" })); await a.page.waitForTimeout(300);
+  await a.page.screenshot({ path: out("cerchie-serate.png") });
+  await fr.locator('[data-act="open"]', { hasText: "Brunello" }).click(); await fr.locator(".big.team").first().waitFor(); await a.page.waitForTimeout(500);
+  await a.page.evaluate(() => document.getElementById("circSerate").scrollIntoView({ block: "start" })); await a.page.waitForTimeout(300);
+  await a.page.screenshot({ path: out("cerchie-unvino.png") });
   await a.ctx.close();
   /* Sara arriva dal link */
   const hv = await redis.hgetall("cv:" + c1.id); const invs = []; for (let i = 0; i < hv.length; i += 2) invs.push(JSON.parse(hv[i + 1]));

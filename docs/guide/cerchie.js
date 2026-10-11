@@ -16,7 +16,7 @@ function build() {
     <h1 class="d">Un gruppo, <em>tre ruoli</em></h1>
     <p class="lead">Una cerchia è un gruppo di persone — amici, colleghi, corsisti — che degustano insieme. La crei tu, inviti chi vuoi, e decidi chi può gestirla.</p>
     ${stats([["3", "ruoli:<br>Proprietario, Amministratore, Membro"], ["50", "persone al massimo<br>per cerchia"], ["14", "giorni di validità<br>di un invito"], ["0 €", "il costo<br>dell'app"]])}
-    ${cards([["Crei", "Dai un nome alla cerchia: sei il Proprietario. Puoi crearne fino a cinque."], ["Inviti", "Scrivi le mail: l'invito vale solo per quell'indirizzo. Puoi anche mandare un link."], ["Gestisci", "Nomini amministratori, togli persone, passi la proprietà. Le serate di gruppo arrivano nel prossimo aggiornamento."]])}
+    ${cards([["Crei", "Dai un nome alla cerchia: sei il Proprietario. Puoi crearne fino a cinque."], ["Inviti", "Scrivi le mail: l'invito vale solo per quell'indirizzo. Puoi anche mandare un link."], ["Degusti", "Serate con più vini o un solo vino: tutti votano dal telefono, con medie e classifica."]])}
     <p class="mute">Serve un account Google: è lo stesso che usi per ritrovare le schede su ogni dispositivo.</p>
   `));
 
@@ -92,7 +92,7 @@ function build() {
     <div class="two">
       <div>
         <h3 class="k">Privacy</h3>
-        ${ul(["I <b>nomi</b> delle persone li vedono tutti i membri; le <b>mail</b> solo il Proprietario e gli amministratori.", "Il tuo <b>Taccuino personale resta privato</b>: nella cerchia non finisce niente se non lo scegli tu.", "Nelle serate di gruppo i voti saranno <b>anonimi</b>: solo medie e conteggi, mai chi ha dato quale voto.", "Chi esce lascia i propri voti nelle medie senza il nome, e potrà chiedere di cancellarli."])}
+        ${ul(["I <b>nomi</b> delle persone li vedono tutti i membri; le <b>mail</b> solo il Proprietario e gli amministratori.", "Il tuo <b>Taccuino personale resta privato</b>: nella cerchia non finisce niente se non lo scegli tu.", "Nelle serate i voti sono <b>anonimi</b>: solo medie e conteggi, mai chi ha dato quale voto.", "Chi esce lascia i propri voti nelle medie senza il nome; prima può usare <b>Cancella i miei voti</b>."])}
       </div>
       <div>
         <h3 class="k">Limiti</h3>
@@ -112,14 +112,24 @@ function build() {
       ["Voglio passare la gestione a un amico.", "Rendilo amministratore; se vuoi cedere tutto, usa «Passa la proprietà»."],
       ["Posso togliere un amministratore?", "Solo il Proprietario. Un amministratore può togliere solo i Membri."],
       ["Ho eliminato la cerchia per sbaglio.", "Non si può annullare: va ricreata e le persone vanno invitate di nuovo."],
-      ["Chi vede il mio Taccuino?", "Nessuno: la cerchia non lo legge."]], [0, 1])}
+      ["Chi vede il mio Taccuino?", "Nessuno: la cerchia non lo legge."],
+      ["Un vino lo hanno assaggiato in pochi.", "Apri il vino e chiudi la sua votazione: la media conta chi ha votato fino a quel momento."]], [0, 1])}
   `));
 
-  P.push(pg("paper", "Cosa arriva dopo", `
-    ${eyebrow("09", "Cosa arriva dopo")}
-    <h1 class="d">Le serate, <em>poi il sito</em></h1>
-    ${passi([["Ora", "Cerchie, ruoli e inviti."], ["Prossimo aggiornamento", "Serate di gruppo, anche alla cieca, con classifica e statistiche."], ["Poi", "Un widget per mostrare le statistiche su un sito."]])}
-    ${ul(["<b>Serate di gruppo</b>: l'amministratore crea la serata e aggiunge i vini; tutti votano; si può chiudere la votazione di un singolo vino se lo assaggiano in pochi; classifica e statistiche di gruppo, con esportazione.", "<b>Widget</b>: un frammento da incollare in un sito, in sola lettura e revocabile, con le statistiche della cerchia.", "L'<b>Evento</b> della versione precedente sarà sostituito dalle serate delle cerchie."])}
+  P.push(pg("paper", "Le serate", `
+    ${eyebrow("09", "Le serate")}
+    <h1 class="d">Degustare <em>insieme</em></h1>
+    ${lato(`
+        <p class="lead">Apri la cerchia: in alto c'è <b>Serate e degustazioni</b>.</p>
+        ${passi([["Crea", "«Nuova degustazione» con più vini, o «Un solo vino»."], ["Vota", "Ognuno dal suo telefono."], ["Classifica", "Medie, classifica e statistiche."]])}
+        ${ul(["Le creano il <b>Proprietario</b> e gli <b>amministratori</b>; i membri votano.", "La media di un vino compare <b>dopo il tuo voto</b>.", "Anche <b>alla cieca</b>, con le ipotesi su tipologia, vitigno e annata.", "Proprietario e amministratori <b>scaricano le medie</b> in CSV o JSON."])}`,
+      fig("cerchie-unvino.png", 1, "Una degustazione di <b>un solo vino</b> dopo il voto: il tuo voto e la media della cerchia.", "lg"))}
+  `));
+
+  P.push(pg("ink", "Cosa arriva dopo", `
+    ${eyebrow("10", "Cosa arriva dopo")}
+    <h1 class="d">Poi, <em>il sito</em></h1>
+    ${ul(["<b>Widget</b>: un frammento da incollare in un sito, in sola lettura e revocabile, con la classifica e le medie della cerchia.", "Gli <b>eventi</b> della versione precedente restano consultabili in fondo a Cerchie; i nuovi si fanno come serate."])}
     <h3 class="k" style="margin-top:6mm">In pratica, per cominciare</h3>
     ${check(["Apro Cerchie e creo la mia prima cerchia.", "Invito le persone con le loro mail e, se serve, mando il link.", "Nomino un amministratore di fiducia.", "Tengo d'occhio gli inviti in attesa e revoco quelli sbagliati."])}
     <div class="bigword">Buone degustazioni.</div>

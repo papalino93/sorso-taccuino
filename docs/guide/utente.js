@@ -18,7 +18,7 @@ function build() {
     <h1 class="d">Assaggi, <em>voti, ricordi</em></h1>
     <p class="lead">Sorso è il tuo taccuino: fotografi l'etichetta, dai il voto, e ritrovi ogni vino con le statistiche del tuo palato.</p>
     ${stats([["50–100", "la scala<br>del voto"], ["2", "modi di votare:<br>rapido o completo"], ["5", "sezioni:<br>Nuova · Alla cieca · Taccuino · Statistiche · Cerchie"], ["0 €", "il costo<br>dell'app"]])}
-    ${cards([["Nuova", "Una scheda per ogni vino: etichetta, dati, giudizio. Il punteggio si calcola da solo."], ["Alla cieca", "Assaggi senza guardare l'etichetta e provi a indovinare. Poi confronti."], ["Taccuino", "Tutte le tue schede: cerchi, ordini, confronti due vini, modifichi."], ["Statistiche", "Il tuo profilo: vitigni preferiti, come giudichi, quanto conta il prezzo."], ["Cerchie", "Gruppi di amici, colleghi o corsisti: inviti per mail e tre ruoli. Le serate di gruppo arrivano presto."], ["Impostazioni", "Colori, tema chiaro o scuro, copia dei dati, account e questa guida."]])}
+    ${cards([["Nuova", "Una scheda per ogni vino: etichetta, dati, giudizio. Il punteggio si calcola da solo."], ["Alla cieca", "Assaggi senza guardare l'etichetta e provi a indovinare. Poi confronti."], ["Taccuino", "Tutte le tue schede: cerchi, ordini, confronti due vini, modifichi."], ["Statistiche", "Il tuo profilo: vitigni preferiti, come giudichi, quanto conta il prezzo."], ["Cerchie", "Gruppi di amici, colleghi o corsisti: serate con più vini o un solo vino, voti anonimi e classifica."], ["Impostazioni", "Colori, tema chiaro o scuro, copia dei dati, account e questa guida."]])}
     <p class="mute">Funziona dal telefono e dal computer. Sul telefono le sezioni sono nella barra in alto; sul computer, nella barra in alto.</p>
   `));
 
@@ -46,7 +46,7 @@ function build() {
     ${lato(`
         <p class="lead">Tutto è facoltativo, tranne il nome del vino.</p>
         ${passi([["Etichetta", "Scatta o scegli una foto, poi «Leggi l'etichetta»."], ["Dati", "Controlli e completi: nome, annata, prezzo…"], ["Giudizio", "Voto rapido o scheda completa."]])}
-        ${ul(["<b>Leggi l'etichetta</b>: Sorso legge la foto e propone nome, produttore, annata, denominazione e vitigni. Controlli, correggi e scegli cosa usare. La foto resta sul telefono.", "<b>Uvaggio</b>: indica i vitigni e le percentuali. Alimenta le statistiche per vitigno: più lo compili, più il profilo è preciso.", "<b>Tipologia</b>: rosso, bianco, rosato, bollicine… Il giudizio tiene conto del tipo di vino.", "<b>Evento</b>: se degusti con altri, collega la scheda a un evento (capitolo 07).", "Il punteggio si aggiorna mentre muovi i cursori."])}
+        ${ul(["<b>Leggi l'etichetta</b>: Sorso legge la foto e propone nome, produttore, annata, denominazione e vitigni. Controlli, correggi e scegli cosa usare. La foto resta sul telefono.", "<b>Uvaggio</b>: indica i vitigni e le percentuali. Alimenta le statistiche per vitigno: più lo compili, più il profilo è preciso.", "<b>Tipologia</b>: rosso, bianco, rosato, bollicine… Il giudizio tiene conto del tipo di vino.", "<b>Con altri</b>: per degustare in gruppo usa le serate di una cerchia (capitolo 07).", "Il punteggio si aggiorna mentre muovi i cursori."])}
         ${call("<b>Hai sbagliato?</b> Una scheda salvata si modifica dal Taccuino: tocca «Modifica scheda».")}`,
       fig("app-nuova.png", 1, "La scheda <b>Nuova</b>: etichetta, dati e giudizio.", "lg"))}
   `));
@@ -82,15 +82,14 @@ function build() {
       fig("app-statistiche.png", 1, "Le <b>Statistiche</b> del tuo profilo.", "lg"))}
   `));
 
-  P.push(pg("paper", "Evento", `
-    ${eyebrow("07", "Evento (versione precedente)")}
-    <h1 class="d">Una serata, <em>una classifica</em></h1>
+  P.push(pg("paper", "Serate nelle cerchie", `
+    ${eyebrow("07", "Serate nelle cerchie")}
+    <h1 class="d">Degustare <em>insieme</em></h1>
     ${lato(`
-        <p class="lead">Serve solo se degusti <b>insieme ad altri</b>: una serata in enoteca, un corso, una fiera. Lo trovi in <b>Cerchie</b>, in fondo («Evento della versione precedente»): sarà sostituito dalle serate delle cerchie.</p>
-        ${passi([["Crea l'evento", "Dal menu in fondo a «Nuova»."], ["Ognuno vota", "Le schede si collegano all'evento."], ["Classifica", "Si apre «Evento» e si aggiorna."]])}
-        ${ul(["Tutti compilano la scheda degli stessi vini.", "La <b>classifica</b> mostra i vini più apprezzati dal gruppo.", "Per condividere davvero i voti serve l'<b>accesso con Google</b>, anche per gli altri partecipanti: senza accesso la classifica raccoglie solo i voti di questo dispositivo."])}
-        ${call("Se bevi per conto tuo lascia «Nessun evento»: la scheda è personale.")}`,
-      fig("app-evento.png", 1, "<b>Evento</b>: la classifica dei vini votati insieme.", "lg"))}
+        <p class="lead">Per una serata in enoteca, un corso o una cena: apri una <b>cerchia</b> e trovi in alto <b>Serate e degustazioni</b>.</p>
+        ${passi([["Crea", "Una serata con più vini, o «Un solo vino»."], ["Vota", "Ognuno dal suo telefono."], ["Classifica", "Medie e statistiche della cerchia."]])}
+        ${ul(["Le creano il Proprietario e gli amministratori; i membri votano.", "La media di un vino compare <b>dopo il tuo voto</b>; anche <b>alla cieca</b>.", "I voti sono anonimi; con <b>Cancella i miei voti</b> li togli da una cerchia.", "Gli <b>eventi</b> della versione precedente restano consultabili in fondo a Cerchie."])}`,
+      fig("cerchie-serate.png", 1, "Le <b>serate</b> di una cerchia: una serata con tre vini e una degustazione di un solo vino.", "lg"))}
   `));
 
   P.push(pg("ink", "Impostazioni", `

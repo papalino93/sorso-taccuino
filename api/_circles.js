@@ -2,6 +2,7 @@ const crypto = require("crypto");
 const { HttpError, cleanText } = require("./_http");
 const limit = require("./_limit");
 const mail = require("./_mail");
+const Team = require("./_team");
 
 /* Le cerchie: gruppi di persone (amici, colleghi, corsisti) con un Proprietario, degli
    Amministratori e dei Membri. Un invito è legato a un indirizzo mail: lo può accettare solo
@@ -52,7 +53,7 @@ const K = {
 const ID = /^[0-9a-f]{10}$/, TOKEN = /^[0-9a-f]{48}$/, MID = /^[0-9a-f]{12}$/;
 const rid = () => crypto.randomBytes(5).toString("hex");
 const bad = (code, msg) => new HttpError(400, code, msg);
-const notFound = what => new HttpError(404, "not_found", what + " non trovata.");
+const notFound = what => new HttpError(404, "not_found", what + (what === "Invito" ? " non trovato." : " non trovata."));
 const forbidden = msg => new HttpError(403, "forbidden", msg || "Non hai il permesso di farlo.");
 const parse = s => { try { return typeof s === "string" ? JSON.parse(s) : (s && typeof s === "object" ? s : null); } catch (e) { return null; } };
 /* hgetall può tornare come elenco piatto [chiave, valore, …] oppure come oggetto */
@@ -235,6 +236,7 @@ const remove = (redis, user, body) => locked(redis, body.circle, async () => {
   Object.values(hv).map(parse).filter(Boolean).forEach(i => { p.del(K.cl(i.token)); p.srem(K.ce(i.eh), circle.id + "|" + i.id); });
   p.del(K.ci(circle.id)); p.del(K.cm(circle.id)); p.del(K.cv(circle.id));
   await p.exec();
+  await Team.deleteTeam(redis, CIRCLE_PARTNER.id, circle.id);   // le serate della cerchia, con i voti
   return { deleted: circle.id };
 });
 
@@ -441,13 +443,58 @@ const transfer = (redis, user, body) => locked(redis, body.circle, async () => {
   return { owner: body.member };
 });
 
-const WRITES = new Set(["create", "rename", "delete", "invite", "invite.resend", "invite.revoke", "invite.accept", "invite.decline", "member.role", "member.remove", "leave", "transfer"]);
+const WRITES = new Set(["votes.delete", "create", "rename", "delete", "invite", "invite.resend", "invite.revoke", "invite.accept", "invite.decline", "member.role", "member.remove", "leave", "transfer"]);
 const OPS = {
   list, create, get, rename, delete: remove, invite, "invite.revoke": revokeInvite, "invite.resend": resendInvite, "invite.peek": peekInvite, "invite.preview": previewInvite,
-  "invite.accept": acceptInvite, "invite.decline": declineInvite, "member.role": setRole, "member.remove": removeMember, leave, transfer
+  "invite.accept": acceptInvite, "invite.decline": declineInvite, "member.role": setRole, "member.remove": removeMember, leave, transfer,
+  "votes.delete": deleteMyVotes, export: exportCircle
 };
+
+/* ---- serate della cerchia: lo stesso motore dello spazio di team (api/_team.js) ----
+   Per il motore una cerchia è un team di un partner interno, «cerchie»: la cerchia è il team, l'account è
+   l'utente; Proprietario e Amministratori sono organizzatori, i Membri partecipanti. I voti restano anonimi. */
+const CIRCLE_PARTNER = Object.freeze({ id: "cerchie", name: "Cerchie", modes: ["smart", "full"], defaultMode: "smart", lang: "it", theme: {} });
+
+/* Chi può entrare nelle serate di una cerchia: sessione Sorso valida e ruolo letto dalla cerchia a OGNI richiesta
+   (chi è stato tolto o ha cambiato ruolo lo vede subito). Chi non ne fa parte non sa nemmeno che esiste. */
+async function embedContext(redis, token, cid) {
+  const username = token ? await redis.get("session:" + token) : null;
+  if (!username) throw new HttpError(401, "session", "Sessione scaduta: accedi di nuovo.");
+  if (typeof cid !== "string" || !ID.test(cid)) throw notFound("Cerchia");
+  const [mRaw, cRaw] = await Promise.all([redis.hget(K.cm(cid), String(username)), redis.get(K.ci(cid))]);
+  const m = parse(mRaw), c = parse(cRaw);
+  if (!m || !c) throw notFound("Cerchia");
+  return {
+    partner: CIRCLE_PARTNER, circle: c, username: String(username),
+    ctx: { uid: String(username), name: "", team: cid, role: m.role === "member" ? "member" : "organizer", circleRole: m.role, lang: null, mode: null }
+  };
+}
+
+/* «Cancella i miei voti»: tutti i voti e le ipotesi di questa persona in questa cerchia (le medie si ricalcolano) */
+async function deleteMyVotes(redis, user, body) {
+  const { circle } = await requireRole(redis, user, body.circle, "member");
+  if (body.confirm !== true) throw bad("confirm_required", "Conferma la cancellazione.");
+  const r = await Team.deleteUser(redis, CIRCLE_PARTNER.id, user.username, circle.id);
+  return { votesRemoved: r.votesRemoved, guessesRemoved: r.guessesRemoved };
+}
+
+/* Esportazione per Proprietario e Amministratori: medie per vino di ogni serata, anonime
+   (sotto i 2 voti la media non si dà: sarebbe il voto di una persona). */
+async function exportCircle(redis, user, body) {
+  const { circle } = await requireRole(redis, user, body.circle, "admin");
+  const list = await Team.listTastings(redis, CIRCLE_PARTNER.id, { team: circle.id });
+  const tastings = [];
+  for (const t of list.slice(0, 200)) { try { tastings.push(await Team.getResults(redis, CIRCLE_PARTNER.id, t.id)); } catch (e) { /* eliminata nel frattempo */ } }
+  const csv = ["tasting_id,tasting,date,status,wine_id,producer,name,vintage,votes,average,rank"].concat(
+    ...tastings.map(r => r.wines.map(w => [r.tasting.id, r.tasting.name, r.tasting.createdAt.slice(0, 10), r.tasting.status, w.id, w.producer, w.name, w.vintage, w.votes, w.average == null ? "" : w.average, w.rank == null ? "" : w.rank].map(Team.csvCell).join(",")))
+  ).join("\r\n") + "\r\n";
+  const json = { circle: { id: circle.id, name: circle.name }, exportedAt: new Date().toISOString(), minVotes: Team.MIN_VOTES_API,
+    tastings: tastings.map(r => ({ id: r.tasting.id, name: r.tasting.name, createdAt: r.tasting.createdAt, status: r.tasting.status, blind: r.tasting.blind, revealed: r.tasting.revealed,
+      wines: r.wines.map(w => ({ id: w.id, position: w.position, producer: w.producer, name: w.name, vintage: w.vintage, type: w.type, grape: w.grape, status: w.status, votes: w.votes, average: w.average, rank: w.rank })) })) };
+  return { csv, json };
+}
 
 /* operazioni che non chiedono l'accesso */
 const PUBLIC = new Set(["invite.preview"]);
 
-module.exports = { OPS, WRITES, PUBLIC, getUser, normEmail, emailHash, MAX_MEMBERS, MAX_OWNED, MAX_JOINED, INVITE_DAYS, K };
+module.exports = { OPS, WRITES, PUBLIC, CIRCLE_PARTNER, embedContext, getUser, normEmail, emailHash, MAX_MEMBERS, MAX_OWNED, MAX_JOINED, INVITE_DAYS, K };

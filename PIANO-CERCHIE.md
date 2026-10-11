@@ -1,6 +1,6 @@
 # Sorso — Piano delle cerchie
 
-Versione del piano: 9 ottobre 2026 · scritto dopo l'intervista con Andrea. **Stato: passo 0 fatto (1.9.2), passo 1 fatto (2.0.0), mail degli inviti e barra in alto in 2.1.0. Link d'invito, avviso spam e barra colorata in 2.1.1. Ordine scelto l'11 ottobre: prima il widget, poi la lettura delle etichette, per ultime le serate nelle cerchie (le versioni si numerano nell'ordine di uscita).**
+Versione del piano: 9 ottobre 2026 · scritto dopo l'intervista con Andrea. **Stato: passo 0 fatto (1.9.2), passo 1 fatto (2.0.0), mail degli inviti e barra in alto in 2.1.0. Link d'invito, avviso spam e barra colorata in 2.1.1. Lettura delle etichette in 2.2.0, colori «Inchiostro» in 2.2.1, serate nelle cerchie in 2.3.0. Prossimo: il widget.**
 
 ## 1. Obiettivo
 
@@ -71,11 +71,11 @@ Permessi per proprietario sulle chiavi condivise, niente scansione completa, tes
 Creare/rinominare/eliminare cerchie; inviti legati alla mail con link copiabile, scadenza e revoca; ruoli Proprietario/Amministratore/Membro con trasferimento di proprietà; uscire/togliere membri; «le mie cerchie» e «i miei inviti». Test dei permessi su **ogni** operazione e per **ogni** ruolo, e di isolamento tra cerchie.
 *Fine passo: tre persone di prova creano una cerchia, si invitano, si nominano e si tolgono, senza che nessuno veda ciò che non deve.*
 
-**Passo 2 — 2.2.0: serate nella cerchia ed esportazione.**
+**Passo 2 — 2.3.0 ✅ fatto: serate nella cerchia ed esportazione** (in più: «Un solo vino»; i vecchi eventi restano consultabili invece di essere convertiti).
 Le serate (anche alla cieca, chiusura del singolo vino, classifica, statistiche) dentro la cerchia con la sessione interna; ritiro della scheda Evento e conversione dei vecchi eventi; esportazione CSV/JSON delle statistiche di gruppo per gli amministratori; «Cancella i miei voti».
 *Fine passo: una serata completa di cerchia, dall'invito alla classifica, e un CSV corretto.*
 
-**Passo 3 — 2.3.0: widget per i siti.**
+**Passo 3 — prossimo: widget per i siti.**
 Link di sola lettura revocabile; pagina del widget (classifica, medie, serate, nei colori del sito, con un frammento HTML da incollare); solo aggregati; limiti di richieste. Guida in PDF.
 *Fine passo: il widget funziona incollato in una pagina di prova e smette di funzionare appena revocato.*
 

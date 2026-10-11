@@ -100,6 +100,7 @@ async function main(argv, redis, log) {
 
   if (cmd === "create") {
     if (!P.validId(id)) throw new Error("id non valido: minuscole, cifre e trattini in mezzo, 2-31 caratteri (niente trattino all'inizio, alla fine o doppio)");
+    if (id === "cerchie") throw new Error("l'id «cerchie» è riservato alle serate delle cerchie di Sorso");
     if (!opt.name) throw new Error("serve --name");
     const sig = secret(), apiKey = P.newApiKey(id);
     const cfg = {

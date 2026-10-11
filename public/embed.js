@@ -19,7 +19,7 @@
 
   var S = {
     lang: document.documentElement.lang === "en" ? "en" : "it",
-    partner: "", token: "", session: "", user: null, config: null, fatal: null,
+    partner: "", circle: "", token: "", session: "", user: null, config: null, fatal: null,
     view: "list", tab: "tastings", tastings: [], tasting: null, wines: [], quota: "ok",
     stats: null, statsLoading: false, statsError: null, gform: null,
     loading: true, loadError: null,
@@ -61,7 +61,7 @@
       authUnsaved: "Il voto che stavi compilando non è stato salvato.",
       authAsk: "Chiedi un nuovo accesso al sito", authReloadHere: "Ricarica questa pagina",
       tastings: "Degustazioni del team", tastingsHint: "Le crea il responsabile del team: le vedono tutti i membri.", tastingsHintOrg: "Le degustazioni che crei qui le vedono tutti i membri del tuo team.", noTastings: "Ancora nessuna degustazione.", noTastingsOrg: "Crea la prima degustazione del tuo team.",
-      newTasting: "Nuova degustazione", tastingName: "Nome della degustazione", open: "aperta", closedBadge: "chiusa",
+      newTasting: "Nuova degustazione", singleWine: "Un solo vino", singleBadge: "un vino", singleHint: "Per assaggiare insieme un vino solo: la degustazione nasce con il vino, pronta da votare.", tastingName: "Nome della degustazione", open: "aperta", closedBadge: "chiusa",
       wines: "Vini", noWines: "Nessun vino ancora: l'organizzatore deve aggiungerli.", noWinesOrg: "Aggiungi i vini da votare.",
       addWine: "Aggiungi vino", wineName: "Nome del vino", producer: "Produttore (facoltativo)", vintage: "Annata (facoltativa, es. 2018 o NV)",
       wineAdded: "Aggiunto: {name}.",
@@ -164,7 +164,7 @@
       authUnsaved: "The vote you were filling in was not saved.",
       authAsk: "Ask the website for a new access", authReloadHere: "Reload this page",
       tastings: "Team tastings", tastingsHint: "Created by the team lead: every member can see them.", tastingsHintOrg: "The tastings you create here are visible to every member of your team.", noTastings: "No tastings yet.", noTastingsOrg: "Create your team's first tasting.",
-      newTasting: "New tasting", tastingName: "Tasting name", open: "open", closedBadge: "closed",
+      newTasting: "New tasting", singleWine: "Just one wine", singleBadge: "one wine", singleHint: "To taste a single wine together: the tasting starts with the wine, ready to vote.", tastingName: "Tasting name", open: "open", closedBadge: "closed",
       wines: "Wines", noWines: "No wines yet: the organizer has to add them.", noWinesOrg: "Add the wines to vote on.",
       addWine: "Add wine", wineName: "Wine name", producer: "Producer (optional)", vintage: "Vintage (optional, e.g. 2018 or NV)",
       wineAdded: "Added: {name}.",
@@ -235,9 +235,22 @@
       wineN: "Wine {n}"
     }
   };
+  /* nelle cerchie si parla di cerchia, non di team */
+  var TXT_CIRCLE = {
+    it: { tastings: "Degustazioni della cerchia", tastingsHint: "Le creano il Proprietario e gli amministratori: le vedono tutti i membri.", tastingsHintOrg: "Le degustazioni che crei qui le vedono tutti i membri della cerchia.",
+      noTastingsOrg: "Crea la prima degustazione della cerchia: una serata con più vini o un solo vino.", closedNoVote: "Degustazione chiusa e non hai votato questo vino: la media della cerchia non è visibile.",
+      teamAvg: "Media della cerchia", voteToSee: "Vota questo vino per vedere la media della cerchia.", eventsHint: "Le degustazioni chiuse della cerchia e il vino che ha vinto.",
+      statsHint: "Dalle ultime {n} degustazioni chiuse della cerchia. Sono dati aggregati: nessuno vede chi ha votato cosa.", statsHintOne: "Dall'ultima degustazione chiusa della cerchia. Sono dati aggregati: nessuno vede chi ha votato cosa.",
+      teamHeading: "La cerchia", stAverage: "Media della cerchia", vsTeam: "Rispetto alla cerchia", sevSame: "In linea con la cerchia" },
+    en: { tastings: "Circle tastings", tastingsHint: "Created by the Owner and admins: every member can see them.", tastingsHintOrg: "The tastings you create here are visible to every member of the circle.",
+      noTastingsOrg: "Create the circle's first tasting: an evening with several wines or just one wine.", closedNoVote: "The tasting is closed and you did not vote on this wine: the circle average is not visible.",
+      teamAvg: "Circle average", voteToSee: "Vote on this wine to see the circle average.", eventsHint: "The circle's closed tastings and the wine that won.",
+      statsHint: "From the circle's last {n} closed tastings. The data is aggregated: nobody sees who voted what.", statsHintOne: "From the circle's last closed tasting. The data is aggregated: nobody sees who voted what.",
+      teamHeading: "The circle", stAverage: "Circle average", vsTeam: "Compared to the circle", sevSame: "In line with the circle" }
+  };
   function t(k, vars) {
-    var d = TXT[S.lang] || TXT.it;
-    var s = d[k] != null ? d[k] : (TXT.it[k] != null ? TXT.it[k] : k);
+    var d = TXT[S.lang] || TXT.it, dc = S.circle ? (TXT_CIRCLE[S.lang] || TXT_CIRCLE.it) : null;
+    var s = dc && dc[k] != null ? dc[k] : d[k] != null ? d[k] : (TXT.it[k] != null ? TXT.it[k] : k);
     if (vars) Object.keys(vars).forEach(function (v) { s = s.split("{" + v + "}").join(vars[v]); });
     return s;
   }
@@ -309,6 +322,7 @@
     var timer = setTimeout(function () { if (ctrl) ctrl.abort(); }, TIMEOUT_MS);
     var headers = { "Content-Type": "application/json" };
     if (S.session) headers.Authorization = "Bearer " + S.session;
+    if (S.circle) body = Object.assign({}, body, { circle: S.circle });
     return fetch("/api/embed", { method: "POST", headers: headers, body: JSON.stringify(body), signal: ctrl ? ctrl.signal : undefined })
       .then(function (r) {
         clearTimeout(timer);
@@ -408,16 +422,19 @@
 
   /* ---------------- accesso ---------------- */
   function cleanUrl() {
-    try { history.replaceState({ v: "list" }, "", location.pathname + "?p=" + encodeURIComponent(S.partner)); } catch (e) { /* ok */ }
+    try { history.replaceState({ v: "list" }, "", location.pathname + (S.circle ? "?c=" + encodeURIComponent(S.circle) : "?p=" + encodeURIComponent(S.partner))); } catch (e) { /* ok */ }
   }
   function login() {
     S.fatal = null; S.loading = true; render();
-    return api({ op: "session", token: S.token }).then(function (r) {
+    var req = { op: "session", token: S.token };
+    if (S.circle) { req = { op: "session", mode: hostPref("sorso-modo-predefinito"), lang: hostPref("sorso-lang") }; }
+    return api(req).then(function (r) {
       if (!r.session || !r.user || !r.config || !Array.isArray(r.config.modes)) throw mkErr("network");
       /* un altro utente (o un altro team) sullo stesso iframe non deve vedere le bozze del precedente */
       var cambiato = !S.user || S.user.team !== r.user.team || S.user.name !== r.user.name || S.user.role !== r.user.role;
       if (cambiato) { S.drafts = {}; S.gdrafts = {}; S.sheet = null; S.form = null; S.gform = null; S.confirm = null; S.tasting = null; S.wines = []; S.tastings = []; S.stats = null; S.statsError = null; S.tab = "tastings"; S.view = "list"; S.notice = null; }
-      S.session = r.session; S.user = r.user; S.config = r.config; S.quota = r.quota || "ok"; S.token = ""; S.fatal = null;
+      if (!S.circle) S.session = r.session;     // nella cerchia la sessione è quella di Sorso (stessa origine)
+      S.user = r.user; S.config = r.config; S.quota = r.quota || "ok"; S.token = ""; S.fatal = null;
       S.lang = r.config.lang === "en" ? "en" : "it";
       document.documentElement.lang = S.lang;
       cleanUrl();
@@ -436,6 +453,7 @@
   /* ---------------- disegno ---------------- */
   function head() {
     var c = S.config || {};
+    if (S.circle) return "";
     return '<header class="top">' + (c.logo ? '<img class="logo" alt="" src="' + esc(c.logo) + '">' : "") +
       '<h1 class="title" dir="auto">' + esc(c.title || "Sorso") + '</h1>' +
       (S.user ? '<p class="who" dir="auto">' + esc(S.user.name) + '<br>' + esc(t(isOrg() ? "asOrganizer" : "asMember")) + '</p>' : "") + '</header>';
@@ -469,9 +487,10 @@
     var err = f.error ? '<p class="field-error" id="form-err">' + esc(f.error) + '</p>' : "";
     var h = '<form class="card" data-form="' + kind + '" novalidate' + (f.error ? ' aria-describedby="form-err"' : "") + '>';
     var typeOptions = function (sel) { return '<option value="">' + esc(t("typeNone")) + '</option>' + ["Rosso", "Bianco", "Rosato", "Spumante", "Passito"].map(function (x) { return '<option value="' + x + '"' + (sel === x ? " selected" : "") + '>' + esc(t("tp_" + x)) + '</option>'; }).join(""); };
+    if (kind === "single") h += '<p class="muted small">' + esc(t("singleHint")) + '</p>';
     h += '<label class="f" for="f-name">' + esc(t(kind === "tasting" ? "tastingName" : "wineName")) + '</label>' +
       '<input type="text" id="f-name" name="name" data-fk="f-name" maxlength="' + (kind === "tasting" ? 80 : 100) + '" autocomplete="off" enterkeyhint="done" dir="auto" value="' + esc(v.name) + '"' + (f.error ? ' aria-invalid="true"' : "") + '>';
-    if (kind === "wine") {
+    if (kind === "wine" || kind === "single") {
       h += '<label class="f" for="f-prod">' + esc(t("producer")) + '</label><input type="text" id="f-prod" name="producer" data-fk="f-prod" maxlength="80" autocomplete="off" dir="auto" value="' + esc(v.producer) + '">' +
         '<label class="f" for="f-vint">' + esc(t("vintage")) + '</label><input type="text" id="f-vint" name="vintage" data-fk="f-vint" maxlength="4" inputmode="text" autocomplete="off" value="' + esc(v.vintage) + '">' +
         '<label class="f" for="f-type">' + esc(t("wineType")) + '</label><select id="f-type" name="type" data-fk="f-type">' + typeOptions(v.type) + '</select>' +
@@ -479,7 +498,8 @@
     } else {
       h += '<label class="check"><input type="checkbox" name="blind" data-fk="f-blind"' + (v.blind ? " checked" : "") + '> <span>' + esc(t("blindCreate")) + '</span></label>';
     }
-    h += err + '<div class="row">' + btn("submit-form", t(busy ? (kind === "tasting" ? "creating" : "adding") : (kind === "tasting" ? "create" : "add")), { type: "submit", cls: "primary", disabled: busy || readonly(), fk: "f-submit" }) +
+    var crea = kind !== "wine";
+    h += err + '<div class="row">' + btn("submit-form", t(busy ? (crea ? "creating" : "adding") : (crea ? "create" : "add")), { type: "submit", cls: "primary", disabled: busy || readonly(), fk: "f-submit" }) +
       btn("cancel-form", t(kind === "wine" ? "done" : "cancel"), { cls: "ghost", fk: "f-cancel" }) + '</div></form>';
     return h;
   }
@@ -494,6 +514,7 @@
   function badgesHtml(x) {
     var h = '<span class="badge ' + (x.status === "open" ? "open" : "") + '">' + esc(t(x.status === "open" ? "open" : "closedBadge")) + '</span>';
     if (x.blind) h += ' <span class="badge">' + esc(t(x.revealed ? "revealedBadge" : "blindBadge")) + '</span>';
+    if (x.single) h += ' <span class="badge">' + esc(t("singleBadge")) + '</span>';
     return h;
   }
 
@@ -564,7 +585,7 @@
     h += '<p class="muted small">' + esc(t(org ? "tastingsHintOrg" : "tastingsHint")) + '</p>';
     if (S.loadError) return h + loadErrorHtml();
     if (S.loading && !S.tastings.length) return h + '<p class="muted" aria-busy="true">' + esc(t("loading")) + '</p>';
-    if (org) h += S.form && S.form.kind === "tasting" ? formHtml("tasting") : '<p>' + btn("new-tasting", t("newTasting"), { cls: "primary", disabled: readonly(), fk: "new-tasting" }) + '</p>';
+    if (org) h += S.form && (S.form.kind === "tasting" || S.form.kind === "single") ? formHtml(S.form.kind) : '<p class="row">' + btn("new-tasting", t("newTasting"), { cls: "primary", disabled: readonly(), fk: "new-tasting" }) + btn("new-single", t("singleWine"), { disabled: readonly(), fk: "new-single" }) + '</p>';
     if (!S.tastings.length) h += '<p class="muted">' + esc(org ? t("noTastingsOrg") : t("noTastings")) + '</p>';
     S.tastings.forEach(function (x) {
       h += '<button type="button" class="card link" data-act="open" data-id="' + esc(x.id) + '" data-fk="open-' + esc(x.id) + '"><span class="row spread"><span class="name" dir="auto">' + esc(x.name) +
@@ -702,7 +723,7 @@
       }).join("") + '</ol>';
     }
     h += '<h3 class="section">' + esc(t("wines")) + '</h3>';
-    if (org && open) h += S.form && S.form.kind === "wine" ? formHtml("wine") : '<p>' + btn("new-wine", t("addWine"), { disabled: readonly(), fk: "new-wine" }) + '</p>';
+    if (org && open && !(S.tasting && S.tasting.single)) h += S.form && S.form.kind === "wine" ? formHtml("wine") : '<p>' + btn("new-wine", t("addWine"), { disabled: readonly(), fk: "new-wine" }) + '</p>';
     if (S.loading && !S.wines.length) h += '<p class="muted" aria-busy="true">' + esc(t("loading")) + '</p>';
     else if (!S.wines.length) h += '<p class="muted">' + esc(org ? t("noWinesOrg") : t("noWines")) + '</p>';
     S.wines.forEach(function (w) { h += (S.sheet && S.sheet.wine === w.id) ? sheetHtml(w) : wineCard(w, open); });
@@ -798,7 +819,7 @@
     if (S.fatal) html = viewFatal();
     else if (!S.user) html = '<section class="card" aria-busy="true"><p>' + esc(t("loading")) + '</p></section>';
     else html = S.view === "tasting" && S.tasting ? viewTasting() : viewList();
-    app.innerHTML = '<main>' + html + '</main>' + versionHtml();
+    app.innerHTML = '<main>' + html + '</main>' + (S.circle ? "" : versionHtml());
     var logo = app.querySelector(".logo"); if (logo) logo.addEventListener("error", function () { logo.remove(); reportHeight(); });
     var title = ((S.config && S.config.title) || "Sorso") + (S.user && !S.fatal ? " — " + (S.view === "tasting" && S.tasting ? S.tasting.name : t(S.tab === "ranking" ? "tabRanking" : S.tab === "stats" ? "tabStats" : "tastings")) : "");
     if (title !== lastTitle) { document.title = title; lastTitle = title; }
@@ -852,7 +873,7 @@
     if (S.sheet) { e.preventDefault(); closeSheet(); }
     else if (S.gform) { e.preventDefault(); var gw = S.gform.wine; S.gform = null; focusAfter("guess-" + gw); render(); }
     else if (S.confirm) { e.preventDefault(); S.confirm = null; focusAfter("ask-status"); render(); }
-    else if (S.form) { e.preventDefault(); var k = S.form.kind; S.form = null; focusAfter(k === "tasting" ? "new-tasting" : "new-wine"); render(); }
+    else if (S.form) { e.preventDefault(); var k = S.form.kind; S.form = null; focusAfter(k === "tasting" ? "new-tasting" : k === "single" ? "new-single" : "new-wine"); render(); }
   }
   document.addEventListener("keydown", function (e) { if (e.key === "Escape" && !app.contains(e.target)) escape(e); });
 
@@ -883,7 +904,24 @@
     if (kind === "guess") return submitGuess(form);
     if (kind === "tasting") return submitTasting(form);
     if (kind === "wine") return submitWine(form);
+    if (kind === "single") return submitSingle(form);
   });
+
+  /* «Un solo vino»: la degustazione prende il nome del vino (con l'annata) e nasce con quel vino */
+  function submitSingle(form) {
+    S.form.vals = Object.assign(S.form.vals, formVals(form));
+    var v = S.form.vals, name = v.name.trim();
+    if (!name) { S.form.error = t("e_invalid_name"); focusAfter("f-name"); announce(S.form.error, true); return render(); }
+    var titolo = (name + (v.vintage && v.vintage.trim() ? " " + v.vintage.trim() : "")).slice(0, 80);
+    return run("single", function () {
+      return api({ op: "tasting.create", name: titolo, wine: { name: name, producer: v.producer, vintage: v.vintage, type: v.type, grape: v.grape } }).then(function (r) {
+        S.form = null; S.view = "tasting"; pushHistory(r.tasting.id);
+        announce(t("create") + ": " + r.tasting.name);
+        focusSel("#h-main");
+        return loadState(r.tasting.id);
+      }, function (e) { return handleError(e, "form"); });
+    });
+  }
 
   function submitTasting(form) {
     S.form.vals = Object.assign(S.form.vals, formVals(form));
@@ -948,6 +986,7 @@
       case "open": return openTasting(id, true);
       case "back": if (history.state && history.state.v === "tasting") { history.back(); return; } return goList(true);
       case "new-tasting": S.form = { kind: "tasting", vals: { name: "", blind: false }, error: "" }; focusAfter("f-name"); return render();
+      case "new-single": S.form = { kind: "single", vals: { name: "", producer: "", vintage: "", type: "", grape: "" }, error: "" }; focusAfter("f-name"); return render();
       case "new-wine": S.form = { kind: "wine", vals: { name: "", producer: "", vintage: "", type: "", grape: "" }, error: "" }; focusAfter("f-name"); return render();
       case "cancel-form": { var k = S.form && S.form.kind; S.form = null; focusAfter(k === "tasting" ? "new-tasting" : "new-wine"); return render(); }
       case "ask-status": S.confirm = S.tasting.status === "open" ? "close" : "reopen"; focusAfter("confirm"); return render();
@@ -1041,10 +1080,40 @@
     login();
   });
 
+  /* ---------------- dentro l'app di Sorso (serate di una cerchia) ----------------
+     Stessa origine: la pagina legge le preferenze dell'app (lingua, modalità di voto) e ne copia i colori. */
+  function hostPref(k) { try { return localStorage.getItem(k) || ""; } catch (e) { return ""; } }
+  function applyHostTheme() {
+    try {
+      var root = parent.document.getElementById("root"); if (!root || parent === window) return;
+      var cs = parent.getComputedStyle(root), de = document.documentElement, dark = root.classList.contains("dark");
+      var map = { "--bg": "--panel", "--surface": "--card", "--ink": "--ink", "--accent": "--sel-bg", "--on-accent": "--sel-fg", "--line": "--line", "--line-strong": "--line-strong", "--muted": "--ink-3" };
+      Object.keys(map).forEach(function (k) { var v = cs.getPropertyValue(map[k]).trim(); if (v) de.style.setProperty(k, v); });
+      var st = dark ? { "--ok": "#5fd38d", "--warn": "#f0b95a", "--danger": "#ff8a80" } : { "--ok": "#0e7a3e", "--warn": "#8a5a00", "--danger": "#b3261e" };
+      Object.keys(st).forEach(function (k) { de.style.setProperty(k, st[k]); });
+      de.style.colorScheme = dark ? "dark" : "light";
+      de.setAttribute("data-host", "app");
+    } catch (e) { /* senza i colori dell'app restano quelli predefiniti */ }
+  }
+  window.addEventListener("message", function (e) {
+    if (e.origin !== location.origin || !e.data || typeof e.data !== "object") return;
+    if (e.data.type === "sorso:theme") applyHostTheme();
+    if (e.data.type === "sorso:refresh" && S.user && !S.fatal) { if (S.view === "tasting" && S.tasting) loadState(S.tasting.id, true); else loadState("", true); }
+  });
+
   /* ---------------- avvio ---------------- */
   (function start() {
     var q = new URLSearchParams(location.search);
     S.partner = q.get("p") || "";
+    S.circle = /^[0-9a-f]{10}$/.test(q.get("c") || "") ? q.get("c") : "";
+    if (S.circle) {
+      applyHostTheme();
+      S.session = hostPref("sorso.auth.token");
+      document.documentElement.setAttribute("data-ready", "1");
+      if (!S.session) { S.loading = false; S.fatal = { code: "no_token", session: false, retry: false }; render(); askReauth("no_token"); return; }
+      login();
+      return;
+    }
     var h = new URLSearchParams(location.hash.replace(/^#/, ""));
     S.token = h.get("token") || "";    // solo il frammento: un parametro finirebbe nei log del server
     document.documentElement.setAttribute("data-ready", "1");
