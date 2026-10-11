@@ -46,7 +46,7 @@ function build() {
     ${lato(`
         <p class="lead">Tutto è facoltativo, tranne il nome del vino.</p>
         ${passi([["Etichetta", "Scatta o scegli una foto, poi «Leggi l'etichetta»."], ["Dati", "Controlli e completi: nome, annata, prezzo…"], ["Giudizio", "Voto rapido o scheda completa."]])}
-        ${ul(["<b>Leggi l'etichetta</b>: Sorso legge la foto e propone nome, produttore, annata, denominazione e vitigni. Controlli, correggi e scegli cosa usare. La foto resta sul telefono.", "<b>Uvaggio</b>: indica i vitigni e le percentuali. Alimenta le statistiche per vitigno: più lo compili, più il profilo è preciso.", "<b>Tipologia</b>: rosso, bianco, rosato, bollicine… Il giudizio tiene conto del tipo di vino.", "<b>Con altri</b>: per degustare in gruppo usa le serate di una cerchia (capitolo 07).", "Il punteggio si aggiorna mentre muovi i cursori."])}
+        ${ul(["<b>Leggi l'etichetta</b>: Sorso trova l'etichetta nella foto, la legge e propone nome, produttore, annata, denominazione e vitigni. Controlli, correggi e scegli cosa usare. La foto resta sul telefono; meglio se l'etichetta è dritta e ben illuminata.", "<b>Uvaggio</b>: indica i vitigni e le percentuali. Alimenta le statistiche per vitigno: più lo compili, più il profilo è preciso.", "<b>Tipologia</b>: rosso, bianco, rosato, bollicine… Il giudizio tiene conto del tipo di vino.", "<b>Con altri</b>: per degustare in gruppo usa le serate di una cerchia (capitolo 07).", "Il punteggio si aggiorna mentre muovi i cursori."])}
         ${call("<b>Hai sbagliato?</b> Una scheda salvata si modifica dal Taccuino: tocca «Modifica scheda».")}`,
       fig("app-nuova.png", 1, "La scheda <b>Nuova</b>: etichetta, dati e giudizio.", "lg"))}
   `));

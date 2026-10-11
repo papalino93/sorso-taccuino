@@ -76,3 +76,27 @@ test("il nome non si porta dietro il produttore (anche con righe di altezza simi
   assert.equal(f.produttore, "Fontodi");
   assert.equal(f.nome, "Flaccianello della Pieve");
 });
+
+/* testo vero letto dalle foto di etichette (con il rumore dell'OCR) */
+test("foto vera — Giovesone, Orcia DOC: denominazione, vitigno, annata anche con il nome in corsivo illeggibile", () => {
+  const { f, r } = read("LI\npe”\nioueson\nORrCIA DOC\nSANGIOVESE\ni\n2020");
+  assert.equal(f.denominazione, "Orcia DOC"); assert.deepEqual(f.vitigni, ["Sangiovese"]); assert.equal(f.annata, "2020");
+  assert.equal(r.tipologia, "DOC");
+});
+test("foto vera — Mevante, Montefalco Sagrantino: parole spezzate riconosciute, DOCG dedotta", () => {
+  const { f, r } = read("MEVANTI\nQ        ym)\n0 « 5)\nI IL Fiore\nO\nNTEFALE\n\\GRANTI\nTASSA\nLLA     3\nDI ORIGINE CONTRO       È\ni     hiro\nITALIA");
+  assert.match(f.denominazione, /^Montefalco Sagrantino/); assert.equal(r.tipologia, "DOCG");
+});
+test("foto vera — Rosso di Marte, Ruffino: cantina nota e nome ripulito", () => {
+  const lines = [{ text: "#0SSO DI MARTE", h: 60, conf: 70 }, { text: "#47", h: 20, conf: 30 }, { text: "IN Ca", h: 18, conf: 35 }, { text: "RUFF] NO", h: 40, conf: 66 }];
+  const { f } = read(lines.map(l => l.text).join("\n"), lines);
+  assert.equal(f.produttore, "Ruffino");
+  assert.equal(f.nome, "Rosso di Marte");
+});
+test("a somiglianza: niente falsi allarmi da parole corte o simili", () => {
+  assert.equal(read("DELLA PIEVE\nRiserva").f.denominazione, undefined, "Pieve non è Piave");
+  assert.equal(read("Cantina Esempio\nVino da tavola").f.denominazione, undefined);
+  assert.ok(L.partialSim("sangiov", "sangiovese") === 1);
+  assert.ok(L.partialSim("ntefale", "montefalco") > 0.8);
+  assert.equal(read("Vino Rosso\n2O2O").f.annata, "2020", "«2O2O» con le lettere O è 2020");
+});
