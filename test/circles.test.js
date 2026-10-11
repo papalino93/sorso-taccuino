@@ -283,3 +283,28 @@ test("costo: «le mie cerchie» fa poche letture", async () => {
   await ok("anna", { op: "list" });
   assert.ok(srv.log.length <= 20, "comandi: " + srv.log.length);
 });
+
+test("anteprima dell'invito senza accesso: mostra chi invita e la cerchia, niente altro; codici falsi 404/410; limite per IP", async () => {
+  await account("anna", "anna@example.com");
+  const { circle } = await ok("anna", { op: "create", name: "Corso di giovedì" });
+  const inv = (await ok("anna", { op: "invite", circle: circle.id, emails: ["bruno@example.com"] })).results[0];
+  const pre = body => call(circles, { method: "POST", headers: { "x-forwarded-for": "7.7.7.7" }, body });
+  const r = await pre({ op: "invite.preview", token: inv.token });
+  assert.equal(r.statusCode, 200);
+  assert.deepEqual(Object.keys(r.body.invite).sort(), ["by", "circleName", "emailMasked", "exp", "role"]);
+  assert.equal(r.body.invite.circleName, "Corso di giovedì");
+  assert.equal(r.body.invite.by, "Anna Rossi");
+  assert.equal(r.body.invite.emailMasked, "br•••@example.com");
+  assert.equal((await pre({ op: "invite.preview", token: "z".repeat(48) })).statusCode, 404);
+  assert.equal((await pre({ op: "invite.preview", token: "0".repeat(48) })).statusCode, 410);
+  /* le altre operazioni restano chiuse senza accesso */
+  assert.equal((await pre({ op: "list" })).statusCode, 401);
+  assert.equal((await pre({ op: "invite.peek", token: inv.token })).statusCode, 401);
+  /* dopo l'uso dell'invito l'anteprima non c'è più */
+  await account("bruno", "bruno@example.com");
+  await ok("bruno", { op: "invite.accept", token: inv.token });
+  assert.equal((await pre({ op: "invite.preview", token: inv.token })).statusCode, 410);
+  let last = 200;
+  for (let i = 0; i < 35 && last !== 429; i++) last = (await pre({ op: "invite.preview", token: "0".repeat(48) })).statusCode;
+  assert.equal(last, 429);
+});

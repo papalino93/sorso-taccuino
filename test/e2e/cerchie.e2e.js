@@ -68,6 +68,30 @@ const ok = (c, m) => { console.log((c ? "OK   " : "FAIL ") + m); if (!c) fails++
   ok(!/\?invito=/.test(b.url()), "il codice sparisce dall'indirizzo");
   await B.ctx.close();
 
+  /* --- chi apre il link SENZA aver fatto l'accesso: vede chi lo invita e a cosa, poi (dopo l'accesso) trova l'invito pronto --- */
+  for (const [vpName, vp] of [["telefono", { width: 390, height: 844 }], ["PC", { width: 1440, height: 800 }]]) {
+    const ctx = await browser.newContext({ viewport: vp });
+    const pg = await ctx.newPage();
+    pg.on("pageerror", e => errs.push("pageerror: " + e.message));
+    await pg.goto(d.url + "/?invito=" + tokens[1], { waitUntil: "load" }); await pg.waitForTimeout(1000);
+    const note = await pg.locator("#loginInviteNote").innerText();
+    ok(/Anna Rossi/.test(note) && /Corso del giovedì/.test(note) && /Membro/.test(note), vpName + ", senza accesso: «" + note.replace(/\n/g, " ") + "»");
+    ok(/ca•••@example\.com/.test(note), vpName + ": l'indirizzo è mascherato");
+    ok(/accetta l'invito/i.test(await pg.locator("#loginGoogleBtn").innerText()), vpName + ": il pulsante dice «Accedi con Google e accetta l'invito»");
+    ok(!(await overflow(pg)), vpName + ": nessuno scorrimento orizzontale");
+    /* l'accesso con Google rimanda alla pagina: qui lo simulo con la sessione di Carla e un ricarico */
+    await pg.evaluate(([tok, user]) => { localStorage.setItem("sorso.auth.token", tok); localStorage.setItem("sorso.auth.user", user); localStorage.setItem("sorso.auth.name", "carla"); }, [people.carla.token, people.carla.username]);
+    await pg.goto(d.url + "/", { waitUntil: "load" }); await pg.waitForTimeout(1000);
+    await pg.locator("#circWrap .card-head .eyebrow", { hasText: /Invito a/ }).waitFor({ timeout: 4000 }).then(() => ok(true, vpName + ": dopo l'accesso si arriva dritti alle Cerchie con l'invito da accettare"), () => ok(false, vpName + ": dopo l'accesso l'invito non compare"));
+    await ctx.close();
+  }
+  { /* un invito non più valido: lo dice chiaro */
+    const ctx = await browser.newContext({ viewport: { width: 390, height: 844 } }); const pg = await ctx.newPage();
+    await pg.goto(d.url + "/?invito=" + "0".repeat(48), { waitUntil: "load" }); await pg.waitForTimeout(900);
+    ok(/non è più valido/.test(await pg.locator("#loginInviteNote").innerText()), "invito scaduto o falso: «non è più valido»");
+    await ctx.close();
+  }
+
   /* ricostruisco chi è chi: l'invito di Bruno e quello di Carla */
   const cid = (await redis.keys("ci:*"))[0].slice(3);
   const hv = await redis.hgetall("cv:" + cid);
@@ -155,6 +179,10 @@ const ok = (c, m) => { console.log((c ? "OK   " : "FAIL ") + m); if (!c) fails++
     await a2.fill("#circEmails", "nuova.persona@example.com"); await a2.click('[data-circ-form="invite"] button[type=submit]');
     await a2.locator("#circWrap").getByText("mail inviata").waitFor({ timeout: 5000 }).then(() => ok(true, "dopo l'invito compare «mail inviata»"), () => ok(false, "«mail inviata»"));
     ok(inviate.length === 1 && inviate[0].to[0] === "nuova.persona@example.com" && /\?invito=[0-9a-f]{48}/.test(inviate[0].text), "la mail è partita verso l'indirizzo giusto, con il link");
+    ok(/Controlla lo spam/.test(await a2.locator("#circWrap").innerText()), "dopo l'invio: avviso «Controlla lo spam»");
+    const mt = await a2.locator('a[href^="mailto:"]').first().getAttribute("href");
+    ok(/^mailto:nuova\.persona@example\.com\?subject=/.test(mt) && decodeURIComponent(mt).includes("/?invito=") && decodeURIComponent(mt).includes("Corso del giovedì"), "«Scrivi tu la mail»: mailto verso l'invitato, con cerchia e link");
+    ok(/Scrivi tu la mail/.test(await a2.locator("#circWrap").innerText()), "il pulsante «Scrivi tu la mail» c'è");
     await a2.locator('[data-circ="resend"]').first().click();
     await a2.locator("#circWrap").getByText("Mail rimandata").waitFor({ timeout: 5000 }).then(() => ok(true, "«Rimanda la mail» funziona"), () => ok(false, "«Mail rimandata»"));
     ok(!(await overflow(a2)), "nessuno scorrimento orizzontale con i pulsanti in più");
