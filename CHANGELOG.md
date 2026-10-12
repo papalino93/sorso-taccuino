@@ -3,6 +3,9 @@
 La versione e la data dell'ultimo aggiornamento sono mostrate in fondo all'app e dello spazio di team
 (fonte: `public/js/version.js`, da tenere uguale a `package.json`).
 
+## 2.7.1 — 12 ottobre 2026
+- Widget in inglese: anche il link in fondo è tradotto («Sorso · tasting notebook»).
+
 ## 2.7.0 — 12 ottobre 2026
 - **Riconoscere il vino, anche quando non è in nessun catalogo.** Dopo «Leggi l'etichetta» Sorso cerca il vino a strati: prima nel **tuo Taccuino** («l'hai bevuto il 12 mar 2026, 92/100»), poi nel **catalogo Sorso**, poi con il **codice a barre** su Open Food Facts. Con una corrispondenza sicura propone «È questo?» con tutti i dati; se non è sicuro mostra due o tre vini («Forse è uno di questi?») oppure «Nessuno di questi». Si vede sempre da dove viene il dato; l'annata resta quella letta sulla bottiglia. Il posto per il catalogo Vino.com è pronto, tra il Taccuino e il catalogo Sorso.
 - **Catalogo Sorso**: quando salvi una degustazione con nome e produttore (con l'accesso), al catalogo comune vanno solo i dati del vino: niente voti, note o nomi. Un vino nuovo serve subito a te e diventa di tutti quando lo conferma un'altra persona; scritture un po' diverse dello stesso vino si uniscono; con due segnalazioni («Dati sbagliati? Segnala») la voce sparisce. Si disattiva in Impostazioni → Catalogo Sorso.
