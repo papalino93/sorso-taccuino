@@ -191,6 +191,20 @@
   .lbl-raw{margin-top:8px;}
   .lbl-raw textarea{width:100%;min-height:90px;border-radius:10px;border:1px solid var(--line-strong);background:var(--field);color:var(--ink);padding:8px;font:13px/1.4 'Geist','Inter';}
   .lbl-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;}
+  /* «È questo?»: il vino riconosciuto nel Taccuino, nel catalogo Sorso o con il codice a barre */
+  .lbl-match{margin:2px 0 12px;padding:12px;border-radius:12px;background:var(--panel);border:1px solid var(--line);}
+  .lbl-match .m-eye{font:600 11px/1.2 'Geist','Inter';letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);margin-bottom:6px;}
+  .lbl-match .m-name{font:600 15px/1.3 'Geist','Inter';color:var(--ink);overflow-wrap:anywhere;}
+  .lbl-match .m-sub{font-size:12.5px;color:var(--ink-3);overflow-wrap:anywhere;}
+  .lbl-match .m-src{font-size:12px;color:var(--ink-4);margin-top:3px;}
+  .lbl-cand{display:block;width:100%;text-align:left;padding:10px 12px;border:1px solid var(--line-strong);border-radius:10px;background:transparent;color:var(--ink);margin-top:8px;min-height:44px;cursor:pointer;font:inherit;}
+  .lbl-cand:hover,.lbl-cand:focus-visible{border-color:var(--sel-bg);}
+  .lbl-ean{margin-top:12px;padding-top:10px;border-top:1px solid var(--line);}
+  .lbl-ean .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:6px;}
+  .lbl-ean .in-line{width:12em;max-width:100%;}
+  .lbl-link{background:none;border:0;padding:6px 0;color:var(--ink-3);text-decoration:underline;font:inherit;font-size:12px;cursor:pointer;}
+  .cat-check{display:flex;gap:10px;align-items:flex-start;margin:10px 0 4px;font-size:14px;line-height:1.4;color:var(--ink);cursor:pointer;}
+  .cat-check input{width:20px;height:20px;flex:none;margin-top:1px;accent-color:var(--sel-bg);}
   .lbl-actions .pill-solid,.lbl-actions .pill-ghost,.lbl-read .pill-solid,.lbl-read .pill-ghost{min-height:44px;}
 
   /* campi a filo: niente riquadri, solo una riga sotto — stile editoriale */
@@ -1388,6 +1402,13 @@ try{var _p=localStorage.getItem("sorso-theme");if(_p==="dark"||(_p!=="light"&&wi
         <div class="backup-actions"><button type="button" class="pill-ghost" id="lookReset" data-i18n="look.reset">Ripristina i colori</button></div>
       </div>
 
+        <div class="card" id="catCard">
+        <div class="card-head"><span class="eyebrow" data-i18n="cat.eyebrow">Catalogo Sorso</span><span class="fill"></span></div>
+        <p class="note-line" data-i18n="cat.intro">Quando salvi una degustazione con nome e produttore, Sorso aggiunge al catalogo comune solo i dati del vino: nome, produttore, annata, denominazione, tipologia e vitigni. Niente voti, note o nomi. Così la volta dopo il vino si riconosce dalla foto dell'etichetta, anche se non è in nessun altro catalogo.</p>
+        <label class="cat-check"><input type="checkbox" id="catContrib" checked><span data-i18n="cat.toggle">Contribuisci al catalogo Sorso</span></label>
+        <p class="note-line" id="catNote"></p>
+      </div>
+
         <div class="card backup-card" id="accountCard">
         <div class="card-head"><span class="eyebrow" data-i18n="account.eyebrow">Account</span><span class="fill"></span></div>
         <p class="note-line" id="accountNote"></p>
@@ -1513,6 +1534,8 @@ try{var _p=localStorage.getItem("sorso-theme");if(_p==="dark"||(_p!=="light"&&wi
 <script src="js/scoring.js"></script>
 <script src="js/label-reader.js"></script>
 <script src="js/label-ocr.js"></script>
+<script src="js/wine-match.js"></script>
+<script src="js/barcode.js"></script>
 <script src="js/theme.js"></script>
 <script src="js/version.js"></script>
 <script>
@@ -2088,6 +2111,15 @@ const I18N = {
     "lbl.found":"Ho letto questi dati. Controllali e correggili: compilo solo le voci spuntate.", "lbl.nothing":"Non sono riuscito a leggere dati utili. Riprova con una foto più nitida, ben illuminata e frontale, oppure compila a mano.", "lbl.offline":"Non riesco a scaricare il motore di lettura: serve la connessione la prima volta. Riprova, o compila a mano.", "lbl.fail":"La lettura non è riuscita. Riprova o compila a mano.",
     "lbl.f.nome":"Nome", "lbl.f.produttore":"Produttore", "lbl.f.annata":"Annata", "lbl.f.denominazione":"Denominaz.", "lbl.f.tipologia":"Tipo", "lbl.f.vitigni":"Vitigni", "lbl.now":"Ora nella scheda: {v}",
     "lbl.extra":"Gradazione letta: {alc}. Non c'è un campo apposta: la puoi scrivere nelle note.", "lbl.apply":"Compila la scheda", "lbl.close":"Chiudi", "lbl.raw":"Testo letto (puoi correggerlo)", "lbl.again":"Analizza di nuovo", "lbl.done":"Scheda compilata: controlla i campi qui sotto.", "lbl.vitHint":"I vitigni si aggiungono all'uvaggio senza percentuale: scrivila tu.",
+    "m.busy":"Cerco il vino nel tuo Taccuino e nel catalogo…", "m.isThis":"È questo?", "m.maybe":"Forse è uno di questi?", "m.yes":"Sì, è questo", "m.no":"No", "m.none2":"Nessuno di questi", "m.pick":"È questo",
+    "m.src.book":"Dal tuo Taccuino: l'hai bevuto il {date} ({n}/100)", "m.src.bookN":" · assaggiato {c} volte", "m.src.sorso":"Dal catalogo Sorso, confermato da chi l'ha assaggiato", "m.src.sorsoMine":"Dal catalogo Sorso: l'hai inserito tu (lo vedranno tutti quando lo confermerà un'altra persona)", "m.src.off":"Da Open Food Facts, tramite il codice a barre (dati aperti, licenza ODbL)", "m.annate":"Annate conosciute: {v}",
+    "m.picked":"Dati presi da: {src}. Controllali qui sotto; l'annata resta quella letta sull'etichetta.", "m.pickedName.book":"il tuo Taccuino", "m.pickedName.sorso":"il catalogo Sorso", "m.pickedName.off":"Open Food Facts",
+    "m.none":"Non l'ho trovato tra i vini conosciuti: controlla i dati letti qui sotto.", "m.noneSave":" Quando salvi la scheda, Sorso se lo ricorda per la prossima volta.",
+    "m.report":"Dati sbagliati? Segnala", "m.reported":"Grazie: segnalazione inviata.", "m.reportLogin":"Per segnalare un errore accedi con il tuo account.",
+    "m.ean.title":"Codice a barre", "m.ean.hint":"Sul retro della bottiglia: fotografalo o scrivi le cifre.", "m.ean.photo":"Fotografa il codice", "m.ean.go":"Cerca", "m.ean.ph":"es. 8001234567897", "m.ean.reading":"Leggo il codice…",
+    "m.ean.bad":"Le cifre non formano un codice valido: controllale.", "m.ean.notFound":"Non trovo un codice a barre nella foto. Avvicinati, con il codice dritto e ben illuminato, oppure scrivi le cifre.", "m.ean.none":"Codice {c}: non è nel catalogo Sorso né su Open Food Facts.", "m.ean.notWine":"Codice {c}: su Open Food Facts è un prodotto che non sembra un vino.", "m.ean.unavail":"Open Food Facts non risponde ora: riprova fra poco.", "m.ean.offline":"Non riesco a scaricare il lettore dei codici: serve la connessione.",
+    "cat.eyebrow":"Catalogo Sorso", "cat.toggle":"Contribuisci al catalogo Sorso", "cat.on":"Un vino diventa visibile a tutti quando lo hanno confermato almeno due persone; se i dati sono sbagliati, chiunque può segnalarli.", "cat.login":"Serve l'accesso con il tuo account: senza, i vini restano solo nel tuo Taccuino.",
+    "cat.intro":"Quando salvi una degustazione con nome e produttore, Sorso aggiunge al catalogo comune solo i dati del vino: nome, produttore, annata, denominazione, tipologia e vitigni. Niente voti, note o nomi. Così la volta dopo il vino si riconosce dalla foto dell'etichetta, anche se non è in nessun altro catalogo.",
     "label.loaded":"Foto caricata",
     "label.dropTitle":"Fotografa o trascina l'etichetta",
     "label.dropSub":"La allega alla scheda, da compilare a mano qui sotto.",
@@ -2671,6 +2703,15 @@ const I18N = {
     "lbl.found":"Here is what I read. Check and fix it: I only fill the ticked rows.", "lbl.nothing":"I couldn't read useful data. Try a sharper, well-lit, front-on photo, or fill it in by hand.", "lbl.offline":"I can't download the reading engine: you need a connection the first time. Try again, or fill it in by hand.", "lbl.fail":"Reading failed. Try again or fill it in by hand.",
     "lbl.f.nome":"Name", "lbl.f.produttore":"Producer", "lbl.f.annata":"Vintage", "lbl.f.denominazione":"Appellation", "lbl.f.tipologia":"Type", "lbl.f.vitigni":"Grapes", "lbl.now":"Now in the sheet: {v}",
     "lbl.extra":"Alcohol read: {alc}. There is no field for it: you can write it in the notes.", "lbl.apply":"Fill in the sheet", "lbl.close":"Close", "lbl.raw":"Text read (you can fix it)", "lbl.again":"Analyze again", "lbl.done":"Sheet filled in: check the fields below.", "lbl.vitHint":"Grapes are added to the blend without a percentage: add it yourself.",
+    "m.busy":"Looking for the wine in your notebook and in the catalogue…", "m.isThis":"Is it this one?", "m.maybe":"Maybe one of these?", "m.yes":"Yes, that's it", "m.no":"No", "m.none2":"None of these", "m.pick":"This one",
+    "m.src.book":"From your notebook: you had it on {date} ({n}/100)", "m.src.bookN":" · tasted {c} times", "m.src.sorso":"From the Sorso catalogue, confirmed by people who tasted it", "m.src.sorsoMine":"From the Sorso catalogue: you added it (everyone will see it once someone else confirms it)", "m.src.off":"From Open Food Facts, via the barcode (open data, ODbL licence)", "m.annate":"Known vintages: {v}",
+    "m.picked":"Data taken from: {src}. Check it below; the vintage stays the one read on the label.", "m.pickedName.book":"your notebook", "m.pickedName.sorso":"the Sorso catalogue", "m.pickedName.off":"Open Food Facts",
+    "m.none":"I didn't find it among known wines: check the data read below.", "m.noneSave":" When you save the sheet, Sorso remembers it for next time.",
+    "m.report":"Wrong data? Report it", "m.reported":"Thanks: report sent.", "m.reportLogin":"Sign in to report a mistake.",
+    "m.ean.title":"Barcode", "m.ean.hint":"On the back of the bottle: take a photo of it or type the digits.", "m.ean.photo":"Photograph the barcode", "m.ean.go":"Search", "m.ean.ph":"e.g. 8001234567897", "m.ean.reading":"Reading the barcode…",
+    "m.ean.bad":"Those digits are not a valid barcode: check them.", "m.ean.notFound":"I can't find a barcode in the photo. Get closer, with the code straight and well lit, or type the digits.", "m.ean.none":"Barcode {c}: not in the Sorso catalogue nor on Open Food Facts.", "m.ean.notWine":"Barcode {c}: on Open Food Facts it's a product that doesn't look like a wine.", "m.ean.unavail":"Open Food Facts isn't answering right now: try again shortly.", "m.ean.offline":"I can't download the barcode reader: you need a connection.",
+    "cat.eyebrow":"Sorso catalogue", "cat.toggle":"Contribute to the Sorso catalogue", "cat.on":"A wine becomes visible to everyone once at least two people have confirmed it; if the data is wrong, anyone can report it.", "cat.login":"You need to sign in to your account: without it, wines stay only in your notebook.",
+    "cat.intro":"When you save a tasting with name and producer, Sorso adds only the wine's data to the shared catalogue: name, producer, vintage, appellation, type and grapes. No scores, notes or names. So next time the wine is recognised from the label photo, even if it isn't in any other catalogue.",
     "label.loaded":"Photo uploaded",
     "label.dropTitle":"Photograph or drag the label here",
     "label.dropSub":"It's attached to the entry, to fill in by hand below.",
@@ -5139,6 +5180,9 @@ async function salvaScheda(){
     setStatus(tf("new.savingError",{msg:(e && e.message ? e.message : t("new.unknown"))}));
     return;
   }
+  /* il vino (solo i suoi dati) va nel catalogo Sorso; in modifica no: la conferma c'è già stata */
+  if(!inModifica) catContribute(Object.assign({}, entry, {uvaggi:S.wine.uvaggi}));
+  matchReset();
 
   // se è selezionato un evento, registra anche il voto condiviso.
   // In modifica non si aggiunge: il voto in classifica c'è già e si creerebbe un doppione.
@@ -5871,7 +5915,7 @@ async function handleFile(file){
   if(!/^image\//.test(file.type||"")){ $("labelStatus").textContent = t("label.invalidType"); return; }
   const {dataUrl, base64, mediaType} = await fileToBase64(file);
   S.photo = dataUrl; S.photoB64 = base64; S.photoMedia = mediaType; S.photoName = file.name || t("label.defaultName");
-  LBL.fields = null; LBL.err = "";
+  LBL.fields = null; LBL.err = ""; matchReset();
   $("labelStatus").textContent = t("label.loaded");
   renderIdentity();
 }
@@ -6117,7 +6161,7 @@ $("typeChips").addEventListener("click", e => {
 
 // foto
 $("photoInput").addEventListener("change", e => handleFile(e.target.files[0]));
-$("removeLabelBtn").addEventListener("click", () => { S.photo=null; S.photoName=""; $("photoInput").value=""; $("labelStatus").textContent=t("label.none"); renderIdentity(); });
+$("removeLabelBtn").addEventListener("click", () => { S.photo=null; S.photoName=""; $("photoInput").value=""; matchReset(); $("labelStatus").textContent=t("label.none"); renderIdentity(); });
 
 /* ---- «Leggi l'etichetta»: OCR nel browser (public/js/label-ocr.js) + analisi del testo (public/js/label-reader.js) ----
    La foto non esce dal dispositivo. Il risultato non scrive niente da solo: si controlla e si spuntano le voci da usare. */
@@ -6144,9 +6188,9 @@ function lblRender(){
   if(LBL.busy){
     h = '<div role="status">'+esc(t(LBL.status || "lbl.st.prep"))+'</div><div class="lbl-bar"><i style="width:'+Math.round((LBL.p||0)*100)+'%"></i></div>';
   }else if(LBL.err){
-    h = '<p role="status">'+esc(t(LBL.err))+'</p>';
+    h = matchHTML() + (MATCH.picked ? "" : '<p role="status">'+esc(t(LBL.err))+'</p>') + eanHTML();
   }else if(LBL.fields){
-    h = '<p role="status"><b>'+esc(t("lbl.found"))+'</b></p>' + LBL_ORDER.filter(k => LBL.fields[k]).map(k => {
+    h = matchHTML() + '<p role="status"><b>'+esc(t("lbl.found"))+'</b></p>' + LBL_ORDER.filter(k => LBL.fields[k]).map(k => {
       const f = LBL.fields[k], now = lblNow(k);
       const field = k === "tipologia"
         ? '<span class="sel-wrap"><select class="sel" id="lblF_'+k+'" data-lbl-f="'+k+'">'+TYPES.map(x => '<option value="'+x+'"'+(f.value===x?" selected":"")+'>'+esc(tv(x))+'</option>').join("")+'</select></span>'
@@ -6157,9 +6201,10 @@ function lblRender(){
       (LBL.fields.vitigni ? '<p class="lbl-now">'+esc(t("lbl.vitHint"))+'</p>' : "") +
       (LBL.alc ? '<p class="lbl-now">'+esc(tf("lbl.extra",{alc:LBL.alc}))+'</p>' : "") +
       '<div class="lbl-actions"><button type="button" class="pill-solid" data-lbl="apply">'+esc(t("lbl.apply"))+'</button><button type="button" class="pill-ghost" data-lbl="close">'+esc(t("lbl.close"))+'</button></div>' +
-      '<details class="lbl-raw"><summary>'+esc(t("lbl.raw"))+'</summary><textarea id="lblRawText" aria-label="'+esc(t("lbl.raw"))+'">'+esc(LBL.text)+'</textarea><div class="lbl-actions"><button type="button" class="pill-ghost" data-lbl="again">'+esc(t("lbl.again"))+'</button></div></details>';
+      '<details class="lbl-raw"><summary>'+esc(t("lbl.raw"))+'</summary><textarea id="lblRawText" aria-label="'+esc(t("lbl.raw"))+'">'+esc(LBL.text)+'</textarea><div class="lbl-actions"><button type="button" class="pill-ghost" data-lbl="again">'+esc(t("lbl.again"))+'</button></div></details>' +
+      eanHTML();
   }else{
-    h = '<p class="lbl-now">'+esc(t("lbl.privacy"))+'</p>';
+    h = (MATCH.items.length || MATCH.busy ? matchHTML() : '<p class="lbl-now">'+esc(t("lbl.privacy"))+'</p>') + eanHTML();
   }
   box.innerHTML = h; box.classList.remove("hidden");
 }
@@ -6175,11 +6220,15 @@ function lblShow(text, lines){
 }
 async function lblRead(){
   if(LBL.busy || !S.photo) return;
-  LBL.busy = true; LBL.err = ""; LBL.fields = null; LBL.status = "lbl.st.prep"; LBL.p = 0; lblRender();
+  LBL.busy = true; LBL.err = ""; LBL.fields = null; LBL.status = "lbl.st.prep"; LBL.p = 0; matchReset(); lblRender();
   try{
     const img = await new Promise((res, rej) => { const i = new Image(); i.onload = () => res(i); i.onerror = () => rej(new Error("img")); i.src = S.photo; });
     const r = await LabelOCR.read(img, {onProgress: m => { LBL.status = lblStatusKey(m.status); LBL.p = m.progress || 0; lblRender(); }});
     lblShow(r.text, r.lines);
+    LBL.busy = false;
+    /* il codice a barre, se si vede nella stessa foto: solo dove il browser lo legge da sé (niente download in più) */
+    if("BarcodeDetector" in window){ try{ const c = await Barcode.read(img); if(Barcode.valid(c)){ MATCH.ean = c; } }catch(e){} }
+    matchLookup(MATCH.ean && Barcode.valid(MATCH.ean) ? MATCH.ean : "");
   }catch(e){ LBL.err = e && e.message === "offline" ? "lbl.offline" : "lbl.fail"; }
   LBL.busy = false; lblRender();
   try{ $("labelRead").scrollIntoView({block:"nearest", behavior:"smooth"}); }catch(e){}
@@ -6197,7 +6246,7 @@ function lblApply(){
     const have = (w.uvaggi||[]).map(r => String(r.v).toLowerCase());
     String(f.vitigni.value).split(/[,;]+/).map(x => x.trim()).filter(Boolean).slice(0, 8).forEach(g => { if(have.indexOf(g.toLowerCase()) < 0 && w.uvaggi.length < 12) w.uvaggi.push({v:g, p:""}); });
   }
-  LBL.fields = null; LBL.err = "";
+  LBL.fields = null; LBL.err = ""; MATCH.items = []; MATCH.done = false;
   renderIdentity();
   $("labelStatus").textContent = t("lbl.done");
 }
@@ -6206,13 +6255,187 @@ $("labelRead").addEventListener("click", e => {
   const b = e.target.closest("[data-lbl]"); if(!b) return;
   if(b.dataset.lbl === "apply") lblApply();
   else if(b.dataset.lbl === "close"){ LBL.fields = null; LBL.err = ""; lblRender(); }
-  else if(b.dataset.lbl === "again"){ lblShow($("lblRawText").value, []); lblRender(); }
+  else if(b.dataset.lbl === "again"){ lblShow($("lblRawText").value, []); lblRender(); matchLookup(""); }
+  else if(b.dataset.lbl === "m-yes") matchPick(Number(b.dataset.i));
+  else if(b.dataset.lbl === "m-no"){ MATCH.items = []; MATCH.dismissed = true; lblRender(); }
+  else if(b.dataset.lbl === "m-report") matchReport(Number(b.dataset.i));
+  else if(b.dataset.lbl === "ean-go") eanSearch();
+  else if(b.dataset.lbl === "ean-photo") $("lblEanFile").click();
 });
-$("labelRead").addEventListener("input", e => { const k = e.target.dataset && e.target.dataset.lblF; if(k && LBL.fields && LBL.fields[k]){ LBL.fields[k].value = e.target.value; } });
+$("labelRead").addEventListener("keydown", e => { if(e.target.id === "lblEan" && e.key === "Enter"){ e.preventDefault(); eanSearch(); } });
+$("labelRead").addEventListener("input", e => {
+  if(e.target.id === "lblEan"){ MATCH.ean = e.target.value.replace(/[^\d ]/g, "").slice(0, 18); return; }
+  const k = e.target.dataset && e.target.dataset.lblF; if(k && LBL.fields && LBL.fields[k]){ LBL.fields[k].value = e.target.value; }
+});
 $("labelRead").addEventListener("change", e => {
+  if(e.target.id === "lblEanFile"){ eanFromPhoto(e.target.files && e.target.files[0]); e.target.value = ""; return; }
   const c = e.target.dataset && e.target.dataset.lblC; if(c && LBL.fields && LBL.fields[c]) LBL.fields[c].checked = e.target.checked;
   const k = e.target.dataset && e.target.dataset.lblF; if(k && LBL.fields && LBL.fields[k]){ LBL.fields[k].value = e.target.value; }
 });
+
+/* ---- Il vino è già conosciuto? Ricerca a strati (2.7.0) ----
+   1. il tuo Taccuino (resta sul dispositivo)  2. il catalogo Vino.com, quando ci sarà  3. il catalogo Sorso (vini confermati da chi li ha assaggiati)
+   4. Open Food Facts, con il codice a barre  5. altrimenti restano i dati letti.
+   «È questo?» solo quando la somiglianza è alta; se è media, due o tre «Forse». Si vede sempre da dove viene il dato. */
+const MATCH = {busy:false, items:[], strong:false, done:false, dismissed:false, ean:"", eanBusy:false, eanMsg:"", picked:null, msg:""};
+function matchReset(){ Object.assign(MATCH, {busy:false, items:[], strong:false, done:false, dismissed:false, ean:"", eanBusy:false, eanMsg:"", picked:null, msg:""}); }
+function matchQuery(){
+  const f = LBL.fields || {}, v = k => f[k] ? String(f[k].value || "") : "";
+  return {nome:v("nome"), produttore:v("produttore"), denominazione:v("denominazione"), annata:v("annata"), text:String(LBL.text || "").slice(0, 2000)};
+}
+const vitOf = e => (e.uvaggi || []).map(r => r && r.v).filter(x => x && x !== ALTRO);
+function bookList(){
+  return (S.saved || []).filter(e => e && (e.nome || e.produttore)).map(e => ({source:"book", id:e.id, nome:e.nome || "", produttore:e.produttore || "",
+    denominazione:e.denominazione || "", tipologia:e.tipologia || "", vitigni:vitOf(e), annata:String(e.annata || ""), score:e.score, timestamp:e.timestamp || 0}));
+}
+function bookItem(r){
+  const x = Object.assign({}, r.wine, {match:r.score});
+  const same = bookList().filter(e => WineMatch.identity(e) === WineMatch.identity(x));
+  x.count = same.length;
+  return x;
+}
+function catHeaders(){ const h = {"Content-Type":"application/json"}; if(AUTH.isLoggedIn && AUTH.token) h.Authorization = "Bearer " + AUTH.token; return h; }
+async function catSearch(body){
+  try{
+    const r = await fetch("/api/catalog", {method:"POST", headers:catHeaders(), body:JSON.stringify(Object.assign({op:"search"}, body))});
+    const j = await r.json().catch(() => null);
+    return r.ok ? j : {error:(j && j.error) || {code:"http"}};
+  }catch(e){ return {error:{code:"offline"}}; }
+}
+async function matchLookup(ean){
+  const q = matchQuery();
+  if(!ean && !q.nome && !q.produttore && q.text.trim().length < 4){ MATCH.done = true; lblRender(); return; }
+  MATCH.busy = true; MATCH.items = []; MATCH.strong = false; MATCH.dismissed = false; MATCH.eanMsg = ""; lblRender();
+  let book = {strong:null, list:[]};
+  if(!ean){ try{ book = WineMatch.rank(bookList(), q, {max:3}); }catch(e){} }
+  /* già nel Taccuino con sicurezza: non serve chiedere fuori */
+  const remote = book.strong ? null : await catSearch(ean ? {q, ean} : {q});
+  let items = [], strong = false;
+  if(ean){
+    if(remote && remote.results && remote.results.length){ items = remote.results.slice(0, 1); strong = true; }
+    else if(remote && remote.off && remote.off.found){ items = [remote.off]; strong = true; }
+    else{
+      const why = remote && remote.error ? (remote.error.code === "bad_ean" ? "m.ean.bad" : "m.ean.unavail") : remote && remote.off && remote.off.reason === "not_wine" ? "m.ean.notWine" : remote && remote.off && remote.off.reason === "unavailable" ? "m.ean.unavail" : "m.ean.none";
+      MATCH.eanMsg = tf(why, {c:ean});
+    }
+    items.forEach(x => { x.ean = ean; });
+  }else if(book.strong){ items = [bookItem(book.strong)]; strong = true; }
+  else if(remote && remote.strong && remote.results && remote.results.length){ items = [remote.results[0]]; strong = true; }
+  else{
+    const all = book.list.map(bookItem).concat(((remote && remote.results) || []).map(x => Object.assign({}, x, {match:x.score})));
+    all.sort((a, b) => (b.match || 0) - (a.match || 0));
+    const seen = new Set();
+    items = all.filter(x => { const k = WineMatch.identity(x); if(seen.has(k)) return false; seen.add(k); return true; }).slice(0, 3);
+  }
+  Object.assign(MATCH, {busy:false, items, strong, done:true});
+  lblRender();
+}
+function matchDate(ms){ try{ return new Date(ms).toLocaleDateString(S.lang === "en" ? "en-GB" : "it-IT", {day:"numeric", month:"short", year:"numeric"}); }catch(e){ return ""; } }
+function matchItemHTML(x, i){
+  const name = [x.nome, x.produttore].filter(Boolean).join(" · ");
+  const sub = [x.denominazione, x.tipologia && TYPES.indexOf(x.tipologia) > -1 ? tv(x.tipologia) : "", x.source === "book" || x.source === "off" ? x.annata : ""].filter(Boolean).join(" · ");
+  let src = "";
+  if(x.source === "book") src = tf("m.src.book", {date:matchDate(x.timestamp), n:x.score}) + (x.count > 1 ? tf("m.src.bookN", {c:x.count}) : "");
+  else if(x.source === "sorso") src = t(x.mine && x.pending ? "m.src.sorsoMine" : "m.src.sorso") + (x.annate && x.annate.length ? " · " + tf("m.annate", {v:x.annate.slice(0, 5).join(", ")}) : "");
+  else if(x.source === "off") src = t("m.src.off");
+  return '<div class="m-name">'+esc(name)+'</div>'+(sub ? '<div class="m-sub">'+esc(sub)+'</div>' : "")+'<div class="m-src">'+esc(src)+'</div>';
+}
+function matchHTML(){
+  if(MATCH.busy) return '<p class="lbl-now" role="status">'+esc(t("m.busy"))+'</p>';
+  if(MATCH.picked) return '<p class="lbl-now" role="status">'+esc(tf("m.picked", {src:t("m.pickedName."+MATCH.picked.source)}))+'</p>' + (MATCH.msg ? '<p class="lbl-now" role="status">'+esc(MATCH.msg)+'</p>' : "");
+  if(MATCH.msg && !MATCH.items.length) return '<p class="lbl-now" role="status">'+esc(MATCH.msg)+'</p>';
+  if(!MATCH.done || MATCH.dismissed) return "";
+  if(!MATCH.items.length){
+    if(!LBL.fields) return "";
+    return '<p class="lbl-now">'+esc(t("m.none") + (AUTH.isLoggedIn && catOn() ? t("m.noneSave") : ""))+'</p>';
+  }
+  const rep = x => x.source === "sorso" && !x.mine ? '<button type="button" class="lbl-link" data-lbl="m-report" data-i="'+MATCH.items.indexOf(x)+'">'+esc(t("m.report"))+'</button>' : "";
+  if(MATCH.strong){
+    const x = MATCH.items[0];
+    return '<div class="lbl-match" role="group" aria-label="'+esc(t("m.isThis"))+'"><div class="m-eye">'+esc(t("m.isThis"))+'</div>'+matchItemHTML(x, 0)+
+      '<div class="lbl-actions"><button type="button" class="pill-solid" data-lbl="m-yes" data-i="0">'+esc(t("m.yes"))+'</button><button type="button" class="pill-ghost" data-lbl="m-no">'+esc(t("m.no"))+'</button></div>'+rep(x)+'</div>';
+  }
+  return '<div class="lbl-match" role="group" aria-label="'+esc(t("m.maybe"))+'"><div class="m-eye">'+esc(t("m.maybe"))+'</div>'+
+    MATCH.items.map((x, i) => '<button type="button" class="lbl-cand" data-lbl="m-yes" data-i="'+i+'" aria-label="'+esc(t("m.pick")+": "+[x.nome, x.produttore].filter(Boolean).join(", "))+'">'+matchItemHTML(x, i)+'</button>'+rep(x)).join("")+
+    '<div class="lbl-actions"><button type="button" class="pill-ghost" data-lbl="m-no">'+esc(t("m.none2"))+'</button></div></div>';
+}
+function eanHTML(){
+  return '<div class="lbl-ean"><label class="lab" for="lblEan" style="font:600 11px/1.2 \'Geist\',\'Inter\';letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3)">'+esc(t("m.ean.title"))+'</label>'+
+    '<div class="lbl-now">'+esc(t("m.ean.hint"))+'</div>'+
+    '<div class="row"><input class="in-line" id="lblEan" inputmode="numeric" autocomplete="off" maxlength="18" placeholder="'+esc(t("m.ean.ph"))+'" value="'+esc(MATCH.ean)+'">'+
+    '<button type="button" class="pill-ghost" data-lbl="ean-go"'+(MATCH.eanBusy ? " disabled" : "")+'>'+esc(t("m.ean.go"))+'</button>'+
+    '<button type="button" class="pill-ghost" data-lbl="ean-photo"'+(MATCH.eanBusy ? " disabled" : "")+'>'+esc(t("m.ean.photo"))+'</button>'+
+    '<input type="file" accept="image/*" id="lblEanFile" hidden></div>'+
+    (MATCH.eanBusy ? '<p class="lbl-now" role="status">'+esc(t("m.ean.reading"))+'</p>' : MATCH.eanMsg ? '<p class="lbl-now" role="status">'+esc(MATCH.eanMsg)+'</p>' : "")+'</div>';
+}
+async function eanSearch(){
+  const c = String(MATCH.ean || "").replace(/\D/g, "");
+  if(!Barcode.valid(c)){ MATCH.eanMsg = t("m.ean.bad"); lblRender(); return; }
+  MATCH.ean = c; MATCH.picked = null; MATCH.msg = "";
+  await matchLookup(c);
+}
+async function eanFromPhoto(file){
+  if(!file) return;
+  MATCH.eanBusy = true; MATCH.eanMsg = ""; lblRender();
+  let code = "";
+  try{
+    const url = URL.createObjectURL(file);
+    const img = await new Promise((res, rej) => { const i = new Image(); i.onload = () => res(i); i.onerror = () => rej(new Error("img")); i.src = url; });
+    code = await Barcode.read(img);
+    URL.revokeObjectURL(url);
+  }catch(e){ MATCH.eanBusy = false; MATCH.eanMsg = t(e && e.message === "offline" ? "m.ean.offline" : "m.ean.notFound"); lblRender(); return; }
+  MATCH.eanBusy = false;
+  if(!Barcode.valid(code)){ MATCH.eanMsg = t("m.ean.notFound"); lblRender(); return; }
+  MATCH.ean = code;
+  await eanSearch();
+}
+function matchPick(i){
+  const x = MATCH.items[i]; if(!x) return;
+  if(!LBL.fields) LBL.fields = {};
+  const set = (k, v) => { v = String(v || "").trim(); if(!v) return; LBL.fields[k] = {value:v, checked:lblNow(k) !== v}; };
+  set("nome", x.nome); set("produttore", x.produttore); set("denominazione", x.denominazione);
+  if(TYPES.indexOf(x.tipologia) > -1) LBL.fields.tipologia = {value:x.tipologia, checked:S.wine.tipologia !== x.tipologia};
+  if(x.vitigni && x.vitigni.length){
+    const have = lblNow("vitigni").toLowerCase(), nuovi = x.vitigni.filter(g => !have.includes(String(g).toLowerCase()));
+    if(nuovi.length) LBL.fields.vitigni = {value:nuovi.join(", "), checked:!have};
+  }
+  /* l'annata è quella della bottiglia che hai in mano: si tiene quella letta; dal codice a barre solo se l'etichetta non l'ha data */
+  if(!LBL.fields.annata && x.source === "off" && /^\d{4}$/.test(String(x.annata || ""))) LBL.fields.annata = {value:String(x.annata), checked:!lblNow("annata")};
+  MATCH.picked = {source:x.source, id:x.id || "", ean:x.ean || ""};
+  MATCH.items = []; LBL.err = "";
+  lblRender();
+}
+async function matchReport(i){
+  const x = MATCH.items[i]; if(!x || x.source !== "sorso") return;
+  if(!AUTH.isLoggedIn){ MATCH.msg = t("m.reportLogin"); lblRender(); return; }
+  try{
+    const r = await fetch("/api/catalog", {method:"POST", headers:catHeaders(), body:JSON.stringify({op:"report", id:x.id})});
+    MATCH.msg = r.ok ? t("m.reported") : t("m.ean.unavail");
+  }catch(e){ MATCH.msg = t("m.ean.unavail"); }
+  if(MATCH.msg === t("m.reported")) MATCH.items.splice(i, 1);
+  if(!MATCH.items.length) MATCH.strong = false;
+  lblRender();
+}
+
+/* contribuire al catalogo Sorso: dopo il salvataggio di una degustazione nuova, solo i dati del vino */
+function catOn(){ try{ return window.localStorage.getItem("sorso-catalogo") !== "0"; }catch(e){ return true; } }
+function catContribute(w){
+  const picked = MATCH.picked;
+  if(!AUTH.isLoggedIn || !catOn() || !w) return;
+  const nome = String(w.nome || "").trim(), prod = String(w.produttore || "").trim();
+  if(nome.length < 2 || prod.length < 2) return;
+  const body = {op:"confirm", wine:{nome, produttore:prod, denominazione:String(w.denominazione || "").trim(), tipologia:w.tipologia || "",
+    vitigni:(w.uvaggi || []).map(r => r && String(r.v || "").trim()).filter(v => v && v !== ALTRO).slice(0, 8), annata:/^\d{4}$/.test(String(w.annata || "").trim()) ? String(w.annata).trim() : ""}};
+  if(picked && picked.ean) body.ean = picked.ean;
+  try{ fetch("/api/catalog", {method:"POST", headers:catHeaders(), body:JSON.stringify(body), keepalive:true}).catch(() => {}); }catch(e){}
+}
+function renderCatCard(){
+  const box = $("catContrib"), note = $("catNote"); if(!box || !note) return;
+  box.checked = catOn(); box.disabled = !AUTH.isLoggedIn;
+  note.textContent = t(AUTH.isLoggedIn ? "cat.on" : "cat.login");
+}
+$("catContrib").addEventListener("change", e => { try{ window.localStorage.setItem("sorso-catalogo", e.target.checked ? "1" : "0"); }catch(err){} renderCatCard(); });
+
 const dz = $("dropZone");
 ["dragenter","dragover"].forEach(ev => dz.addEventListener(ev, e => { e.preventDefault(); dz.classList.add("over"); }));
 ["dragleave","dragend"].forEach(ev => dz.addEventListener(ev, () => dz.classList.remove("over")));
@@ -6596,6 +6819,7 @@ function renderAccount(){
   $("accountNote").textContent = in_
     ? tf("account.noteIn", {who: AUTH.displayName || AUTH.username})
     : t("account.noteOut");
+  renderCatCard();
 
   const av = $("avatarBtn");
   av.classList.toggle("guest", !in_);

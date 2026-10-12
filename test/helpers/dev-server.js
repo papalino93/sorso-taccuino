@@ -36,7 +36,8 @@ async function start(opts) {
     "/api/v1": require("../../api/v1"),
     "/api/circles": require("../../api/circles"),
     "/api/db": require("../../api/db"),
-    "/api/widget": require("../../api/widget")
+    "/api/widget": require("../../api/widget"),
+    "/api/catalog": require("../../api/catalog")
   };
   const secret = opts.secret || "d".repeat(64);
   const apiKey = P.newApiKey("demo");

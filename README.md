@@ -1,6 +1,6 @@
 # Sorso — Taccuino di degustazione
 
-Versione corrente: **2.6.0** — ultimo aggiornamento: 11 ottobre 2026 (cronologia in `CHANGELOG.md`). La versione e la data si leggono anche in fondo all'app e dello spazio di team.
+Versione corrente: **2.7.0** — ultimo aggiornamento: 12 ottobre 2026 (cronologia in `CHANGELOG.md`). La versione e la data si leggono anche in fondo all'app e dello spazio di team.
 
 App per registrare degustazioni di vino con scheda di valutazione, statistiche personali, degustazioni alla cieca ed eventi condivisi.
 
@@ -74,6 +74,14 @@ Proprietario e amministratori creano dall'app (cerchia → «Widget per un sito�
 In «Nuova», dopo aver scelto la foto, «Leggi l'etichetta» riconosce il testo direttamente nel browser con [Tesseract.js](https://github.com/naptha/tesseract.js) (Apache 2.0): la foto non viene inviata a nessun server. La prima volta il browser scarica il motore (da jsDelivr) e i dati delle lingue italiano e inglese (circa 10 MB in tutto), poi restano in cache. L'analisi del testo (produttore, nome, annata, denominazione, tipologia, vitigni, gradazione) è in `public/js/label-reader.js`, provata in `test/label-reader.test.js`; il lettore è `public/js/label-ocr.js`; la prova nel browser è `test/e2e/etichetta.e2e.js` (serve la rete). I dati proposti non entrano nella scheda finché non si preme «Compila la scheda», e una voce già compilata non viene sovrascritta se non la si spunta.
 
 Su foto vere (2.6.0): il lettore trova da solo l'etichetta nella foto (zona chiara e poco colorata, più centrale, che non tocca i bordi), la legge quattro volte (luminosità e canale verde, testo sparso e a blocchi; scelte misurate su foto vere) e unisce le righe, preferendo quelle confermate da più letture. L'analisi corregge gli errori tipici dell'OCR confrontando «a somiglianza» con elenchi ampi di denominazioni (DOCG riconosciute come tali), vitigni e cantine note, riga per riga e senza usare gli indirizzi. Per rimisurare con altre foto: `node scripts/label-bench.js <cartella>`.
+
+### Riconoscere il vino (2.7.0)
+
+Dopo la lettura Sorso cerca il vino a strati e si ferma alla prima fonte sicura: **il tuo Taccuino** (nel dispositivo: «l'hai bevuto il 12 mar 2026, 92/100»), il **catalogo Vino.com** (quando arriverà il feed), il **catalogo Sorso** e **Open Food Facts** con il codice a barre. Altrimenti restano i dati letti. Con una somiglianza alta propone «È questo?», con una media due o tre «Forse è uno di questi?» e «Nessuno di questi»; si vede sempre da dove viene il dato e l'annata resta quella letta. Il confronto a somiglianza è `public/js/wine-match.js` (stesso codice nel browser e sul server).
+
+- **Catalogo Sorso** (`api/catalog.js`, `api/_catalog.js`): quando chi ha fatto l'accesso salva una degustazione nuova con nome e produttore, vanno al catalogo solo i dati del vino (nome, produttore, denominazione, tipologia, vitigni, annate, codice a barre); chi conferma è un'impronta anonima. Un vino serve solo a chi l'ha inserito finché non lo conferma una seconda persona; varianti dello stesso vino si uniscono a somiglianza; con due segnalazioni di persone diverse la voce sparisce. Si disattiva in Impostazioni → Catalogo Sorso. Ricerca anche senza accesso, 30 richieste al minuto per indirizzo IP; l'indice resta in memoria un minuto (la ricerca costa pochi comandi Redis).
+- **Codice a barre** (`public/js/barcode.js`): letto nel browser con BarcodeDetector dove c'è (Chrome su Android), altrimenti con [ZXing](https://github.com/zxing-js/library) (Apache 2.0, da jsDelivr, solo quando serve); oppure scritto a mano. Si cerca prima nel catalogo Sorso, poi su [Open Food Facts](https://world.openfoodfacts.org) (dati con licenza ODbL, citata nell'app), con la risposta in memoria per 30 giorni (3 se non trovato). Una scheda che non è di un vino viene scartata.
+- Prove: `test/catalog.test.js` e `test/e2e/riconosci.e2e.js` (Taccuino, catalogo, codice scritto e fotografato, contributo al salvataggio).
 
 ## Guida all'uso
 

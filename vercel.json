@@ -25,6 +25,9 @@
     },
     "api/widget.js": {
       "includeFiles": "public/js/{scoring,theme}.js"
+    },
+    "api/catalog.js": {
+      "includeFiles": "public/js/{wine-match,label-reader}.js"
     }
   }
 }
