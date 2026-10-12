@@ -80,7 +80,7 @@ test("mostra solo aggregati delle serate chiuse: medie dal secondo voto, alla ci
   await ok(E, "anna", { op: "tasting.status", circle: cid, tasting: b.id, status: "closed" });
   await redis.del("st:cerchie:" + cid);
   r = await W("t=" + w.token + "&lang=en");
-  assert.doesNotMatch(r.body, /Nascosto/); assert.match(r.body, /Wine 1 \(blind\)/); assert.match(r.body, /Best wines/);
+  assert.doesNotMatch(r.body, /Nascosto/); assert.match(r.body, /Wine 1 \(blind\)/); assert.match(r.body, /Best wines/); assert.match(r.body, /Sorso · tasting notebook/); assert.doesNotMatch(r.body, /taccuino di degustazione/);
 });
 
 test("revoca ed eliminazione della cerchia spengono il widget; link falso 404", async () => {

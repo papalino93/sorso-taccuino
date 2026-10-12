@@ -22,7 +22,7 @@ const TXT = {
     votes1: "1 voto", votesN: "{n} voti", wines1: "1 vino", winesN: "{n} vini", blind: "Vino {n} (alla cieca)", tie: "pari merito",
     tEvenings: "Serate", tWines: "Vini", tVotes: "Voti", tAvg: "Media", scale: "su 100",
     empty: "La classifica compare quando si chiude la prima serata con almeno due voti per vino.",
-    foot: "Medie anonime delle serate chiuse", gone: "Questo widget non è disponibile: il link è stato revocato o non è corretto.", busy: "Troppe richieste: riprova fra poco.",
+    foot: "Medie anonime delle serate chiuse", brand: "Sorso · taccuino di degustazione", gone: "Questo widget non è disponibile: il link è stato revocato o non è corretto.", busy: "Troppe richieste: riprova fra poco.",
     rankLabel: "Classifica dei vini", evLabel: "Serate chiuse", in: "in"
   },
   en: {
@@ -30,7 +30,7 @@ const TXT = {
     votes1: "1 vote", votesN: "{n} votes", wines1: "1 wine", winesN: "{n} wines", blind: "Wine {n} (blind)", tie: "tie",
     tEvenings: "Evenings", tWines: "Wines", tVotes: "Votes", tAvg: "Average", scale: "out of 100",
     empty: "The ranking appears once the first evening is closed with at least two votes per wine.",
-    foot: "Anonymous averages of closed evenings", gone: "This widget is not available: the link was revoked or is wrong.", busy: "Too many requests: try again shortly.",
+    foot: "Anonymous averages of closed evenings", brand: "Sorso · tasting notebook", gone: "This widget is not available: the link was revoked or is wrong.", busy: "Too many requests: try again shortly.",
     rankLabel: "Wine ranking", evLabel: "Closed evenings", in: "at"
   }
 };
@@ -186,7 +186,7 @@ module.exports = async (req, res) => {
   let q;
   try { q = new URL(req.url, "http://x").searchParams; } catch (e) { q = new URLSearchParams(); }
   const o = options(q);
-  const foot = '<footer><span>' + esc(TXT[o.lang].foot) + '</span><a href="https://sorso-taccuino.vercel.app/" target="_blank" rel="noopener">Sorso · taccuino di degustazione</a></footer>';
+  const foot = '<footer><span>' + esc(TXT[o.lang].foot) + '</span><a href="https://sorso-taccuino.vercel.app/" target="_blank" rel="noopener">' + esc(TXT[o.lang].brand) + '</a></footer>';
   if (req.method !== "GET" && req.method !== "HEAD") { headers(res, nonce, "no-store"); res.status(405).send(page(o, nonce, "Sorso", "")); return; }
   const token = q.get("t") || "";
   if (!TOKEN.test(token)) { headers(res, nonce, "public, max-age=300, s-maxage=300"); res.status(404).send(page(o, nonce, "Sorso", '<p class="empty">' + esc(TXT[o.lang].gone) + "</p>")); return; }
