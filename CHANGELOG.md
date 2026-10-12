@@ -3,6 +3,12 @@
 La versione e la data dell'ultimo aggiornamento sono mostrate in fondo all'app e dello spazio di team
 (fonte: `public/js/version.js`, da tenere uguale a `package.json`).
 
+## 2.7.0 — 12 ottobre 2026
+- **Riconoscere il vino, anche quando non è in nessun catalogo.** Dopo «Leggi l'etichetta» Sorso cerca il vino a strati: prima nel **tuo Taccuino** («l'hai bevuto il 12 mar 2026, 92/100»), poi nel **catalogo Sorso**, poi con il **codice a barre** su Open Food Facts. Con una corrispondenza sicura propone «È questo?» con tutti i dati; se non è sicuro mostra due o tre vini («Forse è uno di questi?») oppure «Nessuno di questi». Si vede sempre da dove viene il dato; l'annata resta quella letta sulla bottiglia. Il posto per il catalogo Vino.com è pronto, tra il Taccuino e il catalogo Sorso.
+- **Catalogo Sorso**: quando salvi una degustazione con nome e produttore (con l'accesso), al catalogo comune vanno solo i dati del vino: niente voti, note o nomi. Un vino nuovo serve subito a te e diventa di tutti quando lo conferma un'altra persona; scritture un po' diverse dello stesso vino si uniscono; con due segnalazioni («Dati sbagliati? Segnala») la voce sparisce. Si disattiva in Impostazioni → Catalogo Sorso.
+- **Codice a barre**: «Fotografa il codice» (letto nel telefono, la foto non esce) oppure scrivi le cifre; Sorso controlla che il codice sia valido e lo cerca nel catalogo Sorso e su Open Food Facts (banca dati libera, licenza ODbL). Se nella stessa foto dell'etichetta si vede il codice, su Android lo legge da solo.
+- Guida all'uso aggiornata (Nuova, Impostazioni, domande frequenti).
+
 ## 2.6.0 — 11 ottobre 2026
 - **Lettura dell'etichetta molto più precisa su foto vere** (provata sulle prime foto mandate dall'utente): Sorso trova da solo l'etichetta nella foto e la ritaglia, ignorando strofinacci, legno, piastrelle e bottiglie accanto; la legge quattro volte con filtri diversi (anche il canale verde, che fa uscire le scritte rosse) e unisce le letture; corregge gli errori tipici confrontando con elenchi ampi di denominazioni, vitigni e cantine note («ORrCIA» → Orcia, «NTEFAL… \\GRANTI» → Montefalco Sagrantino, «RUFF] NO» → Ruffino). Una DOCG nota viene indicata come DOCG anche se la scritta è letta a metà; anni come «2O2O» diventano 2020; nomi senza senso e pezzi di numeri (gradazione) non vengono più proposti.
 - Prima e dopo, sulle tre foto di prova: Giovesone da «eso!» a «Orcia DOC · Sangiovese · 2020»; Mevante da «Mevant» a «Montefalco Sagrantino DOCG · Sagrantino»; Rosso di Marte da «Ross Arte» a «Ruffino · Marte».

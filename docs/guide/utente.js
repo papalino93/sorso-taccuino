@@ -46,7 +46,7 @@ function build() {
     ${lato(`
         <p class="lead">Tutto è facoltativo, tranne il nome del vino.</p>
         ${passi([["Etichetta", "Scatta o scegli una foto, poi «Leggi l'etichetta»."], ["Dati", "Controlli e completi: nome, annata, prezzo…"], ["Giudizio", "Voto rapido o scheda completa."]])}
-        ${ul(["<b>Leggi l'etichetta</b>: Sorso trova l'etichetta nella foto, la legge e propone nome, produttore, annata, denominazione e vitigni. Controlli, correggi e scegli cosa usare. La foto resta sul telefono; meglio se l'etichetta è dritta e ben illuminata.", "<b>Uvaggio</b>: indica i vitigni e le percentuali. Alimenta le statistiche per vitigno: più lo compili, più il profilo è preciso.", "<b>Tipologia</b>: rosso, bianco, rosato, bollicine… Il giudizio tiene conto del tipo di vino.", "<b>Con altri</b>: per degustare in gruppo usa le serate di una cerchia (capitolo 07).", "Il punteggio si aggiorna mentre muovi i cursori."])}
+        ${ul(["<b>Leggi l'etichetta</b>: Sorso trova l'etichetta nella foto, la legge e propone nome, produttore, annata, denominazione e vitigni. Controlli, correggi e scegli cosa usare. La foto resta sul telefono; meglio se l'etichetta è dritta e ben illuminata.", "<b>È questo?</b>: se il vino è nel tuo Taccuino, nel catalogo Sorso o (con il <b>codice a barre</b> del retro) su Open Food Facts, Sorso lo propone con tutti i dati; se non è sicuro, due o tre vini tra cui scegliere.", "<b>Uvaggio</b>: indica i vitigni e le percentuali. Alimenta le statistiche per vitigno: più lo compili, più il profilo è preciso.", "<b>Tipologia</b>: rosso, bianco, rosato, bollicine… Il giudizio tiene conto del tipo di vino.", "Il punteggio si aggiorna mentre muovi i cursori."])}
         ${call("<b>Hai sbagliato?</b> Una scheda salvata si modifica dal Taccuino: tocca «Modifica scheda».")}`,
       fig("app-nuova.png", 1, "La scheda <b>Nuova</b>: etichetta, dati e giudizio.", "lg"))}
   `));
@@ -97,7 +97,7 @@ function build() {
     <h1 class="d">Tutto sul tuo profilo, <em>in un posto</em></h1>
     ${lato(`
         <p class="lead">Si apre dall'ingranaggio in alto (e dal menù del tuo avatar); sul computer c'è anche il pulsante «Aspetto e colori».</p>
-        ${table(["Sezione", "A cosa serve"], [["<b>Nome del taccuino</b>", "Il titolo (per esempio «Sorso di vino») e di chi è («il taccuino di Mario Rossi»): compare in alto. Con «Ripristina» torni a Sorso."], ["<b>Aspetto</b>", "Tema <b>Chiaro</b>, <b>Scuro</b> o <b>Automatico</b> (segue il tuo dispositivo). Colore d'accento e sfondo a scelta."], ["<b>Come voti di solito</b>", "Con quale modo si apre ogni nuova scheda: l'ultima usata, Voto rapido o Scheda completa."], ["<b>Il tuo archivio</b>", "<b>Salva copia</b> scarica un file con le tue schede; <b>Ripristina da copia</b> le rimette a posto."], ["<b>Guida</b>", "Questo documento, sempre a portata di mano."], ["<b>Account</b>", "Accedi con Google per ritrovare le schede ovunque; esci quando vuoi."]], [1])}
+        ${table(["Sezione", "A cosa serve"], [["<b>Nome del taccuino</b>", "Il titolo e di chi è («il taccuino di Mario Rossi»): compare in alto."], ["<b>Aspetto</b>", "Tema <b>Chiaro</b>, <b>Scuro</b> o <b>Automatico</b> (segue il tuo dispositivo). Colore d'accento e sfondo a scelta."], ["<b>Come voti di solito</b>", "Con quale modo si apre ogni nuova scheda: l'ultima usata, Voto rapido o Scheda completa."], ["<b>Il tuo archivio</b>", "<b>Salva copia</b> scarica un file con le tue schede; <b>Ripristina da copia</b> le rimette a posto."], ["<b>Catalogo Sorso</b>", "Solo i dati del vino (niente voti né nomi) vanno al catalogo comune, per riconoscerlo la volta dopo. Disattivabile."], ["<b>Guida</b>", "Questo documento, sempre a portata di mano."], ["<b>Account</b>", "Accedi con Google per ritrovare le schede ovunque; esci quando vuoi."]], [1])}
         ${call("Il testo resta sempre leggibile: se scegli un colore troppo chiaro o troppo scuro, l'app lo corregge leggermente e te lo dice.")}`,
       fig("app-impostazioni.png", 1, "Le <b>Impostazioni</b>: l'aspetto in alto; voto, archivio, guida e account più sotto.", "lg"))}
   `));
@@ -136,6 +136,7 @@ function build() {
       ["Come cambio i colori?", "Impostazioni → Aspetto. Con «Ripristina i colori» torni a quelli originali."],
       ["Voglio il tema scuro.", "Impostazioni → Aspetto → Scuro. Con «Automatico» l'app segue il tema del telefono."],
       ["Posso cambiare un voto?", "Sì: dal Taccuino, «Modifica scheda»."],
+      ["Il vino non viene riconosciuto.", "Compila i dati e salva: Sorso se lo ricorda."],
       ["Perché il voto minimo è 50?", "È la scala di Sorso: 50 insufficiente, 100 irripetibile. Il 100 è solo per il vino perfetto."],
       ["Come confronto due vini?", "Nel Taccuino tocca il punteggio dei due vini."],
       ["Le statistiche non compaiono.", "Servono alcune schede (e per alcuni blocchi l'uvaggio compilato). L'app dice cosa manca."],
