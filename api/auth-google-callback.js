@@ -104,6 +104,7 @@ module.exports = Quota.wrap(async (req, res) => {
       email: info.email || "",
       emailVerified: info.email_verified === true || info.email_verified === "true",
       name: info.name || "",
+      picture: typeof info.picture === "string" ? info.picture.slice(0, 400) : "",
       createdAt: prev && prev.createdAt ? prev.createdAt : Date.now()
     }));
 

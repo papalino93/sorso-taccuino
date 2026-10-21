@@ -93,6 +93,7 @@ function create() {
       case "HGET": { const h = hash(a[0]); return h && h.has(a[1]) ? h.get(a[1]) : null; }
       case "HGETALL": { const h = hash(a[0]); const out = []; if (h) h.forEach((v, k) => out.push(k, v)); return out; }
       case "HLEN": { const h = hash(a[0]); return h ? h.size : 0; }
+      case "HKEYS": { const h = hash(a[0]); return h ? Array.from(h.keys()) : []; }
       case "HDEL": { const h = hash(a[0]); let n = 0; if (h) a.slice(1).forEach(f => { if (h.delete(f)) n++; }); return n; }
       case "HINCRBY": { const h = hash(a[0], true); const v = (Number(h.get(a[1])) || 0) + Number(a[2]); h.set(a[1], String(v)); return v; }
       case "SADD": { const s = set(a[0], true); let n = 0; a.slice(1).forEach(m => { if (!s.has(m)) { s.add(m); n++; } }); return n; }

@@ -3,6 +3,12 @@
 La versione e la data dell'ultimo aggiornamento sono mostrate in fondo all'app e dello spazio di team
 (fonte: `public/js/version.js`, da tenere uguale a `package.json`).
 
+## 2.10.0 — 21 ottobre 2026
+- **Il gioco nelle cerchie.** Il Proprietario o un amministratore lo accende in fondo alla cerchia. Sotto ogni vino delle serate trascini **la tua faccia** (foto di Google o iniziali) su un campo con due assi che cambiano da vino a vino (corpo e acidità, tannino e morbidezza…), fai un **pronostico** sul voto del gruppo e, se vuoi, indovini il **prezzo**. Le mosse restano segrete fino allo **svelamento** (quando hanno votato tutti, quando si chiude il vino o con «Svela!» dell'organizzatore); poi tutti vedono tutto: facce sul campo, voti, punti, titoli («Fuori dal coro», «In sintonia», «Pronostico d'oro», «Naso da sommelier»), reazioni e frecciatine bonarie.
+- **Classifica del gioco** nella scheda Classifica: punti della stagione, soprannomi («Il generoso», «Lo spietato», «Il bastian contrario», «Naso d'oro») e il tuo gemello di palato.
+- A gioco spento i voti restano anonimi come prima; il widget per i siti resta anonimo sempre. «Cancella i miei voti» cancella anche le tue mosse e le reazioni.
+- Guida alle cerchie: nuova pagina sul gioco.
+
 ## 2.9.2 — 21 ottobre 2026
 - **Nuovo aspetto, tappa 3: le cinque guide PDF** rifatte con il nuovo logo (la scritta con le O che sorridono in copertina), i colori lavanda e antracite, i titoli in Geist e tutte le schermate nuove (app, serate, spazio di team, widget). Corretto il testo sui colori predefiniti dello spazio di team.
 
