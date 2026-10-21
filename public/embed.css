@@ -340,3 +340,52 @@ button.g-dot.me:focus-visible { outline: none; } button.g-dot.me:focus-visible .
 .g-confetti i.c0 { background: #5b4bd5; } .g-confetti i.c1 { background: #1f8a4c; } .g-confetti i.c2 { background: #f2b84b; } .g-confetti i.c3 { background: #2b6cb0; }
 .g-confetti i.c4 { background: #e27a98; } .g-confetti i.c5 { background: #9a8cff; } .g-confetti i.c6 { background: #0f9a8a; } .g-confetti i.c7 { background: #ff6b5e; }
 @keyframes g-fall { 0% { transform: translate(0, 0) rotate(0); opacity: 1; } 100% { transform: translate(var(--dx, 0), 520px) rotate(var(--rot, 360deg)); opacity: 0; } }
+/* 2.14: sei giochi per vino, «Come si gioca», novità */
+.g-head { flex-wrap: wrap; gap: 6px 10px; }
+.g-helpbtn { margin-left: auto; }
+.g-progress { display: flex; align-items: center; gap: 10px; margin: 4px 0 6px; color: var(--muted); }
+.g-bar { display: inline-flex; gap: 3px; }
+.g-bar i { width: 18px; height: 6px; border-radius: 6px; background: var(--line); }
+.g-bar i.on { background: var(--accent); }
+.g-step { display: flex; gap: 10px; align-items: flex-start; margin: 18px 0 8px; }
+.g-step > span:last-child { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+.g-step b { font-size: 15px; font-weight: 750; }
+.g-num { flex: none; width: 26px; height: 26px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 800; background: color-mix(in srgb, var(--accent) 14%, var(--surface)); color: var(--accent); }
+.g-step.done .g-num { background: var(--accent); color: var(--on-accent, #fff); }
+.g-chips { display: flex; flex-wrap: wrap; gap: 6px; align-items: flex-start; }
+.g-chip { display: inline-flex; align-items: center; gap: 6px; min-height: 40px; padding: 6px 12px; border-radius: var(--r-pill, 999px); border: 1px solid var(--line); background: var(--surface); color: var(--ink); font-size: 13.5px; font-weight: 600; cursor: pointer; }
+button.g-chip:hover { border-color: var(--accent); }
+.g-chip.on { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 14%, var(--surface)); box-shadow: inset 0 0 0 1px var(--accent); }
+.g-chip[disabled] { opacity: .4; cursor: not-allowed; }
+.g-chip b { font-weight: 800; color: var(--accent); }
+.g-chip.top { background: var(--accent); color: var(--on-accent, #fff); }
+.g-chip.top b { color: inherit; }
+.g-fanb { padding-left: 4px; }
+.g-fanb .face { width: 30px; height: 30px; font-size: 11px; }
+.g-count { margin-top: 4px; }
+.g-groups { display: grid; gap: 8px; margin: 10px 0 4px; }
+@media (min-width: 620px) { .g-groups { grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); } }
+.g-gcard { border: 1px solid var(--line); border-radius: var(--r-md, 12px); background: var(--surface); padding: 10px 12px; }
+.g-gk { display: block; font-size: 11px; font-weight: 750; letter-spacing: .1em; text-transform: uppercase; color: var(--accent); margin-bottom: 6px; }
+.g-cloud { display: flex; flex-wrap: wrap; gap: 5px; align-items: flex-start; }
+.g-cloud .g-chip { min-height: 32px; font-size: 12.5px; cursor: default; }
+.g-word { margin: 0; font-size: 20px; font-weight: 800; letter-spacing: -.01em; }
+.g-fanwin { margin: 0 0 4px; display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.g-nums { grid-template-columns: repeat(auto-fill, minmax(min(100%, 104px), 1fr)) !important; }
+.g-nums b { overflow-wrap: anywhere; }
+.g-help h3.section { margin-top: 0; }
+.g-hcards { list-style: none; margin: 10px 0 0; padding: 0; display: grid; gap: 10px; }
+@media (min-width: 620px) { .g-hcards { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.g-hcard { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 12px; padding: 12px 14px; border-radius: var(--r-lg, 16px); border: 1px solid var(--line); background: var(--surface); }
+.g-hico { width: 44px; height: 44px; border-radius: 14px; display: inline-flex; align-items: center; justify-content: center; font-size: 24px; }
+.hc0 .g-hico { background: color-mix(in srgb, #5b4bd5 16%, transparent); } .hc1 .g-hico { background: color-mix(in srgb, #1f8a4c 16%, transparent); }
+.hc2 .g-hico { background: color-mix(in srgb, #f2b84b 22%, transparent); } .hc3 .g-hico { background: color-mix(in srgb, #e27a98 20%, transparent); }
+.hc4 .g-hico { background: color-mix(in srgb, #2b6cb0 16%, transparent); } .hc5 .g-hico { background: color-mix(in srgb, #ff6b5e 16%, transparent); }
+.g-hcard b { display: block; font-size: 15.5px; font-weight: 780; margin-bottom: 4px; }
+.g-hcard p { margin: 0 0 4px; font-size: 13.5px; line-height: 1.45; }
+.g-hcard em { font-style: normal; font-size: 10.5px; font-weight: 750; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); margin-right: 4px; }
+.g-hpts { color: var(--ink); }
+.g-htip { color: var(--muted); font-size: 12.5px !important; }
+.g-novita { display: flex; gap: 12px; align-items: flex-start; border-color: var(--accent); background: color-mix(in srgb, var(--accent) 8%, var(--card, var(--bg))); }
+.g-nvico { font-size: 28px; line-height: 1; }
+.g-novita p { margin: 4px 0 8px; }

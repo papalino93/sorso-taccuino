@@ -810,7 +810,7 @@
         return '<li><span class="pos">' + w.rank + '</span><span class="nm" dir="auto"><b>' + esc(wineTitle(w)) + '</b>' + (ties ? ' <span class="small muted">(' + esc(t("rankTie")) + ')</span>' : "") + '<br><span class="small muted">' + esc(plural(w.team.count, "voteSingle", "votePlural")) + '</span></span><span class="av">' + dec(w.team.avg) + '</span></li>';
       }).join("") + '</ol>';
     }
-    h += favHtml();
+    h += novitaHtml() + helpHtml() + favHtml();
     h += '<h3 class="section">' + esc(t("wines")) + '</h3>';
     if (org && open && !(S.tasting && S.tasting.single)) h += S.form && S.form.kind === "wine" ? formHtml("wine") : '<p>' + btn("new-wine", t("addWine"), { disabled: readonly(), fk: "new-wine" }) + '</p>';
     if (S.loading && !S.wines.length) h += '<p class="muted" aria-busy="true">' + esc(t("loading")) + '</p>';
@@ -838,14 +838,14 @@
       g_react: "Reagisci a {name}", g_phrase: "Una frecciatina…", g_noPhrase: "Nessuna frecciatina",
       f1: "Hai annusato il tappo?", f2: "Palato da bollicine al discount", f3: "Sommelier in incognito", f4: "Questo l'hai bevuto con gli occhi", f5: "Generoso come a Natale",
       f6: "Severo come un professore", f7: "Hai sbagliato bicchiere?", f8: "Naso da segugio", f9: "Ma era lo stesso vino?", f10: "Applausi, palato d'oro",
-      g_board: "Classifica del gioco", g_boardHint: "Punti della stagione: pronostici, prezzi e vicinanza al gruppo, sui vini svelati.", g_boardEmpty: "Ancora nessun vino svelato: la classifica parte dal primo svelamento.",
+      g_board: "Classifica del gioco", g_boardHint: "Punti della stagione su tutti i giochi dei vini svelati, più la scommessa della serata.", g_boardEmpty: "Ancora nessun vino svelato: la classifica parte dal primo svelamento.",
       g_n_generoso: "Il generoso", g_n_spietato: "Lo spietato", g_n_bastian: "Il bastian contrario", g_n_naso: "Naso d'oro", g_twin: "Gemello di palato: {name}",
       ax_corpo: "Corpo", ax_acidita: "Acidità", ax_tannino: "Tannino", ax_morbidezza: "Morbidezza", ax_frutto: "Frutto", ax_legno: "Legno",
       ax_intensita: "Intensità", ax_persistenza: "Persistenza", ax_dolcezza: "Dolcezza", ax_freschezza: "Freschezza",
       lo_corpo: "esile", hi_corpo: "pieno", lo_acidita: "piatta", hi_acidita: "tagliente", lo_tannino: "vellutato", hi_tannino: "ruvido", lo_morbidezza: "secco", hi_morbidezza: "rotondo",
       lo_frutto: "poco", hi_frutto: "tanto", lo_legno: "niente", hi_legno: "tanto", lo_intensita: "lieve", hi_intensita: "potente", lo_persistenza: "corto", hi_persistenza: "lunghissimo",
       lo_dolcezza: "secco", hi_dolcezza: "dolce", lo_freschezza: "stanco", hi_freschezza: "vivace",
-      e_game_off: "In questa cerchia il gioco non è attivo.", e_revealed: "Questo vino è già svelato: le mosse non si cambiano più.", e_invalid_move: "Metti la tua faccia sul campo, oppure fai un pronostico.",
+      e_game_off: "In questa cerchia il gioco non è attivo.", e_revealed: "Questo vino è già svelato: le mosse non si cambiano più.", e_invalid_move: "Fai almeno una mossa: il campo, un pronostico, un aroma…",
       e_invalid_price: "Prezzo non valido.", e_not_revealed: "Le reazioni si lasciano dopo lo svelamento.",
       fav_title: "La scommessa della serata", fav_q: "Chi vince stasera? Scegli il vino che avrà la media più alta: se indovini, 10 punti.",
       fav_secret: "Le scommesse restano segrete fino alla chiusura della serata.", fav_mine: "Hai scommesso su questo", fav_pick: "Punta su questo vino",
@@ -861,7 +861,29 @@
       a_favorito: "Fiuto del vincitore", ad_favorito: "Hai indovinato il vino che vince la serata.", a_tris: "Tris", ad_tris: "Almeno 7 punti in pronostico, prezzo e campo sullo stesso vino.",
       a_diapason: "Diapason", ad_diapason: "Tre volte il più vicino al gruppo.", a_coro: "Voce fuori dal coro", ad_coro: "Tre volte il più lontano dal gruppo.",
       a_veterano: "Veterano", ad_veterano: "Dieci vini giocati.", a_re: "Re della cerchia", ad_re: "Primo in classifica, con almeno tre vini giocati.",
-      g_youWon: "Il vino è tuo: primo in classifica! 🎉"
+      g_youWon: "Il vino è tuo: primo in classifica! 🎉",
+      g_s1: "Il campo", g_s2: "Il pronostico", g_s3: "Quanto costa?", g_s4: "Caccia agli aromi", g_s5: "Il vino in una parola", g_s6: "Il fan numero uno",
+      g_r1: "Fino a 10 punti: più sei vicino al centro del gruppo, meglio è.", g_r2: "10 punti se centri la media, uno in meno per ogni punto di distanza.", g_r3: "Fino a 10 punti, quanto più ti avvicini al prezzo vero.",
+      g_r4: "Scegli fino a 3 profumi: 3 punti per ognuno che è tra i preferiti del gruppo.", g_r5: "Se fosse una persona, com'è? 5 punti se scegli la parola più scelta.", g_r6: "Chi gli darà il voto più alto? 5 punti se indovini. Puoi scegliere anche te.",
+      g_aromaCount: "{n} su 3", g_noseGroup: "Il naso del gruppo", g_wordGroup: "In una parola è…", g_fanGroup: "Il fan numero uno", g_fanGuess: "Lo avevano indovinato:", g_fanNobody: "Nessuno l'aveva indovinato.",
+      g_aromaShort: "Aromi", g_wordShort: "Parola", g_fanShort: "Fan", g_noWords: "Nessuno ha scelto una parola.", g_noAromas: "Nessuno ha cercato aromi.", g_movesDone: "{n} giochi su 6",
+      ar_rossi: "Frutti rossi", ar_neri: "Frutti neri", ar_agrumi: "Agrumi", ar_mela: "Mela e pera", ar_pesca: "Pesca e albicocca", ar_tropicale: "Tropicale", ar_fiori: "Fiori", ar_erbe: "Erbe",
+      ar_spezie: "Spezie", ar_vaniglia: "Vaniglia", ar_tostato: "Tostato", ar_miele: "Miele", ar_burro: "Burro", ar_minerale: "Minerale", ar_cuoio: "Cuoio e tabacco", ar_terra: "Terra e sottobosco",
+      pw_elegante: "Elegante", pw_potente: "Potente", pw_allegro: "Allegro", pw_timido: "Timido", pw_ruffiano: "Ruffiano", pw_austero: "Austero", pw_seducente: "Seducente", pw_rustico: "Rustico",
+      pw_fresco: "Fresco", pw_morbido: "Morbido", pw_spigoloso: "Spigoloso", pw_meditazione: "Da meditazione",
+      h_btn: "Come si gioca", h_close: "Chiudi le regole", h_title: "Come si gioca", h_intro: "Sei giochi per ogni vino, una scommessa per la serata. Fai solo quelli che vuoi: ognuno dà punti per la classifica.",
+      h_do: "Cosa fai", h_pts: "Punti", h_tip: "Il trucco",
+      h1d: "Trascina la tua faccia sul piano: due assi, come corpo e acidità, che cambiano a ogni vino.", h1p: "Fino a 10, più sei vicino al centro del gruppo.", h1t: "Fidati del primo sorso.",
+      h2d: "Indovina la media che darà il gruppo, da 50 a 100.", h2p: "10 se la centri, uno in meno per ogni punto di distanza.", h2t: "Pensa a chi c'è stasera: i generosi alzano la media.",
+      h3d: "Scrivi quanto pensi costi la bottiglia (il prezzo vero lo scrive chi organizza).", h3p: "Fino a 10, in proporzione a quanto ti avvicini.", h3t: "Il prezzo non è il voto: un vino da 8 € può stupire.",
+      h4d: "Scegli fino a tre profumi tra sedici: frutti rossi, spezie, vaniglia…", h4p: "3 per ogni aroma che è tra i preferiti del gruppo (scelto da almeno due).", h4t: "Meglio due aromi sicuri che tre a caso.",
+      h5d: "Se il vino fosse una persona, com'è? Elegante, ruffiano, spigoloso, da meditazione…", h5p: "5 se scegli la parola più scelta dal gruppo.", h5t: "Allo svelamento il vino si prende il suo soprannome.",
+      h6d: "Chi del gruppo gli darà il voto più alto? Puoi scegliere anche te.", h6p: "5 se indovini (a pari merito valgono tutti).", h6t: "Conosci i gusti dei colleghi meglio di loro?",
+      h7t_: "La scommessa della serata", h7d: "Prima della chiusura punta sul vino che vincerà la serata.", h7p: "10 se indovini il vincitore.", h7t: "Le scommesse restano segrete fino alla fine.",
+      h8t_: "Lo svelamento", h8d: "Le mosse restano segrete finché hanno votato tutti, il vino si chiude o chi organizza preme «Svela!».", h8p: "Poi tutti vedono tutto: facce sul campo, voti e punti.", h8t: "Puoi cambiare le mosse fino allo svelamento.",
+      h9t_: "Reazioni e frecciatine", h9d: "Dopo lo svelamento lascia un'emoji o una frecciatina bonaria agli altri (mai a te stesso).", h9p: "Non danno punti, solo soddisfazioni.", h9t: "«Hai annusato il tappo?» è un classico.",
+      h10t_: "Classifica, livelli e traguardi", h10d: "I punti si sommano nella stagione e nel mese: da Apprendista a Leggenda, con dieci traguardi da sbloccare.", h10p: "Serie 🔥, gemello di palato e nemesi ⚔️ arrivano da soli.", h10t: "Il podio può finire sul sito, ma solo se lo decidete voi.",
+      nv_title: "Novità nel gioco!", nv_text: "Tre giochi nuovi per ogni vino: caccia agli aromi, il vino in una parola e il fan numero uno.", nv_ok: "Ho capito"
     },
     en: {
       g_title: "The game", g_secret: "Moves stay secret until the reveal", g_revealed: "Revealed",
@@ -878,14 +900,14 @@
       g_react: "React to {name}", g_phrase: "A friendly jab…", g_noPhrase: "No jab",
       f1: "Did you sniff the cork?", f2: "Discount-bubbles palate", f3: "Sommelier undercover", f4: "You drank this one with your eyes", f5: "Generous as Christmas",
       f6: "Strict as a schoolteacher", f7: "Wrong glass?", f8: "Bloodhound nose", f9: "Was it even the same wine?", f10: "Applause, golden palate",
-      g_board: "Game ranking", g_boardHint: "Season points: predictions, prices and closeness to the group, on revealed wines.", g_boardEmpty: "No wine revealed yet: the ranking starts with the first reveal.",
+      g_board: "Game ranking", g_boardHint: "Season points from every game on revealed wines, plus tonight\u2019s bet.", g_boardEmpty: "No wine revealed yet: the ranking starts with the first reveal.",
       g_n_generoso: "The generous one", g_n_spietato: "The ruthless one", g_n_bastian: "The contrarian", g_n_naso: "Golden nose", g_twin: "Palate twin: {name}",
       ax_corpo: "Body", ax_acidita: "Acidity", ax_tannino: "Tannin", ax_morbidezza: "Softness", ax_frutto: "Fruit", ax_legno: "Oak",
       ax_intensita: "Intensity", ax_persistenza: "Length", ax_dolcezza: "Sweetness", ax_freschezza: "Freshness",
       lo_corpo: "light", hi_corpo: "full", lo_acidita: "flat", hi_acidita: "sharp", lo_tannino: "silky", hi_tannino: "rough", lo_morbidezza: "dry", hi_morbidezza: "round",
       lo_frutto: "little", hi_frutto: "lots", lo_legno: "none", hi_legno: "lots", lo_intensita: "faint", hi_intensita: "powerful", lo_persistenza: "short", hi_persistenza: "endless",
       lo_dolcezza: "dry", hi_dolcezza: "sweet", lo_freschezza: "tired", hi_freschezza: "lively",
-      e_game_off: "The game is not active in this circle.", e_revealed: "This wine has been revealed: moves can't change any more.", e_invalid_move: "Put your face on the field, or make a prediction.",
+      e_game_off: "The game is not active in this circle.", e_revealed: "This wine has been revealed: moves can't change any more.", e_invalid_move: "Make at least one move: the field, a prediction, an aroma…",
       e_invalid_price: "Invalid price.", e_not_revealed: "Reactions open after the reveal.",
       fav_title: "Tonight's bet", fav_q: "Who wins tonight? Pick the wine that will get the highest average: guess right for 10 points.",
       fav_secret: "Bets stay secret until the evening is closed.", fav_mine: "Your bet", fav_pick: "Bet on this wine",
@@ -901,7 +923,29 @@
       a_favorito: "Winner's nose", ad_favorito: "You picked the evening's winning wine.", a_tris: "Hat trick", ad_tris: "At least 7 points in prediction, price and field on the same wine.",
       a_diapason: "Tuning fork", ad_diapason: "Closest to the group three times.", a_coro: "Odd one out", ad_coro: "Farthest from the group three times.",
       a_veterano: "Veteran", ad_veterano: "Ten wines played.", a_re: "King of the circle", ad_re: "First in the ranking, with at least three wines played.",
-      g_youWon: "This wine is yours: first in the ranking! 🎉"
+      g_youWon: "This wine is yours: first in the ranking! 🎉",
+      g_s1: "The field", g_s2: "The prediction", g_s3: "How much is it?", g_s4: "Aroma hunt", g_s5: "The wine in one word", g_s6: "Number one fan",
+      g_r1: "Up to 10 points: the closer to the group's centre, the better.", g_r2: "10 points if you hit the average, one less for each point away.", g_r3: "Up to 10 points, the closer you get to the real price.",
+      g_r4: "Pick up to 3 aromas: 3 points for each one among the group's favourites.", g_r5: "If it were a person, what's it like? 5 points if you pick the most chosen word.", g_r6: "Who will give it the highest score? 5 points if you guess. You can pick yourself.",
+      g_aromaCount: "{n} of 3", g_noseGroup: "The group's nose", g_wordGroup: "In one word it's…", g_fanGroup: "Number one fan", g_fanGuess: "Guessed it:", g_fanNobody: "Nobody guessed it.",
+      g_aromaShort: "Aromas", g_wordShort: "Word", g_fanShort: "Fan", g_noWords: "Nobody picked a word.", g_noAromas: "Nobody went aroma hunting.", g_movesDone: "{n} of 6 games",
+      ar_rossi: "Red fruit", ar_neri: "Black fruit", ar_agrumi: "Citrus", ar_mela: "Apple & pear", ar_pesca: "Peach & apricot", ar_tropicale: "Tropical", ar_fiori: "Flowers", ar_erbe: "Herbs",
+      ar_spezie: "Spice", ar_vaniglia: "Vanilla", ar_tostato: "Toasty", ar_miele: "Honey", ar_burro: "Butter", ar_minerale: "Mineral", ar_cuoio: "Leather & tobacco", ar_terra: "Earth & undergrowth",
+      pw_elegante: "Elegant", pw_potente: "Powerful", pw_allegro: "Cheerful", pw_timido: "Shy", pw_ruffiano: "Crowd-pleaser", pw_austero: "Austere", pw_seducente: "Seductive", pw_rustico: "Rustic",
+      pw_fresco: "Fresh", pw_morbido: "Soft", pw_spigoloso: "Angular", pw_meditazione: "For meditation",
+      h_btn: "How to play", h_close: "Close the rules", h_title: "How to play", h_intro: "Six games for each wine, one bet for the evening. Play only the ones you like: each one scores points for the ranking.",
+      h_do: "What you do", h_pts: "Points", h_tip: "The trick",
+      h1d: "Drag your face onto the plane: two axes, like body and acidity, that change with each wine.", h1p: "Up to 10, the closer you are to the group's centre.", h1t: "Trust your first sip.",
+      h2d: "Guess the average the group will give, from 50 to 100.", h2p: "10 if you hit it, one less for each point away.", h2t: "Think of who's here tonight: generous people raise the average.",
+      h3d: "Write how much you think the bottle costs (the organiser enters the real price).", h3p: "Up to 10, depending on how close you get.", h3t: "Price isn't the score: an €8 wine can surprise.",
+      h4d: "Pick up to three of sixteen aromas: red fruit, spice, vanilla…", h4p: "3 for each aroma among the group's favourites (picked by at least two).", h4t: "Two sure aromas beat three random ones.",
+      h5d: "If the wine were a person, what's it like? Elegant, crowd-pleaser, angular, for meditation…", h5p: "5 if you pick the group's most chosen word.", h5t: "At the reveal the wine gets its nickname.",
+      h6d: "Who in the group will give it the highest score? You can pick yourself.", h6p: "5 if you guess (in a tie, everyone counts).", h6t: "Do you know your colleagues' taste better than they do?",
+      h7t_: "Tonight's bet", h7d: "Before the evening closes, bet on the wine that will win it.", h7p: "10 if you pick the winner.", h7t: "Bets stay secret until the end.",
+      h8t_: "The reveal", h8d: "Moves stay secret until everyone has voted, the wine is closed or the organiser taps «Reveal!».", h8p: "Then everyone sees everything: faces on the field, scores and points.", h8t: "You can change your moves until the reveal.",
+      h9t_: "Reactions and jabs", h9d: "After the reveal, leave an emoji or a friendly jab for the others (never for yourself).", h9p: "No points, just satisfaction.", h9t: "«Did you sniff the cork?» is a classic.",
+      h10t_: "Ranking, levels and achievements", h10d: "Points add up over the season and the month: from Apprentice to Legend, with ten achievements to unlock.", h10p: "Streaks 🔥, palate twin and nemesis ⚔️ come by themselves.", h10t: "The podium can go on your website, but only if you decide so.",
+      nv_title: "New in the game!", nv_text: "Three new games for each wine: aroma hunt, the wine in one word and number one fan.", nv_ok: "Got it"
     }
   };
   Object.keys(TXT_GAME).forEach(function (l) { Object.keys(TXT_GAME[l]).forEach(function (k) { if (TXT[l][k] == null) TXT[l][k] = TXT_GAME[l][k]; }); });
@@ -909,6 +953,8 @@
   function gameOn() { return !!(S.circle && S.config && S.config.game); }
   var LEVELS = [0, 40, 100, 200, 350, 600], LV_ICON = ["🍇", "🥂", "🍷", "🎓", "👑", "🏆"];
   var ACH_ICON = { primo: "🍇", cecchino: "🎯", portafoglio: "💶", serie3: "🔥", favorito: "🔮", tris: "🎲", diapason: "🎼", coro: "📣", veterano: "🛡️", re: "👑" };
+  var AR_ICON = { rossi: "🍓", neri: "🫐", agrumi: "🍋", mela: "🍏", pesca: "🍑", tropicale: "🍍", fiori: "🌸", erbe: "🌿", spezie: "🌶️", vaniglia: "🍦", tostato: "☕", miele: "🍯", burro: "🧈", minerale: "🪨", cuoio: "🚬", terra: "🍄" };
+  var PW_ICON = { elegante: "🎩", potente: "💪", allegro: "🎉", timido: "🙈", ruffiano: "😏", austero: "🧐", seducente: "💋", rustico: "🌾", fresco: "🧊", morbido: "☁️", spigoloso: "🔺", meditazione: "🧘" };
   function levelOf(p) { var i = 0; while (i + 1 < LEVELS.length && p >= LEVELS[i + 1]) i++; return i; }
   var gameSeq = 0, lastGame = "";
   function loadGame(tid) {
@@ -932,7 +978,7 @@
   function axesOf(gw) { var a = S.game.axes[gw.axes] || ["corpo", "acidita"]; return { x: a[0], y: a[1] }; }
   function draftOf(wid) {
     var gw = S.game.wines[wid];
-    if (!S.gdraft[wid]) { var m = gw.mine || {}; S.gdraft[wid] = { x: m.x != null ? m.x : null, y: m.y != null ? m.y : null, p: m.p != null ? m.p : null, e: m.e != null ? String(m.e).replace(".", S.lang === "it" ? "," : ".") : "" }; }
+    if (!S.gdraft[wid]) { var m = gw.mine || {}; S.gdraft[wid] = { x: m.x != null ? m.x : null, y: m.y != null ? m.y : null, p: m.p != null ? m.p : null, e: m.e != null ? String(m.e).replace(".", S.lang === "it" ? "," : ".") : "", a: (m.a || []).slice(), wd: m.wd || "", fan: m.fan || "" }; }
     return S.gdraft[wid];
   }
   function ptsText(n) { return n === 1 ? t("g_ptsOne") : t("g_pts", { n: n }); }
@@ -960,13 +1006,32 @@
     if (!gameOn() || !S.game || !S.game.wines[w.id]) return "";
     var g = S.game, gw = g.wines[w.id], ax = axesOf(gw), me = mePk(), busy = !!S.pending["g-" + w.id];
     var h = '<section class="game" aria-labelledby="gt-' + esc(w.id) + '"><div class="g-head"><h4 class="grp" id="gt-' + esc(w.id) + '">' + esc(t("g_title")) + '</h4>' +
-      '<span class="badge' + (gw.revealed ? " open" : "") + '">' + esc(gw.revealed ? t("g_revealed") : t("g_secret")) + '</span></div>';
+      '<span class="badge' + (gw.revealed ? " open" : "") + '">' + esc(gw.revealed ? t("g_revealed") : t("g_secret")) + '</span>' +
+      btn("g-help", "❓ " + t("h_btn"), { cls: "small ghost g-helpbtn", fk: "ghelp-" + w.id }) + '</div>';
     if (!gw.revealed) {
       var d = draftOf(w.id);
-      h += fieldHtml(w.id, ax, [{ who: me, x: d.x, y: d.y, me: true }], null, true) + '<p class="small muted">' + esc(t("g_fieldHint")) + '</p>';
+      var sec = function (n, done) { return '<div class="g-step' + (done ? " done" : "") + '"><span class="g-num" aria-hidden="true">' + (done ? "✓" : n) + '</span><span><b>' + esc(t("g_s" + n)) + '</b><span class="small muted">' + esc(t("g_r" + n)) + '</span></span></div>'; };
+      var nDone = [d.x != null, d.p != null, !!String(d.e || "").trim(), d.a.length > 0, !!d.wd, !!d.fan].filter(Boolean).length;
+      h += '<p class="g-progress small"><span class="g-bar" aria-hidden="true">' + [0, 1, 2, 3, 4, 5].map(function (i) { return '<i' + (i < nDone ? ' class="on"' : "") + '></i>'; }).join("") + '</span>' + esc(t("g_movesDone", { n: nDone })) + '</p>';
+      h += sec(1, d.x != null) + fieldHtml(w.id, ax, [{ who: me, x: d.x, y: d.y, me: true }], null, true) + '<p class="small muted">' + esc(t("g_fieldHint")) + '</p>';
       var pv = d.p != null ? d.p : 68;
-      h += '<label class="f" for="gp-' + esc(w.id) + '">' + esc(t("g_pron")) + '</label><div class="g-pron"><input type="range" min="50" max="100" step="1" id="gp-' + esc(w.id) + '" data-g="p" data-w="' + esc(w.id) + '" data-fk="gp-' + esc(w.id) + '" value="' + pv + '"' + (d.p == null ? ' class="untouched"' : "") + '><output id="gpo-' + esc(w.id) + '">' + (d.p != null ? d.p : "—") + '</output></div>';
-      h += '<label class="f" for="ge-' + esc(w.id) + '">' + esc(t("g_price")) + '</label><input type="text" inputmode="decimal" maxlength="8" id="ge-' + esc(w.id) + '" data-g="e" data-w="' + esc(w.id) + '" data-fk="ge-' + esc(w.id) + '" placeholder="' + esc(t("g_pricePh")) + '" value="' + esc(d.e) + '">';
+      h += sec(2, d.p != null) + '<label class="f" for="gp-' + esc(w.id) + '">' + esc(t("g_pron")) + '</label><div class="g-pron"><input type="range" min="50" max="100" step="1" id="gp-' + esc(w.id) + '" data-g="p" data-w="' + esc(w.id) + '" data-fk="gp-' + esc(w.id) + '" value="' + pv + '"' + (d.p == null ? ' class="untouched"' : "") + '><output id="gpo-' + esc(w.id) + '">' + (d.p != null ? d.p : "—") + '</output></div>';
+      h += sec(3, !!String(d.e || "").trim()) + '<label class="f" for="ge-' + esc(w.id) + '">' + esc(t("g_price")) + '</label><input type="text" inputmode="decimal" maxlength="8" id="ge-' + esc(w.id) + '" data-g="e" data-w="' + esc(w.id) + '" data-fk="ge-' + esc(w.id) + '" placeholder="' + esc(t("g_pricePh")) + '" value="' + esc(d.e) + '">';
+      /* caccia agli aromi: fino a tre */
+      h += sec(4, d.a.length > 0) + '<div class="g-chips g-aromi" role="group" aria-label="' + esc(t("g_s4")) + '">' + (g.aromi || []).map(function (k) {
+        var on = d.a.indexOf(k) > -1, full = !on && d.a.length >= 3;
+        return '<button type="button" class="g-chip' + (on ? " on" : "") + '" data-act="g-aroma" data-w="' + esc(w.id) + '" data-k="' + k + '" aria-pressed="' + on + '"' + (full ? " disabled" : "") + ' data-fk="ga-' + esc(w.id + k) + '"><span aria-hidden="true">' + (AR_ICON[k] || "") + '</span> ' + esc(t("ar_" + k)) + '</button>';
+      }).join("") + '</div><p class="small muted g-count">' + esc(t("g_aromaCount", { n: d.a.length })) + '</p>';
+      /* il vino in una parola */
+      h += sec(5, !!d.wd) + '<div class="g-chips g-parole" role="radiogroup" aria-label="' + esc(t("g_s5")) + '">' + (g.parole || []).map(function (k) {
+        var on = d.wd === k;
+        return '<button type="button" class="g-chip' + (on ? " on" : "") + '" data-act="g-word" data-w="' + esc(w.id) + '" data-k="' + k + '" role="radio" aria-checked="' + on + '" data-fk="gw-' + esc(w.id + k) + '"><span aria-hidden="true">' + (PW_ICON[k] || "") + '</span> ' + esc(t("pw_" + k)) + '</button>';
+      }).join("") + '</div>';
+      /* il fan numero uno: chi darà il voto più alto */
+      h += sec(6, !!d.fan) + '<div class="g-chips g-fans" role="radiogroup" aria-label="' + esc(t("g_s6")) + '">' + Object.keys(g.people).map(function (k) {
+        var on = d.fan === k;
+        return '<button type="button" class="g-chip g-fanb' + (on ? " on" : "") + '" data-act="g-fan" data-w="' + esc(w.id) + '" data-k="' + esc(k) + '" role="radio" aria-checked="' + on + '" data-fk="gfan-' + esc(w.id + k) + '">' + faceHtml(k) + '<span dir="auto">' + esc(personName(k)) + '</span></button>';
+      }).join("") + '</div>';
       if (S.gerr && S.gerr.wine === w.id) h += '<p class="field-error" role="alert">' + esc(S.gerr.text) + '</p>';
       h += '<div class="row">' + btn("g-play", busy ? t("g_playing") : t(gw.mine ? "g_update" : "g_play"), { id: w.id, cls: "primary", disabled: busy || readonly(), fk: "gplay-" + w.id }) + '</div>';
       if (S.saved === "gm-" + w.id) h += '<p class="saved-note">✓ ' + esc(t("g_saved")) + '</p>';
@@ -993,6 +1058,25 @@
     if (gw.avg != null) line.push(t("g_avg", { n: dec(gw.avg) }));
     if (gw.price != null) line.push(t("g_realPriceIs", { p: String(gw.price).replace(".", S.lang === "it" ? "," : ".") }));
     if (line.length) h += '<p class="small"><b>' + esc(line.join(" · ")) + '</b></p>';
+    /* i giochi del gruppo: il naso, la parola, il fan */
+    var groupCards = "";
+    if ((gw.aromas || []).length) {
+      var topN = gw.aromas[0].n;
+      groupCards += '<div class="g-gcard"><span class="g-gk">👃 ' + esc(t("g_noseGroup")) + '</span><div class="g-cloud">' + gw.aromas.slice(0, 8).map(function (x) {
+        return '<span class="g-chip on' + (x.n >= 2 && x.n >= topN ? " top" : "") + '">' + (AR_ICON[x.k] || "") + " " + esc(t("ar_" + x.k)) + ' <b>' + x.n + '</b></span>';
+      }).join("") + '</div></div>';
+    }
+    if ((gw.words || []).length) {
+      var wtop = gw.words[0];
+      groupCards += '<div class="g-gcard"><span class="g-gk">💬 ' + esc(t("g_wordGroup")) + '</span><p class="g-word"><span aria-hidden="true">' + (PW_ICON[wtop.k] || "") + '</span> ' + esc(t("pw_" + wtop.k)) + ' <span class="small muted">(' + wtop.n + ')</span></p>' +
+        (gw.words.length > 1 ? '<p class="small muted">' + gw.words.slice(1, 5).map(function (x) { return (PW_ICON[x.k] || "") + " " + esc(t("pw_" + x.k)) + " " + x.n; }).join(" · ") + '</p>' : "") + '</div>';
+    }
+    if ((gw.fanTop || []).length) {
+      var guessed = res.filter(function (r) { return r.fan && gw.fanTop.indexOf(r.fan) > -1; }).map(function (r) { return r.who; });
+      groupCards += '<div class="g-gcard"><span class="g-gk">💘 ' + esc(t("g_fanGroup")) + '</span><p class="g-fanwin">' + gw.fanTop.map(function (k) { var r = res.filter(function (x) { return x.who === k; })[0]; return faceHtml(k) + ' <b dir="auto">' + esc(personName(k)) + '</b>' + (r && r.vote != null ? ' <span class="chip">' + r.vote + '</span>' : ""); }).join(" ") + '</p>' +
+        '<p class="small">' + esc(guessed.length ? t("g_fanGuess") : t("g_fanNobody")) + (guessed.length ? ' <span class="g-faces">' + guessed.map(function (k) { return '<span class="g-wf on" title="' + esc(personName(k)) + '">' + faceHtml(k) + '</span>'; }).join("") + '</span>' : "") + '</p></div>';
+    }
+    if (groupCards) h += '<div class="g-groups">' + groupCards + '</div>';
     h += '<ol class="g-res">' + res.map(function (r, i) {
       var p = g.people[r.who] || { name: "?" }, mine = !!p.me;
       var nums = [];
@@ -1000,6 +1084,9 @@
       nums.push('<span><em>' + esc(t("g_pronShort")) + '</em><b>' + (r.p != null ? r.p : "—") + '</b>' + (r.pts.pron != null ? '<i>+' + r.pts.pron + '</i>' : "") + '</span>');
       nums.push('<span><em>' + esc(t("g_priceShort")) + '</em><b>' + (r.e != null ? String(r.e).replace(".", S.lang === "it" ? "," : ".") + " €" : "—") + '</b>' + (r.pts.price != null ? '<i>+' + r.pts.price + '</i>' : "") + '</span>');
       nums.push('<span><em>' + esc(t("g_fieldShort")) + '</em><b>' + (r.x != null ? "✓" : "—") + '</b>' + (r.pts.field != null ? '<i>+' + r.pts.field + '</i>' : "") + '</span>');
+      nums.push('<span><em>' + esc(t("g_aromaShort")) + '</em><b>' + (r.a && r.a.length ? r.a.map(function (k) { return AR_ICON[k] || "•"; }).join("") : "—") + '</b>' + (r.pts.aroma != null ? '<i>+' + r.pts.aroma + '</i>' : "") + '</span>');
+      nums.push('<span><em>' + esc(t("g_wordShort")) + '</em><b>' + (r.wd ? (PW_ICON[r.wd] || "") + " " + esc(t("pw_" + r.wd)) : "—") + '</b>' + (r.pts.word != null ? '<i>+' + r.pts.word + '</i>' : "") + '</span>');
+      nums.push('<span><em>' + esc(t("g_fanShort")) + '</em><b dir="auto">' + (r.fan && g.people[r.fan] ? esc(initials(g.people[r.fan].name)) : "—") + '</b>' + (r.pts.fan != null ? '<i>+' + r.pts.fan + '</i>' : "") + '</span>');
       var badges = r.badges.map(function (b) { return '<span class="chip g-badge g-b-' + esc(b) + '">' + esc(t("g_b_" + b)) + '</span>'; }).join("");
       /* reazioni ricevute: emoji raggruppate, frecciatine per esteso con chi le ha mandate */
       var em = {}, fr = [];
@@ -1022,7 +1109,7 @@
   function boardHtml() {
     if (!gameOn()) return "";
     var b = S.board, mode = S.boardMode === "month" ? "month" : "season";
-    var h = '<section class="card g-board"><h3 class="section">🏆 ' + esc(t("g_board")) + '</h3><p class="small muted">' + esc(t("g_boardHint")) + '</p>';
+    var h = helpHtml() + '<section class="card g-board"><div class="row spread"><h3 class="section">🏆 ' + esc(t("g_board")) + '</h3>' + btn("g-help", "❓ " + t("h_btn"), { cls: "small ghost", fk: "ghelp-board" }) + '</div><p class="small muted">' + esc(t("g_boardHint")) + '</p>';
     if (!b) return h + '<p class="muted" aria-busy="true">' + esc(t("loading")) + '</p></section>';
     var any = b.rows.some(function (r) { return r.pts.total > 0 || r.pts.played > 0; });
     if (!any) return h + '<p class="muted">' + esc(t("g_boardEmpty")) + '</p></section>';
@@ -1056,6 +1143,25 @@
       }).join("") + '</ul></div>';
     }
     return h + '</section>';
+  }
+
+  /* «Come si gioca»: una scheda per gioco, con cosa fai, i punti e un trucco */
+  var NOVITA_KEY = "taste-gioco-novita-214";
+  var HELP = [["🗺️", "g_s1", "h1"], ["🎯", "g_s2", "h2"], ["💶", "g_s3", "h3"], ["👃", "g_s4", "h4"], ["💬", "g_s5", "h5"], ["💘", "g_s6", "h6"],
+    ["🔮", "h7t_", "h7"], ["🎉", "h8t_", "h8"], ["😂", "h9t_", "h9"], ["🏆", "h10t_", "h10"]];
+  function helpHtml() {
+    if (!gameOn() || !S.ghelp) return "";
+    return '<section class="card g-help" aria-labelledby="h-help"><div class="row spread"><h3 class="section" id="h-help" tabindex="-1">❓ ' + esc(t("h_title")) + '</h3>' + btn("g-help", t("h_close"), { cls: "small ghost", fk: "ghelp-close" }) + '</div>' +
+      '<p class="small">' + esc(t("h_intro")) + '</p><ol class="g-hcards">' + HELP.map(function (x, i) {
+        return '<li class="g-hcard hc' + (i % 6) + '"><span class="g-hico" aria-hidden="true">' + x[0] + '</span><div><b>' + esc(t(x[1])) + '</b>' +
+          '<p><em>' + esc(t("h_do")) + '</em> ' + esc(t(x[2] + "d")) + '</p><p class="g-hpts"><em>' + esc(t("h_pts")) + '</em> ' + esc(t(x[2] + "p")) + '</p><p class="g-htip">💡 ' + esc(t(x[2] + "t")) + '</p></div></li>';
+      }).join("") + '</ol></section>';
+  }
+  function novitaHtml() {
+    if (!gameOn() || S.novitaOff || S.ghelp) return "";
+    try { if (localStorage.getItem(NOVITA_KEY)) { S.novitaOff = true; return ""; } } catch (e) { /* niente memoria */ }
+    return '<section class="card g-novita" role="status"><span class="g-nvico" aria-hidden="true">🎉</span><div><b>' + esc(t("nv_title")) + '</b><p class="small">' + esc(t("nv_text")) + '</p><div class="row">' +
+      btn("g-help", "❓ " + t("h_btn"), { cls: "small primary", fk: "ghelp-nv" }) + btn("g-novita", t("nv_ok"), { cls: "small ghost", fk: "gnv-ok" }) + '</div></div></section>';
   }
 
   /* la scommessa della serata: prima della chiusura si sceglie il vincitore, dopo si vede chi aveva indovinato */
@@ -1178,10 +1284,10 @@
   function gamePlay(wid) {
     var d = draftOf(wid), e = gNum(d.e);
     if (e != null && !(e >= 0 && e <= 10000)) { S.gerr = { wine: wid, text: t("e_invalid_price") }; return render(); }
-    if (d.x == null && d.p == null && e == null) { S.gerr = { wine: wid, text: t("e_invalid_move") }; return render(); }
+    if (d.x == null && d.p == null && e == null && !d.a.length && !d.wd && !d.fan) { S.gerr = { wine: wid, text: t("e_invalid_move") }; return render(); }
     S.gerr = null;
     return run("g-" + wid, function () {
-      return api({ op: "game.play", tasting: S.tasting.id, wine: wid, x: d.x, y: d.y, p: d.p, e: e }).then(function () {
+      return api({ op: "game.play", tasting: S.tasting.id, wine: wid, x: d.x, y: d.y, p: d.p, e: e, a: d.a, wd: d.wd, fan: d.fan }).then(function () {
         S.saved = "gm-" + wid; announce(t("g_saved")); focusAfter("gplay-" + wid); return loadGame(S.tasting.id);
       }, function (err) { S.gerr = { wine: wid, text: errText(err) }; render(); if (err.code === "revealed") return loadGame(S.tasting.id); });
     });
@@ -1202,6 +1308,15 @@
     var act = b.getAttribute("data-act"), id = b.getAttribute("data-id");
     if (act === "g-play") return gamePlay(id);
     if (act === "g-fav") return gameFav(id);
+    if (act === "g-aroma" || act === "g-word" || act === "g-fan") {
+      var dw = b.getAttribute("data-w"), k = b.getAttribute("data-k"), dd = draftOf(dw);
+      if (act === "g-aroma") { var ix = dd.a.indexOf(k); if (ix > -1) dd.a.splice(ix, 1); else if (dd.a.length < 3) dd.a.push(k); }
+      if (act === "g-word") dd.wd = dd.wd === k ? "" : k;
+      if (act === "g-fan") dd.fan = dd.fan === k ? "" : k;
+      focusAfter(b.getAttribute("data-fk")); return render();
+    }
+    if (act === "g-help") { S.ghelp = !S.ghelp; focusAfter(S.ghelp ? "h-help" : b.getAttribute("data-fk")); return render(); }
+    if (act === "g-novita") { try { localStorage.setItem(NOVITA_KEY, "1"); } catch (err) { /* niente memoria: si riproporrà */ } S.novitaOff = true; return render(); }
     if (act === "g-bmode") { S.boardMode = b.getAttribute("data-v"); focusAfter("gbm-" + S.boardMode); return render(); }
     if (act === "g-price") return gamePrice(id);
     if (act === "g-reveal") { S.gconfirm = id; focusAfter("greveal-" + id); return render(); }

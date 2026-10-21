@@ -36,7 +36,7 @@ const TXT = {
     gOff: "Il podio con i nomi non è attivo: lo accendono il Proprietario o gli amministratori dall'app.", gEmpty: "Il podio compare dopo il primo vino svelato con il gioco.", gFoot: "Punti del gioco sui vini svelati",
     stLast: "Il preferito dell'ultima serata", stAvg: "media",
     sBias: "Il termometro dei pronostici", sBiasUp: "Vi aspettate {n} punti in più di quelli che date davvero", sBiasDown: "Siete più generosi dei vostri pronostici: {n} punti in più", sBiasEven: "Pronostici in perfetta sintonia con i voti",
-    sSurprise: "Il prezzo che vi ha spiazzato", sSurpriseTxt: "Pensavate {g} €, costava {p} €", cEyebrow: "Il campo dell'ultimo vino", cAvg: "Media del gruppo", cCenter: "il centro del gruppo", cEmpty: "Il campo compare dopo il primo vino svelato con almeno due facce.",
+    sNose: "Il naso del gruppo", sWord: "La parola del team", sSurprise: "Il prezzo che vi ha spiazzato", sSurpriseTxt: "Pensavate {g} €, costava {p} €", cEyebrow: "Il campo dell'ultimo vino", cAvg: "Media del gruppo", cCenter: "il centro del gruppo", cEmpty: "Il campo compare dopo il primo vino svelato con almeno due facce.",
     cFoot: "Le facce del gioco sul campo", aTitle: "I premi della stagione", tTwins: "Gemelli di palato",
     a_pron: "Re del pronostico", a_price: "Naso per i prezzi", a_field: "Bussola d'oro", a_fuori: "Fuori dal coro", a_sintonia: "Sempre in sintonia", a_played: "Instancabile",
     u_pron: "{n} punti di pronostico", u_price: "{n} punti sui prezzi", u_field: "{n} punti sul campo", u_fuori: "{n} volte il più lontano", u_sintonia: "{n} volte il più vicino", u_played: "{n} vini giocati",
@@ -62,7 +62,7 @@ const TXT = {
     gOff: "The podium with names is off: the Owner or the admins turn it on from the app.", gEmpty: "The podium appears after the first wine revealed with the game.", gFoot: "Game points on revealed wines",
     stLast: "Favourite of the last evening", stAvg: "avg",
     sBias: "Prediction thermometer", sBiasUp: "You expect {n} points more than you actually give", sBiasDown: "You're more generous than your predictions: {n} points more", sBiasEven: "Predictions perfectly in tune with the scores",
-    sSurprise: "The price that caught you out", sSurpriseTxt: "You guessed €{g}, it cost €{p}", cEyebrow: "The last wine's field", cAvg: "Group average", cCenter: "the group's centre", cEmpty: "The field appears after the first wine revealed with at least two faces.",
+    sNose: "The group's nose", sWord: "The team's word", sSurprise: "The price that caught you out", sSurpriseTxt: "You guessed €{g}, it cost €{p}", cEyebrow: "The last wine's field", cAvg: "Group average", cCenter: "the group's centre", cEmpty: "The field appears after the first wine revealed with at least two faces.",
     cFoot: "The game's faces on the field", aTitle: "Season awards", tTwins: "Palate twins",
     a_pron: "Prediction king", a_price: "Nose for prices", a_field: "Golden compass", a_fuori: "Odd one out", a_sintonia: "Always in tune", a_played: "Tireless",
     u_pron: "{n} prediction points", u_price: "{n} price points", u_field: "{n} field points", u_fuori: "farthest {n} times", u_sintonia: "closest {n} times", u_played: "{n} wines played",
@@ -150,7 +150,7 @@ footer a{color:inherit;font-weight:650;text-decoration:none;border-bottom:1px so
 .list2 li{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:2px 10px;align-items:center;padding:7px 0;border-bottom:1px solid var(--line)}
 .list2 li:last-child{border-bottom:0}.list2 b{font-weight:650;overflow-wrap:anywhere}.list2 em{font-style:normal;color:var(--muted);font-size:12px}
 .list2 .bar{grid-column:1 / 3;height:5px;border-radius:5px;background:var(--track);overflow:hidden}.list2 .bar i{display:block;height:100%;border-radius:5px;background:var(--accent)}
-.chips{display:flex;flex-wrap:wrap;gap:6px}.chips span{display:inline-flex;gap:6px;align-items:baseline;padding:5px 10px;border-radius:999px;background:var(--card);border:1px solid var(--line);font-size:13px;font-weight:620}
+.chips{display:flex;flex-wrap:wrap;gap:6px}.card .chips{margin-top:6px}.chips span{display:inline-flex;gap:6px;align-items:baseline;padding:5px 10px;border-radius:999px;background:var(--card);border:1px solid var(--line);font-size:13px;font-weight:620}
 .chips em{font-style:normal;color:var(--muted);font-weight:500;font-size:12px}
 .hint{font-size:12.5px;color:var(--muted);margin:2px 0 0}
 .card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:12px 14px;margin-bottom:8px}
@@ -258,6 +258,10 @@ function render(o, circle, st, widths) {
 }
 
 const AX = Game.AXES;
+const AR = { it: { rossi: "🍓 Frutti rossi", neri: "🫐 Frutti neri", agrumi: "🍋 Agrumi", mela: "🍏 Mela e pera", pesca: "🍑 Pesca e albicocca", tropicale: "🍍 Tropicale", fiori: "🌸 Fiori", erbe: "🌿 Erbe", spezie: "🌶️ Spezie", vaniglia: "🍦 Vaniglia", tostato: "☕ Tostato", miele: "🍯 Miele", burro: "🧈 Burro", minerale: "🪨 Minerale", cuoio: "🚬 Cuoio e tabacco", terra: "🍄 Terra e sottobosco" },
+  en: { rossi: "🍓 Red fruit", neri: "🫐 Black fruit", agrumi: "🍋 Citrus", mela: "🍏 Apple & pear", pesca: "🍑 Peach & apricot", tropicale: "🍍 Tropical", fiori: "🌸 Flowers", erbe: "🌿 Herbs", spezie: "🌶️ Spice", vaniglia: "🍦 Vanilla", tostato: "☕ Toasty", miele: "🍯 Honey", burro: "🧈 Butter", minerale: "🪨 Mineral", cuoio: "🚬 Leather & tobacco", terra: "🍄 Earth & undergrowth" } };
+const PW = { it: { elegante: "🎩 Elegante", potente: "💪 Potente", allegro: "🎉 Allegro", timido: "🙈 Timido", ruffiano: "😏 Ruffiano", austero: "🧐 Austero", seducente: "💋 Seducente", rustico: "🌾 Rustico", fresco: "🧊 Fresco", morbido: "☁️ Morbido", spigoloso: "🔺 Spigoloso", meditazione: "🧘 Da meditazione" },
+  en: { elegante: "🎩 Elegant", potente: "💪 Powerful", allegro: "🎉 Cheerful", timido: "🙈 Shy", ruffiano: "😏 Crowd-pleaser", austero: "🧐 Austere", seducente: "💋 Seductive", rustico: "🌾 Rustic", fresco: "🧊 Fresh", morbido: "☁️ Soft", spigoloso: "🔺 Angular", meditazione: "🧘 For meditation" } };
 const pos10 = v => Math.max(0, Math.min(100, Math.round(Number(v) * 10)));
 const header = (L, eb, circle) => '<header><p class="eb">Taste · ' + esc(TXT[L][eb]) + '</p><h1 dir="auto">' + esc(circle.name) + "</h1></header>";
 const empty = msg => '<p class="empty">' + esc(msg) + "</p>";
@@ -334,6 +338,8 @@ function renderSfida(o, circle, g, cls) {
     const n = num(Math.abs(g.bias), L), txt = Math.abs(g.bias) < 1 ? T.sBiasEven : g.bias > 0 ? tf(L, "sBiasUp", { n }) : tf(L, "sBiasDown", { n });
     right += '<div class="card"><span class="k">' + esc(T.sBias) + '</span><b class="n">' + esc(txt) + "</b></div>";
   }
+  if ((g.aromas || []).length) right += '<div class="card"><span class="k">' + esc(T.sNose) + '</span><div class="chips sec0">' + g.aromas.map(x => "<span>" + esc(AR[L][x.k] || x.k) + " <em>" + x.n + "</em></span>").join("") + "</div></div>";
+  if ((g.words || []).length) right += '<div class="card"><span class="k">' + esc(T.sWord) + '</span><b class="n">' + esc(PW[L][g.words[0].k] || g.words[0].k) + '</b><span class="s">' + esc(g.words.slice(1).map(x => (PW[L][x.k] || x.k) + " " + x.n).join(" · ")) + "</span></div>";
   if (g.surprise) right += '<div class="card"><span class="k">' + esc(T.sSurprise) + '</span><b class="n" dir="auto">' + esc(g.surprise.name || g.surprise.tastingName) + '</b><span class="s">' + esc(tf(L, "sSurpriseTxt", { g: g.surprise.guess, p: g.surprise.price })) + "</span></div>";
   const sc = (x, k) => '<div class="card"><span class="k">' + esc(T[k]) + '</span><b class="n" dir="auto">' + esc(x.name || x.tastingName) + '</b><span class="s" dir="auto">' + esc([x.producer, tf(L, "sPlayers", { n: x.players })].filter(Boolean).join(" · ")) + "</span></div>";
   if (g.split) right += sc(g.split, "sSplit");

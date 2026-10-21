@@ -150,8 +150,23 @@ function build() {
     </div>
   `));
 
+  P.push(pg("ink", "I giochi", `
+    ${eyebrow("12", "I giochi, uno per uno")}
+    <h1 class="d">Sei giochi per vino, <em>una scommessa</em></h1>
+    <p class="lead">Ognuno fa solo quelli che vuole; nella serata il pulsante <b>❓ Come si gioca</b> li spiega con un esempio.</p>
+    ${table(["Gioco", "Cosa fai", "Punti"], [
+      ["🗺️ <b>Il campo</b>", "Trascini la tua faccia su due assi che cambiano a ogni vino.", "Fino a 10, vicino al centro del gruppo"],
+      ["🎯 <b>Il pronostico</b>", "Indovini la media del gruppo (50–100).", "10 se la centri, −1 per punto"],
+      ["💶 <b>Quanto costa?</b>", "Scrivi il prezzo della bottiglia.", "Fino a 10, in proporzione"],
+      ["👃 <b>Caccia agli aromi</b>", "Scegli fino a 3 profumi su 16.", "3 per aroma tra i preferiti del gruppo"],
+      ["💬 <b>Il vino in una parola</b>", "Elegante, ruffiano, spigoloso, da meditazione…", "5 se è la parola più scelta"],
+      ["💘 <b>Il fan numero uno</b>", "Chi gli darà il voto più alto?", "5 se indovini"],
+      ["🔮 <b>La scommessa della serata</b>", "Chi vince la serata? Segreta fino alla chiusura.", "10 se indovini"]], [0, 1, 2])}
+    ${ul(["<b>Svelamento</b>: quando hanno votato tutti, si chiude il vino o con «Svela!». Poi tutti vedono tutto, con reazioni e frecciatine.", "<b>Classifica</b> della stagione e del mese, livelli da Apprendista a Leggenda, dieci traguardi, serie 🔥, gemello di palato e nemesi ⚔️."])}
+  `));
+
   P.push(pg("paper", "Per cominciare", `
-    ${eyebrow("12", "Per cominciare")}
+    ${eyebrow("13", "Per cominciare")}
     <h1 class="d">In pratica, <em>tre passi</em></h1>
     ${ul(["Gli <b>eventi</b> della versione precedente restano consultabili in fondo a Cerchie; i nuovi si fanno come serate."])}
     ${check(["Apro Cerchie e creo la mia prima cerchia.", "Invito le persone con le loro mail e, se serve, mando il link.", "Nomino un amministratore di fiducia.", "Creo la prima serata (o «Un solo vino») e faccio votare tutti.", "Se il club ha un sito, ci incollo il widget."])}
