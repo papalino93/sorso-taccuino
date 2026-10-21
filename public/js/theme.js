@@ -13,10 +13,12 @@
   var HEX_RE = /^#[0-9a-fA-F]{6}$/;
   var NERO = [0, 0, 0], BIANCO = [255, 255, 255];
 
-  /* ---- predefiniti: «Inchiostro» (scelto l'11 ottobre 2026) ----
-     chiaro: pietra e blu inchiostro; scuro: ardesia e lo stesso blu schiarito
-     (il blu profondo, sul fondo scuro, non si leggerebbe nei testi piccoli). */
+  /* ---- predefiniti: «Lavanda» (restyling 2.8.0, ottobre 2026) ----
+     chiaro: perla calda con schede bianche e lavanda profonda; scuro: antracite e la stessa lavanda
+     schiarita (quella profonda, sul fondo scuro, non si leggerebbe nei testi piccoli).
+     Inchiostro (il predefinito di prima) resta tra i colori proposti. */
   var ACCENTS = [
+    { id: "lavanda", hex: "#5b4bd5" },
     { id: "inchiostro", hex: "#2b4c7e" },
     { id: "vinaccia", hex: "#8c1d3f" },
     { id: "uva", hex: "#5b2eff" },
@@ -27,16 +29,16 @@
     { id: "grafite", hex: "#2b2b33" }
   ];
   var BG_LIGHT = [
-    { id: "pietra", hex: "#f6f6f3" }, { id: "crema", hex: "#fbf4e6" }, { id: "carta", hex: "#fafaf7" }, { id: "bianco", hex: "#ffffff" },
+    { id: "perla", hex: "#f4f3ef" }, { id: "pietra", hex: "#f6f6f3" }, { id: "crema", hex: "#fbf4e6" }, { id: "carta", hex: "#fafaf7" }, { id: "bianco", hex: "#ffffff" },
     { id: "salvia", hex: "#f2f6f1" }, { id: "nebbia", hex: "#f1f4f9" }
   ];
   var BG_DARK = [
-    { id: "ardesia", hex: "#121418" }, { id: "cantina", hex: "#0f080b" }, { id: "nero", hex: "#08080b" }, { id: "grafite", hex: "#17181c" },
+    { id: "antracite", hex: "#131218" }, { id: "ardesia", hex: "#121418" }, { id: "cantina", hex: "#0f080b" }, { id: "nero", hex: "#08080b" }, { id: "grafite", hex: "#17181c" },
     { id: "notte", hex: "#0b1020" }, { id: "bosco", hex: "#0e1512" }
   ];
-  var DEFAULT_ACCENT = "#2b4c7e";
-  /* l'accento predefinito, sul fondo scuro: lo stesso blu, schiarito quanto basta (è quello delle proposte) */
-  var DEFAULT_ACCENT_DARK = "#597299";
+  var DEFAULT_ACCENT = "#5b4bd5";
+  /* l'accento predefinito, sul fondo scuro: la stessa lavanda, schiarita quanto basta */
+  var DEFAULT_ACCENT_DARK = "#9a8cff";
 
   /* ---- colori ---- */
   function hex2rgb(h) { return [1, 3, 5].map(function (i) { return parseInt(h.slice(i, i + 2), 16); }); }
@@ -79,9 +81,10 @@
     /* nel buio le schede prendono un velo del colore d'accento, così il fondo non è un grigio piatto */
     var acc0 = hex2rgb(accentChosen ? opt.accent : (dark ? DEFAULT_ACCENT_DARK : DEFAULT_ACCENT));
     var velo = dark ? mix(ink, acc0, 0.3) : ink;
-    var card = mix(bg, velo, dark ? 0.08 : 0.05);
-    var cardAlt = mix(bg, velo, dark ? 0.13 : 0.09);
-    var field = dark ? cardAlt : mix(bg, BIANCO, 0.7);
+    /* di giorno le schede sono bianche sul fondo caldo (si staccano con un bordo sottile), di notte un grigio appena più chiaro del fondo */
+    var card = dark ? mix(bg, velo, 0.08) : mix(bg, BIANCO, 0.92);
+    var cardAlt = dark ? mix(bg, velo, 0.13) : mix(bg, ink, 0.045);
+    var field = dark ? cardAlt : BIANCO;
     var line = mix(bg, ink, 0.14);
     var lineSoft = mix(bg, ink, 0.1);
     var lineStrong = garantisci(mix(bg, ink, 0.5), bg, ink, 3.1);       // bordi dei campi (WCAG 1.4.11)
@@ -93,6 +96,8 @@
     fill = garantisci(fill, card, ink, 3.1);
     if (!same(fill, acc)) adjusted = true;
     var onFill = polo(fill);
+    /* testo scuro sul riempimento chiaro: il nero puro stona, si usa il fondo scuro se basta il contrasto */
+    if (same(onFill, NERO) && dark && contrast(bg, fill) >= 4.5) onFill = bg;
     /* testo colorato: leggibile sulle schede e sullo sfondo */
     var text = garantisci(fill, card, ink, 4.6);
     text = garantisci(text, bg, ink, 4.6);
@@ -111,7 +116,9 @@
       "--ink": rgb2hex(ink), "--ink-2": rgb2hex(ink2), "--ink-3": rgb2hex(ink3), "--ink-4": rgb2hex(ink4),
       "--sel-bg": rgb2hex(fill), "--sel-fg": rgb2hex(onFill), "--accent": rgb2hex(fill), "--accent-text": rgb2hex(text),
       "--gold": rgb2hex(text), "--head-gold": rgb2hex(fill),
-      "--head-bg": rgb2hex(bg), "--head-fg": rgb2hex(ink), "--head-dim": rgb2hex(ink3),
+      "--head-bg": rgb2hex(dark ? card : mix(bg, BIANCO, 0.92)), "--head-fg": rgb2hex(ink), "--head-dim": rgb2hex(ink3),
+      "--accent-tint": rgb2hex(mix(dark ? card : mix(bg, BIANCO, 0.92), fill, dark ? 0.13 : 0.11)),
+      "--accent-soft": "rgba(" + fill.join(",") + (dark ? ",.16)" : ",.10)"), "--accent-line": "rgba(" + fill.join(",") + (dark ? ",.55)" : ",.45)"),
       "--head-line": "rgba(" + ink.join(",") + ",.16)",
       "--bar": "rgba(" + bg.join(",") + ",.94)", "--chip": rgb2hex(cardAlt),
       "--desk-wine": "rgba(" + glow + (dark ? ",.10)" : ",.07)"), "--desk-gold": "rgba(" + glow + (dark ? ",.06)" : ",.05)"),

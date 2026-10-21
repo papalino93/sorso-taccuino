@@ -1,6 +1,6 @@
 # Sorso — Taccuino di degustazione
 
-Versione corrente: **2.7.2** — ultimo aggiornamento: 21 ottobre 2026 (cronologia in `CHANGELOG.md`). La versione e la data si leggono anche in fondo all'app e dello spazio di team.
+Versione corrente: **2.8.0** — ultimo aggiornamento: 21 ottobre 2026 (cronologia in `CHANGELOG.md`). La versione e la data si leggono anche in fondo all'app e dello spazio di team.
 
 App per registrare degustazioni di vino con scheda di valutazione, statistiche personali, degustazioni alla cieca ed eventi condivisi.
 
@@ -82,6 +82,10 @@ Dopo la lettura Sorso cerca il vino a strati e si ferma alla prima fonte sicura:
 - **Catalogo Sorso** (`api/catalog.js`, `api/_catalog.js`): quando chi ha fatto l'accesso salva una degustazione nuova con nome e produttore, vanno al catalogo solo i dati del vino (nome, produttore, denominazione, tipologia, vitigni, annate, codice a barre); chi conferma è un'impronta anonima. Un vino serve solo a chi l'ha inserito finché non lo conferma una seconda persona; varianti dello stesso vino si uniscono a somiglianza; con due segnalazioni di persone diverse la voce sparisce. Si disattiva in Impostazioni → Catalogo Sorso. Ricerca anche senza accesso, 30 richieste al minuto per indirizzo IP; l'indice resta in memoria un minuto (la ricerca costa pochi comandi Redis).
 - **Codice a barre** (`public/js/barcode.js`): letto nel browser con BarcodeDetector dove c'è (Chrome su Android), altrimenti con [ZXing](https://github.com/zxing-js/library) (Apache 2.0, da jsDelivr, solo quando serve); oppure scritto a mano. Si cerca prima nel catalogo Sorso, poi su [Open Food Facts](https://world.openfoodfacts.org) (dati con licenza ODbL, citata nell'app), con la risposta in memoria per 30 giorni (3 se non trovato). Una scheda che non è di un vino viene scartata.
 - Prove: `test/catalog.test.js` e `test/e2e/riconosci.e2e.js` (Taccuino, catalogo, codice scritto e fotografato, contributo al salvataggio).
+
+## Aspetto (2.8.0)
+
+Il sistema visivo è uno solo: i colori li calcola `public/js/theme.js` da un accento e da uno sfondo (predefiniti: lavanda `#5b4bd5` su perla `#f4f3ef` di giorno, lavanda `#9a8cff` su antracite `#131218` di notte), con il contrasto garantito; `node scripts/theme-css.js` li scrive in `index.html` così la pagina nasce già colorata. Sopra ci sono i token di forma (angoli `--r-*`, ombre `--shadow-*`, stati `--ok`/`--warn`/`--bad`, `--accent-soft`/`--accent-tint` per le scelte attive) nel blocco «SORSO 3» di `index.html`. Logo: `public/favicon.svg` (icona) e `public/logo-mark.svg` (simbolo su fondo chiaro); nella barra il simbolo è disegnato in linea e prende i colori del tema.
 
 ## Guida all'uso
 

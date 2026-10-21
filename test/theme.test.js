@@ -6,10 +6,10 @@ const C = (a, b) => Theme.contrast(hex(a), hex(b));
 function rnd(seed) { let s = seed; return () => (s = (s * 1664525 + 1013904223) % 4294967296) / 4294967296; }
 const color = r => "#" + [0, 0, 0].map(() => Math.floor(r() * 256).toString(16).padStart(2, "0")).join("");
 
-test("nessuna scelta: tavolozza predefinita «Inchiostro», leggibile in entrambi i temi", () => {
+test("nessuna scelta: tavolozza predefinita «Lavanda», leggibile in entrambi i temi", () => {
   const l = Theme.derive({ dark: false }), d = Theme.derive({ dark: true });
-  assert.equal(l.vars["--accent"], "#2b4c7e"); assert.equal(l.vars["--panel"], "#f6f6f3");
-  assert.equal(d.vars["--accent"], "#597299"); assert.equal(d.vars["--panel"], "#121418");
+  assert.equal(l.vars["--accent"], "#5b4bd5"); assert.equal(l.vars["--panel"], "#f4f3ef");
+  assert.equal(d.vars["--accent"], "#9a8cff"); assert.equal(d.vars["--panel"], "#131218");
   for (const x of [l, d]) {
     assert.equal(x.adjusted, false, "i predefiniti non vanno corretti");
     assert.ok(C(x.vars["--sel-fg"], x.vars["--sel-bg"]) >= 4.5, "testo sul pulsante pieno");
@@ -17,7 +17,7 @@ test("nessuna scelta: tavolozza predefinita «Inchiostro», leggibile in entramb
     assert.ok(C(x.vars["--accent"], x.vars["--panel"]) >= 3.2, "riempimento sullo sfondo");
   }
   assert.deepEqual(Theme.derive({ dark: false, accent: "rosso", bg: "x" }).vars, l.vars, "valori non validi ignorati");
-  assert.deepEqual(Theme.derive({ dark: true, accent: Theme.DEFAULT_ACCENT, bg: "#121418" }).vars, d.vars);
+  assert.deepEqual(Theme.derive({ dark: true, accent: Theme.DEFAULT_ACCENT, bg: "#131218" }).vars, d.vars);
 });
 test("i colori predefiniti scritti in index.html sono quelli di theme.js", () => {
   const r = require("node:child_process").spawnSync(process.execPath, [require("node:path").join(__dirname, "..", "scripts", "theme-css.js"), "--check"], { encoding: "utf8" });
@@ -60,4 +60,10 @@ test("un giallo su bianco viene scurito e segnalato; un viola già adatto no", (
 test("sanitize tiene solo valori validi", () => {
   assert.deepEqual(Theme.sanitize({ accent: "#ABCDEF", bgLight: "red", bgDark: "#112233", x: 1 }), { accent: "#abcdef", bgDark: "#112233" });
   assert.deepEqual(Theme.sanitize(null), {});
+});
+test("voce attiva (tinta d'accento): il testo colorato si legge per ogni colore proposto, chiaro e scuro", () => {
+  for (const a of Theme.ACCENTS) for (const dark of [false, true]) {
+    const v = Theme.derive({ dark, accent: a.hex }).vars;
+    assert.ok(C(v["--accent-text"], v["--accent-tint"]) >= 4.5, a.id + (dark ? " scuro" : " chiaro"));
+  }
 });
