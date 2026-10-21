@@ -66,7 +66,7 @@ const ok = (c, m) => { console.log((c ? "OK   " : "FAIL ") + m); if (!c) fails++
   ok(await m1.frame.locator('[data-act="new-wine"]').count() === 0, "il partecipante non può aggiungere vini");
   ok((await m1.frame.locator(".wine").first().textContent()).includes("Vota questo vino per vedere la media"), "prima di votare la media è nascosta");
   await m1.frame.locator('[data-act="vote"]').first().click();
-  ok(await m1.frame.locator("#sh-score").textContent() === "70", "voto rapido: anteprima 70 a 70/70/70");
+  ok(await m1.frame.locator("#sh-score").textContent() === "68", "voto rapido: si parte da 68, come la scheda completa");
   ok(await m1.frame.locator('[data-act="save-vote"]').isDisabled(), "il voto non si salva finché i cursori non sono stati toccati");
   await m1.frame.locator("#sm-occhio").fill("80"); await m1.frame.locator("#sm-naso").fill("90"); await m1.frame.locator("#sm-bocca").fill("70");
   ok(await m1.frame.locator("#sh-score").textContent() === "77", "voto rapido: 80/90/70 = 77 (come sul server)");

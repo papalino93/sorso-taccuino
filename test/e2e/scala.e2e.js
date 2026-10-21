@@ -71,7 +71,7 @@ const seed = {
   await page.click('button[data-modalita="smart"]');
   ok((await page.textContent("#segs .seg-label >> nth=0")) === "Occhio", "smart: etichette Occhio/Naso/Bocca");
   ok(!(await page.locator('#segs [data-goto="fin"]').isVisible()), "smart: quarta barra nascosta");
-  ok((await page.textContent("#ringNum")) === "70", "smart: default 70/70/70 = 70");
+  ok((await page.textContent("#ringNum")) === "68", "smart: si parte da 68, come la scheda completa");
   for (const [k, v] of [["occhio",80],["naso",90],["bocca",70]]) {
     await page.locator('input[data-smart-range="'+k+'"]').fill(String(v));
   }

@@ -3,6 +3,9 @@
 La versione e la data dell'ultimo aggiornamento sono mostrate in fondo all'app e dello spazio di team
 (fonte: `public/js/version.js`, da tenere uguale a `package.json`).
 
+## 2.7.2 — 21 ottobre 2026
+- **Voti di partenza uguali**: il Voto rapido ora parte da 68, come la Scheda completa (tutti i giudizi a 6/10), nell'app e nelle serate delle cerchie. Cambia solo il punto di partenza dei cursori, non il calcolo del punteggio.
+
 ## 2.7.1 — 12 ottobre 2026
 - Widget in inglese: anche il link in fondo è tradotto («Sorso · tasting notebook»).
 
