@@ -1184,6 +1184,7 @@
       var st = dark ? { "--ok": "#5fd38d", "--warn": "#f0b95a", "--danger": "#ff8a80" } : { "--ok": "#0e7a3e", "--warn": "#8a5a00", "--danger": "#b3261e" };
       Object.keys(st).forEach(function (k) { de.style.setProperty(k, st[k]); });
       de.style.colorScheme = dark ? "dark" : "light";
+      de.setAttribute("data-scheme", dark ? "dark" : "light");
       de.setAttribute("data-host", "app");
     } catch (e) { /* senza i colori dell'app restano quelli predefiniti */ }
   }

@@ -3,6 +3,10 @@
 La versione e la data dell'ultimo aggiornamento sono mostrate in fondo all'app e dello spazio di team
 (fonte: `public/js/version.js`, da tenere uguale a `package.json`).
 
+## 2.9.0 — 21 ottobre 2026
+- **Logo definitivo**: niente punto e sorriso un po' più basso; nella scritta «SORSO» le due O sono il cerchio che sorride (in alto, nell'accesso e nell'anteprima del nome). Nuove favicon e icone dell'app.
+- **Nuovo aspetto, tappa 2**: le serate delle cerchie e lo spazio di team nei siti dei partner (riquadri bianchi con bordo sottile, pulsanti e segmenti come nell'app; colori predefiniti lavanda su perla, antracite di notte; i partner con i propri colori li tengono), il widget per i siti (riquadri con bordo) e la mail degli inviti (testata «SORSO», riquadro bianco, pulsante lavanda).
+
 ## 2.8.0 — 21 ottobre 2026
 - **Nuovo aspetto, tappa 1 (app personale).** Colori nuovi: di giorno fondo perla caldo con schede bianche, di notte antracite con riquadri grigio scuro; accento **lavanda** al posto del blu inchiostro (che resta tra i colori proposti, insieme a una nuova voce «Perla» e «Antracite» tra gli sfondi). Verde, giallo e rosso solo per gli stati. Chi aveva scelto un colore lo tiene.
 - **Nuovo logo**: la O di «SORSO» diventa un cerchio che sorride, con un punto in alto a destra (l'occhiolino del sorso). Nuove icone dell'app, favicon e manifest.

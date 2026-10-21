@@ -1,6 +1,6 @@
 # Sorso — Taccuino di degustazione
 
-Versione corrente: **2.8.0** — ultimo aggiornamento: 21 ottobre 2026 (cronologia in `CHANGELOG.md`). La versione e la data si leggono anche in fondo all'app e dello spazio di team.
+Versione corrente: **2.9.0** — ultimo aggiornamento: 21 ottobre 2026 (cronologia in `CHANGELOG.md`). La versione e la data si leggono anche in fondo all'app e dello spazio di team.
 
 App per registrare degustazioni di vino con scheda di valutazione, statistiche personali, degustazioni alla cieca ed eventi condivisi.
 
@@ -85,7 +85,7 @@ Dopo la lettura Sorso cerca il vino a strati e si ferma alla prima fonte sicura:
 
 ## Aspetto (2.8.0)
 
-Il sistema visivo è uno solo: i colori li calcola `public/js/theme.js` da un accento e da uno sfondo (predefiniti: lavanda `#5b4bd5` su perla `#f4f3ef` di giorno, lavanda `#9a8cff` su antracite `#131218` di notte), con il contrasto garantito; `node scripts/theme-css.js` li scrive in `index.html` così la pagina nasce già colorata. Sopra ci sono i token di forma (angoli `--r-*`, ombre `--shadow-*`, stati `--ok`/`--warn`/`--bad`, `--accent-soft`/`--accent-tint` per le scelte attive) nel blocco «SORSO 3» di `index.html`. Logo: `public/favicon.svg` (icona) e `public/logo-mark.svg` (simbolo su fondo chiaro); nella barra il simbolo è disegnato in linea e prende i colori del tema.
+Il sistema visivo è uno solo: i colori li calcola `public/js/theme.js` da un accento e da uno sfondo (predefiniti: lavanda `#5b4bd5` su perla `#f4f3ef` di giorno, lavanda `#9a8cff` su antracite `#131218` di notte), con il contrasto garantito; `node scripts/theme-css.js` li scrive in `index.html` così la pagina nasce già colorata. Sopra ci sono i token di forma (angoli `--r-*`, ombre `--shadow-*`, stati `--ok`/`--warn`/`--bad`, `--accent-soft`/`--accent-tint` per le scelte attive) nel blocco «SORSO 3» di `index.html`. Logo: un cerchio che sorride. Nella scritta «SORSO» le due O sono il cerchio che sorride (`wordmarkHTML` in `index.html`: la parola resta testo vero, i lettori di schermo leggono «Sorso»; un nome scelto dall'utente si scrive com'è); `public/favicon.svg` è l'icona, `public/logo-mark.svg` il simbolo su fondo chiaro. Lo spazio di team (`public/embed.css`), il widget e la mail degli inviti usano gli stessi colori e la stessa forma.
 
 ## Guida all'uso
 

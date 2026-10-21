@@ -48,9 +48,9 @@ const mix = (a, b, t) => a.map((v, i) => Math.round(v * (1 - t) + b[i] * t));   
 /* nero e bianco puri: per qualunque colore, il migliore dei due dà almeno 4,58:1 (con un nero
    appena più chiaro i colori di luminosità media restavano sotto 4,5) */
 const NERO = [0, 0, 0], BIANCO = [255, 255, 255];
-const BG_CHIARO = hex2rgb("#fbfaf8"), BG_SCURO = hex2rgb("#161418");
-const INK_CHIARO = hex2rgb("#1b1b1f"), INK_SCURO = hex2rgb("#f3efe9");
-const ACCENT_BASE = hex2rgb("#7a1228");
+const BG_CHIARO = hex2rgb("#f4f3ef"), BG_SCURO = hex2rgb("#131218");
+const INK_CHIARO = hex2rgb("#0b0b10"), INK_SCURO = hex2rgb("#f6f6f3");
+const ACCENT_BASE = hex2rgb("#5b4bd5");
 
 /* Avvicina `c` a `verso` finché il contrasto con `su` raggiunge `minimo`. */
 function garantisci(c, su, verso, minimo) {
@@ -90,7 +90,7 @@ function resolveTheme(theme) {
   }
   if (contrast(ink, surface) < 4.5) { ink = polo(surface); surface = mix(bg, ink, 0.06); }
   let accent = t.accent ? hex2rgb(t.accent) : ACCENT_BASE;
-  if (!t.accent && contrast(accent, bg) < 3) accent = scuro ? hex2rgb("#e0526b") : ACCENT_BASE;
+  if (!t.accent && contrast(accent, bg) < 3) accent = scuro ? hex2rgb("#9a8cff") : ACCENT_BASE;
   accent = garantisci(accent, bg, ink, 3);
   accent = garantisci(accent, surface, ink, 3.2);      // anche sui riquadri, dove sta la media del team e dove si vede il focus
   const onAccent = contrast(BIANCO, accent) >= contrast(NERO, accent) ? BIANCO : NERO;

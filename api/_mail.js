@@ -60,12 +60,14 @@ function inviteMail({ to, circleName, byName, role, link, days }) {
     "Per entrare apri questo link e accedi con Google usando questo indirizzo mail (" + to + "):\n" + link + "\n\n" +
     "L'invito vale " + days + " giorni e si usa una volta sola.\n\n" +
     "Non conosci questa persona o non te lo aspettavi? Ignora questo messaggio: non succede niente se non apri il link.";
-  const html = '<div style="font-family:Arial,Helvetica,sans-serif;font-size:15px;line-height:1.5;color:#1a1a1a;max-width:520px">' +
+  /* stile 2.9.0: testata con la scritta, riquadro bianco su perla, pulsante lavanda (solo stili in linea: le caselle di posta tolgono il resto) */
+  const html = '<div style="background:#f4f3ef;padding:24px 12px;font-family:Arial,Helvetica,sans-serif"><div style="font-size:15px;line-height:1.5;color:#0b0b10;max-width:520px;margin:0 auto;background:#ffffff;border:1px solid #d9d8d4;border-radius:14px;padding:22px 24px">' +
+    '<p style="margin:0 0 4px;font-size:18px;font-weight:bold;letter-spacing:4px;color:#0b0b10">SORSO</p><p style="margin:0 0 18px;font-size:10px;letter-spacing:3px;color:#515153">TACCUINO DI DEGUSTAZIONE</p>' +
     "<p><b>" + esc(by) + "</b> ti ha invitato nella cerchia <b>«" + esc(circle) + "»</b> su Sorso, il taccuino di degustazione, come " + esc(ruolo) + ".</p>" +
-    '<p><a href="' + esc(link) + '" style="display:inline-block;background:#2b4c7e;color:#ffffff;text-decoration:none;padding:12px 20px;border-radius:999px;font-weight:bold">Apri l\'invito</a></p>' +
+    '<p><a href="' + esc(link) + '" style="display:inline-block;background:#5b4bd5;color:#ffffff;text-decoration:none;padding:12px 22px;border-radius:10px;font-weight:bold">Apri l\'invito</a></p>' +
     "<p>Accedi con Google usando questo indirizzo mail (" + esc(to) + "). L'invito vale " + days + " giorni e si usa una volta sola.</p>" +
     '<p style="color:#666;font-size:13px">Se il pulsante non funziona, copia questo link nel browser:<br>' + esc(link) + "</p>" +
-    '<p style="color:#666;font-size:13px">Non conosci questa persona o non te lo aspettavi? Ignora questo messaggio: non succede niente se non apri il link.</p></div>';
+    '<p style="color:#666;font-size:13px">Non conosci questa persona o non te lo aspettavi? Ignora questo messaggio: non succede niente se non apri il link.</p></div></div>';
   return { to, subject, text, html };
 }
 

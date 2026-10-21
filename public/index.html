@@ -1012,6 +1012,9 @@
     .brand-logo{grid-row:1 / span 2;}
     .brand-name{align-self:end;line-height:1.05;}
     .brand-tag{align-self:start;margin-top:3px;font-size:9px;letter-spacing:.14em;}
+    .brand.is-sorso{grid-template-columns:1fr;}
+    .brand.is-sorso .brand-name,.brand.is-sorso .brand-tag{grid-column:1;}
+    .brand.is-sorso .brand-name{font-size:21px;}
     .coffee-fab{right:24px;bottom:24px;}
     .scale-help{display:none;}
     .nav{grid-column:2;grid-row:1;align-self:center;justify-self:start;z-index:2;position:relative;display:flex;flex-direction:row;gap:4px;padding:0;margin-left:28px;border:0;background:none;}
@@ -1163,6 +1166,11 @@
 
   /* ---------- marchio ---------- */
   .brand-logo{width:30px;height:30px;color:var(--head-fg);border-radius:0;flex:none;display:block;}
+  /* la scritta «SORSO» con le O che sorridono: con il nome predefinito il simbolo separato non serve */
+  .brand.is-sorso .brand-logo{display:none;}
+  .o-smile{position:relative;display:inline-block;width:.9em;height:.9em;margin:0 .04em 0 .01em;vertical-align:-.1em;color:currentColor;}
+  .o-smile svg{position:absolute;inset:0;width:100%;height:100%;display:block;}
+  .o-smile .o-txt{position:absolute;opacity:0;pointer-events:none;}
   .brand-name{font:650 17px/1 'Geist','Inter',sans-serif;letter-spacing:.16em;text-transform:uppercase;color:var(--head-fg);}
   .brand-tag{font:600 9px/1.2 'Geist','Inter',sans-serif;letter-spacing:.2em;text-transform:uppercase;color:var(--head-dim);}
   .brand:hover .brand-tag{color:var(--accent-text);}
@@ -1358,7 +1366,7 @@ try{var _p=localStorage.getItem("sorso-theme");if(_p==="dark"||(_p!=="light"&&wi
     </div>
     <div class="login-brand">
       <img src="/favicon.svg" alt="" width="60" height="60" class="login-logo">
-      <span class="login-brand-name">Sorso</span>
+      <span class="login-brand-name" id="loginBrandName">Sorso</span>
       <span class="login-brand-tag" data-i18n="login.tag">taccuino di degustazione</span>
     </div>
     <p class="login-explainer" data-i18n="login.explainer">Un taccuino di degustazione ispirato al metodo AIS: registra ogni vino con una scheda a punteggio, tieni un archivio con le tue statistiche, mettiti alla prova alla cieca e confrontati con altri in una degustazione di gruppo.</p>
@@ -1389,7 +1397,7 @@ try{var _p=localStorage.getItem("sorso-theme");if(_p==="dark"||(_p!=="light"&&wi
 
   <header class="hdr">
     <div class="hdr-top">
-      <button type="button" class="brand" id="brandBtn" data-i18n-title="hdr.brandTitle" title="Tocca per personalizzare"><svg class="brand-logo" viewBox="0 0 32 32" width="30" height="30" aria-hidden="true"><circle cx="16" cy="16" r="12.2" fill="none" stroke="currentColor" stroke-width="2.6"/><path d="M9.8 16.4C12 20.8 20 20.8 22.2 16.4" fill="none" stroke="var(--accent)" stroke-width="2.6" stroke-linecap="round"/><circle cx="21.2" cy="10.6" r="2.1" fill="var(--accent)"/></svg><span class="brand-name" id="brandName">Sorso</span><span class="brand-tag" id="brandOwner" data-i18n="hdr.brandTagDefault">il taccuino</span></button>
+      <button type="button" class="brand" id="brandBtn" data-i18n-title="hdr.brandTitle" title="Tocca per personalizzare"><svg class="brand-logo" viewBox="0 0 32 32" width="30" height="30" aria-hidden="true"><circle cx="16" cy="16" r="12.2" fill="none" stroke="currentColor" stroke-width="2.6"/><path d="M10 17.8C12.4 22.4 19.6 22.4 22 17.8" fill="none" stroke="var(--accent)" stroke-width="2.6" stroke-linecap="round"/></svg><span class="brand-name" id="brandName">Sorso</span><span class="brand-tag" id="brandOwner" data-i18n="hdr.brandTagDefault">il taccuino</span></button>
       <div class="hdr-ctrl">
         <div class="lang-switch" id="langSwitch">
           <button type="button" id="langIt" class="on">IT</button>
@@ -4028,10 +4036,21 @@ const DB = (function(){
    ============================================================ */
 const PROFILE_KEY = "profilo-taccuino";
 
+/* «Sorso» si scrive con le due O che sorridono (il logo). La parola resta testo vero: i lettori di schermo
+   e la ricerca leggono «Sorso». Un nome scelto dall'utente si scrive com'è. */
+const O_SMILE = '<svg viewBox="2.6 2.6 26.8 26.8" aria-hidden="true"><circle cx="16" cy="16" r="11.9" fill="none" stroke="currentColor" stroke-width="3.2"/><path d="M10 17.8C12.4 22.4 19.6 22.4 22 17.8" fill="none" stroke="var(--accent)" stroke-width="3.2" stroke-linecap="round"/></svg>';
+function wordmarkHTML(nome){
+  nome = String(nome || "Sorso");
+  if(nome.trim().toLowerCase() !== "sorso") return esc(nome);
+  return nome.trim().replace(/[oO]/g, c => '<span class="o-smile"><span class="o-txt">'+c+'</span>'+O_SMILE+'</span>');
+}
+try{ document.getElementById("loginBrandName").innerHTML = wordmarkHTML("Sorso"); }catch(e){}
 function renderBrand(){
   const tag = S.owner ? tf("hdr.brandTagOwned", {owner: S.owner}) : t("hdr.brandTagGeneric");
-  $("brandName").textContent = S.brandName || "Sorso";
+  $("brandName").innerHTML = wordmarkHTML(S.brandName || "Sorso");
+  $("brandBtn").classList.toggle("is-sorso", !S.brandName || S.brandName.trim().toLowerCase() === "sorso");
   $("brandOwner").textContent = tag;
+  $("loginBrandName").innerHTML = wordmarkHTML("Sorso");
   $("brandBtn").title = t("hdr.brandRenameTitle");
   document.title = S.brandName && S.brandName !== "Sorso" ? S.brandName : "Sorso — Taccuino di degustazione";
   /* i campi di Impostazioni seguono il nome salvato, tranne mentre ci si sta scrivendo */
@@ -4042,7 +4061,7 @@ function renderBrand(){
 /* anteprima di come comparirà in alto, mentre si scrive */
 function brandPreview(){
   const nome = ($("brandNameInput").value.trim() || "Sorso").slice(0,24), owner = $("brandOwnerInput").value.trim().slice(0,32);
-  $("brandPreviewName").textContent = nome;
+  $("brandPreviewName").innerHTML = wordmarkHTML(nome);
   $("brandPreviewTag").textContent = owner ? tf("hdr.brandTagOwned", {owner}) : t("hdr.brandTagGeneric");
 }
 function brandStatus(msg){
