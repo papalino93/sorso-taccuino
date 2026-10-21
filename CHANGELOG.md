@@ -3,6 +3,9 @@
 La versione e la data dell'ultimo aggiornamento sono mostrate in fondo all'app e dello spazio di team
 (fonte: `public/js/version.js`, da tenere uguale a `package.json`).
 
+## 2.9.2 — 21 ottobre 2026
+- **Nuovo aspetto, tappa 3: le cinque guide PDF** rifatte con il nuovo logo (la scritta con le O che sorridono in copertina), i colori lavanda e antracite, i titoli in Geist e tutte le schermate nuove (app, serate, spazio di team, widget). Corretto il testo sui colori predefiniti dello spazio di team.
+
 ## 2.9.1 — 21 ottobre 2026
 - **Scritta «SORSO» rifinita**: le O che sorridono occupano esattamente lo spazio di una O vera (stessa distanza tra le lettere, misurata al pixel) e hanno lo stesso spessore delle altre lettere.
 
