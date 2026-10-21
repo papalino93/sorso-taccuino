@@ -298,3 +298,7 @@ button.g-dot.me:focus-visible { outline: none; } button.g-dot.me:focus-visible .
 .g-board h3.section { margin-top: 0; }
 .g-boardlist li { gap: 10px; } .g-boardlist li.me { box-shadow: inset 0 0 0 1.5px var(--accent); }
 .g-nicks { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px; } .g-nick { font-size: 11.5px; padding: 3px 9px; }
+/* telefoni stretti (320 px): le righe del gioco non si allargano oltre il riquadro, le schede vanno su due righe */
+.g-res > li, .g-top > *, .g-who, .g-react { min-width: 0; }
+.g-jabsel { width: 100%; max-width: 100%; min-width: 0; text-overflow: ellipsis; }
+@media (max-width: 360px) { .tabs { grid-template-columns: repeat(2, 1fr); } .tab { font-size: 13.5px; } }

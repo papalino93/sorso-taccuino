@@ -1128,6 +1128,10 @@
     .segs{margin-top:6px;}
     .act-row{padding-top:8px;}
   }
+  /* tablet in orizzontale: stessa compattezza, ma righe alte abbastanza per il dito */
+  @media (min-width:1100px) and (max-height:820px) and (pointer:coarse){
+    .seg{min-height:40px;padding:5px 0;}
+  }
   @media (min-width:1100px) and (max-height:640px){ .segs{display:none;} .hdr-num{font-size:60px;} }
   @media (min-width:1100px) and (max-width:1279px){
     .nav{margin-left:16px;gap:2px;} .nav button{padding:9px 12px;} .nav .lbl{font-size:14px;}
@@ -7678,7 +7682,7 @@ async function handleGoogleRedirect(){
     if(!r.width) return;
     /* si controlla tutta l'area del pulsante, non solo il centro: un controllo coperto a metà
        (la fascia 95-100 di un cursore, l'ultimo tratto di un campo) deve restare toccabile */
-    const SEL = "button,select,input,textarea,a,[role='button'],label";
+    const SEL = "button,select,input,textarea,a,[role='button'],label,iframe"; /* iframe: le serate delle cerchie, dove non si vede cosa c'è sotto */
     let blocked = false;
     for(let ix = 0; ix < 5 && !blocked; ix++){
       for(let iy = 0; iy < 5 && !blocked; iy++){
