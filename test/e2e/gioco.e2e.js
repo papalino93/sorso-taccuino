@@ -62,6 +62,11 @@ const SHOTS = process.env.SHOTS || "";
   await B.frame.locator('[data-act="open"]').first().click();
   const field = B.frame.locator(".g-field.edit").first(); await field.waitFor({ timeout: 8000 });
   ok(/Tocca il campo/.test(await field.innerText()), "prima di giocare: «Tocca il campo per metterti»");
+  ok(await B.frame.locator(".game").first().locator(".g-aromi .g-chip").count() === 16 && await B.frame.locator(".game").first().locator(".g-parole .g-chip").count() === 12 && await B.frame.locator(".game").first().locator(".g-fans .g-chip").count() === 3, "2.14: caccia agli aromi, il vino in una parola e il fan numero uno");
+  ok(await B.frame.locator(".g-novita").count() === 1, "2.14: l'avviso delle novità");
+  { const hb = B.frame.locator(".g-novita [data-act=g-help]"); await hb.scrollIntoViewIfNeeded(); await B.page.evaluate(() => scrollBy(0, -200)); await hb.click(); await B.page.waitForTimeout(300); }
+  ok(await B.frame.locator(".g-hcard").count() === 10, "2.14: «Come si gioca» con dieci schede");
+  { const hb = B.frame.locator(".g-help [data-act=g-help]"); await hb.scrollIntoViewIfNeeded(); await B.page.evaluate(() => scrollBy(0, -200)); await hb.click(); await B.page.waitForTimeout(300); }
   await field.scrollIntoViewIfNeeded(); await B.page.waitForTimeout(150);
   const box = await field.boundingBox();
   await B.page.mouse.click(box.x + box.width * 0.8, box.y + box.height * 0.3);

@@ -27,6 +27,9 @@ const PID = Circles.CIRCLE_PARTNER.id;
 const K = { gp: (t, w) => "gp:" + t + ":" + w, gx: (t, w) => "gx:" + t + ":" + w, gw: t => "gw:" + t, gb: c => "gb:" + c, gq: c => "gq:" + c, gf: t => "gf:" + t };
 const AXES = [["corpo", "acidita"], ["tannino", "morbidezza"], ["frutto", "legno"], ["intensita", "persistenza"], ["dolcezza", "freschezza"]];
 const EMOJI = ["🍷", "😂", "🙈", "🧐", "🔥"];
+/* caccia agli aromi (fino a 3) e il vino in una parola: le chiavi; i testi e le icone sono nell'interfaccia */
+const AROMI = ["rossi", "neri", "agrumi", "mela", "pesca", "tropicale", "fiori", "erbe", "spezie", "vaniglia", "tostato", "miele", "burro", "minerale", "cuoio", "terra"];
+const PAROLE = ["elegante", "potente", "allegro", "timido", "ruffiano", "austero", "seducente", "rustico", "fresco", "morbido", "spigoloso", "meditazione"];
 const PHRASES = 10;                      // f1…f10: i testi sono nell'interfaccia (italiano e inglese)
 const BOARD_TTL = 120, BOARD_TASTINGS = 30;
 const ACH = ["primo", "cecchino", "portafoglio", "serie3", "favorito", "tris", "diapason", "coro", "veterano", "re"];
@@ -60,13 +63,21 @@ async function people(redis, ctx) {
 }
 
 /* punti di un vino svelato: pronostico (10 se indovini la media), prezzo (10 se esatto), campo (10 al centro del gruppo) */
-function score(entries, votes, price) {
+function score(entries, votes, price, pkOf) {
   const vs = Object.values(votes);
   const avg = vs.length ? vs.reduce((a, b) => a + b, 0) / vs.length : null;
   const pos = Object.values(entries).filter(e => e.x != null);
   const center = pos.length ? { x: pos.reduce((a, e) => a + e.x, 0) / pos.length, y: pos.reduce((a, e) => a + e.y, 0) / pos.length } : null;
   const res = {};
   const all = new Set(Object.keys(entries).concat(Object.keys(votes)));
+  const count = list => { const c = {}; list.forEach(k => { c[k] = (c[k] || 0) + 1; }); return c; };
+  const aromaN = count([].concat(...Object.values(entries).map(e => Array.isArray(e.a) ? e.a : [])));
+  const aromaTop = new Set(Object.keys(aromaN).filter(k => aromaN[k] >= 2).sort((a, b) => aromaN[b] - aromaN[a]).slice(0, 3).filter((k, i, arr) => aromaN[k] >= aromaN[arr[Math.min(arr.length, 3) - 1]]));
+  const wordN = count(Object.values(entries).map(e => e.wd).filter(Boolean));
+  const wMax = Math.max(0, ...Object.values(wordN));
+  const wordTop = new Set(wMax >= 2 ? Object.keys(wordN).filter(k => wordN[k] === wMax) : []);
+  const vMax = Object.keys(votes).length >= 2 ? Math.max(...Object.values(votes)) : null;
+  const fanTop = new Set(vMax == null || !pkOf ? [] : Object.keys(votes).filter(u => votes[u] === vMax).map(pkOf).filter(Boolean));
   all.forEach(u => {
     const e = entries[u] || {};
     const pts = { pron: null, price: null, field: null };
@@ -74,7 +85,13 @@ function score(entries, votes, price) {
     if (e.e != null && price) pts.price = Math.max(0, r0(10 * (1 - Math.abs(e.e - price) / price)));
     const dist = e.x != null && center && pos.length >= 2 ? Math.hypot(e.x - center.x, e.y - center.y) : null;
     if (dist != null) pts.field = Math.max(0, r0(10 - dist * 1.5));
-    pts.total = (pts.pron || 0) + (pts.price || 0) + (pts.field || 0);
+    /* caccia agli aromi: 3 punti per ogni aroma che è tra i preferiti del gruppo (scelto da almeno due persone) */
+    if (Array.isArray(e.a) && e.a.length && aromaTop.size) pts.aroma = e.a.filter(k => aromaTop.has(k)).length * 3;
+    /* in una parola: 5 punti se hai scelto la parola più scelta (da almeno due persone) */
+    if (e.wd && wordTop.size) pts.word = wordTop.has(e.wd) ? 5 : 0;
+    /* il fan numero uno: 5 punti se hai indovinato chi ha dato il voto più alto */
+    if (e.fan && fanTop.size) pts.fan = fanTop.has(e.fan) ? 5 : 0;
+    pts.total = (pts.pron || 0) + (pts.price || 0) + (pts.field || 0) + (pts.aroma || 0) + (pts.word || 0) + (pts.fan || 0);
     res[u] = { e, vote: votes[u] != null ? votes[u] : null, pts, dist, pronErr: e.p != null && avg != null ? Math.abs(e.p - avg) : null, priceErr: e.e != null && price ? Math.abs(e.e - price) : null };
   });
   /* cartellini: chi è più lontano dal gruppo, chi è più in sintonia, il pronostico e il prezzo migliori */
@@ -84,7 +101,7 @@ function score(entries, votes, price) {
   if (pos.length >= 3) { add(best("dist", (a, b) => a > b), "fuori"); add(best("dist", (a, b) => a < b), "sintonia"); }
   if (Object.values(res).filter(r => r.pronErr != null).length >= 2) add(best("pronErr", (a, b) => a < b), "pronostico");
   if (Object.values(res).filter(r => r.priceErr != null).length >= 2) add(best("priceErr", (a, b) => a < b), "prezzo");
-  return { avg, center, res, badges };
+  return { avg, center, res, badges, aromaN, wordN, fanTop: [...fanTop] };
 }
 
 /* svelato: a mano, a vino o serata chiusi, oppure quando hanno votato tutti i membri della cerchia */
@@ -103,7 +120,7 @@ async function state(redis, partner, ctx, body) {
   const ppl = await people(redis, ctx);
   const byUid = {}; Object.keys(ppl).forEach(k => { byUid[ppl[k].uid] = k; });
   const meta = Team.asObject(await redis.hgetall(K.gw(t.id)));
-  const out = { axes: AXES, emoji: EMOJI, phrases: PHRASES, people: {}, wines: {} };
+  const out = { axes: AXES, emoji: EMOJI, phrases: PHRASES, aromi: AROMI, parole: PAROLE, people: {}, wines: {} };
   Object.keys(ppl).forEach(k => { out.people[k] = { name: ppl[k].name, pic: ppl[k].pic, me: ppl[k].me }; });
   const members = Object.keys(ppl).length;
   for (let i = 0; i < wines.length; i++) {
@@ -114,19 +131,23 @@ async function state(redis, partner, ctx, body) {
     const voterList = (voters || []).map(String);
     const revealed = !!m.revealed || t.status === "closed" || !!w.closed || (members > 0 && voterList.filter(u => byUid[u]).length >= members);
     const wout = { axes: i % AXES.length, revealed, manual: !!m.revealed, played: Object.keys(entries).map(u => byUid[u]).filter(Boolean), voted: voterList.map(u => byUid[u]).filter(Boolean),
-      mine: entries[ctx.uid] ? { x: entries[ctx.uid].x, y: entries[ctx.uid].y, p: entries[ctx.uid].p, e: entries[ctx.uid].e } : null,
+      mine: entries[ctx.uid] ? { x: entries[ctx.uid].x, y: entries[ctx.uid].y, p: entries[ctx.uid].p, e: entries[ctx.uid].e, a: entries[ctx.uid].a || [], wd: entries[ctx.uid].wd || "", fan: entries[ctx.uid].fan || "" } : null,
       price: (revealed || ctx.role === "organizer") && m.price ? m.price : null };
     if (revealed) {
       const vraw = voterList.length ? await redis.mget(...voterList.map(u => Team.K.vt(PID, t.id, w.id, u))) : [];
       const votes = {}; voterList.forEach((u, j) => { const v = parse(vraw[j]); if (v && typeof v.s === "number") votes[u] = v.s; });
-      const sc = score(entries, votes, m.price || null);
+      const sc = score(entries, votes, m.price || null, u => byUid[u]);
       const gx = Team.asObject(gxRaw), reacts = {};
       Object.keys(gx).forEach(k => { const [from, to] = k.split("|"); const r = parse(gx[k]); if (r && byUid[to] !== undefined) (reacts[to] = reacts[to] || []).push({ from: byUid[from] || null, e: r.e || "", f: r.f || "" }); });
       wout.avg = sc.avg == null ? null : r1(sc.avg);
       wout.center = sc.center ? { x: r1(sc.center.x), y: r1(sc.center.y) } : null;
+      wout.aromas = Object.keys(sc.aromaN).map(k => ({ k, n: sc.aromaN[k] })).sort((a, b) => b.n - a.n);
+      wout.words = Object.keys(sc.wordN).map(k => ({ k, n: sc.wordN[k] })).sort((a, b) => b.n - a.n);
+      wout.fanTop = sc.fanTop;
       wout.results = Object.keys(sc.res).filter(u => byUid[u]).map(u => {
         const r = sc.res[u];
         return { who: byUid[u], vote: r.vote, x: r.e.x != null ? r.e.x : null, y: r.e.y != null ? r.e.y : null, p: r.e.p != null ? r.e.p : null, e: r.e.e != null ? r.e.e : null,
+          a: Array.isArray(r.e.a) ? r.e.a : [], wd: r.e.wd || "", fan: r.e.fan || "",
           pts: r.pts, badges: sc.badges[u] || [], reactions: reacts[u] || [] };
       }).sort((a, b) => b.pts.total - a.pts.total);
     }
@@ -174,8 +195,16 @@ async function play(redis, partner, ctx, body) {
   if (await isRevealed(redis, ctx, t, w, m)) throw new HttpError(409, "revealed", "Questo vino è già svelato.");
   const x = num(body.x, 0, 10, 1), y = num(body.y, 0, 10, 1), p = num(body.p, 50, 100, 0), e = num(body.e, 0, 10000, 2);
   if ([x, y, p, e].some(v => v === undefined) || (x == null) !== (y == null)) throw bad("invalid_move", "Mossa non valida.");
-  if (x == null && p == null && e == null) throw bad("invalid_move", "Metti la tua faccia sul campo, oppure fai un pronostico.");
-  await redis.hset(K.gp(t.id, w.id), { [ctx.uid]: JSON.stringify({ x, y, p, e, at: Date.now() }) });
+  const a = body.a == null ? [] : body.a;
+  if (!Array.isArray(a) || a.length > 3 || a.some(k => AROMI.indexOf(k) < 0) || new Set(a).size !== a.length) throw bad("invalid_move", "Aromi non validi: fino a tre.");
+  const wd = body.wd == null || body.wd === "" ? "" : String(body.wd);
+  if (wd && PAROLE.indexOf(wd) < 0) throw bad("invalid_move", "Parola non valida.");
+  let fan = body.fan == null || body.fan === "" ? "" : String(body.fan);
+  if (fan) { const ppl = await people(redis, ctx); if (!ppl[fan]) throw bad("invalid_move", "Persona non valida."); }
+  if (x == null && p == null && e == null && !a.length && !wd && !fan) throw bad("invalid_move", "Fai almeno una mossa.");
+  const mv = { x, y, p, e, at: Date.now() };
+  if (a.length) mv.a = a; if (wd) mv.wd = wd; if (fan) mv.fan = fan;
+  await redis.hset(K.gp(t.id, w.id), { [ctx.uid]: JSON.stringify(mv) });
   await redis.del(K.gb(ctx.team));
   return { ok: true };
 }
@@ -252,8 +281,8 @@ async function board(redis, partner, ctx) {
         const vs = w.results.filter(r => r.vote != null);
         w.results.forEach(r => {
           const p = pts[r.who] = pts[r.who] || { total: 0, pron: 0, price: 0, field: 0, played: 0 };
-          p.total += r.pts.total; p.pron += r.pts.pron || 0; p.price += r.pts.price || 0; p.field += r.pts.field || 0;
-          const played = r.x != null || r.p != null || r.e != null;
+          p.total += r.pts.total; p.pron += r.pts.pron || 0; p.price += r.pts.price || 0; p.field += r.pts.field || 0; p.aroma = (p.aroma || 0) + (r.pts.aroma || 0); p.word = (p.word || 0) + (r.pts.word || 0); p.fan = (p.fan || 0) + (r.pts.fan || 0);
+          const played = r.x != null || r.p != null || r.e != null || (r.a && r.a.length) || r.wd || r.fan;
           if (played) { p.played++; feat(r.who, "primo"); }
           if (inMonth) month[r.who] = (month[r.who] || 0) + r.pts.total;
           /* traguardi e serie: il pronostico «centrato» è entro 2 punti dalla media */
@@ -340,6 +369,7 @@ async function widgetStats(redis, cid, names) {
     let moves = 0, wines = 0, pron = 0, pronHit = 0, priceN = 0, priceErr = 0, biasN = 0, bias = 0;
     const comp = AXES.map(() => ({ x: 0, y: 0, n: 0 }));
     let split = null, tight = null, surprise = null, last = null;
+    const aromaAll = {}, wordAll = {};
     for (const t of tl) {
       const st = await state(redis, partner, ctx, { tasting: t.id });
       const wl = Object.values(Team.asObject(await redis.hgetall(Team.K.wn(PID, t.id)))).map(parse).filter(Boolean).sort((a, b) => b.createdAt - a.createdAt);
@@ -347,7 +377,7 @@ async function widgetStats(redis, cid, names) {
       wl.forEach(wn => {
         const w = st.wines[wn.id];
         if (!w || !w.revealed || !w.results) return;
-        const res = w.results.filter(r => r.x != null || r.p != null || r.e != null);
+        const res = w.results.filter(r => r.x != null || r.p != null || r.e != null || (r.a && r.a.length) || r.wd || r.fan);
         if (!res.length) return;
         const label = { name: hide ? "" : wn.name || "", producer: hide ? "" : wn.producer || "", tastingName: t.name, at: t.createdAt };
         wines++; moves += res.length;
@@ -361,6 +391,8 @@ async function widgetStats(redis, cid, names) {
           const g = guesses.reduce((a, b) => a + b, 0) / guesses.length, gap = Math.abs(g - w.price) / w.price;
           if (gap >= 0.25 && (!surprise || gap > surprise.gap)) surprise = Object.assign({ guess: r0(g), price: w.price, gap: r1(gap), n: guesses.length }, label);
         }
+        (w.aromas || []).forEach(x => { aromaAll[x.k] = (aromaAll[x.k] || 0) + x.n; });
+        (w.words || []).forEach(x => { wordAll[x.k] = (wordAll[x.k] || 0) + x.n; });
         if (w.center) { const c = comp[w.axes]; c.x += w.center.x; c.y += w.center.y; c.n++; }
         const pos = res.filter(r => r.x != null);
         if (pos.length >= 3 && w.center) {
@@ -378,7 +410,9 @@ async function widgetStats(redis, cid, names) {
     }
     base = { moves, wines, pron, pronHit, priceN, priceErr: priceN ? r1(100 * priceErr / priceN) : null, bias: biasN >= 3 ? r1(bias / biasN) : null,
       compass: comp.map((c, i) => c.n ? { axes: i, x: r1(c.x / c.n), y: r1(c.y / c.n), wines: c.n } : null).filter(Boolean),
-      split, tight: tight && split && tight.spread < split.spread ? tight : null, surprise, last };
+      split, tight: tight && split && tight.spread < split.spread ? tight : null, surprise, last,
+      aromas: Object.keys(aromaAll).map(k => ({ k, n: aromaAll[k] })).sort((a, b) => b.n - a.n).slice(0, 6),
+      words: Object.keys(wordAll).map(k => ({ k, n: wordAll[k] })).sort((a, b) => b.n - a.n).slice(0, 3) };
     await redis.set(K.gq(cid), JSON.stringify(base), { ex: BOARD_TTL });
   }
   const out = Object.assign({}, base, { pronRate: base.pron ? r0(100 * base.pronHit / base.pron) : null });
@@ -425,4 +459,4 @@ async function deleteUser(redis, cid, uid) {
 const OPS = { "game.fav": pickFav, "game.state": state, "game.play": play, "game.react": react, "game.reveal": reveal, "game.price": setPrice, "game.board": board };
 const WRITES = new Set(["game.fav", "game.play", "game.react", "game.reveal", "game.price"]);
 
-module.exports = { OPS, WRITES, AXES, EMOJI, K, score, pk, deleteUser, widgetStats };
+module.exports = { OPS, WRITES, AXES, EMOJI, AROMI, PAROLE, K, score, pk, deleteUser, widgetStats };

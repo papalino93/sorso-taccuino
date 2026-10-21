@@ -56,7 +56,7 @@ test("mosse segrete fino allo svelamento; poi tutti vedono tutto, con punti e ca
   let st = await ok(E("carla", s.cid, { op: "game.state", tasting: s.t }));
   let w = st.wines[s.w1];
   assert.equal(w.revealed, false); assert.equal(w.results, undefined, "prima dello svelamento nessuno vede le mosse degli altri");
-  assert.deepEqual(w.mine, { x: 8, y: 3, p: 85, e: 25 });
+  assert.deepEqual(w.mine, { x: 8, y: 3, p: 85, e: 25, a: [], wd: "", fan: "" });
   assert.equal(w.played.length, 3); assert.equal(w.voted.length, 2);
   assert.equal(w.axes, 0); assert.equal(st.wines[s.w2].axes, 1, "gli assi cambiano a ogni vino");
   assert.doesNotMatch(JSON.stringify(st), /google:|example\.com/, "niente account né mail");
@@ -180,4 +180,30 @@ test("2.13: serie di pronostici centrati e la nemesi", async () => {
   assert.equal(anna.streak.cur, 3); assert.equal(anna.streak.best, 3); assert.ok(anna.feats.includes("serie3"));
   assert.equal(bea.streak.cur, 0);
   assert.equal(anna.rival, "Carla Rossi", "i voti più lontani dai suoi");
+});
+
+test("2.14: caccia agli aromi, il vino in una parola, il fan numero uno", async () => {
+  const s = await scena();
+  await ok(C("anna", { op: "game.set", circle: s.cid, on: true }));
+  const st0 = await ok(E("anna", s.cid, { op: "game.state", tasting: s.t }));
+  const pk = n => Object.keys(st0.people).find(k => st0.people[k].name === n);
+  assert.equal((await E("anna", s.cid, { op: "game.play", tasting: s.t, wine: s.w1, a: ["rossi", "spezie", "fiori", "erbe"] })).statusCode, 400, "al massimo tre aromi");
+  assert.equal((await E("anna", s.cid, { op: "game.play", tasting: s.t, wine: s.w1, a: ["caffè"] })).statusCode, 400, "solo aromi della lista");
+  assert.equal((await E("anna", s.cid, { op: "game.play", tasting: s.t, wine: s.w1, wd: "boh" })).statusCode, 400);
+  assert.equal((await E("anna", s.cid, { op: "game.play", tasting: s.t, wine: s.w1, fan: "0000000000" })).statusCode, 400, "il fan deve essere della cerchia");
+  /* Carla darà il voto più alto */
+  await ok(E("anna", s.cid, { op: "game.play", tasting: s.t, wine: s.w1, a: ["rossi", "spezie"], wd: "elegante", fan: pk("Carla Rossi") }));
+  await ok(E("carla", s.cid, { op: "game.play", tasting: s.t, wine: s.w1, a: ["rossi", "spezie", "vaniglia"], wd: "elegante", fan: pk("Bea Rossi") }));
+  await ok(E("bea", s.cid, { op: "game.play", tasting: s.t, wine: s.w1, a: ["fiori"], wd: "potente", fan: pk("Carla Rossi") }));
+  let st = await ok(E("bea", s.cid, { op: "game.state", tasting: s.t }));
+  assert.deepEqual(st.wines[s.w1].mine.a, ["fiori"]); assert.equal(st.wines[s.w1].results, undefined, "segreto fino allo svelamento");
+  for (const [who, n] of [["anna", 80], ["carla", 92], ["bea", 75]]) await ok(E(who, s.cid, { op: "vote", tasting: s.t, wine: s.w1, ...smart(n) }));
+  st = await ok(E("bea", s.cid, { op: "game.state", tasting: s.t }));
+  const w = st.wines[s.w1], R = n => w.results.find(r => st.people[r.who].name === n);
+  assert.deepEqual(w.aromas.slice(0, 2).map(x => x.k).sort(), ["rossi", "spezie"]);
+  assert.equal(w.words[0].k, "elegante"); assert.deepEqual(w.fanTop, [pk("Carla Rossi")]);
+  assert.equal(R("Anna Rossi").pts.aroma, 6); assert.equal(R("Anna Rossi").pts.word, 5); assert.equal(R("Anna Rossi").pts.fan, 5);
+  assert.equal(R("Carla Rossi").pts.aroma, 6); assert.equal(R("Carla Rossi").pts.fan, 0);
+  assert.equal(R("Bea Rossi").pts.aroma, 0); assert.equal(R("Bea Rossi").pts.word, 0); assert.equal(R("Bea Rossi").pts.fan, 5);
+  assert.equal(R("Anna Rossi").pts.total, 16);
 });

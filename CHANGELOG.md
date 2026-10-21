@@ -3,6 +3,16 @@
 La versione e la data dell'ultimo aggiornamento sono mostrate in fondo all'app e dello spazio di team
 (fonte: `public/js/version.js`, da tenere uguale a `package.json`).
 
+## 2.14.0 — 21 ottobre 2026
+- **Sei giochi per ogni vino**, non solo il campo. Si fanno quelli che si vogliono, con la barra «3 giochi su 6»:
+  - 🗺️ **Il campo**, 🎯 **Il pronostico**, 💶 **Quanto costa?** (come prima);
+  - 👃 **Caccia agli aromi**: scegli fino a tre profumi tra sedici (frutti rossi, spezie, vaniglia, cuoio…); 3 punti per ognuno che è tra i preferiti del gruppo;
+  - 💬 **Il vino in una parola**: elegante, ruffiano, spigoloso, da meditazione…; 5 punti se scegli la parola più scelta, e allo svelamento il vino si prende il suo soprannome;
+  - 💘 **Il fan numero uno**: chi del gruppo gli darà il voto più alto? 5 punti se indovini.
+- **Allo svelamento** tre schede del gruppo: il naso del gruppo (la nuvola degli aromi), «in una parola è…» e il fan numero uno con chi l'aveva indovinato. Nelle righe di ognuno anche aromi, parola e fan con i punti.
+- **❓ Come si gioca**: dieci schede illustrate (cosa fai, i punti, il trucco) per ogni gioco, la scommessa, lo svelamento, le frecciatine e la classifica. Si apre dalla serata e dalla classifica; la prima volta un avviso presenta le novità.
+- Il widget **La sfida** mostra anche il naso e la parola del gruppo. Nella guida alle cerchie, nuova pagina «I giochi, uno per uno».
+
 ## 2.13.0 — 21 ottobre 2026
 - **Il gioco cresce.**
   - **La scommessa della serata**: «chi vince stasera?». Ognuno punta sul vino che avrà la media più alta; le scelte restano segrete fino alla chiusura, poi chi ha indovinato prende 10 punti e si vede chi ci aveva puntato.
