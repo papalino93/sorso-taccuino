@@ -1,4 +1,4 @@
-/* Spazio di team di Sorso — interfaccia dell'iframe.
+/* Spazio di team di Taste — interfaccia dell'iframe.
 
    Il sito partner incorpora  /embed?p=<partner>#token=<JWT firmato>.
    Il token sta nel frammento (#), che il browser non invia mai a nessun server: non finisce
@@ -310,7 +310,7 @@
     if (!window.SORSO_VERSION) return "";
     var d = SORSO_VERSION.date;
     try { d = new Date(SORSO_VERSION.date + "T12:00:00").toLocaleDateString(S.lang === "en" ? "en-GB" : "it-IT", { day: "numeric", month: "short", year: "numeric" }); } catch (e) { /* data grezza */ }
-    return '<p class="foot">Sorso · v' + esc(SORSO_VERSION.version) + ' · ' + esc(t("updatedOn", { d: d })) + '</p>';
+    return '<p class="foot">Taste · v' + esc(SORSO_VERSION.version) + ' · ' + esc(t("updatedOn", { d: d })) + '</p>';
   }
   function reportHeight() {
     try { parent.postMessage({ type: "sorso:height", height: Math.ceil(app.getBoundingClientRect().height) }, "*"); } catch (e) { /* fuori da un iframe */ }
@@ -464,7 +464,7 @@
       /* un altro utente (o un altro team) sullo stesso iframe non deve vedere le bozze del precedente */
       var cambiato = !S.user || S.user.team !== r.user.team || S.user.name !== r.user.name || S.user.role !== r.user.role;
       if (cambiato) { S.drafts = {}; S.gdrafts = {}; S.sheet = null; S.form = null; S.gform = null; S.confirm = null; S.tasting = null; S.wines = []; S.tastings = []; S.stats = null; S.statsError = null; S.tab = "tastings"; S.view = "list"; S.notice = null; }
-      if (!S.circle) S.session = r.session;     // nella cerchia la sessione è quella di Sorso (stessa origine)
+      if (!S.circle) S.session = r.session;     // nella cerchia la sessione è quella di Taste (stessa origine)
       S.user = r.user; S.config = r.config; S.quota = r.quota || "ok"; S.token = ""; S.fatal = null;
       S.lang = r.config.lang === "en" ? "en" : "it";
       document.documentElement.lang = S.lang;
@@ -486,7 +486,7 @@
     var c = S.config || {};
     if (S.circle) return "";
     return '<header class="top">' + (c.logo ? '<img class="logo" alt="" src="' + esc(c.logo) + '">' : "") +
-      '<h1 class="title" dir="auto">' + esc(c.title || "Sorso") + '</h1>' +
+      '<h1 class="title" dir="auto">' + esc(c.title || "Taste") + '</h1>' +
       (S.user ? '<p class="who" dir="auto">' + esc(S.user.name) + '<br>' + esc(t(isOrg() ? "asOrganizer" : "asMember")) + '</p>' : "") + '</header>';
   }
   function notices() {
@@ -1194,7 +1194,7 @@
     else html = S.view === "tasting" && S.tasting ? viewTasting() : viewList();
     app.innerHTML = '<main>' + html + '</main>' + (S.circle ? "" : versionHtml());
     var logo = app.querySelector(".logo"); if (logo) logo.addEventListener("error", function () { logo.remove(); reportHeight(); });
-    var title = ((S.config && S.config.title) || "Sorso") + (S.user && !S.fatal ? " — " + (S.view === "tasting" && S.tasting ? S.tasting.name : t(S.tab === "ranking" ? "tabRanking" : S.tab === "stats" ? "tabStats" : S.tab === "notebook" ? "tabNotebook" : "tastings")) : "");
+    var title = ((S.config && S.config.title) || "Taste") + (S.user && !S.fatal ? " — " + (S.view === "tasting" && S.tasting ? S.tasting.name : t(S.tab === "ranking" ? "tabRanking" : S.tab === "stats" ? "tabStats" : S.tab === "notebook" ? "tabNotebook" : "tastings")) : "");
     if (title !== lastTitle) { document.title = title; lastTitle = title; }
     /* il focus resta dov'era: un lettore di schermo o chi usa la tastiera non riparte dall'inizio */
     var target = null;
@@ -1461,7 +1461,7 @@
     login();
   });
 
-  /* ---------------- dentro l'app di Sorso (serate di una cerchia) ----------------
+  /* ---------------- dentro l'app di Taste (serate di una cerchia) ----------------
      Stessa origine: la pagina legge le preferenze dell'app (lingua, modalità di voto) e ne copia i colori. */
   function hostPref(k) { try { return localStorage.getItem(k) || ""; } catch (e) { return ""; } }
   function applyHostTheme() {

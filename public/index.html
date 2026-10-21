@@ -8,26 +8,26 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Sorso">
+<meta name="apple-mobile-web-app-title" content="Taste">
 <meta name="description" content="Taccuino di degustazione ispirato al metodo AIS: scheda a punteggio, archivio personale, statistiche, classifica evento.">
 <link rel="canonical" href="https://sorso-taccuino.vercel.app/">
 <meta property="og:type" content="website">
-<meta property="og:site_name" content="Sorso">
-<meta property="og:title" content="Sorso — Taccuino di degustazione">
+<meta property="og:site_name" content="Taste">
+<meta property="og:title" content="Taste — Taccuino di degustazione">
 <meta property="og:description" content="Taccuino di degustazione ispirato al metodo AIS: scheda a punteggio, archivio personale, statistiche, classifica evento.">
 <meta property="og:url" content="https://sorso-taccuino.vercel.app/">
 <meta property="og:image" content="https://sorso-taccuino.vercel.app/icon-512.png">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Sorso — Taccuino di degustazione">
+<meta name="twitter:title" content="Taste — Taccuino di degustazione">
 <meta name="twitter:description" content="Taccuino di degustazione ispirato al metodo AIS: scheda a punteggio, archivio personale, statistiche, classifica evento.">
 <meta name="twitter:image" content="https://sorso-taccuino.vercel.app/icon-512.png">
 <link rel="manifest" href="/manifest.webmanifest">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="icon" href="/favicon-32.png" sizes="32x32" type="image/png">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
-<title>Sorso — Taccuino di degustazione</title>
+<title>Taste — Taccuino di degustazione</title>
 <script type="application/ld+json">
-{"@context":"https://schema.org","@type":"WebApplication","name":"Sorso — Taccuino di degustazione","alternateName":"Sorso","url":"https://sorso-taccuino.vercel.app/","description":"Taccuino di degustazione ispirato al metodo AIS: scheda a punteggio, archivio personale, statistiche, classifica evento.","applicationCategory":"LifestyleApplication","operatingSystem":"Any browser","inLanguage":["it","en"],"offers":{"@type":"Offer","price":"0","priceCurrency":"EUR"}}
+{"@context":"https://schema.org","@type":"WebApplication","name":"Taste — Taccuino di degustazione","alternateName":"Taste","url":"https://sorso-taccuino.vercel.app/","description":"Taccuino di degustazione ispirato al metodo AIS: scheda a punteggio, archivio personale, statistiche, classifica evento.","applicationCategory":"LifestyleApplication","operatingSystem":"Any browser","inLanguage":["it","en"],"offers":{"@type":"Offer","price":"0","priceCurrency":"EUR"}}
 </script>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@400;500;600;700;800&family=Inter:ital,wght@0,400;0,500;0,600;0,700;0,800&family=JetBrains+Mono:wght@500;600;700;800&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -191,7 +191,7 @@
   .lbl-raw{margin-top:8px;}
   .lbl-raw textarea{width:100%;min-height:90px;border-radius:10px;border:1px solid var(--line-strong);background:var(--field);color:var(--ink);padding:8px;font:13px/1.4 'Geist','Inter';}
   .lbl-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;}
-  /* «È questo?»: il vino riconosciuto nel Taccuino, nel catalogo Sorso o con il codice a barre */
+  /* «È questo?»: il vino riconosciuto nel Taccuino, nel catalogo Taste o con il codice a barre */
   .lbl-match{margin:2px 0 12px;padding:12px;border-radius:12px;background:var(--panel);border:1px solid var(--line);}
   .lbl-match .m-eye{font:600 11px/1.2 'Geist','Inter';letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);margin-bottom:6px;}
   .lbl-match .m-name{font:600 15px/1.3 'Geist','Inter';color:var(--ink);overflow-wrap:anywhere;}
@@ -1177,6 +1177,11 @@
   .o-smile{position:relative;display:inline-block;width:.78em;height:.74em;margin:0 var(--ls,.16em) 0 0;vertical-align:-.02em;color:currentColor;}
   .o-smile svg{position:absolute;inset:0;width:100%;height:100%;display:block;}
   .o-smile .o-txt{position:absolute;opacity:0;pointer-events:none;}
+  /* la scritta «taste» (2.11.0): minuscola, la a è il cerchio che sorride, alta e larga come una a vera */
+  .wm-taste{display:inline-flex;align-items:baseline;text-transform:none;letter-spacing:-.01em;font-weight:800;font-size:1.42em;line-height:1;}
+  .a-smile{position:relative;display:inline-block;width:.52em;height:.58em;margin:0 .035em 0 .02em;color:currentColor;}
+  .a-smile svg{position:absolute;inset:0;width:100%;height:100%;display:block;overflow:visible;}
+  .a-smile .o-txt{position:absolute;opacity:0;pointer-events:none;}
   .brand-name{--ls:.16em;font:650 17px/1 'Geist','Inter',sans-serif;letter-spacing:var(--ls);text-transform:uppercase;color:var(--head-fg);}
   .brand-tag{font:600 9px/1.2 'Geist','Inter',sans-serif;letter-spacing:.2em;text-transform:uppercase;color:var(--head-dim);}
   .brand:hover .brand-tag{color:var(--accent-text);}
@@ -1372,7 +1377,7 @@ try{var _p=localStorage.getItem("sorso-theme");if(_p==="dark"||(_p!=="light"&&wi
     </div>
     <div class="login-brand">
       <img src="/favicon.svg" alt="" width="60" height="60" class="login-logo">
-      <span class="login-brand-name" id="loginBrandName">Sorso</span>
+      <span class="login-brand-name" id="loginBrandName">Taste</span>
       <span class="login-brand-tag" data-i18n="login.tag">taccuino di degustazione</span>
     </div>
     <p class="login-explainer" data-i18n="login.explainer">Un taccuino di degustazione ispirato al metodo AIS: registra ogni vino con una scheda a punteggio, tieni un archivio con le tue statistiche, mettiti alla prova alla cieca e confrontati con altri in una degustazione di gruppo.</p>
@@ -1403,7 +1408,7 @@ try{var _p=localStorage.getItem("sorso-theme");if(_p==="dark"||(_p!=="light"&&wi
 
   <header class="hdr">
     <div class="hdr-top">
-      <button type="button" class="brand" id="brandBtn" data-i18n-title="hdr.brandTitle" title="Tocca per personalizzare"><svg class="brand-logo" viewBox="0 0 32 32" width="30" height="30" aria-hidden="true"><circle cx="16" cy="16" r="12.2" fill="none" stroke="currentColor" stroke-width="2.6"/><path d="M10 17.8C12.4 22.4 19.6 22.4 22 17.8" fill="none" stroke="var(--accent)" stroke-width="2.6" stroke-linecap="round"/></svg><span class="brand-name" id="brandName">Sorso</span><span class="brand-tag" id="brandOwner" data-i18n="hdr.brandTagDefault">il taccuino</span></button>
+      <button type="button" class="brand" id="brandBtn" data-i18n-title="hdr.brandTitle" title="Tocca per personalizzare"><svg class="brand-logo" viewBox="0 0 32 32" width="30" height="30" aria-hidden="true"><circle cx="16" cy="16" r="12.2" fill="none" stroke="currentColor" stroke-width="2.6"/><path d="M10 17.8C12.4 22.4 19.6 22.4 22 17.8" fill="none" stroke="var(--accent)" stroke-width="2.6" stroke-linecap="round"/></svg><span class="brand-name" id="brandName">Taste</span><span class="brand-tag" id="brandOwner" data-i18n="hdr.brandTagDefault">il taccuino</span></button>
       <div class="hdr-ctrl">
         <div class="lang-switch" id="langSwitch">
           <button type="button" id="langIt" class="on">IT</button>
@@ -1580,9 +1585,9 @@ try{var _p=localStorage.getItem("sorso-theme");if(_p==="dark"||(_p!=="light"&&wi
 
         <div class="card" id="nameCard">
         <div class="card-head"><span class="eyebrow" data-i18n="name.eyebrow">Nome del taccuino</span><span class="fill"></span></div>
-        <p class="note-line" data-i18n="name.intro">Dai un nome al tuo taccuino, per esempio «Taccuino di Mario Rossi» o «Sorso di vino». Compare in alto, accanto al logo.</p>
+        <p class="note-line" data-i18n="name.intro">Dai un nome al tuo taccuino, per esempio «Taccuino di Mario Rossi» o «Calici di Mario Rossi». Compare in alto, accanto al logo.</p>
         <label class="fld"><span class="fld-lab" data-i18n="name.title">Titolo</span>
-          <input class="in-line" id="brandNameInput" maxlength="24" autocomplete="off" data-i18n-placeholder="name.titlePh" placeholder="Sorso"></label>
+          <input class="in-line" id="brandNameInput" maxlength="24" autocomplete="off" data-i18n-placeholder="name.titlePh" placeholder="Taste"></label>
         <label class="fld"><span class="fld-lab" data-i18n="name.owner">Di chi è (facoltativo)</span>
           <input class="in-line" id="brandOwnerInput" maxlength="32" autocomplete="off" data-i18n-placeholder="name.ownerPh" placeholder="es. Mario Rossi"></label>
         <div class="name-preview" aria-live="polite"><b id="brandPreviewName"></b><span id="brandPreviewTag"></span></div>
@@ -1624,9 +1629,9 @@ try{var _p=localStorage.getItem("sorso-theme");if(_p==="dark"||(_p!=="light"&&wi
       </div>
 
         <div class="card" id="catCard">
-        <div class="card-head"><span class="eyebrow" data-i18n="cat.eyebrow">Catalogo Sorso</span><span class="fill"></span></div>
-        <p class="note-line" data-i18n="cat.intro">Quando salvi una degustazione con nome e produttore, Sorso aggiunge al catalogo comune solo i dati del vino: nome, produttore, annata, denominazione, tipologia e vitigni. Niente voti, note o nomi. Così la volta dopo il vino si riconosce dalla foto dell'etichetta, anche se non è in nessun altro catalogo.</p>
-        <label class="cat-check"><input type="checkbox" id="catContrib" checked><span data-i18n="cat.toggle">Contribuisci al catalogo Sorso</span></label>
+        <div class="card-head"><span class="eyebrow" data-i18n="cat.eyebrow">Catalogo Taste</span><span class="fill"></span></div>
+        <p class="note-line" data-i18n="cat.intro">Quando salvi una degustazione con nome e produttore, Taste aggiunge al catalogo comune solo i dati del vino: nome, produttore, annata, denominazione, tipologia e vitigni. Niente voti, note o nomi. Così la volta dopo il vino si riconosce dalla foto dell'etichetta, anche se non è in nessun altro catalogo.</p>
+        <label class="cat-check"><input type="checkbox" id="catContrib" checked><span data-i18n="cat.toggle">Contribuisci al catalogo Taste</span></label>
         <p class="note-line" id="catNote"></p>
       </div>
 
@@ -1641,7 +1646,7 @@ try{var _p=localStorage.getItem("sorso-theme");if(_p==="dark"||(_p!=="light"&&wi
 
         <div class="card backup-card" id="guideCard">
         <div class="card-head"><span class="eyebrow" data-i18n="guide.eyebrow">Guida</span><span class="fill"></span><span class="status">PDF</span></div>
-        <p class="note-line" data-i18n="guide.note">Come usare Sorso, passo per passo: punteggio, schede, alla cieca, statistiche, eventi e impostazioni.</p>
+        <p class="note-line" data-i18n="guide.note">Come usare Taste, passo per passo: punteggio, schede, alla cieca, statistiche, eventi e impostazioni.</p>
         <div class="backup-actions">
           <a class="pill-solid" id="guideLink" href="guida-uso-sorso.pdf" target="_blank" rel="noopener" data-i18n="guide.open" data-i18n-aria="guide.openAria" aria-label="Apri la guida (PDF, si apre in una nuova scheda)">Apri la guida</a>
         </div>
@@ -1734,7 +1739,7 @@ try{var _p=localStorage.getItem("sorso-theme");if(_p==="dark"||(_p!=="light"&&wi
       <div id="lbList"></div>
     </section>
 
-    <footer class="app-version" id="appVersion" data-i18n-aria="app.versionAria" aria-label="Versione dell'app">Sorso</footer>
+    <footer class="app-version" id="appVersion" data-i18n-aria="app.versionAria" aria-label="Versione dell'app">Taste</footer>
   </main>
 
   <div class="ac-box hidden" id="acBox" role="listbox"></div>
@@ -2222,7 +2227,7 @@ function descInit(){
 const S = {
   tab:"new", theme:"light", lang:"it", open:"vis",
   photo:null, photoName:"", photoB64:null, photoMedia:null,
-  owner:"", brandName:"Sorso",
+  owner:"", brandName:"Taste",
   wine:{nome:"", produttore:"", annata:"", tipologia:"Rosso", denominazione:"",
         regione:"", prezzo:"", affinamento:"", uvaggi:[]},
   limpidezza:"Limpido", colore:"Rosso rubino", consistenza:"Abbastanza consistente",
@@ -2313,7 +2318,7 @@ const I18N = {
     "action.delete":"Elimina",
 
     "account.eyebrow":"Account",
-    "guide.eyebrow":"Guida", "guide.note":"Come usare Sorso, passo per passo: punteggio, schede, alla cieca, statistiche, eventi e impostazioni.", "guide.open":"Apri la guida", "guide.openAria":"Apri la guida (PDF, si apre in una nuova scheda)",
+    "guide.eyebrow":"Guida", "guide.note":"Come usare Taste, passo per passo: punteggio, schede, alla cieca, statistiche, eventi e impostazioni.", "guide.open":"Apri la guida", "guide.openAria":"Apri la guida (PDF, si apre in una nuova scheda)",
     "account.logout":"Esci",
     "account.logoutFull":"Esci dall'account",
     "account.loginPrompt":"Accedi o crea un account",
@@ -2333,14 +2338,14 @@ const I18N = {
     "lbl.f.nome":"Nome", "lbl.f.produttore":"Produttore", "lbl.f.annata":"Annata", "lbl.f.denominazione":"Denominaz.", "lbl.f.tipologia":"Tipo", "lbl.f.vitigni":"Vitigni", "lbl.now":"Ora nella scheda: {v}",
     "lbl.extra":"Gradazione letta: {alc}. Non c'è un campo apposta: la puoi scrivere nelle note.", "lbl.apply":"Compila la scheda", "lbl.close":"Chiudi", "lbl.raw":"Testo letto (puoi correggerlo)", "lbl.again":"Analizza di nuovo", "lbl.done":"Scheda compilata: controlla i campi qui sotto.", "lbl.vitHint":"I vitigni si aggiungono all'uvaggio senza percentuale: scrivila tu.",
     "m.busy":"Cerco il vino nel tuo Taccuino e nel catalogo…", "m.isThis":"È questo?", "m.maybe":"Forse è uno di questi?", "m.yes":"Sì, è questo", "m.no":"No", "m.none2":"Nessuno di questi", "m.pick":"È questo",
-    "m.src.book":"Dal tuo Taccuino: l'hai bevuto il {date} ({n}/100)", "m.src.bookN":" · assaggiato {c} volte", "m.src.sorso":"Dal catalogo Sorso, confermato da chi l'ha assaggiato", "m.src.sorsoMine":"Dal catalogo Sorso: l'hai inserito tu (lo vedranno tutti quando lo confermerà un'altra persona)", "m.src.off":"Da Open Food Facts, tramite il codice a barre (dati aperti, licenza ODbL)", "m.annate":"Annate conosciute: {v}",
-    "m.picked":"Dati presi da: {src}. Controllali qui sotto; l'annata resta quella letta sull'etichetta.", "m.pickedName.book":"il tuo Taccuino", "m.pickedName.sorso":"il catalogo Sorso", "m.pickedName.off":"Open Food Facts",
-    "m.none":"Non l'ho trovato tra i vini conosciuti: controlla i dati letti qui sotto.", "m.noneSave":" Quando salvi la scheda, Sorso se lo ricorda per la prossima volta.",
+    "m.src.book":"Dal tuo Taccuino: l'hai bevuto il {date} ({n}/100)", "m.src.bookN":" · assaggiato {c} volte", "m.src.sorso":"Dal catalogo Taste, confermato da chi l'ha assaggiato", "m.src.sorsoMine":"Dal catalogo Taste: l'hai inserito tu (lo vedranno tutti quando lo confermerà un'altra persona)", "m.src.off":"Da Open Food Facts, tramite il codice a barre (dati aperti, licenza ODbL)", "m.annate":"Annate conosciute: {v}",
+    "m.picked":"Dati presi da: {src}. Controllali qui sotto; l'annata resta quella letta sull'etichetta.", "m.pickedName.book":"il tuo Taccuino", "m.pickedName.sorso":"il catalogo Taste", "m.pickedName.off":"Open Food Facts",
+    "m.none":"Non l'ho trovato tra i vini conosciuti: controlla i dati letti qui sotto.", "m.noneSave":" Quando salvi la scheda, Taste se lo ricorda per la prossima volta.",
     "m.report":"Dati sbagliati? Segnala", "m.reported":"Grazie: segnalazione inviata.", "m.reportLogin":"Per segnalare un errore accedi con il tuo account.",
     "m.ean.title":"Codice a barre", "m.ean.hint":"Sul retro della bottiglia: fotografalo o scrivi le cifre.", "m.ean.photo":"Fotografa il codice", "m.ean.go":"Cerca", "m.ean.ph":"es. 8001234567897", "m.ean.reading":"Leggo il codice…",
-    "m.ean.bad":"Le cifre non formano un codice valido: controllale.", "m.ean.notFound":"Non trovo un codice a barre nella foto. Avvicinati, con il codice dritto e ben illuminato, oppure scrivi le cifre.", "m.ean.none":"Codice {c}: non è nel catalogo Sorso né su Open Food Facts.", "m.ean.notWine":"Codice {c}: su Open Food Facts è un prodotto che non sembra un vino.", "m.ean.unavail":"Open Food Facts non risponde ora: riprova fra poco.", "m.ean.offline":"Non riesco a scaricare il lettore dei codici: serve la connessione.",
-    "cat.eyebrow":"Catalogo Sorso", "cat.toggle":"Contribuisci al catalogo Sorso", "cat.on":"Un vino diventa visibile a tutti quando lo hanno confermato almeno due persone; se i dati sono sbagliati, chiunque può segnalarli.", "cat.login":"Serve l'accesso con il tuo account: senza, i vini restano solo nel tuo Taccuino.",
-    "cat.intro":"Quando salvi una degustazione con nome e produttore, Sorso aggiunge al catalogo comune solo i dati del vino: nome, produttore, annata, denominazione, tipologia e vitigni. Niente voti, note o nomi. Così la volta dopo il vino si riconosce dalla foto dell'etichetta, anche se non è in nessun altro catalogo.",
+    "m.ean.bad":"Le cifre non formano un codice valido: controllale.", "m.ean.notFound":"Non trovo un codice a barre nella foto. Avvicinati, con il codice dritto e ben illuminato, oppure scrivi le cifre.", "m.ean.none":"Codice {c}: non è nel catalogo Taste né su Open Food Facts.", "m.ean.notWine":"Codice {c}: su Open Food Facts è un prodotto che non sembra un vino.", "m.ean.unavail":"Open Food Facts non risponde ora: riprova fra poco.", "m.ean.offline":"Non riesco a scaricare il lettore dei codici: serve la connessione.",
+    "cat.eyebrow":"Catalogo Taste", "cat.toggle":"Contribuisci al catalogo Taste", "cat.on":"Un vino diventa visibile a tutti quando lo hanno confermato almeno due persone; se i dati sono sbagliati, chiunque può segnalarli.", "cat.login":"Serve l'accesso con il tuo account: senza, i vini restano solo nel tuo Taccuino.",
+    "cat.intro":"Quando salvi una degustazione con nome e produttore, Taste aggiunge al catalogo comune solo i dati del vino: nome, produttore, annata, denominazione, tipologia e vitigni. Niente voti, note o nomi. Così la volta dopo il vino si riconosce dalla foto dell'etichetta, anche se non è in nessun altro catalogo.",
     "label.loaded":"Foto caricata",
     "label.dropTitle":"Fotografa o trascina l'etichetta",
     "label.dropSub":"La allega alla scheda, da compilare a mano qui sotto.",
@@ -2643,7 +2648,7 @@ const I18N = {
     "book.exportManySaved":"schede salvate",
     "book.exportFailed":"Non sono riuscito a preparare la copia.",
     "book.importReading":"Leggo il file…",
-    "book.importNotOurs":"Questo file non sembra una copia di Sorso.",
+    "book.importNotOurs":"Questo file non sembra una copia di Taste.",
     "book.importDone":"{n} schede ripristinate{extra}.",
     "book.importAlready":", {n} già presenti o illeggibili",
     "book.importUnreadable":"File non leggibile.",
@@ -2824,11 +2829,11 @@ const I18N = {
     "circ.pending":"Inviti in attesa", "circ.pendingNone":"Nessun invito in attesa.", "circ.copyLink":"Copia il link", "circ.copied":"Link copiato.", "circ.copyFailed":"Non riesco a copiare: tieni premuto sul link e copialo a mano.",
     "circ.revoke":"Revoca", "circ.revoked":"Invito revocato.", "circ.expires":"scade il {d}",
     "circ.st.invited":"invitato", "circ.st.already_member":"è già nella cerchia", "circ.st.already_invited":"ha già un invito in attesa", "circ.st.invalid":"indirizzo non valido", "circ.st.full":"cerchia al completo", "circ.mail.sent":"mail inviata (può finire in spam)", "circ.mail.failed":"la mail non è partita: manda il link", "circ.mail.limited":"troppe mail oggi: manda il link", "circ.mail.off":"copia il link e mandalo tu",
-    "circ.mailOn":"Sorso manda anche una mail all'indirizzo, ma può finire in spam: avvisa chi inviti, oppure manda tu il link (Copia il link, Scrivi tu la mail, Condividi).", "circ.mailOff":"Sorso non manda mail da solo: dopo aver creato l'invito copia il link e mandalo tu (WhatsApp, mail…).",
-    "circ.spamTitle":"Controlla lo spam", "circ.spamWarn":"Le mail partono da un indirizzo gratuito e spesso finiscono in spam. Di' a chi hai invitato di cercare «Hai un invito su Sorso» anche lì, oppure manda tu il link dall'elenco «Inviti in attesa» qui sotto: dalla tua posta o da WhatsApp arriva sempre.",
-    "circ.writeMail":"Scrivi tu la mail", "circ.share":"Condividi", "circ.shareTitle":"Invito a una cerchia su Sorso", "circ.mailSubject":"Invito a una cerchia su Sorso",
-    "circ.mailBody":"Ciao! Ti invito nella cerchia «{circle}» su Sorso, il taccuino di degustazione.\n\nApri questo link e accedi con Google usando questo indirizzo mail:\n{link}\n\nL'invito vale 14 giorni e si usa una volta sola.",
-    "circ.resend":"Rimanda la mail", "circ.resent":"Mail rimandata.", "circ.resendFailed":"La mail non è partita: copia il link e mandalo tu.", "circ.resendLimited":"Hai già rimandato la mail abbastanza volte, o oggi ne sono partite troppe: copia il link.", "circ.resendOff":"Sorso non manda mail: copia il link.", "circ.st.unavailable":"non invitabile ora (ha già troppi inviti in attesa)",
+    "circ.mailOn":"Taste manda anche una mail all'indirizzo, ma può finire in spam: avvisa chi inviti, oppure manda tu il link (Copia il link, Scrivi tu la mail, Condividi).", "circ.mailOff":"Taste non manda mail da solo: dopo aver creato l'invito copia il link e mandalo tu (WhatsApp, mail…).",
+    "circ.spamTitle":"Controlla lo spam", "circ.spamWarn":"Le mail partono da un indirizzo gratuito e spesso finiscono in spam. Di' a chi hai invitato di cercare «Hai un invito su Taste» anche lì, oppure manda tu il link dall'elenco «Inviti in attesa» qui sotto: dalla tua posta o da WhatsApp arriva sempre.",
+    "circ.writeMail":"Scrivi tu la mail", "circ.share":"Condividi", "circ.shareTitle":"Invito a una cerchia su Taste", "circ.mailSubject":"Invito a una cerchia su Taste",
+    "circ.mailBody":"Ciao! Ti invito nella cerchia «{circle}» su Taste, il taccuino di degustazione.\n\nApri questo link e accedi con Google usando questo indirizzo mail:\n{link}\n\nL'invito vale 14 giorni e si usa una volta sola.",
+    "circ.resend":"Rimanda la mail", "circ.resent":"Mail rimandata.", "circ.resendFailed":"La mail non è partita: copia il link e mandalo tu.", "circ.resendLimited":"Hai già rimandato la mail abbastanza volte, o oggi ne sono partite troppe: copia il link.", "circ.resendOff":"Taste non manda mail: copia il link.", "circ.st.unavailable":"non invitabile ora (ha già troppi inviti in attesa)",
     "circ.makeAdmin":"Rendi amministratore", "circ.makeMember":"Togli amministratore", "circ.remove":"Togli dalla cerchia", "circ.transfer":"Passa la proprietà",
     "circ.removeAsk":"Togliere {name} dalla cerchia?", "circ.transferAsk":"Passare la proprietà a {name}? Diventerai amministratore e non potrai più eliminare la cerchia.",
     "circ.roleSet":"Ruolo cambiato.", "circ.removed":"Persona tolta.", "circ.transferred":"Proprietà passata.",
@@ -2857,11 +2862,11 @@ const I18N = {
     "circ.err.not_found":"Non trovo la cerchia: forse non ne fai più parte.", "circ.err.invite_expired":"L'invito è scaduto o è già stato usato.", "circ.err.wrong_account":"Questo invito è per un altro indirizzo mail.",
     "circ.err.rate_limited":"Troppe richieste: riprova fra poco.", "circ.err.owner_must_transfer":"Sei il Proprietario: passa prima la proprietà o elimina la cerchia.",
     "circ.err.invalid_name":"Scrivi un nome.", "circ.err.invalid_email":"Scrivi almeno un indirizzo mail.", "circ.err.too_many":"Al massimo 10 inviti per volta.", "circ.err.generic":"Qualcosa non ha funzionato. Riprova.", "circ.err.nameMismatch":"Il nome non coincide: la cerchia non è stata eliminata.", "circ.err.busy":"Un'altra modifica è in corso: riprova fra un attimo.", "circ.backFromEvent":"← Cerchie",
-    "name.eyebrow":"Nome del taccuino", "name.intro":"Dai un nome al tuo taccuino, per esempio «Taccuino di Mario Rossi» o «Sorso di vino». Compare in alto, accanto al logo.",
-    "name.title":"Titolo", "name.titlePh":"Sorso", "name.owner":"Di chi è (facoltativo)", "name.ownerPh":"es. Mario Rossi",
+    "name.eyebrow":"Nome del taccuino", "name.intro":"Dai un nome al tuo taccuino, per esempio «Taccuino di Mario Rossi» o «Calici di Mario Rossi». Compare in alto, accanto al logo.",
+    "name.title":"Titolo", "name.titlePh":"Taste", "name.owner":"Di chi è (facoltativo)", "name.ownerPh":"es. Mario Rossi",
     "name.save":"Salva il nome", "name.reset":"Ripristina", "name.saved":"Nome salvato.", "name.restored":"Nome originale ripristinato.",
     "brand.askOwner":"Di chi è questo taccuino?",
-    "brand.askName":"Come vuoi chiamarlo? (lascia vuoto per “Sorso”)"
+    "brand.askName":"Come vuoi chiamarlo? (lascia vuoto per “Taste”)"
   },
   en: {
     "nav.new":"New", "nav.blind":"Blind", "nav.book":"Notebook",
@@ -2910,7 +2915,7 @@ const I18N = {
     "action.delete":"Delete",
 
     "account.eyebrow":"Account",
-    "guide.eyebrow":"Guide", "guide.note":"How to use Sorso, step by step: scoring, sheets, blind tasting, statistics, events and settings (the PDF is in Italian).", "guide.open":"Open the guide", "guide.openAria":"Open the guide (PDF in Italian, opens in a new tab)",
+    "guide.eyebrow":"Guide", "guide.note":"How to use Taste, step by step: scoring, sheets, blind tasting, statistics, events and settings (the PDF is in Italian).", "guide.open":"Open the guide", "guide.openAria":"Open the guide (PDF in Italian, opens in a new tab)",
     "account.logout":"Sign out",
     "account.logoutFull":"Sign out of account",
     "account.loginPrompt":"Sign in or create an account",
@@ -2930,14 +2935,14 @@ const I18N = {
     "lbl.f.nome":"Name", "lbl.f.produttore":"Producer", "lbl.f.annata":"Vintage", "lbl.f.denominazione":"Appellation", "lbl.f.tipologia":"Type", "lbl.f.vitigni":"Grapes", "lbl.now":"Now in the sheet: {v}",
     "lbl.extra":"Alcohol read: {alc}. There is no field for it: you can write it in the notes.", "lbl.apply":"Fill in the sheet", "lbl.close":"Close", "lbl.raw":"Text read (you can fix it)", "lbl.again":"Analyze again", "lbl.done":"Sheet filled in: check the fields below.", "lbl.vitHint":"Grapes are added to the blend without a percentage: add it yourself.",
     "m.busy":"Looking for the wine in your notebook and in the catalogue…", "m.isThis":"Is it this one?", "m.maybe":"Maybe one of these?", "m.yes":"Yes, that's it", "m.no":"No", "m.none2":"None of these", "m.pick":"This one",
-    "m.src.book":"From your notebook: you had it on {date} ({n}/100)", "m.src.bookN":" · tasted {c} times", "m.src.sorso":"From the Sorso catalogue, confirmed by people who tasted it", "m.src.sorsoMine":"From the Sorso catalogue: you added it (everyone will see it once someone else confirms it)", "m.src.off":"From Open Food Facts, via the barcode (open data, ODbL licence)", "m.annate":"Known vintages: {v}",
-    "m.picked":"Data taken from: {src}. Check it below; the vintage stays the one read on the label.", "m.pickedName.book":"your notebook", "m.pickedName.sorso":"the Sorso catalogue", "m.pickedName.off":"Open Food Facts",
-    "m.none":"I didn't find it among known wines: check the data read below.", "m.noneSave":" When you save the sheet, Sorso remembers it for next time.",
+    "m.src.book":"From your notebook: you had it on {date} ({n}/100)", "m.src.bookN":" · tasted {c} times", "m.src.sorso":"From the Taste catalogue, confirmed by people who tasted it", "m.src.sorsoMine":"From the Taste catalogue: you added it (everyone will see it once someone else confirms it)", "m.src.off":"From Open Food Facts, via the barcode (open data, ODbL licence)", "m.annate":"Known vintages: {v}",
+    "m.picked":"Data taken from: {src}. Check it below; the vintage stays the one read on the label.", "m.pickedName.book":"your notebook", "m.pickedName.sorso":"the Taste catalogue", "m.pickedName.off":"Open Food Facts",
+    "m.none":"I didn't find it among known wines: check the data read below.", "m.noneSave":" When you save the sheet, Taste remembers it for next time.",
     "m.report":"Wrong data? Report it", "m.reported":"Thanks: report sent.", "m.reportLogin":"Sign in to report a mistake.",
     "m.ean.title":"Barcode", "m.ean.hint":"On the back of the bottle: take a photo of it or type the digits.", "m.ean.photo":"Photograph the barcode", "m.ean.go":"Search", "m.ean.ph":"e.g. 8001234567897", "m.ean.reading":"Reading the barcode…",
-    "m.ean.bad":"Those digits are not a valid barcode: check them.", "m.ean.notFound":"I can't find a barcode in the photo. Get closer, with the code straight and well lit, or type the digits.", "m.ean.none":"Barcode {c}: not in the Sorso catalogue nor on Open Food Facts.", "m.ean.notWine":"Barcode {c}: on Open Food Facts it's a product that doesn't look like a wine.", "m.ean.unavail":"Open Food Facts isn't answering right now: try again shortly.", "m.ean.offline":"I can't download the barcode reader: you need a connection.",
-    "cat.eyebrow":"Sorso catalogue", "cat.toggle":"Contribute to the Sorso catalogue", "cat.on":"A wine becomes visible to everyone once at least two people have confirmed it; if the data is wrong, anyone can report it.", "cat.login":"You need to sign in to your account: without it, wines stay only in your notebook.",
-    "cat.intro":"When you save a tasting with name and producer, Sorso adds only the wine's data to the shared catalogue: name, producer, vintage, appellation, type and grapes. No scores, notes or names. So next time the wine is recognised from the label photo, even if it isn't in any other catalogue.",
+    "m.ean.bad":"Those digits are not a valid barcode: check them.", "m.ean.notFound":"I can't find a barcode in the photo. Get closer, with the code straight and well lit, or type the digits.", "m.ean.none":"Barcode {c}: not in the Taste catalogue nor on Open Food Facts.", "m.ean.notWine":"Barcode {c}: on Open Food Facts it's a product that doesn't look like a wine.", "m.ean.unavail":"Open Food Facts isn't answering right now: try again shortly.", "m.ean.offline":"I can't download the barcode reader: you need a connection.",
+    "cat.eyebrow":"Taste catalogue", "cat.toggle":"Contribute to the Taste catalogue", "cat.on":"A wine becomes visible to everyone once at least two people have confirmed it; if the data is wrong, anyone can report it.", "cat.login":"You need to sign in to your account: without it, wines stay only in your notebook.",
+    "cat.intro":"When you save a tasting with name and producer, Taste adds only the wine's data to the shared catalogue: name, producer, vintage, appellation, type and grapes. No scores, notes or names. So next time the wine is recognised from the label photo, even if it isn't in any other catalogue.",
     "label.loaded":"Photo uploaded",
     "label.dropTitle":"Photograph or drag the label here",
     "label.dropSub":"It's attached to the entry, to fill in by hand below.",
@@ -3240,7 +3245,7 @@ const I18N = {
     "book.exportManySaved":"entries saved",
     "book.exportFailed":"Couldn't prepare the copy.",
     "book.importReading":"Reading the file…",
-    "book.importNotOurs":"This file doesn't look like a Sorso backup.",
+    "book.importNotOurs":"This file doesn't look like a Taste backup.",
     "book.importDone":"{n} entries restored{extra}.",
     "book.importAlready":", {n} already present or unreadable",
     "book.importUnreadable":"File not readable.",
@@ -3421,11 +3426,11 @@ const I18N = {
     "circ.pending":"Pending invitations", "circ.pendingNone":"No pending invitations.", "circ.copyLink":"Copy link", "circ.copied":"Link copied.", "circ.copyFailed":"I can't copy: press and hold the link and copy it by hand.",
     "circ.revoke":"Revoke", "circ.revoked":"Invitation revoked.", "circ.expires":"expires {d}",
     "circ.st.invited":"invited", "circ.st.already_member":"is already in the circle", "circ.st.already_invited":"already has a pending invitation", "circ.st.invalid":"invalid address", "circ.st.full":"circle is full", "circ.mail.sent":"email sent (may land in spam)", "circ.mail.failed":"the email didn't go out: send the link", "circ.mail.limited":"too many emails today: send the link", "circ.mail.off":"copy the link and send it yourself",
-    "circ.mailOn":"Sorso also sends an email to the address, but it may land in spam: tell the people you invite, or send the link yourself (Copy link, Write the email, Share).", "circ.mailOff":"Sorso doesn't send emails by itself: after creating the invitation copy the link and send it yourself (WhatsApp, email…).",
-    "circ.spamTitle":"Check the spam folder", "circ.spamWarn":"Emails go out from a free address and often land in spam. Tell the people you invited to look for “Hai un invito su Sorso” there too, or send the link yourself from the “Pending invitations” list below: from your own mail or WhatsApp it always arrives.",
-    "circ.writeMail":"Write the email", "circ.share":"Share", "circ.shareTitle":"Invitation to a circle on Sorso", "circ.mailSubject":"Invitation to a circle on Sorso",
-    "circ.mailBody":"Hi! I'm inviting you to the circle “{circle}” on Sorso, the tasting notebook.\n\nOpen this link and sign in with Google using this email address:\n{link}\n\nThe invitation is valid for 14 days and can be used once.",
-    "circ.resend":"Resend email", "circ.resent":"Email sent again.", "circ.resendFailed":"The email didn't go out: copy the link and send it yourself.", "circ.resendLimited":"You've already resent it enough times, or too many went out today: copy the link.", "circ.resendOff":"Sorso doesn't send emails: copy the link.", "circ.st.unavailable":"can't be invited now (too many pending invitations)",
+    "circ.mailOn":"Taste also sends an email to the address, but it may land in spam: tell the people you invite, or send the link yourself (Copy link, Write the email, Share).", "circ.mailOff":"Taste doesn't send emails by itself: after creating the invitation copy the link and send it yourself (WhatsApp, email…).",
+    "circ.spamTitle":"Check the spam folder", "circ.spamWarn":"Emails go out from a free address and often land in spam. Tell the people you invited to look for “Hai un invito su Taste” there too, or send the link yourself from the “Pending invitations” list below: from your own mail or WhatsApp it always arrives.",
+    "circ.writeMail":"Write the email", "circ.share":"Share", "circ.shareTitle":"Invitation to a circle on Taste", "circ.mailSubject":"Invitation to a circle on Taste",
+    "circ.mailBody":"Hi! I'm inviting you to the circle “{circle}” on Taste, the tasting notebook.\n\nOpen this link and sign in with Google using this email address:\n{link}\n\nThe invitation is valid for 14 days and can be used once.",
+    "circ.resend":"Resend email", "circ.resent":"Email sent again.", "circ.resendFailed":"The email didn't go out: copy the link and send it yourself.", "circ.resendLimited":"You've already resent it enough times, or too many went out today: copy the link.", "circ.resendOff":"Taste doesn't send emails: copy the link.", "circ.st.unavailable":"can't be invited now (too many pending invitations)",
     "circ.makeAdmin":"Make admin", "circ.makeMember":"Remove admin", "circ.remove":"Remove from circle", "circ.transfer":"Transfer ownership",
     "circ.removeAsk":"Remove {name} from the circle?", "circ.transferAsk":"Transfer ownership to {name}? You will become an admin and won't be able to delete the circle.",
     "circ.roleSet":"Role changed.", "circ.removed":"Person removed.", "circ.transferred":"Ownership transferred.",
@@ -3455,10 +3460,10 @@ const I18N = {
     "circ.err.rate_limited":"Too many requests: try again shortly.", "circ.err.owner_must_transfer":"You're the Owner: transfer ownership first or delete the circle.",
     "circ.err.invalid_name":"Write a name.", "circ.err.invalid_email":"Write at least one email address.", "circ.err.too_many":"At most 10 invitations at a time.", "circ.err.generic":"Something went wrong. Try again.", "circ.err.nameMismatch":"The name doesn't match: the circle was not deleted.", "circ.err.busy":"Another change is in progress: try again in a moment.", "circ.backFromEvent":"← Circles",
     "name.eyebrow":"Notebook name", "name.intro":"Give your notebook a name, for example “Mario Rossi's notebook” or “Wine sip”. It appears at the top, next to the logo.",
-    "name.title":"Title", "name.titlePh":"Sorso", "name.owner":"Whose it is (optional)", "name.ownerPh":"e.g. Mario Rossi",
+    "name.title":"Title", "name.titlePh":"Taste", "name.owner":"Whose it is (optional)", "name.ownerPh":"e.g. Mario Rossi",
     "name.save":"Save the name", "name.reset":"Restore", "name.saved":"Name saved.", "name.restored":"Original name restored.",
     "brand.askOwner":"Whose notebook is this?",
-    "brand.askName":"What do you want to call it? (leave blank for “Sorso”)"
+    "brand.askName":"What do you want to call it? (leave blank for “Taste”)"
   }
 };
 function t(key){ return (I18N[S.lang] && I18N[S.lang][key]) || I18N.it[key] || key; }
@@ -3478,7 +3483,7 @@ function applyStaticText(){
   document.querySelectorAll("[data-i18n-title]").forEach(el => { el.title = t(el.getAttribute("data-i18n-title")); });
   document.querySelectorAll("[data-i18n-aria]").forEach(el => { el.setAttribute("aria-label", t(el.getAttribute("data-i18n-aria"))); });
   document.querySelectorAll("[data-i18n-alt]").forEach(el => { el.alt = t(el.getAttribute("data-i18n-alt")); });
-  document.title = "Sorso — " + t("login.tag");
+  document.title = "Taste — " + t("login.tag");
 }
 const LANG_KEY = "sorso-lang";
 /* versione e data dell'ultimo aggiornamento, sempre visibili in fondo (fonte: js/version.js) */
@@ -3486,7 +3491,7 @@ function renderVersion(){
   const el = document.getElementById("appVersion"); if(!el || !window.SORSO_VERSION) return;
   let d = SORSO_VERSION.date;
   try{ d = new Date(SORSO_VERSION.date+"T12:00:00").toLocaleDateString(S.lang === "en" ? "en-GB" : "it-IT", {day:"numeric", month:"short", year:"numeric"}); }catch(e){}
-  el.textContent = "Sorso · v"+SORSO_VERSION.version+" · "+tf("app.updated",{d:d});
+  el.textContent = "Taste · v"+SORSO_VERSION.version+" · "+tf("app.updated",{d:d});
 }
 function setLang(lang){
   S.lang = (lang === "en") ? "en" : "it";
@@ -3939,7 +3944,7 @@ const DB = (function(){
   function demote(err){
     if(!ws) return;
     ws = null;
-    try{ console.info("Sorso: archivio Claude non raggiungibile, uso quello del browser. I dati vengono salvati lo stesso.", err && err.message); }catch(e){}
+    try{ console.info("Taste: archivio Claude non raggiungibile, uso quello del browser. I dati vengono salvati lo stesso.", err && err.message); }catch(e){}
     if(typeof window !== "undefined" && window.__sorsoOnDemote) window.__sorsoOnDemote();
   }
 
@@ -3968,7 +3973,7 @@ const DB = (function(){
         if(typeof window !== "undefined" && window.__sorsoOnSessionExpired) window.__sorsoOnSessionExpired();
       }else{
         remoteBroken = true;
-        try{ console.info("Sorso: " + err.message + " — uso l'archivio del browser nel frattempo.", err); }catch(e){}
+        try{ console.info("Taste: " + err.message + " — uso l'archivio del browser nel frattempo.", err); }catch(e){}
         if(typeof window !== "undefined" && window.__sorsoOnDemote) window.__sorsoOnDemote();
       }
       return {handled:false};
@@ -4052,31 +4057,32 @@ const DB = (function(){
    ============================================================ */
 const PROFILE_KEY = "profilo-taccuino";
 
-/* «Sorso» si scrive con le due O che sorridono (il logo). La parola resta testo vero: i lettori di schermo
-   e la ricerca leggono «Sorso». Un nome scelto dall'utente si scrive com'è. */
-const O_SMILE = '<svg viewBox="2.6 2.6 26.8 26.8" aria-hidden="true"><circle cx="16" cy="16" r="11.2" fill="none" stroke="currentColor" stroke-width="4.4"/><path d="M10.6 17.6C12.8 21.8 19.2 21.8 21.4 17.6" fill="none" stroke="var(--accent,#5b4bd5)" stroke-width="3.8" stroke-linecap="round"/></svg>';
+/* «taste» si scrive in minuscolo, con la a tonda che sorride (il logo). La parola resta testo vero: i lettori
+   di schermo e la ricerca leggono «taste». Chi aveva lasciato il vecchio nome predefinito («Sorso») vede il nuovo.
+   Un nome scelto dall'utente si scrive com'è. */
+const A_SMILE = '<svg viewBox="0 0 86 100" aria-hidden="true"><circle cx="40" cy="50" r="31" fill="none" stroke="currentColor" stroke-width="19"/><path d="M77 2V100" stroke="currentColor" stroke-width="18"/><path d="M23 53C30 72 50 72 57 53" fill="none" stroke="var(--accent,#5b4bd5)" stroke-width="14" stroke-linecap="round"/></svg>';
+function nomePredefinito(nome){ const n = String(nome || "").trim().toLowerCase(); return !n || n === "taste" || n === "sorso"; }
 function wordmarkHTML(nome){
-  nome = String(nome || "Sorso");
-  if(nome.trim().toLowerCase() !== "sorso") return esc(nome);
-  return nome.trim().replace(/[oO]/g, c => '<span class="o-smile"><span class="o-txt">'+c+'</span>'+O_SMILE+'</span>');
+  if(!nomePredefinito(nome)) return esc(String(nome));
+  return '<span class="wm-taste">t<span class="a-smile"><span class="o-txt">a</span>'+A_SMILE+'</span>ste</span>';
 }
-try{ document.getElementById("loginBrandName").innerHTML = wordmarkHTML("Sorso"); }catch(e){}
+try{ document.getElementById("loginBrandName").innerHTML = wordmarkHTML("Taste"); }catch(e){}
 function renderBrand(){
   const tag = S.owner ? tf("hdr.brandTagOwned", {owner: S.owner}) : t("hdr.brandTagGeneric");
-  $("brandName").innerHTML = wordmarkHTML(S.brandName || "Sorso");
-  $("brandBtn").classList.toggle("is-sorso", !S.brandName || S.brandName.trim().toLowerCase() === "sorso");
+  $("brandName").innerHTML = wordmarkHTML(S.brandName || "Taste");
+  $("brandBtn").classList.toggle("is-sorso", nomePredefinito(S.brandName));
   $("brandOwner").textContent = tag;
-  $("loginBrandName").innerHTML = wordmarkHTML("Sorso");
+  $("loginBrandName").innerHTML = wordmarkHTML("Taste");
   $("brandBtn").title = t("hdr.brandRenameTitle");
-  document.title = S.brandName && S.brandName !== "Sorso" ? S.brandName : "Sorso — Taccuino di degustazione";
+  document.title = nomePredefinito(S.brandName) ? "Taste — " + t("login.tag") : S.brandName;
   /* i campi di Impostazioni seguono il nome salvato, tranne mentre ci si sta scrivendo */
-  if(document.activeElement !== $("brandNameInput")) $("brandNameInput").value = S.brandName && S.brandName !== "Sorso" ? S.brandName : "";
+  if(document.activeElement !== $("brandNameInput")) $("brandNameInput").value = nomePredefinito(S.brandName) ? "" : S.brandName;
   if(document.activeElement !== $("brandOwnerInput")) $("brandOwnerInput").value = S.owner || "";
   brandPreview();
 }
 /* anteprima di come comparirà in alto, mentre si scrive */
 function brandPreview(){
-  const nome = ($("brandNameInput").value.trim() || "Sorso").slice(0,24), owner = $("brandOwnerInput").value.trim().slice(0,32);
+  const nome = ($("brandNameInput").value.trim() || "Taste").slice(0,24), owner = $("brandOwnerInput").value.trim().slice(0,32);
   $("brandPreviewName").innerHTML = wordmarkHTML(nome);
   $("brandPreviewTag").textContent = owner ? tf("hdr.brandTagOwned", {owner}) : t("hdr.brandTagGeneric");
 }
@@ -4111,7 +4117,7 @@ $("brandBtn").addEventListener("click", () => {
 });
 ["brandNameInput","brandOwnerInput"].forEach(id => $(id).addEventListener("input", brandPreview));
 async function salvaNome(){
-  S.brandName = ($("brandNameInput").value.trim() || "Sorso").slice(0,24);
+  S.brandName = ($("brandNameInput").value.trim() || "Taste").slice(0,24);
   S.owner = $("brandOwnerInput").value.trim().slice(0,32);
   renderBrand();
   await saveProfile();
@@ -5422,7 +5428,7 @@ async function salvaScheda(){
     setStatus(tf("new.savingError",{msg:(e && e.message ? e.message : t("new.unknown"))}));
     return;
   }
-  /* il vino (solo i suoi dati) va nel catalogo Sorso; in modifica no: la conferma c'è già stata */
+  /* il vino (solo i suoi dati) va nel catalogo Taste; in modifica no: la conferma c'è già stata */
   if(!inModifica) catContribute(Object.assign({}, entry, {uvaggi:S.wine.uvaggi}));
   matchReset();
 
@@ -6516,7 +6522,7 @@ $("labelRead").addEventListener("change", e => {
 });
 
 /* ---- Il vino è già conosciuto? Ricerca a strati (2.7.0) ----
-   1. il tuo Taccuino (resta sul dispositivo)  2. il catalogo Vino.com, quando ci sarà  3. il catalogo Sorso (vini confermati da chi li ha assaggiati)
+   1. il tuo Taccuino (resta sul dispositivo)  2. il catalogo Vino.com, quando ci sarà  3. il catalogo Taste (vini confermati da chi li ha assaggiati)
    4. Open Food Facts, con il codice a barre  5. altrimenti restano i dati letti.
    «È questo?» solo quando la somiglianza è alta; se è media, due o tre «Forse». Si vede sempre da dove viene il dato. */
 const MATCH = {busy:false, items:[], strong:false, done:false, dismissed:false, ean:"", eanBusy:false, eanMsg:"", picked:null, msg:""};
@@ -6659,7 +6665,7 @@ async function matchReport(i){
   lblRender();
 }
 
-/* contribuire al catalogo Sorso: dopo il salvataggio di una degustazione nuova, solo i dati del vino */
+/* contribuire al catalogo Taste: dopo il salvataggio di una degustazione nuova, solo i dati del vino */
 function catOn(){ try{ return window.localStorage.getItem("sorso-catalogo") !== "0"; }catch(e){ return true; } }
 function catContribute(w){
   const picked = MATCH.picked;
@@ -7294,7 +7300,7 @@ function circWidgetUrl(token){
 }
 function circWidgetCode(token, name){
   const url = circWidgetUrl(token), o = location.origin;
-  return '<iframe src="'+url+'" title="'+String("Sorso — "+name).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]))+'" style="width:100%;max-width:640px;height:520px;border:0" loading="lazy"></iframe>\n'+
+  return '<iframe src="'+url+'" title="'+String("Taste — "+name).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]))+'" style="width:100%;max-width:640px;height:520px;border:0" loading="lazy"></iframe>\n'+
     '<script>addEventListener("message",function(e){if(e.origin!=="'+o+'"||!e.data||e.data.type!=="sorso:widget-height")return;document.querySelectorAll(\'iframe[src^="'+o+'/widget"]\').forEach(function(f){if(f.contentWindow===e.source)f.style.height=e.data.height+"px"})});<\/script>';
 }
 function circWidgetHTML(d){

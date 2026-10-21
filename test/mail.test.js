@@ -44,7 +44,7 @@ test("senza servizio di posta: l'invito si crea, la mail è «off», niente chia
 });
 
 test("Resend: la mail parte con link fisso, oggetto fisso, testo ripulito", async () => {
-  env({ RESEND_API_KEY: "re_test_key_000000000000000000", MAIL_FROM: "Sorso <inviti@esempio.it>" });
+  env({ RESEND_API_KEY: "re_test_key_000000000000000000", MAIL_FROM: "Taste <inviti@esempio.it>" });
   await account("anna", "anna@example.com");
   const { circle } = await ok("anna", { op: "create", name: '<script>alert(1)</script> "Corso"' });
   const r = await ok("anna", { op: "invite", circle: circle.id, emails: ["bruno@example.com"], role: "admin" });
@@ -53,8 +53,8 @@ test("Resend: la mail parte con link fisso, oggetto fisso, testo ripulito", asyn
   const m = sent[0];
   assert.equal(m.url, "https://api.resend.com/emails");
   assert.equal(m.headers.Authorization, "Bearer re_test_key_000000000000000000");
-  assert.equal(m.body.from, "Sorso <inviti@esempio.it>"); assert.deepEqual(m.body.to, ["bruno@example.com"]);
-  assert.equal(m.body.subject, "Hai un invito su Sorso", "il nome della cerchia non finisce nell'oggetto");
+  assert.equal(m.body.from, "Taste <inviti@esempio.it>"); assert.deepEqual(m.body.to, ["bruno@example.com"]);
+  assert.equal(m.body.subject, "Hai un invito su Taste", "il nome della cerchia non finisce nell'oggetto");
   const link = "https://sorso-taccuino.vercel.app/?invito=" + r.results[0].token;
   assert.ok(m.body.text.includes(link) && m.body.html.includes(link), "il link è quello del sito, non dell'intestazione Host della richiesta");
   assert.ok(!JSON.stringify(m.body).includes("evil.example"));
@@ -74,13 +74,13 @@ test("APP_ORIGIN cambia l'indirizzo dei link; un valore strano è ignorato", asy
 });
 
 test("Brevo: stessa mail con il formato di Brevo", async () => {
-  env({ BREVO_API_KEY: "brevo-key", MAIL_FROM: "Sorso <inviti@esempio.it>" });
+  env({ BREVO_API_KEY: "brevo-key", MAIL_FROM: "Taste <inviti@esempio.it>" });
   await account("anna", "anna@example.com");
   const { circle } = await ok("anna", { op: "create", name: "Corso" });
   const r = await ok("anna", { op: "invite", circle: circle.id, emails: ["bruno@example.com"] });
   assert.equal(r.results[0].mail, "sent");
   assert.equal(sent[0].url, "https://api.brevo.com/v3/smtp/email"); assert.equal(sent[0].headers["api-key"], "brevo-key");
-  assert.deepEqual(sent[0].body.sender, { name: "Sorso", email: "inviti@esempio.it" }); assert.deepEqual(sent[0].body.to, [{ email: "bruno@example.com" }]);
+  assert.deepEqual(sent[0].body.sender, { name: "Taste", email: "inviti@esempio.it" }); assert.deepEqual(sent[0].body.to, [{ email: "bruno@example.com" }]);
   assert.ok(sent[0].body.textContent.includes("?invito="));
 });
 

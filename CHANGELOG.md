@@ -3,6 +3,10 @@
 La versione e la data dell'ultimo aggiornamento sono mostrate in fondo all'app e dello spazio di team
 (fonte: `public/js/version.js`, da tenere uguale a `package.json`).
 
+## 2.11.0 — 21 ottobre 2026
+- **Sorso diventa Taste.** Il nuovo nome compare ovunque si veda: app, accesso, titolo nel browser e sul telefono, serate delle cerchie, spazio di team, widget, mail degli inviti e guide PDF. Il logo è la scritta **«taste» in minuscolo**, con la **a** tonda che sorride (lo stesso sorriso del vecchio logo); l'icona dell'app resta il cerchio che sorride. Il sottotitolo segue la lingua: «taccuino di degustazione» / «tasting notebook».
+- Non cambia niente di tecnico: stesso indirizzo, stessi dati salvati, stessi codici dei widget già incollati. Chi aveva lasciato il nome predefinito vede «taste»; chi aveva scelto un nome suo lo tiene.
+
 ## 2.10.1 — 21 ottobre 2026
 - **Giro su telefono e tablet.** Telefoni stretti (320 px): le schede delle serate (Degustazioni, Taccuino, Classifica, Statistiche) vanno su due righe invece di uscire dal bordo, e le righe del gioco restano dentro il riquadro. Tablet in orizzontale: le righe del punteggio a sinistra tornano alte abbastanza per il dito. Il pulsante «Offrimi un calice» si fa da parte anche sopra le serate delle cerchie, così non copre punti e pulsanti.
 

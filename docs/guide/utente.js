@@ -1,8 +1,8 @@
-/* Guida all'uso di Sorso per chi lo usa ogni giorno (il profilo personale): linguaggio semplice, tante schermate.
+/* Guida all'uso di Taste per chi lo usa ogni giorno (il profilo personale): linguaggio semplice, tante schermate.
    Si scarica dall'app: Impostazioni → Guida. Il file finito viene copiato anche in public/. */
 const L = require("./lib");
 const { fig, wide, stats, cards, table, call, ul, check, eyebrow } = L;
-const DOC = "Guida all'uso di Sorso";
+const DOC = "Guida all'uso di Taste";
 let n = 1;
 const pg = (cls, label, inner) => L.page({ cls, label, doc: DOC, n: ++n, big: true }, inner);
 const passi = list => `<div class="flow" style="grid-template-columns:repeat(${list.length},1fr)">${list.map(([t, d], i) => `<div class="st" style="min-height:34mm"><span class="nn">${i + 1}</span><b>${t}</b><span class="d">${d}</span></div>`).join("")}</div>`;
@@ -11,12 +11,12 @@ const lato = (testo, figura) => `<div style="display:grid;grid-template-columns:
 
 function build() {
   const P = [];
-  P.push(L.cover({ titolo: "Il tuo taccuino<br>di <em>degustazione</em>", sotto: "Guida all'uso di Sorso<br>Schede · alla cieca · statistiche · eventi · impostazioni", tipo: "Guida all'uso per chi degusta" }));
+  P.push(L.cover({ titolo: "Il tuo taccuino<br>di <em>degustazione</em>", sotto: "Guida all'uso di Taste<br>Schede · alla cieca · statistiche · eventi · impostazioni", tipo: "Guida all'uso per chi degusta" }));
 
   P.push(pg("paper", "In breve", `
     ${eyebrow("01", "In breve")}
     <h1 class="d">Assaggi, <em>voti, ricordi</em></h1>
-    <p class="lead">Sorso è il tuo taccuino: fotografi l'etichetta, dai il voto, e ritrovi ogni vino con le statistiche del tuo palato.</p>
+    <p class="lead">Taste è il tuo taccuino: fotografi l'etichetta, dai il voto, e ritrovi ogni vino con le statistiche del tuo palato.</p>
     ${stats([["50–100", "la scala<br>del voto"], ["2", "modi di votare:<br>rapido o completo"], ["5", "sezioni:<br>Nuova · Alla cieca · Taccuino · Statistiche · Cerchie"], ["0 €", "il costo<br>dell'app"]])}
     ${cards([["Nuova", "Una scheda per ogni vino: etichetta, dati, giudizio. Il punteggio si calcola da solo."], ["Alla cieca", "Assaggi senza guardare l'etichetta e provi a indovinare. Poi confronti."], ["Taccuino", "Tutte le tue schede: cerchi, ordini, confronti due vini, modifichi."], ["Statistiche", "Il tuo profilo: vitigni preferiti, come giudichi, quanto conta il prezzo."], ["Cerchie", "Gruppi di amici, colleghi o corsisti: serate con più vini o un solo vino, voti anonimi e classifica."], ["Impostazioni", "Colori, tema chiaro o scuro, copia dei dati, account e questa guida."]])}
     <p class="mute">Funziona dal telefono e dal computer. Sul telefono le sezioni sono nella barra in alto; sul computer, nella barra in alto.</p>
@@ -46,7 +46,7 @@ function build() {
     ${lato(`
         <p class="lead">Tutto è facoltativo, tranne il nome del vino.</p>
         ${passi([["Etichetta", "Scatta o scegli una foto, poi «Leggi l'etichetta»."], ["Dati", "Controlli e completi: nome, annata, prezzo…"], ["Giudizio", "Voto rapido o scheda completa."]])}
-        ${ul(["<b>Leggi l'etichetta</b>: Sorso trova l'etichetta nella foto, la legge e propone nome, produttore, annata, denominazione e vitigni. Controlli, correggi e scegli cosa usare. La foto resta sul telefono; meglio se l'etichetta è dritta e ben illuminata.", "<b>È questo?</b>: se il vino è nel tuo Taccuino, nel catalogo Sorso o (con il <b>codice a barre</b> del retro) su Open Food Facts, Sorso lo propone con tutti i dati; se non è sicuro, due o tre vini tra cui scegliere.", "<b>Uvaggio</b>: indica i vitigni e le percentuali. Alimenta le statistiche per vitigno: più lo compili, più il profilo è preciso.", "<b>Tipologia</b>: rosso, bianco, rosato, bollicine… Il giudizio tiene conto del tipo di vino.", "Il punteggio si aggiorna mentre muovi i cursori."])}
+        ${ul(["<b>Leggi l'etichetta</b>: Taste trova l'etichetta nella foto, la legge e propone nome, produttore, annata, denominazione e vitigni. Controlli, correggi e scegli cosa usare. La foto resta sul telefono; meglio se l'etichetta è dritta e ben illuminata.", "<b>È questo?</b>: se il vino è nel tuo Taccuino, nel catalogo Taste o (con il <b>codice a barre</b> del retro) su Open Food Facts, Taste lo propone con tutti i dati; se non è sicuro, due o tre vini tra cui scegliere.", "<b>Uvaggio</b>: indica i vitigni e le percentuali. Alimenta le statistiche per vitigno: più lo compili, più il profilo è preciso.", "<b>Tipologia</b>: rosso, bianco, rosato, bollicine… Il giudizio tiene conto del tipo di vino.", "Il punteggio si aggiorna mentre muovi i cursori."])}
         ${call("<b>Hai sbagliato?</b> Una scheda salvata si modifica dal Taccuino: tocca «Modifica scheda».")}`,
       fig("app-nuova.png", 1, "La scheda <b>Nuova</b>: etichetta, dati e giudizio.", "lg"))}
   `));
@@ -97,7 +97,7 @@ function build() {
     <h1 class="d">Tutto sul tuo profilo, <em>in un posto</em></h1>
     ${lato(`
         <p class="lead">Si apre dall'ingranaggio in alto (e dal menù del tuo avatar); sul computer c'è anche il pulsante «Aspetto e colori».</p>
-        ${table(["Sezione", "A cosa serve"], [["<b>Nome del taccuino</b>", "Il titolo e di chi è («il taccuino di Mario Rossi»): compare in alto."], ["<b>Aspetto</b>", "Tema <b>Chiaro</b>, <b>Scuro</b> o <b>Automatico</b> (segue il tuo dispositivo). Colore d'accento e sfondo a scelta."], ["<b>Come voti di solito</b>", "Con quale modo si apre ogni nuova scheda: l'ultima usata, Voto rapido o Scheda completa."], ["<b>Il tuo archivio</b>", "<b>Salva copia</b> scarica un file con le tue schede; <b>Ripristina da copia</b> le rimette a posto."], ["<b>Catalogo Sorso</b>", "Solo i dati del vino (niente voti né nomi) vanno al catalogo comune, per riconoscerlo la volta dopo. Disattivabile."], ["<b>Guida</b>", "Questo documento, sempre a portata di mano."], ["<b>Account</b>", "Accedi con Google per ritrovare le schede ovunque; esci quando vuoi."]], [1])}
+        ${table(["Sezione", "A cosa serve"], [["<b>Nome del taccuino</b>", "Il titolo e di chi è («il taccuino di Mario Rossi»): compare in alto."], ["<b>Aspetto</b>", "Tema <b>Chiaro</b>, <b>Scuro</b> o <b>Automatico</b> (segue il tuo dispositivo). Colore d'accento e sfondo a scelta."], ["<b>Come voti di solito</b>", "Con quale modo si apre ogni nuova scheda: l'ultima usata, Voto rapido o Scheda completa."], ["<b>Il tuo archivio</b>", "<b>Salva copia</b> scarica un file con le tue schede; <b>Ripristina da copia</b> le rimette a posto."], ["<b>Catalogo Taste</b>", "Solo i dati del vino (niente voti né nomi) vanno al catalogo comune, per riconoscerlo la volta dopo. Disattivabile."], ["<b>Guida</b>", "Questo documento, sempre a portata di mano."], ["<b>Account</b>", "Accedi con Google per ritrovare le schede ovunque; esci quando vuoi."]], [1])}
         ${call("Il testo resta sempre leggibile: se scegli un colore troppo chiaro o troppo scuro, l'app lo corregge leggermente e te lo dice.")}`,
       fig("app-impostazioni.png", 1, "Le <b>Impostazioni</b>: l'aspetto in alto; voto, archivio, guida e account più sotto.", "lg"))}
   `));
@@ -112,8 +112,8 @@ function build() {
 
   P.push(pg("ink", "Lo spazio del club", `
     ${eyebrow("10", "Lo spazio del club")}
-    <h1 class="d">Se il tuo club usa <em>Sorso</em></h1>
-    <p class="lead">Alcuni siti ospitano Sorso al loro interno: nello spazio del tuo club puoi votare insieme agli altri soci.</p>
+    <h1 class="d">Se il tuo club usa <em>Taste</em></h1>
+    <p class="lead">Alcuni siti ospitano Taste al loro interno: nello spazio del tuo club puoi votare insieme agli altri soci.</p>
     <div class="two">
       <div>
         ${table(["Scheda", "Cosa trovi"], [["<b>Degustazioni</b>", "Le serate del tuo gruppo: apri, vota, vedi la media. Se un vino lo assaggiano in pochi, l'organizzatore ne chiude la votazione e la media conta chi ha votato."], ["<b>Taccuino</b>", "Tutti i vini assaggiati col gruppo, col tuo voto accanto alla media."], ["<b>Classifica</b>", "I vini ordinati per media; provvisoria finché la serata è aperta, finale a serata chiusa."], ["<b>Statistiche</b>", "I numeri delle ultime degustazioni chiuse del gruppo."]], [1])}
@@ -136,8 +136,8 @@ function build() {
       ["Come cambio i colori?", "Impostazioni → Aspetto. Con «Ripristina i colori» torni a quelli originali."],
       ["Voglio il tema scuro.", "Impostazioni → Aspetto → Scuro. Con «Automatico» l'app segue il tema del telefono."],
       ["Posso cambiare un voto?", "Sì: dal Taccuino, «Modifica scheda»."],
-      ["Il vino non viene riconosciuto.", "Compila i dati e salva: Sorso se lo ricorda."],
-      ["Perché il voto minimo è 50?", "È la scala di Sorso: 50 insufficiente, 100 irripetibile. Il 100 è solo per il vino perfetto."],
+      ["Il vino non viene riconosciuto.", "Compila i dati e salva: Taste se lo ricorda."],
+      ["Perché il voto minimo è 50?", "È la scala di Taste: 50 insufficiente, 100 irripetibile. Il 100 è solo per il vino perfetto."],
       ["Come confronto due vini?", "Nel Taccuino tocca il punteggio dei due vini."],
       ["Le statistiche non compaiono.", "Servono alcune schede (e per alcuni blocchi l'uvaggio compilato). L'app dice cosa manca."],
       ["Come passo i dati a un altro telefono?", "Accedi con lo stesso account Google, oppure salva una copia e ripristinala sull'altro dispositivo."],
@@ -152,6 +152,6 @@ function build() {
     <div class="bigword">Buon assaggio.</div>
     <p class="mute">Versione ${L.VERSIONE} · ultimo aggiornamento: ${L.DATA}</p>
   `));
-  return L.documento("Sorso — Guida all'uso", P);
+  return L.documento("Taste — Guida all'uso", P);
 }
 module.exports = { build };

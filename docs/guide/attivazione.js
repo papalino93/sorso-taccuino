@@ -20,7 +20,7 @@ function build() {
       <div class="st"><span class="nn">4</span><b>Messa online</b><span class="d">Spunti l'elenco di verifica; se serve aggiustiamo domini, colori e lingua.</span></div>
     </div>
     ${stats([["5′", "per l'attivazione<br>da parte nostra"], ["3", "credenziali<br>da custodire"], ["15′", "durata massima<br>di un token"], ["0 €", "il costo<br>del servizio"]])}
-    ${table(["Versione di Sorso", "Indirizzo", "Per i dettagli tecnici"], [[`${L.VERSIONE} — ${L.DATA}`, `<code>${BASE}</code>`, "La guida all'integrazione API"]], [0])}
+    ${table(["Versione di Taste", "Indirizzo", "Per i dettagli tecnici"], [[`${L.VERSIONE} — ${L.DATA}`, `<code>${BASE}</code>`, "La guida all'integrazione API"]], [0])}
   `));
 
   P.push(pg("paper", "Passo 1 — la richiesta", `
@@ -83,6 +83,6 @@ function build() {
     <div class="bigword">Si parte.</div>
     <p class="mute">Versione ${L.VERSIONE} · ultimo aggiornamento: ${L.DATA}</p>
   `));
-  return L.documento("Sorso — Guida di attivazione", P);
+  return L.documento("Taste — Guida di attivazione", P);
 }
 module.exports = { build };

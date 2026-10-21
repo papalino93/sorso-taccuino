@@ -19,7 +19,7 @@ function build() {
     ${eyebrow("01", "In breve")}
     <div style="display:grid;grid-template-columns:92mm 1fr;gap:6mm;height:118mm">
       <div><h1 class="d">Una degustazione che <em>vive</em> nel tuo sito</h1>
-      <p class="lead">I tuoi utenti votano insieme i vini di una serata, ognuno vede i propri voti e, solo dopo aver votato, la media del team. Tu incorpori una pagina e firmi un token: al resto pensa Sorso.</p></div>
+      <p class="lead">I tuoi utenti votano insieme i vini di una serata, ognuno vede i propri voti e, solo dopo aver votato, la media del team. Tu incorpori una pagina e firmi un token: al resto pensa Taste.</p></div>
       <div style="position:relative">
         <div style="position:absolute;left:-2mm;top:16mm">${rot("team-base-2-vini.png", -5).replace('class="phone "','class="phone sm"')}</div>
         <div style="position:absolute;left:34mm;top:0">${rot("team-vinaccia-2-vini.png", 4).replace('class="phone "','class="phone sm"')}</div>
@@ -51,19 +51,19 @@ function build() {
       <div class="st"><span class="nn">1</span><b>L'utente apre la pagina</b><span class="d">È già autenticato sul tuo sito.</span></div>
       <div class="st"><span class="nn">2</span><b>Il tuo server firma il token</b><span class="d">Chi è, che gruppo, che ruolo. Vale 5 minuti.</span></div>
       <div class="st"><span class="nn">3</span><b>La pagina incorpora l'iframe</b><span class="d">Il token sta dopo il <code>#</code>: non viaggia in rete.</span></div>
-      <div class="st"><span class="nn">4</span><b>Sorso lo verifica</b><span class="d">Apre una sessione di 4 ore, in memoria.</span></div>
+      <div class="st"><span class="nn">4</span><b>Taste lo verifica</b><span class="d">Apre una sessione di 4 ore, in memoria.</span></div>
       <div class="st"><span class="nn">5</span><b>Tu leggi i risultati</b><span class="d">Dal tuo server, con la chiave API.</span></div>
     </div>
     <h2 class="s">Cosa vive <em>dove</em></h2>
     ${table(["Cosa", "Dove", "Note"], [
-      ["Utenti, password, accessi", "Il tuo sito", "Sorso non conosce nessuna password."],
+      ["Utenti, password, accessi", "Il tuo sito", "Taste non conosce nessuna password."],
       ["Gruppi (team) e ruoli", "Il tuo token", "Li decidi tu a ogni caricamento."],
-      ["Degustazioni, vini, voti", "Sorso", "Visibili solo al team; i voti individuali solo a chi li ha dati."],
-      ["Medie e risultati", "Sorso → il tuo server", "API di sola lettura, solo aggregati."],
-      ["Aspetto (colori, logo, titolo)", "Sorso, impostato per te", "Lo cambiamo noi su tua richiesta."]], [2]) }
+      ["Degustazioni, vini, voti", "Taste", "Visibili solo al team; i voti individuali solo a chi li ha dati."],
+      ["Medie e risultati", "Taste → il tuo server", "API di sola lettura, solo aggregati."],
+      ["Aspetto (colori, logo, titolo)", "Taste, impostato per te", "Lo cambiamo noi su tua richiesta."]], [2]) }
     ${call("<b>Nessuna scrittura dall'esterno.</b> Dall'API non si possono scrivere voti: si vota solo dentro l'iframe. Così nessuno può gonfiare una media dal di fuori.")}
-    <h2 class="s">Cosa Sorso <em>non</em> fa</h2>
-    ${cards([["Non conosce le password", "L'accesso lo gestisce solo il tuo sito: a Sorso arriva un token firmato, mai una credenziale."], ["Non conserva anagrafiche", "Niente email, telefono o indirizzo: solo un identificativo opaco e i voti."], ["Non mostra i voti altrui", "Ognuno vede i propri; la media del team compare solo dopo aver votato quel vino."]])}
+    <h2 class="s">Cosa Taste <em>non</em> fa</h2>
+    ${cards([["Non conosce le password", "L'accesso lo gestisce solo il tuo sito: a Taste arriva un token firmato, mai una credenziale."], ["Non conserva anagrafiche", "Niente email, telefono o indirizzo: solo un identificativo opaco e i voti."], ["Non mostra i voti altrui", "Ognuno vede i propri; la media del team compare solo dopo aver votato quel vino."]])}
   `));
 
   /* 04 Credenziali */
@@ -129,7 +129,7 @@ function build() {
     ${code(BASE + "/embed?p=ID_PARTNER#token=TOKEN_FIRMATO", "indirizzo", false)}
     ${esempio("pagina-ospite.html", "HTML")}
     <div class="two">
-      <div><h3 class="k">Cosa succede dentro l'iframe</h3>${ul(["Sorso scambia il token con una <b>sessione di 4 ore</b>, in memoria, e poi toglie il token dall'indirizzo.", "Se la sessione finisce, l'iframe chiede al tuo sito un token nuovo con <code>sorso:reauth</code>: l'utente rientra da solo e il voto che stava compilando non va perso.", "Il tasto Indietro del browser resta dentro lo spazio."])}</div>
+      <div><h3 class="k">Cosa succede dentro l'iframe</h3>${ul(["Taste scambia il token con una <b>sessione di 4 ore</b>, in memoria, e poi toglie il token dall'indirizzo.", "Se la sessione finisce, l'iframe chiede al tuo sito un token nuovo con <code>sorso:reauth</code>: l'utente rientra da solo e il voto che stava compilando non va perso.", "Il tasto Indietro del browser resta dentro lo spazio."])}</div>
       <div><h3 class="k">Messaggi verso la tua pagina</h3>${table(["Messaggio", "Quando"], [["<code>sorso:height</code>", "L'altezza del contenuto, per adattare l'iframe senza barre di scorrimento."], ["<code>sorso:reauth</code>", "L'accesso non è più valido: serve un token nuovo."]], [1])}<p class="mute" style="font-size:8pt">Controlla sempre <code>event.origin</code> prima di fidarti di un messaggio.</p></div>
     </div>
   `));
@@ -140,7 +140,7 @@ function build() {
     <div style="display:grid;grid-template-columns:1fr 70mm;gap:8mm">
       <div>
         <h1 class="d">Il ruolo lo decidi <em>tu</em></h1>
-        <p>Sorso non ha schermate di amministrazione né inviti: se un utente è organizzatore lo dice il tuo sito, nel claim <code>role</code>.</p>
+        <p>Taste non ha schermate di amministrazione né inviti: se un utente è organizzatore lo dice il tuo sito, nel claim <code>role</code>.</p>
         ${table(["Azione", "Partecipante", "Organizzatore"], [
           ["Vedere le degustazioni del team", "sì", "sì"],
           ["Creare ed eliminare una degustazione", "no", "sì"],
@@ -217,7 +217,7 @@ function build() {
       ["<code>bg</code> · <code>ink</code>", "colori <code>#rrggbb</code>", "Sfondo e testo."],
       ["<code>font</code>", "sistema, serif, arrotondato, mono", "Carattere (solo tra quelli di sistema)."],
       ["lingua · modalità", "it/en · rapido/completa/entrambe", "Lingua predefinita e modalità consentite."]], [2])}
-    ${call("<b>Leggibilità garantita.</b> Se i colori scelti non assicurano un testo leggibile (contrasto almeno 4,5 a 1), Sorso li corregge o torna a quelli predefiniti, anche sui riquadri e sui bordi dei campi. Imposta sempre insieme sfondo e testo. Se non imposti nulla, lo spazio usa i colori di Sorso: lavanda su perla, e lavanda su antracite quando il dispositivo è in tema scuro.")}
+    ${call("<b>Leggibilità garantita.</b> Se i colori scelti non assicurano un testo leggibile (contrasto almeno 4,5 a 1), Taste li corregge o torna a quelli predefiniti, anche sui riquadri e sui bordi dei campi. Imposta sempre insieme sfondo e testo. Se non imposti nulla, lo spazio usa i colori di Taste: lavanda su perla, e lavanda su antracite quando il dispositivo è in tema scuro.")}
   `));
 
   /* 10 API */
@@ -325,7 +325,7 @@ function build() {
     <h1 class="d">Pochi dati, <em>ben custoditi</em></h1>
     <div class="two">
       <div><h3 class="k">Cosa devi fare tu</h3>${ul(["Tieni segreto di firma e chiave API solo sul server; se li esponi, chiedi la rotazione.", "Firma token solo per utenti già autenticati; team e ruolo vengono dai tuoi dati, mai da parametri della richiesta.", "Usa come <code>sub</code> un identificativo opaco invece dell'email.", "Servi la pagina che incorpora l'iframe sempre in <code>https</code>."])}</div>
-      <div><h3 class="k">Cosa fa Sorso</h3>${ul(["La pagina si incorpora solo dai domini registrati, senza script inline e senza inviare il riferimento di provenienza.", "Il punteggio lo calcola il server; i voti individuali sono visibili solo a chi li ha dati.", "Chi ha il token non esce dal proprio team né dal proprio partner: ogni richiesta lo verifica."])}</div>
+      <div><h3 class="k">Cosa fa Taste</h3>${ul(["La pagina si incorpora solo dai domini registrati, senza script inline e senza inviare il riferimento di provenienza.", "Il punteggio lo calcola il server; i voti individuali sono visibili solo a chi li ha dati.", "Chi ha il token non esce dal proprio team né dal proprio partner: ogni richiesta lo verifica."])}</div>
     </div>
     <h2 class="s">Quali dati <em>conserviamo</em></h2>
     ${table(["Dato", "Conservato", "Note"], [
@@ -360,6 +360,6 @@ function build() {
     <div class="bigword">Pronti.</div>
     <p class="mute">Versione ${L.VERSIONE} della guida · ultimo aggiornamento: ${L.DATA}</p>
   `));
-  return L.documento("Sorso — Guida all'integrazione API", P);
+  return L.documento("Taste — Guida all'integrazione API", P);
 }
 module.exports = { build };

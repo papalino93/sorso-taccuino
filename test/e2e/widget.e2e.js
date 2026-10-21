@@ -39,7 +39,7 @@ const ok = (c, m) => { console.log((c ? "OK   " : "FAIL ") + m); if (!c) fails++
   await a.locator("#wdgCode").waitFor();
   const code = await a.locator("#wdgCode").inputValue();
   const tok = (/\/widget\?t=([0-9a-f]{48})/.exec(code) || [])[1];
-  ok(!!tok && /^<iframe src="http:\/\/127\.0\.0\.1:8796\/widget\?t=/.test(code) && /sorso:widget-height/.test(code) && /title="Sorso — Corso del giovedì"/.test(code), "codice da incollare: iframe con il link e l'adattamento dell'altezza");
+  ok(!!tok && /^<iframe src="http:\/\/127\.0\.0\.1:8796\/widget\?t=/.test(code) && /sorso:widget-height/.test(code) && /title="Taste — Corso del giovedì"/.test(code), "codice da incollare: iframe con il link e l'adattamento dell'altezza");
   const prev = a.frameLocator("#wdgPreview");
   await prev.locator("h1").waitFor();
   ok((await prev.locator("h1").textContent()) === "Corso del giovedì" && /Brunello/.test(await prev.locator("main").innerText()), "anteprima nell'app: nome della cerchia e classifica");

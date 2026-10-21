@@ -1,6 +1,6 @@
 {
-  "name": "Sorso — Taccuino di degustazione",
-  "short_name": "Sorso",
+  "name": "Taste — Taccuino di degustazione",
+  "short_name": "Taste",
   "description": "Taccuino di degustazione ispirato al metodo AIS",
   "start_url": ".",
   "display": "standalone",
