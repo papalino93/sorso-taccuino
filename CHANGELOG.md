@@ -3,6 +3,9 @@
 La versione e la data dell'ultimo aggiornamento sono mostrate in fondo all'app e dello spazio di team
 (fonte: `public/js/version.js`, da tenere uguale a `package.json`).
 
+## 2.10.1 — 21 ottobre 2026
+- **Giro su telefono e tablet.** Telefoni stretti (320 px): le schede delle serate (Degustazioni, Taccuino, Classifica, Statistiche) vanno su due righe invece di uscire dal bordo, e le righe del gioco restano dentro il riquadro. Tablet in orizzontale: le righe del punteggio a sinistra tornano alte abbastanza per il dito. Il pulsante «Offrimi un calice» si fa da parte anche sopra le serate delle cerchie, così non copre punti e pulsanti.
+
 ## 2.10.0 — 21 ottobre 2026
 - **Il gioco nelle cerchie.** Il Proprietario o un amministratore lo accende in fondo alla cerchia. Sotto ogni vino delle serate trascini **la tua faccia** (foto di Google o iniziali) su un campo con due assi che cambiano da vino a vino (corpo e acidità, tannino e morbidezza…), fai un **pronostico** sul voto del gruppo e, se vuoi, indovini il **prezzo**. Le mosse restano segrete fino allo **svelamento** (quando hanno votato tutti, quando si chiude il vino o con «Svela!» dell'organizzatore); poi tutti vedono tutto: facce sul campo, voti, punti, titoli («Fuori dal coro», «In sintonia», «Pronostico d'oro», «Naso da sommelier»), reazioni e frecciatine bonarie.
 - **Classifica del gioco** nella scheda Classifica: punti della stagione, soprannomi («Il generoso», «Lo spietato», «Il bastian contrario», «Naso d'oro») e il tuo gemello di palato.
