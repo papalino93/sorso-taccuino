@@ -3,6 +3,17 @@
 La versione e la data dell'ultimo aggiornamento sono mostrate in fondo all'app e dello spazio di team
 (fonte: `public/js/version.js`, da tenere uguale a `package.json`).
 
+## 2.13.0 — 21 ottobre 2026
+- **Il gioco cresce.**
+  - **La scommessa della serata**: «chi vince stasera?». Ognuno punta sul vino che avrà la media più alta; le scelte restano segrete fino alla chiusura, poi chi ha indovinato prende 10 punti e si vede chi ci aveva puntato.
+  - **Livelli di carriera**: Apprendista, Assaggiatore, Cantiniere, Sommelier, Maestro e Leggenda, con la barra di quanto manca al prossimo.
+  - **Dieci traguardi da collezionare**: Primo sorso, Cecchino, Occhio al portafoglio, In serie, Fiuto del vincitore, Tris, Diapason, Voce fuori dal coro, Veterano, Re della cerchia.
+  - **Serie 🔥**: quanti pronostici centrati di fila, e il tuo record.
+  - **La nemesi ⚔️**: accanto al gemello di palato, la persona che vota più lontano da te.
+  - **Classifica del mese** accanto a quella della stagione.
+  - **Coriandoli** quando un vino si svela e sei primo.
+- «Cancella i miei voti» cancella anche le scommesse.
+
 ## 2.12.0 — 21 ottobre 2026
 - **Sei widget per i siti** (cerchia → Widget per un sito → «Che widget vuoi»):
   - **Classifica**: come prima.

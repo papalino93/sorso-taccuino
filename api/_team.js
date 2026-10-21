@@ -192,7 +192,7 @@ async function deleteTasting(redis, pid, ctx, tid) {
   const f = redis.pipeline();
   f.del(K.wn(pid, t.id)); f.del(K.sm(pid, t.id)); f.del(K.ct(pid, t.id)); f.del(K.gr(pid, t.id)); f.hdel(K.cn(pid), "w:" + t.id);
   /* il gioco delle cerchie (api/_game.js): mosse, reazioni, prezzi e svelamenti di questa serata */
-  f.del("gw:" + t.id); wines.forEach(w => { f.del("gp:" + t.id + ":" + w); f.del("gx:" + t.id + ":" + w); });
+  f.del("gw:" + t.id); f.del("gf:" + t.id); wines.forEach(w => { f.del("gp:" + t.id + ":" + w); f.del("gx:" + t.id + ":" + w); });
   await f.exec();
   await invalidateStats(redis, pid, ctx.team);
   return { deleted: t.id, votesRemoved: votes };

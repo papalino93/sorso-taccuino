@@ -124,6 +124,10 @@ const SHOTS = process.env.SHOTS || "";
   await B.frame.locator('[data-act="tab"][data-tab="ranking"]').click();
   await B.frame.locator(".g-board .g-boardlist").waitFor({ timeout: 8000 }).then(() => ok(true, "nella Classifica c'è la classifica del gioco"), () => ok(false, "niente classifica del gioco"));
   ok(await B.frame.locator(".g-boardlist li").count() === 3, "con tutti e tre");
+  ok(await B.frame.locator(".g-career .g-prog").count() === 1 && await B.frame.locator(".g-ach li").count() === 10, "2.13: la mia carriera con il livello e i dieci traguardi");
+  ok(await B.frame.locator(".g-ach li.on").count() >= 1, "almeno «Primo sorso» sbloccato");
+  await B.frame.locator('[data-act="g-bmode"][data-v="month"]').click(); await B.page.waitForTimeout(300);
+  ok(await B.frame.locator('[data-act="g-bmode"][data-v="month"][aria-pressed="true"]').count() === 1, "si passa alla classifica del mese");
   if (SHOTS) await B.frame.locator(".g-board").screenshot({ path: SHOTS + "/gioco-classifica.png" });
 
   /* --- tema scuro: il campo si legge --- */

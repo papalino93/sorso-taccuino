@@ -24,11 +24,12 @@ const Scoring = require("../public/js/scoring.js");
    Chi gioca si riconosce da un'impronta per cerchia (mai l'account Google). */
 
 const PID = Circles.CIRCLE_PARTNER.id;
-const K = { gp: (t, w) => "gp:" + t + ":" + w, gx: (t, w) => "gx:" + t + ":" + w, gw: t => "gw:" + t, gb: c => "gb:" + c, gq: c => "gq:" + c };
+const K = { gp: (t, w) => "gp:" + t + ":" + w, gx: (t, w) => "gx:" + t + ":" + w, gw: t => "gw:" + t, gb: c => "gb:" + c, gq: c => "gq:" + c, gf: t => "gf:" + t };
 const AXES = [["corpo", "acidita"], ["tannino", "morbidezza"], ["frutto", "legno"], ["intensita", "persistenza"], ["dolcezza", "freschezza"]];
 const EMOJI = ["🍷", "😂", "🙈", "🧐", "🔥"];
 const PHRASES = 10;                      // f1…f10: i testi sono nell'interfaccia (italiano e inglese)
 const BOARD_TTL = 120, BOARD_TASTINGS = 30;
+const ACH = ["primo", "cecchino", "portafoglio", "serie3", "favorito", "tris", "diapason", "coro", "veterano", "re"];
 const ID_RE = /^[0-9a-f]{10}$/;
 
 const parse = s => { try { return typeof s === "string" ? JSON.parse(s) : (s && typeof s === "object" ? s : null); } catch (e) { return null; } };
@@ -131,7 +132,30 @@ async function state(redis, partner, ctx, body) {
     }
     out.wines[w.id] = wout;
   }
+  /* la scommessa della serata: chi indovina il vino che vince prende 10 punti. Le scelte restano segrete fino alla chiusura */
+  const gf = Team.asObject(await redis.hgetall(K.gf(t.id))), picks = {};
+  Object.keys(gf).forEach(u => { if (byUid[u] && out.wines[gf[u]]) picks[u] = gf[u]; });
+  const fav = { open: t.status === "open", eligible: wines.length >= 2, mine: picks[ctx.uid] || null, pickers: Object.keys(picks).map(u => byUid[u]) };
+  if (t.status === "closed" && wines.length >= 2) {
+    const avgs = wines.map(w => out.wines[w.id].avg).filter(a => a != null);
+    const top = avgs.length ? Math.max(...avgs) : null;
+    fav.winners = top == null ? [] : wines.filter(w => out.wines[w.id].avg === top).map(w => w.id);
+    fav.results = Object.keys(picks).map(u => ({ who: byUid[u], wine: picks[u], ok: fav.winners.indexOf(picks[u]) > -1 }));
+  }
+  out.fav = fav;
   return out;
+}
+
+async function pickFav(redis, partner, ctx, body) {
+  requireGame(partner, ctx);
+  const t = await Team.getTasting(redis, PID, body.tasting, ctx.team);
+  if (t.status !== "open") throw new HttpError(409, "closed", "La serata è chiusa: la scommessa non si cambia più.");
+  if (body.wine === "" || body.wine == null) { await redis.hdel(K.gf(t.id), ctx.uid); return { ok: true, wine: null }; }
+  const { w } = await wineOf(redis, ctx, t.id, body.wine);
+  const n = Object.keys(Team.asObject(await redis.hgetall(Team.K.wn(PID, t.id)))).length;
+  if (n < 2) throw bad("too_few", "Per scommettere servono almeno due vini.");
+  await redis.hset(K.gf(t.id), { [ctx.uid]: w.id });
+  return { ok: true, wine: w.id };
 }
 
 function num(v, min, max, dec) {
@@ -209,16 +233,33 @@ async function board(redis, partner, ctx) {
   let base = cached;
   if (!base) {
     const tl = Object.values(Team.asObject(await redis.hgetall(Team.K.tl(PID, ctx.team)))).map(parse).filter(Boolean).sort((a, b) => b.createdAt - a.createdAt).slice(0, BOARD_TASTINGS);
-    const pts = {}, diffs = {}, votesBy = {}, wins = {};
-    for (const t of tl) {
+    const pts = {}, diffs = {}, votesBy = {}, wins = {}, month = {}, feats = {}, hist = {};
+    const m0 = new Date(); m0.setUTCDate(1); m0.setUTCHours(0, 0, 0, 0);
+    const feat = (k, f) => { (feats[k] = feats[k] || {})[f] = true; };
+    for (const t of tl.slice().reverse()) {
       const st = await state(redis, partner, Object.assign({}, ctx, { role: "member" }), { tasting: t.id });
+      const inMonth = t.createdAt >= m0.getTime();
+      /* la scommessa della serata: 10 punti a chi ha indovinato il vincitore */
+      (st.fav && st.fav.results || []).forEach(r => {
+        if (!r.ok) return;
+        const p = pts[r.who] = pts[r.who] || { total: 0, pron: 0, price: 0, field: 0, played: 0 };
+        p.total += 10; p.fav = (p.fav || 0) + 10; feat(r.who, "favorito");
+        if (inMonth) month[r.who] = (month[r.who] || 0) + 10;
+      });
       Object.keys(st.wines).forEach(wid => {
         const w = st.wines[wid];
         if (!w.revealed || !w.results) return;
         const vs = w.results.filter(r => r.vote != null);
         w.results.forEach(r => {
           const p = pts[r.who] = pts[r.who] || { total: 0, pron: 0, price: 0, field: 0, played: 0 };
-          p.total += r.pts.total; p.pron += r.pts.pron || 0; p.price += r.pts.price || 0; p.field += r.pts.field || 0; if (r.x != null || r.p != null || r.e != null) p.played++;
+          p.total += r.pts.total; p.pron += r.pts.pron || 0; p.price += r.pts.price || 0; p.field += r.pts.field || 0;
+          const played = r.x != null || r.p != null || r.e != null;
+          if (played) { p.played++; feat(r.who, "primo"); }
+          if (inMonth) month[r.who] = (month[r.who] || 0) + r.pts.total;
+          /* traguardi e serie: il pronostico «centrato» è entro 2 punti dalla media */
+          if (r.p != null && w.avg != null) { const err = Math.abs(r.p - w.avg); (hist[r.who] = hist[r.who] || []).push(err <= 2); if (err <= 0.5) feat(r.who, "cecchino"); }
+          if (r.e != null && w.price && Math.abs(r.e - w.price) / w.price <= 0.05) feat(r.who, "portafoglio");
+          if ((r.pts.pron || 0) >= 7 && (r.pts.price || 0) >= 7 && (r.pts.field || 0) >= 7) feat(r.who, "tris");
           (r.badges || []).forEach(b => { (wins[r.who] = wins[r.who] || {})[b] = ((wins[r.who] || {})[b] || 0) + 1; });
           if (r.vote != null && vs.length >= 2 && w.avg != null) {
             (diffs[r.who] = diffs[r.who] || []).push(r.vote - w.avg);
@@ -227,7 +268,10 @@ async function board(redis, partner, ctx) {
         });
       });
     }
-    base = { pts, diffs, votesBy, wins };
+    /* serie: quanti pronostici centrati di fila adesso, e il record */
+    const streak = {};
+    Object.keys(hist).forEach(k => { let cur = 0, best = 0, run = 0; hist[k].forEach(ok => { run = ok ? run + 1 : 0; if (run > best) best = run; }); for (let i = hist[k].length - 1; i >= 0 && hist[k][i]; i--) cur++; streak[k] = { cur, best }; if (best >= 3) feat(k, "serie3"); });
+    base = { pts, diffs, votesBy, wins, month, feats, streak };
     await redis.set(K.gb(ctx.team), JSON.stringify(base), { ex: BOARD_TTL });
   }
   /* soprannomi: dal palato (scarti dalla media del gruppo) e dai cartellini vinti */
@@ -255,9 +299,33 @@ async function board(redis, partner, ctx) {
     });
     if (best && bd <= 3) twins[a] = best;
   });
-  const rows = Object.keys(ppl).map(k => ({ who: k, name: ppl[k].name, pic: ppl[k].pic, me: ppl[k].me, pts: base.pts[k] || { total: 0, pron: 0, price: 0, field: 0, played: 0 }, nick: nick[k] || [], wins: (base.wins || {})[k] || {}, twin: twins[k] && ppl[twins[k]] ? ppl[twins[k]].name : "" }))
+  /* la nemesi: chi ha il palato più lontano dal tuo (almeno due vini in comune, in media 6 punti o più) */
+  const rivals = {};
+  keys.forEach(a => {
+    let far = null, fd = null;
+    keys.forEach(b => {
+      if (a === b) return;
+      const common = Object.keys(base.votesBy[a]).filter(x => base.votesBy[b][x] != null);
+      if (common.length < 2) return;
+      const d = mean(common.map(x => Math.abs(base.votesBy[a][x] - base.votesBy[b][x])));
+      if (fd == null || d > fd) { fd = d; far = b; }
+    });
+    if (far && fd >= 6) rivals[a] = far;
+  });
+  const rows = Object.keys(ppl).map(k => ({ who: k, name: ppl[k].name, pic: ppl[k].pic, me: ppl[k].me, pts: base.pts[k] || { total: 0, pron: 0, price: 0, field: 0, played: 0 }, nick: nick[k] || [], wins: (base.wins || {})[k] || {}, twin: twins[k] && ppl[twins[k]] ? ppl[twins[k]].name : "",
+    rival: rivals[k] && ppl[rivals[k]] ? ppl[rivals[k]].name : "", month: (base.month || {})[k] || 0, streak: (base.streak || {})[k] || { cur: 0, best: 0 },
+    feats: Object.keys((base.feats || {})[k] || {}) }))
     .sort((a, b) => b.pts.total - a.pts.total || a.name.localeCompare(b.name, "it"));
-  return { rows };
+  /* traguardi che dipendono da tutti: chi è in testa, chi ha giocato tanto, voce fuori dal coro e diapason */
+  rows.forEach((r, i) => {
+    const f = new Set(r.feats);
+    if (i === 0 && r.pts.played >= 3 && r.pts.total > 0) f.add("re");
+    if (r.pts.played >= 10) f.add("veterano");
+    if ((r.wins.fuori || 0) >= 3) f.add("coro");
+    if ((r.wins.sintonia || 0) >= 3) f.add("diapason");
+    r.feats = ACH.filter(a => f.has(a));
+  });
+  return { rows, ach: ACH };
 }
 
 /* per i widget dei siti (api/widget.js): il gioco della cerchia in numeri, senza nomi; la classifica con i
@@ -341,6 +409,7 @@ async function deleteUser(redis, cid, uid) {
   const tids = Object.keys(Team.asObject(await redis.hgetall(Team.K.tl(PID, cid))));
   let n = 0;
   for (const t of tids) {
+    n += Number(await redis.hdel(K.gf(t), uid)) || 0;
     const wids = Object.keys(Team.asObject(await redis.hgetall(Team.K.wn(PID, t))));
     for (const w of wids) {
       n += Number(await redis.hdel(K.gp(t, w), uid)) || 0;
@@ -353,7 +422,7 @@ async function deleteUser(redis, cid, uid) {
   return n;
 }
 
-const OPS = { "game.state": state, "game.play": play, "game.react": react, "game.reveal": reveal, "game.price": setPrice, "game.board": board };
-const WRITES = new Set(["game.play", "game.react", "game.reveal", "game.price"]);
+const OPS = { "game.fav": pickFav, "game.state": state, "game.play": play, "game.react": react, "game.reveal": reveal, "game.price": setPrice, "game.board": board };
+const WRITES = new Set(["game.fav", "game.play", "game.react", "game.reveal", "game.price"]);
 
 module.exports = { OPS, WRITES, AXES, EMOJI, K, score, pk, deleteUser, widgetStats };

@@ -134,3 +134,50 @@ test("pulizia: «Cancella i miei voti» toglie anche mosse e reazioni; eliminare
   await ok(E("anna", s.cid, { op: "tasting.delete", tasting: s.t }));
   assert.equal(await redis.exists(Game.K.gp(s.t, s.w2)), 0); assert.equal(await redis.exists(Game.K.gw(s.t)), 0);
 });
+
+test("2.13: la scommessa della serata è segreta fino alla chiusura, poi 10 punti a chi indovina", async () => {
+  const s = await scena();
+  await ok(C("anna", { op: "game.set", circle: s.cid, on: true }));
+  await ok(E("carla", s.cid, { op: "game.fav", tasting: s.t, wine: s.w1 }));
+  await ok(E("bea", s.cid, { op: "game.fav", tasting: s.t, wine: s.w2 }));
+  let st = await ok(E("anna", s.cid, { op: "game.state", tasting: s.t }));
+  assert.equal(st.fav.eligible, true); assert.equal(st.fav.mine, null); assert.equal(st.fav.pickers.length, 2);
+  assert.equal(st.fav.results, undefined, "prima della chiusura nessuno vede le scelte");
+  const c = await ok(E("carla", s.cid, { op: "game.state", tasting: s.t })); assert.equal(c.fav.mine, s.w1, "ognuno vede la sua");
+  for (const [who, a, b] of [["anna", 90, 70], ["carla", 88, 72], ["bea", 86, 74]]) {
+    await ok(E(who, s.cid, { op: "game.play", tasting: s.t, wine: s.w1, p: 85 }));
+    await ok(E(who, s.cid, { op: "vote", tasting: s.t, wine: s.w1, ...smart(a) }));
+    await ok(E(who, s.cid, { op: "vote", tasting: s.t, wine: s.w2, ...smart(b) }));
+  }
+  await ok(E("anna", s.cid, { op: "tasting.status", tasting: s.t, status: "closed" }));
+  assert.equal((await E("bea", s.cid, { op: "game.fav", tasting: s.t, wine: s.w1 })).statusCode, 409, "a serata chiusa non si cambia");
+  st = await ok(E("anna", s.cid, { op: "game.state", tasting: s.t }));
+  assert.deepEqual(st.fav.winners, [s.w1]);
+  assert.equal(st.fav.results.filter(r => r.ok).length, 1);
+  await redis.del("gb:" + s.cid);
+  const b = await ok(E("anna", s.cid, { op: "game.board" }));
+  const carla = b.rows.find(r => r.name === "Carla Rossi"), bea = b.rows.find(r => r.name === "Bea Rossi");
+  assert.equal(carla.pts.fav, 10); assert.ok(carla.feats.includes("favorito"), "traguardo «Fiuto del vincitore»");
+  assert.ok(!bea.feats.includes("favorito"));
+  assert.ok(carla.feats.includes("primo"), "traguardo «Primo sorso»");
+  assert.ok(carla.month >= 10, "i punti contano anche nel mese");
+  assert.deepEqual(b.ach.length, 10);
+});
+
+test("2.13: serie di pronostici centrati e la nemesi", async () => {
+  const s = await scena();
+  await ok(C("anna", { op: "game.set", circle: s.cid, on: true }));
+  const w3 = (await ok(E("anna", s.cid, { op: "wine.add", tasting: s.t, wine: { name: "Nero d'Avola" } }))).wine.id;
+  for (const w of [s.w1, s.w2, w3]) {
+    for (const [who, v, p] of [["anna", 95, 82], ["carla", 70, 82], ["bea", 80, 60]]) {
+      await ok(E(who, s.cid, { op: "game.play", tasting: s.t, wine: w, p }));
+      await ok(E(who, s.cid, { op: "vote", tasting: s.t, wine: w, ...smart(v) }));
+    }
+  }
+  await redis.del("gb:" + s.cid);
+  const b = await ok(E("anna", s.cid, { op: "game.board" }));
+  const anna = b.rows.find(r => r.name === "Anna Rossi"), bea = b.rows.find(r => r.name === "Bea Rossi");
+  assert.equal(anna.streak.cur, 3); assert.equal(anna.streak.best, 3); assert.ok(anna.feats.includes("serie3"));
+  assert.equal(bea.streak.cur, 0);
+  assert.equal(anna.rival, "Carla Rossi", "i voti più lontani dai suoi");
+});
