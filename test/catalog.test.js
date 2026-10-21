@@ -1,4 +1,4 @@
-/* Catalogo Sorso e codici a barre (Open Food Facts), e il confronto a somiglianza che li usa. */
+/* Catalogo Taste e codici a barre (Open Food Facts), e il confronto a somiglianza che li usa. */
 const test = require("node:test");
 const assert = require("node:assert/strict");
 const { setup, call } = require("./helpers/env");
@@ -83,7 +83,7 @@ test("codice a barre: prima il catalogo, poi Open Food Facts (una volta sola, po
   const calls = [];
   Cat.setFetch(async (url, opts) => {
     calls.push(url);
-    assert.match(opts.headers["User-Agent"], /^Sorso\//);
+    assert.match(opts.headers["User-Agent"], /^Taste\//);
     if (url.includes("8000000000002")) return { ok: true, status: 200, json: async () => ({ status: 1, product: { product_name: "Ruffino Rosso di Marte Morellino di Scansano 2022", brands: "Ruffino,Gruppo X", categories_tags: ["en:beverages", "en:wines", "en:red-wines"] } }) };
     if (url.includes("4006381333931")) return { ok: true, status: 200, json: async () => ({ status: 1, product: { product_name: "Birra chiara", brands: "Bionda", categories_tags: ["en:beers"] } }) };
     if (url.includes("5000000000005")) return { ok: false, status: 503, json: async () => ({}) };

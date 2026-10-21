@@ -22,7 +22,7 @@ const TXT = {
     votes1: "1 voto", votesN: "{n} voti", wines1: "1 vino", winesN: "{n} vini", blind: "Vino {n} (alla cieca)", tie: "pari merito",
     tEvenings: "Serate", tWines: "Vini", tVotes: "Voti", tAvg: "Media", scale: "su 100",
     empty: "La classifica compare quando si chiude la prima serata con almeno due voti per vino.",
-    foot: "Medie anonime delle serate chiuse", brand: "Sorso · taccuino di degustazione", gone: "Questo widget non è disponibile: il link è stato revocato o non è corretto.", busy: "Troppe richieste: riprova fra poco.",
+    foot: "Medie anonime delle serate chiuse", brand: "Taste · taccuino di degustazione", gone: "Questo widget non è disponibile: il link è stato revocato o non è corretto.", busy: "Troppe richieste: riprova fra poco.",
     rankLabel: "Classifica dei vini", evLabel: "Serate chiuse", in: "in"
   },
   en: {
@@ -30,7 +30,7 @@ const TXT = {
     votes1: "1 vote", votesN: "{n} votes", wines1: "1 wine", winesN: "{n} wines", blind: "Wine {n} (blind)", tie: "tie",
     tEvenings: "Evenings", tWines: "Wines", tVotes: "Votes", tAvg: "Average", scale: "out of 100",
     empty: "The ranking appears once the first evening is closed with at least two votes per wine.",
-    foot: "Anonymous averages of closed evenings", brand: "Sorso · tasting notebook", gone: "This widget is not available: the link was revoked or is wrong.", busy: "Too many requests: try again shortly.",
+    foot: "Anonymous averages of closed evenings", brand: "Taste · tasting notebook", gone: "This widget is not available: the link was revoked or is wrong.", busy: "Too many requests: try again shortly.",
     rankLabel: "Wine ranking", evLabel: "Closed evenings", in: "at"
   }
 };
@@ -136,7 +136,7 @@ const votesTxt = (n, L) => n === 1 ? TXT[L].votes1 : tf(L, "votesN", { n });
 
 function render(o, circle, st, widths) {
   const L = o.lang, T = TXT[L];
-  let h = '<header><p class="eb">Sorso · ' + esc(T.eyebrow) + '</p><h1 dir="auto">' + esc(circle.name) + "</h1></header>";
+  let h = '<header><p class="eb">Taste · ' + esc(T.eyebrow) + '</p><h1 dir="auto">' + esc(circle.name) + "</h1></header>";
   const t = st.totals || {};
   const top = (st.top || []).slice(0, o.rows), events = (st.events || []).slice(0, o.rows);
   if (!top.length && !events.some(e => e.winner)) return h + '<p class="empty">' + esc(T.empty) + "</p>";
@@ -187,25 +187,25 @@ module.exports = async (req, res) => {
   try { q = new URL(req.url, "http://x").searchParams; } catch (e) { q = new URLSearchParams(); }
   const o = options(q);
   const foot = '<footer><span>' + esc(TXT[o.lang].foot) + '</span><a href="https://sorso-taccuino.vercel.app/" target="_blank" rel="noopener">' + esc(TXT[o.lang].brand) + '</a></footer>';
-  if (req.method !== "GET" && req.method !== "HEAD") { headers(res, nonce, "no-store"); res.status(405).send(page(o, nonce, "Sorso", "")); return; }
+  if (req.method !== "GET" && req.method !== "HEAD") { headers(res, nonce, "no-store"); res.status(405).send(page(o, nonce, "Taste", "")); return; }
   const token = q.get("t") || "";
-  if (!TOKEN.test(token)) { headers(res, nonce, "public, max-age=300, s-maxage=300"); res.status(404).send(page(o, nonce, "Sorso", '<p class="empty">' + esc(TXT[o.lang].gone) + "</p>")); return; }
+  if (!TOKEN.test(token)) { headers(res, nonce, "public, max-age=300, s-maxage=300"); res.status(404).send(page(o, nonce, "Taste", '<p class="empty">' + esc(TXT[o.lang].gone) + "</p>")); return; }
   let redis;
-  try { redis = getRedis(); } catch (e) { headers(res, nonce, "no-store"); res.status(503).send(page(o, nonce, "Sorso", "")); return; }
+  try { redis = getRedis(); } catch (e) { headers(res, nonce, "no-store"); res.status(503).send(page(o, nonce, "Taste", "")); return; }
   try {
     await Quota.ensure(redis);
     const rl = await limit.hit(redis, "wdg:" + clientIp(req), PER_IP, 60);
-    if (!rl.ok) { headers(res, nonce, "no-store"); res.setHeader("Retry-After", String(rl.retryAfter)); res.status(429).send(page(o, nonce, "Sorso", '<p class="empty">' + esc(TXT[o.lang].busy) + "</p>")); return; }
+    if (!rl.ok) { headers(res, nonce, "no-store"); res.setHeader("Retry-After", String(rl.retryAfter)); res.status(429).send(page(o, nonce, "Taste", '<p class="empty">' + esc(TXT[o.lang].busy) + "</p>")); return; }
     const circle = await Circles.widgetCircle(redis, token);
-    if (!circle) { headers(res, nonce, "public, max-age=60, s-maxage=60"); res.status(404).send(page(o, nonce, "Sorso", '<p class="empty">' + esc(TXT[o.lang].gone) + "</p>")); return; }
+    if (!circle) { headers(res, nonce, "public, max-age=60, s-maxage=60"); res.status(404).send(page(o, nonce, "Taste", '<p class="empty">' + esc(TXT[o.lang].gone) + "</p>")); return; }
     const st = await Team.getTeamStatsApi(redis, Circles.CIRCLE_PARTNER.id, circle.id);
     headers(res, nonce, "public, max-age=60, s-maxage=120, stale-while-revalidate=300");
     const widths = new Set();
     const body = render(o, circle, st, widths) + foot;
-    res.status(200).send(page(o, nonce, circle.name + " — Sorso", body, widths));
+    res.status(200).send(page(o, nonce, circle.name + " — Taste", body, widths));
   } catch (e) {
     headers(res, nonce, "no-store");
-    res.status(500).send(page(o, nonce, "Sorso", ""));
+    res.status(500).send(page(o, nonce, "Taste", ""));
   } finally {
     await Quota.flush(redis);
   }

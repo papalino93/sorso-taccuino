@@ -1,4 +1,4 @@
-/* Componenti e stile condivisi dalle guide PDF di Sorso (A4, HTML stampato con Chromium).
+/* Componenti e stile condivisi dalle guide PDF di Taste (A4, HTML stampato con Chromium).
    Stile: editoriale, come una rivista: copertina scura con cornice e ornamenti, titoli in serif con
    una parola in corsivo a colore, schermate vere dentro cornici di telefono, numeri grandi, schede. */
 const fs = require("fs");
@@ -21,8 +21,8 @@ const esc = s => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(
 
 const MARCHIO = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="16" fill="#1d1c22"/><g transform="translate(8 8) scale(1.5)"><circle cx="16" cy="16" r="12.2" fill="none" stroke="#fff" stroke-width="2.6"/><path d="M10 17.8C12.4 22.4 19.6 22.4 22 17.8" fill="none" stroke="#9a8cff" stroke-width="2.6" stroke-linecap="round"/></g></svg>`;
 /* la scritta: le due O sono il cerchio che sorride */
-const O_SMILE = `<svg viewBox="2.6 2.6 26.8 26.8" style="display:inline-block;width:.78em;height:.74em;margin-right:.16em;vertical-align:-.02em"><circle cx="16" cy="16" r="11.2" fill="none" stroke="currentColor" stroke-width="4.4"/><path d="M10.6 17.6C12.8 21.8 19.2 21.8 21.4 17.6" fill="none" stroke="#9a8cff" stroke-width="3.8" stroke-linecap="round"/></svg>`;
-const WORDMARK = "S" + O_SMILE + "RS" + O_SMILE;
+const A_SMILE = `<svg viewBox="0 0 86 100" style="display:inline-block;width:.52em;height:.58em;margin:0 .035em 0 .02em;overflow:visible"><circle cx="40" cy="50" r="31" fill="none" stroke="currentColor" stroke-width="19"/><path d="M77 2V100" stroke="currentColor" stroke-width="18"/><path d="M23 53C30 72 50 72 57 53" fill="none" stroke="#7d6cff" stroke-width="14" stroke-linecap="round"/></svg>`;
+const WORDMARK = `<span style="text-transform:none;letter-spacing:-.01em;font-weight:800;font-size:1.25em">t${A_SMILE}ste</span>`;
 const ROMBO = `<svg class="rombo" viewBox="0 0 10 10"><path d="M5 0l5 5-5 5-5-5z" fill="currentColor"/></svg>`;
 
 const CSS = `
@@ -247,5 +247,5 @@ function esempio(nome, tag) { return code(fs.readFileSync(path.join(__dirname, "
 function documento(titolo, pagine) {
   return `<!doctype html><html lang="it"><head><meta charset="utf-8"><title>${esc(titolo)}</title><style>${CSS}</style></head><body>${pagine.join("\n")}</body></html>`;
 }
-const anat = () => `<div class="anat"><div class="h"><b>header</b>L'algoritmo: sempre <code>HS256</code>, tipo <code>JWT</code>.</div><div class="p"><b>payload</b>Chi è l'utente, in che gruppo, con che ruolo, fino a quando vale: i campi qui sopra.</div><div class="f"><b>firma</b>Calcolata con il tuo segreto: solo tu e Sorso potete produrla.</div></div>`;
+const anat = () => `<div class="anat"><div class="h"><b>header</b>L'algoritmo: sempre <code>HS256</code>, tipo <code>JWT</code>.</div><div class="p"><b>payload</b>Chi è l'utente, in che gruppo, con che ruolo, fino a quando vale: i campi qui sopra.</div><div class="f"><b>firma</b>Calcolata con il tuo segreto: solo tu e Taste potete produrla.</div></div>`;
 module.exports = { anat, page, cover, eyebrow, phone, fig, wide, stats, cards, table, call, quote, ul, check, code, esempio, documento, esc, MARCHIO, DATA, VERSIONE, BASE, img };

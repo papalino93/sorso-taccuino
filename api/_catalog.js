@@ -4,7 +4,7 @@ const limit = require("./_limit");
 const WineMatch = require("../public/js/wine-match.js");
 const LabelReader = require("../public/js/label-reader.js");
 
-/* Catalogo Sorso: i vini confermati da chi li ha assaggiati, per riconoscerli la volta dopo.
+/* Catalogo Taste: i vini confermati da chi li ha assaggiati, per riconoscerli la volta dopo.
    Si salvano solo i dati del vino (nome, produttore, denominazione, tipologia, vitigni, annate,
    codici a barre): niente voti, niente note, niente nomi. Chi conferma è un'impronta anonima.
 
@@ -24,7 +24,7 @@ const PUBLIC_AT = 2, HIDE_AT = 2;
 const TYPES = ["Rosso", "Bianco", "Rosato", "Spumante", "Passito"];
 const K = { idx: "cat:idx", w: id => "cat:w:" + id, ean: e => "cat:ean:" + e, off: e => "off:" + e };
 const OFF_TTL = 30 * 86400, OFF_MISS_TTL = 3 * 86400;
-const UA = "Sorso/2.7 (https://sorso-taccuino.vercel.app)";
+const UA = "Taste/2.11 (https://sorso-taccuino.vercel.app)";
 
 function parse(raw) { if (raw == null) return null; if (typeof raw === "object") return raw; try { return JSON.parse(raw); } catch (e) { return null; } }
 /* hgetall torna come elenco piatto [campo, valore, …] (client senza deserializzazione) oppure come oggetto */

@@ -1,6 +1,6 @@
-# Sorso — Taccuino di degustazione
+# Taste — Taccuino di degustazione
 
-Versione corrente: **2.9.2** — ultimo aggiornamento: 21 ottobre 2026 (cronologia in `CHANGELOG.md`). La versione e la data si leggono anche in fondo all'app e dello spazio di team.
+Versione corrente: **2.11.0** — ultimo aggiornamento: 21 ottobre 2026 (cronologia in `CHANGELOG.md`). Fino alla 2.10 si chiamava **Sorso**: indirizzo, repository, chiavi dei dati salvati, intestazioni `X-Sorso-*` e messaggi `sorso:*` restano con il vecchio nome, così niente si rompe. La versione e la data si leggono anche in fondo all'app e dello spazio di team.
 
 App per registrare degustazioni di vino con scheda di valutazione, statistiche personali, degustazioni alla cieca ed eventi condivisi.
 

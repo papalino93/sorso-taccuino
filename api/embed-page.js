@@ -24,7 +24,7 @@ const SHELL = nonce => themeCss => lang => `<!doctype html>
 <meta name="robots" content="noindex">
 <meta name="color-scheme" content="light dark">
 <link rel="icon" href="data:,">
-<title>Sorso</title>
+<title>Taste</title>
 <link rel="stylesheet" href="/embed.css">
 <style nonce="${nonce}">${themeCss}</style>
 </head>
@@ -54,8 +54,8 @@ module.exports = async (req, res) => {
   let pid = "", cid = "";
   try { const q = new URL(req.url, "http://x").searchParams; pid = q.get("p") || ""; cid = q.get("c") || ""; } catch (e) { pid = ""; }
 
-  /* serate di una cerchia: la pagina vive dentro l'app di Sorso (stessa origine), incorporabile solo da lì.
-     Chi entra e con che ruolo lo decide l'API a ogni richiesta (sessione Sorso + ruolo nella cerchia). */
+  /* serate di una cerchia: la pagina vive dentro l'app di Taste (stessa origine), incorporabile solo da lì.
+     Chi entra e con che ruolo lo decide l'API a ogni richiesta (sessione Taste + ruolo nella cerchia). */
   if (/^[0-9a-f]{10}$/.test(cid)) {
     const nonce = crypto.randomBytes(16).toString("base64");
     res.setHeader("Content-Security-Policy", ["default-src 'none'", "script-src 'self'", "style-src 'self' 'nonce-" + nonce + "'", "img-src 'self' data: https://*.googleusercontent.com", "connect-src 'self'", "base-uri 'none'", "form-action 'none'", "frame-ancestors 'self'"].join("; "));

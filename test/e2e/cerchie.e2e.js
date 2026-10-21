@@ -170,12 +170,12 @@ const ok = (c, m) => { console.log((c ? "OK   " : "FAIL ") + m); if (!c) fails++
   {
     const A2 = await open("anna", { width: 390, height: 844 }); const a2 = A2.page;
     await goCircles(a2); await a2.locator('[data-circ="open"]').first().click(); await a2.locator('form[data-circ-form="invite"]').waitFor();
-    ok(/non manda mail da solo/.test(await a2.locator("#pane-circles").innerText()) && await a2.locator('[data-circ="resend"]').count() === 0, "senza servizio di posta: «Sorso non manda mail da solo», niente «Rimanda la mail»");
+    ok(/non manda mail da solo/.test(await a2.locator("#pane-circles").innerText()) && await a2.locator('[data-circ="resend"]').count() === 0, "senza servizio di posta: «Taste non manda mail da solo», niente «Rimanda la mail»");
     const realFetch = global.fetch, inviate = [];
     global.fetch = async (url, opts) => { if (/api\.resend\.com/.test(String(url))) { inviate.push(JSON.parse(opts.body)); return { ok: true, status: 200 }; } return realFetch(url, opts); };
-    process.env.RESEND_API_KEY = "re_finta"; process.env.MAIL_FROM = "Sorso <inviti@esempio.it>";
+    process.env.RESEND_API_KEY = "re_finta"; process.env.MAIL_FROM = "Taste <inviti@esempio.it>";
     await a2.reload(); await a2.waitForTimeout(900); await goCircles(a2); await a2.locator('[data-circ="open"]').first().click(); await a2.locator('form[data-circ-form="invite"]').waitFor();
-    ok(/Sorso manda anche una mail/.test(await a2.locator("#pane-circles").innerText()), "con il servizio: «Sorso manda anche una mail»");
+    ok(/Taste manda anche una mail/.test(await a2.locator("#pane-circles").innerText()), "con il servizio: «Taste manda anche una mail»");
     await a2.fill("#circEmails", "nuova.persona@example.com"); await a2.click('[data-circ-form="invite"] button[type=submit]');
     await a2.locator("#pane-circles").getByText("mail inviata").waitFor({ timeout: 5000 }).then(() => ok(true, "dopo l'invito compare «mail inviata»"), () => ok(false, "«mail inviata»"));
     ok(inviate.length === 1 && inviate[0].to[0] === "nuova.persona@example.com" && /\?invito=[0-9a-f]{48}/.test(inviate[0].text), "la mail è partita verso l'indirizzo giusto, con il link");

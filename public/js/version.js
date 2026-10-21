@@ -4,5 +4,5 @@
   if (typeof module === "object" && module.exports) module.exports = factory();
   else root.SORSO_VERSION = factory();
 })(typeof self !== "undefined" ? self : this, function () {
-  return { version: "2.10.1", date: "2026-10-21" };
+  return { version: "2.11.0", date: "2026-10-21" };
 });

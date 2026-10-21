@@ -186,6 +186,6 @@ function build() {
     <div class="bigword">Buona serata.</div>
     <p class="mute">Versione ${L.VERSIONE} · ultimo aggiornamento: ${L.DATA}</p>
   `));
-  return L.documento("Sorso — Guida per chi organizza", P);
+  return L.documento("Taste — Guida per chi organizza", P);
 }
 module.exports = { build };

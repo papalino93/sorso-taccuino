@@ -1,4 +1,4 @@
-/* Riconoscere il vino (2.7.0): il tuo Taccuino, il catalogo Sorso, Open Food Facts con il codice a barre (scritto o fotografato),
+/* Riconoscere il vino (2.7.0): il tuo Taccuino, il catalogo Taste, Open Food Facts con il codice a barre (scritto o fotografato),
    e il contributo al catalogo quando si salva. Serve la rete (motore di lettura e lettore dei codici la prima volta).
    node test/e2e/riconosci.e2e.js */
 const { chromium } = require(require("child_process").execSync("npm root -g").toString().trim() + "/playwright");
@@ -43,7 +43,7 @@ function eanBits(code) {
   /* nel Taccuino di Anna c'è già un Flaccianello di un'altra annata */
   await redis.set("u:google:anna:degustazione:1700000000000-abc", JSON.stringify({ nome: "Flaccianello della Pieve", produttore: "Fontodi", annata: "2019", tipologia: "Rosso",
     denominazione: "Colli della Toscana Centrale IGT", uvaggi: [{ v: "Sangiovese", p: 100 }], modalita: "smart", giudizi: { occhio: 92, naso: 92, bocca: 92 }, score: 92, scoreScale: 2, modello: 4, timestamp: Date.UTC(2026, 2, 12, 12) }));
-  /* nel catalogo Sorso il Giovesone, confermato da due persone */
+  /* nel catalogo Taste il Giovesone, confermato da due persone */
   const { call } = require("../helpers/env");
   const catalog = require("../../api/catalog");
   for (const who of ["carla", "bea"]) await call(catalog, { method: "POST", headers: { authorization: "Bearer tok-" + who, "x-forwarded-for": "3.3.3.3" }, body: { op: "confirm", wine: { nome: "Giovesone", produttore: "Fattoria del Colle", denominazione: "Orcia DOC", tipologia: "Rosso", vitigni: ["Sangiovese"], annata: "2019" } } });
@@ -90,11 +90,11 @@ function eanBits(code) {
   await page.click('[data-lbl="apply"]');
   ok((await page.locator("#nomeInput").inputValue()) === "Flaccianello della Pieve" && (await page.locator("#annataInput").inputValue()) === "2021", "scheda compilata");
 
-  /* --- 2. dal catalogo Sorso --- */
+  /* --- 2. dal catalogo Taste --- */
   await page.fill("#nomeInput", ""); await page.fill("#produttoreInput", ""); await page.fill("#annataInput", "");
   await readPhoto(await label([["GIOVESONE", 420, 130], ["ORCIA", 600, 90], ["DENOMINAZIONE DI ORIGINE CONTROLLATA", 700, 40, "normal"], ["2020", 900, 140], ["FATTORIA DEL COLLE", 1150, 64]], "giovesone"));
   txt = await panel();
-  ok(/È questo\?/i.test(txt) && /Giovesone · Fattoria del Colle/.test(txt) && /catalogo Sorso/.test(txt), "catalogo Sorso: «È questo?» con un vino confermato da altri");
+  ok(/È questo\?/i.test(txt) && /Giovesone · Fattoria del Colle/.test(txt) && /catalogo Taste/.test(txt), "catalogo Taste: «È questo?» con un vino confermato da altri");
   ok(/Annate conosciute: 2019/.test(txt), "si vedono le annate già note");
   ok(await page.locator('[data-lbl="m-report"]').count() === 1, "c'è «Dati sbagliati? Segnala»");
   await page.click('[data-lbl="m-no"]');
@@ -133,14 +133,14 @@ function eanBits(code) {
   await page.click("#saveBtn"); await page.waitForTimeout(1500);
   const idx = await redis.hgetall("cat:idx");
   const flat = JSON.stringify(idx);
-  ok(/Rosso di Marte/.test(flat), "salvata la scheda: il vino è nel catalogo Sorso");
+  ok(/Rosso di Marte/.test(flat), "salvata la scheda: il vino è nel catalogo Taste");
   ok((await redis.get("cat:ean:8000000000002")) !== null, "con il suo codice a barre");
   ok(!/\banna\b|google:/i.test(JSON.stringify(await redis.get("cat:w:" + (await redis.get("cat:ean:8000000000002"))))), "senza il nome di chi l'ha salvato");
 
   /* --- 6. Impostazioni: si può smettere di contribuire --- */
   await page.click("#settingsBtn");
   await page.waitForTimeout(300);
-  ok(await page.locator("#catContrib").isChecked(), "Impostazioni: «Contribuisci al catalogo Sorso» attivo");
+  ok(await page.locator("#catContrib").isChecked(), "Impostazioni: «Contribuisci al catalogo Taste» attivo");
   ok(/almeno due persone/.test(await page.locator("#catCard").innerText()), "spiega quando un vino diventa di tutti");
   await page.locator("#catContrib").uncheck();
   ok((await page.evaluate(() => localStorage.getItem("sorso-catalogo"))) === "0", "disattivato: lo ricorda");
@@ -153,7 +153,7 @@ function eanBits(code) {
   await p2.goto(d.url + "/", { waitUntil: "load" }); await p2.waitForTimeout(800);
   await p2.setInputFiles("#photoInput", path.join(os.tmpdir(), "giovesone.png")); await p2.waitForTimeout(300);
   await p2.click("#readLabelBtn");
-  await p2.locator("#labelRead", { hasText: "catalogo Sorso" }).waitFor({ timeout: 180000 }).then(() => ok(true, "ospite: riconosce il vino del catalogo"), () => ok(false, "ospite: niente catalogo"));
+  await p2.locator("#labelRead", { hasText: "catalogo Taste" }).waitFor({ timeout: 180000 }).then(() => ok(true, "ospite: riconosce il vino del catalogo"), () => ok(false, "ospite: niente catalogo"));
 
   ok(errs.length === 0, "nessun errore nelle pagine " + errs.join(" | "));
   await browser.close(); await d.stop();
