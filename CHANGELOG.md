@@ -3,6 +3,13 @@
 La versione e la data dell'ultimo aggiornamento sono mostrate in fondo all'app e dello spazio di team
 (fonte: `public/js/version.js`, da tenere uguale a `package.json`).
 
+## 2.8.0 — 21 ottobre 2026
+- **Nuovo aspetto, tappa 1 (app personale).** Colori nuovi: di giorno fondo perla caldo con schede bianche, di notte antracite con riquadri grigio scuro; accento **lavanda** al posto del blu inchiostro (che resta tra i colori proposti, insieme a una nuova voce «Perla» e «Antracite» tra gli sfondi). Verde, giallo e rosso solo per gli stati. Chi aveva scelto un colore lo tiene.
+- **Nuovo logo**: la O di «SORSO» diventa un cerchio che sorride, con un punto in alto a destra (l'occhiolino del sorso). Nuove icone dell'app, favicon e manifest.
+- **Barra in alto su PC rifatta**: marchio, divisore, sezioni a pillola con icona (quella attiva tinta di lavanda con bordo), pulsanti quadrati a destra e chip utente con nome. Sul telefono il menù ha le icone sopra le etichette e i comandi stanno su una riga.
+- **Componenti uniformi**: angoli, bordi sottili e ombre leggere uguali per schede, pulsanti, campi, scelte e segmenti (la scelta attiva dei segmenti è «in rilievo» di giorno, lavanda di notte); focus da tastiera visibile ovunque; tutto il testo in Geist. Il pulsante «Accedi con Google» è bianco, come vuole Google.
+- Contrasti controllati per ogni colore proposto, in chiaro e in scuro (nuovo test).
+
 ## 2.7.2 — 21 ottobre 2026
 - **Voti di partenza uguali**: il Voto rapido ora parte da 68, come la Scheda completa (tutti i giudizi a 6/10), nell'app e nelle serate delle cerchie. Cambia solo il punto di partenza dei cursori, non il calcolo del punteggio.
 

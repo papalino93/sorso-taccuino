@@ -8,7 +8,7 @@ let fails = 0; const ok = (c, m) => { console.log((c ? "OK   " : "FAIL ") + m); 
   await page.addInitScript(() => { if (!localStorage.getItem("s")) { localStorage.setItem("s", "1"); localStorage.setItem("sorso.auth.skipped", "1"); localStorage.setItem("sorso-theme", "light"); localStorage.setItem("sorso-nota-scala2", "1"); } });
   await page.goto("http://localhost:8765/", { waitUntil: "load" }); await page.waitForTimeout(800);
   const v = name => page.evaluate(n => document.getElementById("root").style.getPropertyValue(n) || getComputedStyle(document.getElementById("root")).getPropertyValue(n), name);
-  ok((await v("--sel-bg")).trim().toLowerCase() === "#2b4c7e", "predefinito: blu inchiostro");
+  ok((await v("--sel-bg")).trim().toLowerCase() === "#5b4bd5", "predefinito: lavanda");
   const foot = await page.locator("#appVersion").textContent();
   ok(/v\d+\.\d+\.\d+/.test(foot) && /2026/.test(foot) && /aggiornamento/.test(foot), "versione e data nel piè di pagina: " + foot);
   await page.click("#settingsBtn");
@@ -26,13 +26,13 @@ let fails = 0; const ok = (c, m) => { console.log((c ? "OK   " : "FAIL ") + m); 
   ok(c[0] !== "#ffeb3b", "il giallo è stato scurito (" + c[0] + ")");
   /* tema scuro: sfondi propri e scelta separata */
   await page.click("#themeDark"); await page.waitForTimeout(300);
-  ok((await page.locator("#bgSwatches [data-bg]").first().getAttribute("data-bg")) === "#121418", "in tema scuro si propongono gli sfondi scuri");
+  ok((await page.locator("#bgSwatches [data-bg]").first().getAttribute("data-bg")) === "#131218", "in tema scuro si propongono gli sfondi scuri");
   ok((await v("--panel")).trim() !== "#ffffff", "lo sfondo chiaro scelto non finisce nel tema scuro");
   /* ripristino */
   await page.locator("#lookReset").click();
-  ok((await v("--sel-bg")).trim().toLowerCase() === "#597299", "ripristino: torna l'accento predefinito del tema scuro");
+  ok((await v("--sel-bg")).trim().toLowerCase() === "#9a8cff", "ripristino: torna l'accento predefinito del tema scuro");
   await page.click("#themeLight"); await page.waitForTimeout(200);
-  ok((await v("--sel-bg")).trim().toLowerCase() === "#2b4c7e", "e quello del tema chiaro");
+  ok((await v("--sel-bg")).trim().toLowerCase() === "#5b4bd5", "e quello del tema chiaro");
   /* tema: chiaro / scuro / automatico (segue il dispositivo) */
   await page.locator('#themePrefSwitch [data-themepref="auto"]').click(); await page.waitForTimeout(200);
   ok((await page.locator('#themePrefSwitch [data-themepref="auto"]').getAttribute("aria-pressed")) === "true", "tema automatico selezionato");

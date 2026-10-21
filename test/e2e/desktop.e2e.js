@@ -107,7 +107,7 @@ const TABS = ["new", "blind", "book", "stats", "circles", "settings"];
     ok(!(await page.locator("#lookPop").isVisible()), "l'ingranaggio porta alle Impostazioni (il pannello è chiuso)");
     /* palette a vino */
     const acc = await page.evaluate(() => getComputedStyle(document.getElementById("root")).getPropertyValue("--accent").trim());
-    ok(acc === "#2b4c7e", "chiaro: blu inchiostro (" + acc + ")");
+    ok(acc === "#5b4bd5", "chiaro: lavanda (" + acc + ")");
     await ctx.close();
   }
   /* scuro a vino */
@@ -115,7 +115,7 @@ const TABS = ["new", "blind", "book", "stats", "circles", "settings"];
     const { ctx, page } = await open(1440, 900, "dark");
     await page.locator("#themeDark").click();
     const v = await page.evaluate(() => { const g = n => getComputedStyle(document.getElementById("root")).getPropertyValue(n).trim(); return [g("--accent"), g("--panel")]; });
-    ok(v[0] === "#597299" && v[1] === "#121418", "scuro: blu su ardesia " + v);
+    ok(v[0] === "#9a8cff" && v[1] === "#131218", "scuro: lavanda su antracite " + v);
     await ctx.close();
   }
   /* sotto i 1100px resta il telefono */

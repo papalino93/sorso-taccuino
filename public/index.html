@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#F6F6F3" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#121418" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#FEFEFE" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#23222A" media="(prefers-color-scheme: dark)">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -30,7 +30,7 @@
 {"@context":"https://schema.org","@type":"WebApplication","name":"Sorso — Taccuino di degustazione","alternateName":"Sorso","url":"https://sorso-taccuino.vercel.app/","description":"Taccuino di degustazione ispirato al metodo AIS: scheda a punteggio, archivio personale, statistiche, classifica evento.","applicationCategory":"LifestyleApplication","operatingSystem":"Any browser","inLanguage":["it","en"],"offers":{"@type":"Offer","price":"0","priceCurrency":"EUR"}}
 </script>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@400;500;600;700;800&family=Inter:ital,wght@0,400;0,500;0,600;0,700;0,800&family=JetBrains+Mono:wght@500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@400;500;600;700;800&family=Inter:ital,wght@0,400;0,500;0,600;0,700;0,800&family=JetBrains+Mono:wght@500;600;700;800&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
   *,*::before,*::after{box-sizing:border-box;}
   /* ---------- Sistema colori "Cinema del vino" ----------
@@ -1131,9 +1131,216 @@
     .hdr-ctrl{margin-right:16px;gap:6px;}
   }
   @media (min-width:1700px){ .panel{max-width:1440px;} .body > .tabpane{max-width:1200px;} }
+  /* ==========================================================================
+     SORSO 3 · restyling 2.8.0 — sistema visivo unico
+     Colori dal cruscotto (antracite, grigi, lavanda; verde/giallo/rosso solo per gli stati),
+     impostazione dalla Suite (barra bianca, voci a pillola con quella attiva tinta, pulsanti
+     quadrati a icona, chip utente). Tutto passa dai token: i colori veri li calcola js/theme.js.
+     ========================================================================== */
+  #root{
+    --r-xs:8px; --r-sm:10px; --r-md:14px; --r-lg:18px; --r-xl:22px;
+    --sp-1:4px; --sp-2:8px; --sp-3:12px; --sp-4:16px; --sp-5:24px; --sp-6:32px;
+    --shadow-1:0 1px 2px rgba(20,18,30,.05),0 1px 1px rgba(20,18,30,.03);
+    --shadow-2:0 12px 32px -14px rgba(20,18,30,.28),0 2px 6px rgba(20,18,30,.06);
+    --ok:#1f8a4c; --ok-soft:rgba(31,138,76,.12); --warn:#a76a08; --warn-soft:rgba(214,150,30,.16); --bad:#c0362c; --bad-soft:rgba(192,54,44,.12);
+    --positive:var(--ok);
+    --serif:'Geist','Inter',system-ui,sans-serif;
+    --num:'Geist','Inter',system-ui,sans-serif;
+    --mono:'Geist Mono',ui-monospace,'SF Mono',Menlo,monospace;
+    --focus:0 0 0 2px var(--panel),0 0 0 4px var(--accent);
+  }
+  #root.dark{
+    --shadow-1:0 1px 0 rgba(255,255,255,.02);
+    --shadow-2:0 18px 40px -16px rgba(0,0,0,.7);
+    --ok:#4ad07e; --ok-soft:rgba(74,208,126,.14); --warn:#f2b84b; --warn-soft:rgba(242,184,75,.16); --bad:#ff6b5e; --bad-soft:rgba(255,107,94,.14);
+  }
+  body,.shell{background:var(--panel);}
+  .panel{background:var(--panel);}
+  #root{color:var(--ink);}
+  /* focus da tastiera sempre visibile, nello stesso modo ovunque */
+  #root :focus-visible{outline:none;box-shadow:var(--focus);border-radius:var(--r-sm);}
+  #root input:focus-visible,#root select:focus-visible,#root textarea:focus-visible{box-shadow:var(--focus);}
+
+  /* ---------- marchio ---------- */
+  .brand-logo{width:30px;height:30px;color:var(--head-fg);border-radius:0;flex:none;display:block;}
+  .brand-name{font:650 17px/1 'Geist','Inter',sans-serif;letter-spacing:.16em;text-transform:uppercase;color:var(--head-fg);}
+  .brand-tag{font:600 9px/1.2 'Geist','Inter',sans-serif;letter-spacing:.2em;text-transform:uppercase;color:var(--head-dim);}
+  .brand:hover .brand-tag{color:var(--accent-text);}
+  .login-logo{display:block;margin:0 auto 12px;width:60px;height:60px;border-radius:16px;}
+  .login-brand-name{font:650 28px/1 'Geist',sans-serif !important;letter-spacing:.18em !important;text-transform:uppercase;}
+  .login-brand-tag{letter-spacing:.2em;text-transform:uppercase;font-size:10px;color:var(--ink-3);}
+  .login-google{background:var(--field) !important;color:var(--ink) !important;border:1px solid var(--line-strong) !important;border-radius:var(--r-md) !important;box-shadow:var(--shadow-1);}
+  .login-google:hover{background:var(--card-alt) !important;}
+  .login-gate{background:var(--panel);}
+  .login-card{background:var(--card);border:1px solid var(--line);border-radius:var(--r-xl);box-shadow:var(--shadow-2);}
+
+  /* ---------- intestazione (telefono) ---------- */
+  .hdr{background:var(--head-bg);border-bottom:1px solid var(--line);padding:14px 18px 18px;}
+  .hdr-num{font-family:'Geist',sans-serif;font-weight:800;letter-spacing:-.06em;color:var(--head-fg);}
+  .hdr-unit{color:var(--head-dim);}
+  .hdr-caption{background:var(--accent-soft);color:var(--accent-text);border:1px solid var(--accent-line);padding:6px 12px;border-radius:var(--r-sm);font:650 14px/1.1 'Geist',sans-serif;}
+  .hdr.flood .hdr-caption{background:var(--sel-fg);color:var(--accent);border-color:transparent;}
+  .seg-track{background:var(--line);height:6px;}
+  .seg-fill{background:var(--accent);}
+  .seg-label{color:var(--ink-3);}
+  .seg-val{color:var(--ink);font-family:var(--mono);font-weight:500;}
+  .hdr.flood .seg-track{background:rgba(255,255,255,.28);} .hdr.flood .seg-fill{background:var(--sel-fg);} .hdr.flood .seg-label,.hdr.flood .seg-val{color:var(--sel-fg);}
+  .hdr-evt{background:var(--card-alt);color:var(--ink-2);border-radius:var(--r-sm);}
+
+  /* comandi a destra: pulsanti quadrati con bordo sottile (come la Suite) */
+  /* telefono: marchio su una riga, comandi sotto, allineati a sinistra (impostazioni e utente in fondo a destra) */
+  .hdr-ctrl{margin-left:0;width:100%;justify-content:flex-start;gap:8px;}
+  .hdr-ctrl #settingsBtn{margin-left:auto;}
+  .lang-switch button,.theme-switch button{width:38px;height:36px;}
+  .gear-btn{width:40px;height:40px;border-radius:var(--r-sm);border:1px solid var(--line);background:var(--head-bg);color:var(--ink-2);}
+  .gear-btn:hover{background:var(--card-alt);color:var(--ink);}
+  .gear-btn[aria-pressed=true],.gear-btn[aria-expanded=true]{background:var(--accent-soft);border-color:var(--accent-line);color:var(--accent-text);}
+  .lang-switch,.theme-switch{border:1px solid var(--line);border-radius:var(--r-sm);background:var(--head-bg);overflow:hidden;padding:2px;gap:2px;}
+  .lang-switch button,.theme-switch button{border-radius:7px;color:var(--ink-3);font:600 12.5px/1 'Geist',sans-serif;}
+  .lang-switch button:hover:not(.on),.theme-switch button:hover:not(.on){background:var(--card-alt);color:var(--ink);}
+  .lang-switch button.on,.theme-switch button.on,.login-card .lang-switch button.on{background:var(--accent-soft);color:var(--accent-text);box-shadow:inset 0 0 0 1px var(--accent-line);}
+  .avatar-btn{display:inline-flex;align-items:center;gap:8px;width:auto;min-width:40px;height:40px;padding:0 4px;border-radius:999px;border:1px solid var(--line);background:var(--head-bg);color:var(--ink);}
+  .avatar-btn #avatarInitials{display:grid;place-items:center;width:30px;height:30px;border-radius:50%;background:var(--accent);color:var(--sel-fg);font:700 12px/1 'Geist',sans-serif;flex:none;}
+  .avatar-btn.guest{border:1px dashed var(--line-strong);background:var(--head-bg);}
+  .avatar-btn.guest #avatarInitials{background:transparent;color:var(--ink-3);}
+  .avatar-name,.avatar-chev{display:none;}
+  .avatar-btn:hover{background:var(--card-alt);}
+  .avatar-menu,.look-pop{background:var(--card);border:1px solid var(--line);border-radius:var(--r-md);box-shadow:var(--shadow-2);}
+  .avatar-menu-item{border-radius:var(--r-xs);}
+  .avatar-menu-item:hover{background:var(--card-alt);}
+
+  /* ---------- menù delle sezioni ---------- */
+  .nav{background:var(--head-bg);border-bottom:1px solid var(--line);}
+  .nav .ico{display:block;flex:none;color:var(--ink-4);transition:color .15s;}
+  .nav button{flex-direction:column;gap:4px;padding:10px 2px 9px;}
+  .nav button::after{left:22%;right:22%;height:2px;background:transparent;}
+  .nav button.on::after{background:var(--accent);}
+  .nav .lbl{font:600 11px/1 'Geist',sans-serif;color:var(--ink-4);}
+  .nav button.on .lbl,.nav button.on .ico{color:var(--accent-text);}
+  .nav button:hover:not(.on) .lbl,.nav button:hover:not(.on) .ico{color:var(--ink-2);}
+
+  /* ---------- titoli di pagina ---------- */
+  .pane-title{font:700 28px/1.1 'Geist',sans-serif;letter-spacing:-.025em;color:var(--ink);}
+  .pane-sub{color:var(--ink-3);}
+  .eyebrow{font:650 11px/1.2 'Geist',sans-serif;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);}
+  .status{font:500 12px/1.2 var(--mono);color:var(--ink-3);}
+
+  /* ---------- superfici ---------- */
+  .card,.sec,.stat-card,.wine-row,.empty,.uv-box,.cmp,.stat-panel{background:var(--card);border:1px solid var(--line);border-radius:var(--r-lg);box-shadow:var(--shadow-1);}
+  .wine-detail{background:var(--card);border:1px solid var(--line);border-top:0;border-radius:0 0 var(--r-lg) var(--r-lg);}
+  .zona,.zona-val,.lbl-read,.scale-note{border-radius:var(--r-md);}
+  .lbl-read{background:var(--card-alt);}
+  .drop{border:1.5px dashed var(--line-strong);border-radius:var(--r-md);background:var(--card-alt);}
+  .drop:hover,.drop.over{border-color:var(--accent);background:var(--accent-soft);}
+  .drop-icon{border-radius:var(--r-sm);background:var(--card);}
+  .label-thumb,.wine-slot{border-radius:var(--r-sm);}
+
+  /* ---------- pulsanti ---------- */
+  .pill-solid,.pill-ghost,.pill-danger{border-radius:var(--r-sm);font:650 13.5px/1.1 'Geist',sans-serif;min-height:44px;padding:0 16px;transition:background .15s,border-color .15s,color .15s;}
+  .pill-solid{background:var(--accent);color:var(--sel-fg);border:1px solid var(--accent);}
+  .pill-solid:hover{filter:brightness(1.06);}
+  .pill-ghost{background:var(--card);color:var(--ink);border:1px solid var(--line-strong);}
+  .pill-ghost:hover{background:var(--card-alt);}
+  .pill-danger{background:transparent;color:var(--bad);border:1px solid var(--bad);}
+  .pill-danger:hover{background:var(--bad-soft);}
+  .pill-solid:disabled,.pill-ghost:disabled,.act-save:disabled{opacity:.5;cursor:not-allowed;filter:none;}
+  .act-save{border-radius:var(--r-md);background:var(--accent);color:var(--sel-fg);font:700 15px/1 'Geist',sans-serif;}
+  .act-reset{border-radius:var(--r-md);border:1px solid var(--line-strong);background:var(--card);color:var(--ink-2);}
+  .bottom-inner{background:var(--bar);border-top:1px solid var(--line);backdrop-filter:saturate(1.4) blur(10px);}
+  .coffee-fab{background:var(--ink);color:var(--panel);box-shadow:var(--shadow-2);}
+
+  /* ---------- campi ---------- */
+  .in-title{font:700 26px/1.15 'Geist',sans-serif;letter-spacing:-.025em;border-bottom:1px solid var(--line-strong);}
+  .in-line{border-bottom:1px solid var(--line-strong);}
+  .in-title:focus,.in-line:focus{border-bottom-color:var(--accent);}
+  .fld-lab{font:650 11px/1.2 'Geist',sans-serif;letter-spacing:.08em;color:var(--ink-3);}
+  .sel{border-radius:var(--r-sm);background:var(--field);box-shadow:inset 0 0 0 1px var(--line-strong);}
+  .sel:focus{box-shadow:inset 0 0 0 1.5px var(--accent);}
+  textarea{border-radius:var(--r-sm);}
+
+  /* ---------- scelte: chip e segmenti ---------- */
+  .type-chip-btn,.chip-btn,.fchip{border-radius:var(--r-sm);box-shadow:inset 0 0 0 1px var(--line-strong);background:var(--card);color:var(--ink-2);font-weight:600;}
+  .type-chip-btn:hover:not(.on),.chip-btn:hover:not(.on),.fchip:hover:not(.on){background:var(--card-alt);}
+  .type-chip-btn.on,.chip-btn.on,.fchip.on{background:var(--accent-soft);color:var(--accent-text);box-shadow:inset 0 0 0 1.5px var(--accent-line);}
+  .modes{background:var(--card-alt);border:1px solid var(--line);border-radius:var(--r-md);padding:3px;gap:3px;}
+  .modes button{border-radius:var(--r-sm);color:var(--ink-3);}
+  .modes button.on{background:var(--card);color:var(--ink);box-shadow:var(--shadow-1),inset 0 0 0 1px var(--line);}
+  #root.dark .modes button.on{background:var(--accent);color:var(--sel-fg);box-shadow:none;}
+  /* giudizi: la scelta resta piena (si deve vedere a colpo d'occhio quale voto è dato) */
+  .rgroup button,.lgroup button{border-radius:var(--r-xs);background:var(--card-alt);color:var(--ink-2);}
+  .rgroup button:hover:not(.on),.lgroup button:hover:not(.on){background:var(--line-soft);}
+  .rgroup button.on,.lgroup button.on{background:var(--accent);color:var(--sel-fg);}
+  #root.dark .rgroup button:not(.on),#root.dark .lgroup button:not(.on){background:rgba(255,255,255,.07);}
+  #root.dark .rgroup button:hover:not(.on),#root.dark .lgroup button:hover:not(.on){background:rgba(255,255,255,.12);}
+  .srange,.srow input[type=range]{accent-color:var(--accent);}
+  .vrow-val{font-family:'Geist',sans-serif;font-weight:800;}
+  .vrow-val.up{color:var(--accent-text);}
+  .sec-title{font:700 16px/1.25 'Geist',sans-serif;}
+  .swatch[aria-pressed=true]{box-shadow:0 0 0 3px var(--card),0 0 0 5px var(--accent);}
+
+  /* ---------- taccuino ---------- */
+  .wine-row{padding:14px 16px;transition:border-color .15s,box-shadow .15s;}
+  .wine-row:hover{border-color:var(--line-strong);}
+  .wine-row.picked,#bookList .wine-row.sel{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent);}
+  .wine-name{font:700 16.5px/1.25 'Geist',sans-serif;letter-spacing:-.01em;}
+  .wine-score{border-radius:var(--r-md);background:var(--card-alt);color:var(--ink);font:800 22px/1 'Geist',sans-serif;}
+  .wine-row.picked .wine-score{background:var(--accent);color:var(--sel-fg);}
+  .judge{color:var(--accent-text);}
+  .cmp-score,.dt-big b,.dt-big span{color:var(--accent-text);}
+  .dt-bar i,.cmp-bar{background:var(--line);}
+  .dt-bar i u,.cmp-bar i.win{background:var(--accent);}
+
+  /* ---------- statistiche (come i riquadri del cruscotto) ---------- */
+  .stat-value{font:800 34px/1 'Geist',sans-serif;letter-spacing:-.04em;}
+  .resume{background:var(--ink);border-color:transparent;}
+  .resume-eyebrow,.resume-text,.resume-text b{color:var(--panel);}
+  .resume-text b{color:var(--accent);}
+  #root.dark .resume{background:var(--card-alt);} #root.dark .resume-eyebrow,#root.dark .resume-text{color:var(--ink);}
+  .stats-section-head b{font:800 20px/1.2 'Geist',sans-serif;letter-spacing:-.025em;}
+  .podio-row:first-child .podio-pos{color:var(--accent-text);}
+  .empty-title{font:700 18px/1.3 'Geist',sans-serif;font-style:normal;}
+
+  /* ---------- PC: barra in alto come la Suite ---------- */
+  @media (min-width:1100px){
+    #root .panel::after{background:var(--head-bg);border-bottom:1px solid var(--line);box-shadow:none;}
+    .panel::before{background:var(--panel);border-right:1px solid var(--line);}
+    .brand{margin-left:24px;}
+    .brand-logo{width:32px;height:32px;border-radius:0;}
+    .brand-name{font-size:18px;}
+    .nav{margin-left:20px;padding-left:20px;border-left:1px solid var(--line);border-bottom:0;gap:6px;align-items:center;}
+    .hdr-ctrl{width:auto;}
+    .hdr-ctrl #settingsBtn{margin-left:0;}
+    .nav button{flex-direction:row;gap:7px;padding:7px 13px;min-height:38px;border-radius:var(--r-sm);border:1px solid transparent;}
+    .nav .ico{width:16px;height:16px;}
+    .nav .lbl{font:600 14px/1.2 'Geist',sans-serif;color:var(--ink-3);}
+    .nav button:hover:not(.on){background:var(--card-alt);}
+    .nav button.on{background:var(--accent-tint);border-color:var(--accent-line);}
+    .nav button.on .lbl,.nav button.on .ico{color:var(--accent-text);}
+    .hdr-ctrl{gap:8px;}
+    .avatar-btn{padding:0 12px 0 4px;}
+    .avatar-btn:not(.guest) .avatar-name{display:inline;font:600 14px/1 'Geist',sans-serif;max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+    .avatar-btn:not(.guest) .avatar-chev{display:block;color:var(--ink-3);}
+    .hdr-score{background:var(--card);border:1px solid var(--line);border-radius:var(--r-lg);margin:16px 16px 0;padding:16px 16px 10px;box-shadow:var(--shadow-1);}
+    .hdr.flood .hdr-score{background:var(--accent);border-color:transparent;}
+    .segs{margin:12px 26px 0;}
+    .pane-title{font-size:30px;}
+    #bookList .wine-detail{border:1px solid var(--line);border-radius:var(--r-xl);box-shadow:var(--shadow-1);}
+  }
+  /* PC stretti: il menù deve stare tra il marchio e i comandi */
+  @media (min-width:1440px){ .panel{max-width:1440px;} }
+  @media (min-width:1100px) and (max-width:1439px){
+    .nav{margin-left:12px;padding-left:12px;gap:2px;}
+    .nav .ico{display:none;}
+    .nav button{padding:7px 10px;}
+    .hdr-ctrl{gap:6px;margin-right:16px;}
+  }
+  @media (min-width:1100px) and (max-width:1219px){
+    .brand-tag{display:none;}
+    .avatar-btn:not(.guest) .avatar-name{display:none;}
+  }
   /* THEME-DEFAULTS-BEGIN (generato da scripts/theme-css.js: non modificare a mano) */
-  #root{--shell:#e8e8e5;--panel:#f6f6f3;--card:#eaeae8;--card-alt:#e1e1df;--field:#fcfcfb;--line:#d5d5d3;--line-soft:#dfdfdc;--line-strong:#7c7c7d;--ink:#0b0b10;--ink-2:#27272b;--ink-3:#525254;--ink-4:#616164;--sel-bg:#2b4c7e;--sel-fg:#ffffff;--accent:#2b4c7e;--accent-text:#2b4c7e;--gold:#2b4c7e;--head-gold:#2b4c7e;--head-bg:#f6f6f3;--head-fg:#0b0b10;--head-dim:#525254;--head-line:rgba(11,11,16,.16);--bar:rgba(246,246,243,.94);--chip:#e1e1df;--desk-wine:rgba(43,76,126,.07);--desk-gold:rgba(43,76,126,.05);--desk-edge:rgba(11,11,16,.08);--ph-v:#afbbca;--ph-o:#7c90ad;--ph-g:#506b93;--ph-f:#2b4c7e;}
-  #root.dark{--shell:#07080a;--panel:#121418;--card:#202327;--card-alt:#2a2c31;--field:#2a2c31;--line:#323437;--line-soft:#292b2e;--line-strong:#848586;--ink:#f6f6f3;--ink-2:#dbdbd9;--ink-3:#b2b2b1;--ink-4:#9b9c9b;--sel-bg:#597299;--sel-fg:#ffffff;--accent:#597299;--accent-text:#8799b4;--gold:#8799b4;--head-gold:#597299;--head-bg:#121418;--head-fg:#f6f6f3;--head-dim:#b2b2b1;--head-line:rgba(246,246,243,.16);--bar:rgba(18,20,24,.94);--chip:#2a2c31;--desk-wine:rgba(89,114,153,.10);--desk-gold:rgba(89,114,153,.06);--desk-edge:rgba(246,246,243,.08);--ph-v:#2b3545;--ph-o:#3d4c65;--ph-g:#4c6182;--ph-f:#597299;}
+  #root{--shell:#e6e5e2;--panel:#f4f3ef;--card:#fefefe;--card-alt:#eae9e5;--field:#ffffff;--line:#d3d3d0;--line-soft:#dddcd9;--line-strong:#807f80;--ink:#0b0b10;--ink-2:#27272b;--ink-3:#515153;--ink-4:#646465;--sel-bg:#5b4bd5;--sel-fg:#ffffff;--accent:#5b4bd5;--accent-text:#5b4bd5;--gold:#5b4bd5;--head-gold:#5b4bd5;--head-bg:#fefefe;--head-fg:#0b0b10;--head-dim:#515153;--accent-tint:#eceaf9;--accent-soft:rgba(91,75,213,.10);--accent-line:rgba(91,75,213,.45);--head-line:rgba(11,11,16,.16);--bar:rgba(244,243,239,.94);--chip:#eae9e5;--desk-wine:rgba(91,75,213,.07);--desk-gold:rgba(91,75,213,.05);--desk-edge:rgba(11,11,16,.08);--ph-v:#beb8e6;--ph-o:#988edf;--ph-g:#7769da;--ph-f:#5b4bd5;}
+  #root.dark{--shell:#08070a;--panel:#131218;--card:#23222a;--card-alt:#2d2b35;--field:#2d2b35;--line:#333237;--line-soft:#2a292e;--line-strong:#858486;--ink:#f6f6f3;--ink-2:#dbdbd9;--ink-3:#b2b2b1;--ink-4:#9b9b9b;--sel-bg:#9a8cff;--sel-fg:#131218;--accent:#9a8cff;--accent-text:#9a8cff;--gold:#9a8cff;--head-gold:#9a8cff;--head-bg:#23222a;--head-fg:#f6f6f3;--head-dim:#b2b2b1;--accent-tint:#323046;--accent-soft:rgba(154,140,255,.16);--accent-line:rgba(154,140,255,.55);--head-line:rgba(246,246,243,.16);--bar:rgba(19,18,24,.94);--chip:#2d2b35;--desk-wine:rgba(154,140,255,.10);--desk-gold:rgba(154,140,255,.06);--desk-edge:rgba(246,246,243,.08);--ph-v:#423d69;--ph-o:#645ba3;--ph-g:#8276d5;--ph-f:#9a8cff;}
   /* THEME-DEFAULTS-END */
 </style>
 </head>
@@ -1150,7 +1357,7 @@ try{var _p=localStorage.getItem("sorso-theme");if(_p==="dark"||(_p!=="light"&&wi
       <button type="button" id="loginLangEn">EN</button>
     </div>
     <div class="login-brand">
-      <img src="/favicon.svg" alt="" width="56" height="56" style="display:block;margin:0 auto 10px;border-radius:16px">
+      <img src="/favicon.svg" alt="" width="60" height="60" class="login-logo">
       <span class="login-brand-name">Sorso</span>
       <span class="login-brand-tag" data-i18n="login.tag">taccuino di degustazione</span>
     </div>
@@ -1172,17 +1379,17 @@ try{var _p=localStorage.getItem("sorso-theme");if(_p==="dark"||(_p!=="light"&&wi
 <div class="panel">
 
   <nav class="nav" id="nav">
-    <button type="button" class="on" data-tab="new"><span class="dot"></span><span class="lbl" data-i18n="nav.new">Nuova</span></button>
-    <button type="button" data-tab="blind"><span class="dot"></span><span class="lbl" data-i18n="nav.blind">Alla cieca</span></button>
-    <button type="button" data-tab="book"><span class="dot"></span><span class="lbl" data-i18n="nav.book">Taccuino</span></button>
-    <button type="button" data-tab="stats"><span class="dot"></span><span class="lbl" data-i18n="nav.stats">Statistiche</span></button>
-    <button type="button" data-tab="circles"><span class="dot"></span><span class="lbl" data-i18n="nav.circles">Cerchie</span></button>
-    <button type="button" data-tab="settings" class="nav-set"><span class="dot"></span><span class="lbl" data-i18n="nav.settings">Impostazioni</span></button>
+    <button type="button" class="on" data-tab="new"><span class="dot"></span><svg class="ico" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg><span class="lbl" data-i18n="nav.new">Nuova</span></button>
+    <button type="button" data-tab="blind"><span class="dot"></span><svg class="ico" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3l18 18"/><path d="M10.6 5.1A10.9 10.9 0 0 1 12 5c6.5 0 10 7 10 7a17.6 17.6 0 0 1-3.2 4.1M6.6 6.6C3.8 8.4 2 12 2 12s3.5 7 10 7a9.7 9.7 0 0 0 5.4-1.6"/><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"/></svg><span class="lbl" data-i18n="nav.blind">Alla cieca</span></button>
+    <button type="button" data-tab="book"><span class="dot"></span><svg class="ico" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 19.5V5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2Z"/><path d="M4 19.5A2 2 0 0 0 6 21h13"/><path d="M9 7h6"/></svg><span class="lbl" data-i18n="nav.book">Taccuino</span></button>
+    <button type="button" data-tab="stats"><span class="dot"></span><svg class="ico" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20V10"/><path d="M10 20V4"/><path d="M16 20v-7"/><path d="M22 20H2"/></svg><span class="lbl" data-i18n="nav.stats">Statistiche</span></button>
+    <button type="button" data-tab="circles"><span class="dot"></span><svg class="ico" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3.2"/><path d="M3 19a6 6 0 0 1 12 0"/><circle cx="17" cy="9" r="2.6"/><path d="M15.5 14.2A5 5 0 0 1 21 19"/></svg><span class="lbl" data-i18n="nav.circles">Cerchie</span></button>
+    <button type="button" data-tab="settings" class="nav-set"><span class="dot"></span><svg class="ico" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.9.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.9 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.9l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.9.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.9-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.9V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1Z"/></svg><span class="lbl" data-i18n="nav.settings">Impostazioni</span></button>
   </nav>
 
   <header class="hdr">
     <div class="hdr-top">
-      <button type="button" class="brand" id="brandBtn" data-i18n-title="hdr.brandTitle" title="Tocca per personalizzare"><img class="brand-logo" src="/favicon.svg" alt="" width="28" height="28"><span class="brand-name" id="brandName">Sorso</span><span class="brand-tag" id="brandOwner" data-i18n="hdr.brandTagDefault">il taccuino</span></button>
+      <button type="button" class="brand" id="brandBtn" data-i18n-title="hdr.brandTitle" title="Tocca per personalizzare"><svg class="brand-logo" viewBox="0 0 32 32" width="30" height="30" aria-hidden="true"><circle cx="16" cy="16" r="12.2" fill="none" stroke="currentColor" stroke-width="2.6"/><path d="M9.8 16.4C12 20.8 20 20.8 22.2 16.4" fill="none" stroke="var(--accent)" stroke-width="2.6" stroke-linecap="round"/><circle cx="21.2" cy="10.6" r="2.1" fill="var(--accent)"/></svg><span class="brand-name" id="brandName">Sorso</span><span class="brand-tag" id="brandOwner" data-i18n="hdr.brandTagDefault">il taccuino</span></button>
       <div class="hdr-ctrl">
         <div class="lang-switch" id="langSwitch">
           <button type="button" id="langIt" class="on">IT</button>
@@ -1204,7 +1411,7 @@ try{var _p=localStorage.getItem("sorso-theme");if(_p==="dark"||(_p!=="light"&&wi
         </div>
         <button type="button" class="gear-btn" id="settingsBtn" data-i18n-title="nav.settings" title="Impostazioni" aria-label="Impostazioni"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3.2"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.87l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.7 1.7 0 0 0-1.87-.34 1.7 1.7 0 0 0-1.03 1.56V21a2 2 0 1 1-4 0v-.09A1.7 1.7 0 0 0 9 19.4a1.7 1.7 0 0 0-1.87.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.7 1.7 0 0 0 4.6 15a1.7 1.7 0 0 0-1.56-1.03H3a2 2 0 1 1 0-4h.09A1.7 1.7 0 0 0 4.6 9a1.7 1.7 0 0 0-.34-1.87l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.7 1.7 0 0 0 9 4.6a1.7 1.7 0 0 0 1.03-1.56V3a2 2 0 1 1 4 0v.09A1.7 1.7 0 0 0 15 4.6a1.7 1.7 0 0 0 1.87-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.7 1.7 0 0 0 19.4 9a1.7 1.7 0 0 0 1.56 1.03H21a2 2 0 1 1 0 4h-.09A1.7 1.7 0 0 0 19.4 15z"/></svg></button>
         <div class="avatar-wrap" id="avatarWrap">
-          <button type="button" class="avatar-btn" id="avatarBtn"><span id="avatarInitials">?</span></button>
+          <button type="button" class="avatar-btn" id="avatarBtn"><span id="avatarInitials">?</span><span class="avatar-name" id="avatarChipName"></span><svg class="avatar-chev" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button>
           <div class="avatar-menu hidden" id="avatarMenu">
             <p class="avatar-menu-name" id="avatarMenuName"></p>
             <button type="button" class="avatar-menu-item" id="menuSettingsBtn" data-i18n="nav.settings">Impostazioni</button>
@@ -5995,7 +6202,7 @@ function applyLook(){
   Object.keys(d.vars).forEach(k => root.style.setProperty(k, d.vars[k]));
   S.lookKeys = Object.keys(d.vars);
   document.body.style.background = d.vars["--shell"];
-  document.querySelectorAll('meta[name="theme-color"]').forEach(meta => meta.setAttribute("content", d.vars["--panel"]));
+  document.querySelectorAll('meta[name="theme-color"]').forEach(meta => meta.setAttribute("content", d.vars["--head-bg"]));
   const note = $("lookAdjusted");
   if(note){ note.textContent = d.adjusted ? t("look.adjusted") : ""; note.classList.toggle("hidden", !d.adjusted); }
   renderLook();
@@ -6825,10 +7032,12 @@ function renderAccount(){
   av.classList.toggle("guest", !in_);
   if(in_){
     $("avatarInitials").textContent = iniziali(AUTH.displayName || AUTH.username);
+    $("avatarChipName").textContent = String(AUTH.displayName || AUTH.username || "").split(/\s+/)[0];
     av.title = tf("account.avatarTitleIn", {who: AUTH.displayName || AUTH.username});
     $("avatarMenuName").textContent = AUTH.displayName || AUTH.username;
   }else{
     $("avatarInitials").innerHTML = GOOGLE_G_ICON;
+    $("avatarChipName").textContent = "";
     av.title = t("account.avatarTitleOut");
     closeAvatarMenu();
   }
