@@ -24,7 +24,8 @@
     stats: null, statsLoading: false, statsError: null, gform: null,
     nb: null, nbLoading: false, nbError: null, nbq: "", nbsort: "date", nbOnly: false,
     loading: true, loadError: null,
-    sheet: null, drafts: {}, gdrafts: {}, form: null, confirm: null, pending: {}, saved: null, notice: null
+    sheet: null, drafts: {}, gdrafts: {}, form: null, confirm: null, pending: {}, saved: null, notice: null,
+    game: null, gdraft: {}, gerr: null, gconfirm: null, board: null
   };
 
   /* ---------------- testi ---------------- */
@@ -407,6 +408,7 @@
       if (S.sheet && !S.wines.some(function (w) { return w.id === S.sheet.wine; })) S.sheet = null;
       if (S.gform && (!S.wines.some(function (w) { return w.id === S.gform.wine; }) || (S.tasting && S.tasting.revealed))) S.gform = null;
       render();
+      if (S.tasting && gameOn()) loadGame(S.tasting.id); else S.game = null;
     }).catch(function (e) {
       if (my !== loadSeq) return;
       S.loading = false;
@@ -556,7 +558,7 @@
 
   /* classifica delle serate: le degustazioni chiuse e il vino che ha vinto */
   function viewRanking() {
-    var h = '<div class="row spread"><h2 id="h-main" tabindex="-1">' + esc(t("eventsHeading")) + '</h2>' + btn("refresh-stats", t("refresh"), { cls: "small ghost", fk: "refresh" }) + '</div>';
+    var h = '<div class="row spread"><h2 id="h-main" tabindex="-1">' + esc(t("eventsHeading")) + '</h2>' + btn("refresh-stats", t("refresh"), { cls: "small ghost", fk: "refresh" }) + '</div>' + boardHtml();
     h += '<p class="muted small">' + esc(t("eventsHint")) + '</p>';
     if (S.statsError) return h + statsErrorHtml();
     if (S.statsLoading && !S.stats) return h + '<p class="muted" aria-busy="true">' + esc(t("loading")) + '</p>';
@@ -714,7 +716,7 @@
     if (open) wrow += btn("vote", t(w.mine ? "editVote" : "vote"), { id: w.id, cls: w.mine ? "" : "primary", disabled: readonly(), fk: "vote-" + w.id });
     if (tOpen && isOrg() && !(S.tasting && S.tasting.revealed)) wrow += btn("wine-status", t(w.closed ? "wineReopen" : "wineClose"), { id: w.id, cls: "small ghost", disabled: readonly(), fk: "wstatus-" + w.id });
     if (wrow) h += '<div class="row">' + wrow + '</div>';
-    return h + guessHtml(w) + '</article>';
+    return h + guessHtml(w) + gameHtml(w) + '</article>';
   }
 
   /* ---------------- alla cieca: ipotesi e risultato ---------------- */
@@ -814,6 +816,292 @@
     S.wines.forEach(function (w) { h += (S.sheet && S.sheet.wine === w.id) ? sheetHtml(w) : wineCard(w, open); });
     return h;
   }
+
+  /* ---------------- il gioco delle cerchie (api/_game.js) ----------------
+     Per ogni vino: il campo (la tua faccia su due assi), il pronostico della media del gruppo e il prezzo a occhio.
+     Fino allo svelamento ognuno vede solo le proprie mosse e chi ha già giocato; poi tutti vedono tutto di tutti. */
+  var TXT_GAME = {
+    it: {
+      g_title: "Il gioco", g_secret: "Le mosse restano segrete fino allo svelamento", g_revealed: "Svelato",
+      g_field: "Il campo", g_fieldHint: "Tocca o trascina la tua faccia dove senti questo vino. Con la tastiera: frecce.", g_fieldEmpty: "Tocca il campo per metterti",
+      g_pron: "Pronostico: quanto darà il gruppo?", g_price: "Quanto costa? (€, facoltativo)", g_pricePh: "es. 18",
+      g_play: "Gioca", g_update: "Aggiorna le mosse", g_playing: "Salvo…", g_saved: "Mosse salvate. Si vedranno allo svelamento.",
+      g_played: "Hanno giocato", g_missing: "{n} ancora da votare", g_missingOne: "1 ancora da votare", g_allVoted: "Hanno votato tutti",
+      g_orgTitle: "Per chi organizza", g_realPrice: "Prezzo vero (€)", g_savePrice: "Salva il prezzo", g_reveal: "Svela!", g_revealAsk: "Svelare questo vino? Da quel momento non si cambiano più le mosse.",
+      g_priceSaved: "Prezzo salvato: si vedrà allo svelamento.",
+      g_avg: "Media del gruppo: {n}", g_realPriceIs: "Prezzo vero: {p} €", g_center: "centro del gruppo",
+      g_vote: "Voto", g_pronShort: "Pronostico", g_priceShort: "Prezzo", g_fieldShort: "Campo", g_pts: "{n} punti", g_ptsOne: "1 punto",
+      g_noMove: "non ha giocato", g_you: "tu",
+      g_b_fuori: "Fuori dal coro", g_b_sintonia: "In sintonia", g_b_pronostico: "Pronostico d'oro", g_b_prezzo: "Naso da sommelier",
+      g_react: "Reagisci a {name}", g_phrase: "Una frecciatina…", g_noPhrase: "Nessuna frecciatina",
+      f1: "Hai annusato il tappo?", f2: "Palato da bollicine al discount", f3: "Sommelier in incognito", f4: "Questo l'hai bevuto con gli occhi", f5: "Generoso come a Natale",
+      f6: "Severo come un professore", f7: "Hai sbagliato bicchiere?", f8: "Naso da segugio", f9: "Ma era lo stesso vino?", f10: "Applausi, palato d'oro",
+      g_board: "Classifica del gioco", g_boardHint: "Punti della stagione: pronostici, prezzi e vicinanza al gruppo, sui vini svelati.", g_boardEmpty: "Ancora nessun vino svelato: la classifica parte dal primo svelamento.",
+      g_n_generoso: "Il generoso", g_n_spietato: "Lo spietato", g_n_bastian: "Il bastian contrario", g_n_naso: "Naso d'oro", g_twin: "Gemello di palato: {name}",
+      ax_corpo: "Corpo", ax_acidita: "Acidità", ax_tannino: "Tannino", ax_morbidezza: "Morbidezza", ax_frutto: "Frutto", ax_legno: "Legno",
+      ax_intensita: "Intensità", ax_persistenza: "Persistenza", ax_dolcezza: "Dolcezza", ax_freschezza: "Freschezza",
+      lo_corpo: "esile", hi_corpo: "pieno", lo_acidita: "piatta", hi_acidita: "tagliente", lo_tannino: "vellutato", hi_tannino: "ruvido", lo_morbidezza: "secco", hi_morbidezza: "rotondo",
+      lo_frutto: "poco", hi_frutto: "tanto", lo_legno: "niente", hi_legno: "tanto", lo_intensita: "lieve", hi_intensita: "potente", lo_persistenza: "corto", hi_persistenza: "lunghissimo",
+      lo_dolcezza: "secco", hi_dolcezza: "dolce", lo_freschezza: "stanco", hi_freschezza: "vivace",
+      e_game_off: "In questa cerchia il gioco non è attivo.", e_revealed: "Questo vino è già svelato: le mosse non si cambiano più.", e_invalid_move: "Metti la tua faccia sul campo, oppure fai un pronostico.",
+      e_invalid_price: "Prezzo non valido.", e_not_revealed: "Le reazioni si lasciano dopo lo svelamento."
+    },
+    en: {
+      g_title: "The game", g_secret: "Moves stay secret until the reveal", g_revealed: "Revealed",
+      g_field: "The field", g_fieldHint: "Tap or drag your face to where you place this wine. With the keyboard: arrow keys.", g_fieldEmpty: "Tap the field to place yourself",
+      g_pron: "Prediction: what will the group give it?", g_price: "How much does it cost? (€, optional)", g_pricePh: "e.g. 18",
+      g_play: "Play", g_update: "Update my moves", g_playing: "Saving…", g_saved: "Moves saved. They'll show at the reveal.",
+      g_played: "Played so far", g_missing: "{n} still to vote", g_missingOne: "1 still to vote", g_allVoted: "Everyone has voted",
+      g_orgTitle: "For the organiser", g_realPrice: "Real price (€)", g_savePrice: "Save the price", g_reveal: "Reveal!", g_revealAsk: "Reveal this wine? From then on moves can't change.",
+      g_priceSaved: "Price saved: it will show at the reveal.",
+      g_avg: "Group average: {n}", g_realPriceIs: "Real price: €{p}", g_center: "group centre",
+      g_vote: "Score", g_pronShort: "Prediction", g_priceShort: "Price", g_fieldShort: "Field", g_pts: "{n} points", g_ptsOne: "1 point",
+      g_noMove: "didn't play", g_you: "you",
+      g_b_fuori: "Out of tune", g_b_sintonia: "In sync", g_b_pronostico: "Golden prediction", g_b_prezzo: "Sommelier's nose",
+      g_react: "React to {name}", g_phrase: "A friendly jab…", g_noPhrase: "No jab",
+      f1: "Did you sniff the cork?", f2: "Discount-bubbles palate", f3: "Sommelier undercover", f4: "You drank this one with your eyes", f5: "Generous as Christmas",
+      f6: "Strict as a schoolteacher", f7: "Wrong glass?", f8: "Bloodhound nose", f9: "Was it even the same wine?", f10: "Applause, golden palate",
+      g_board: "Game ranking", g_boardHint: "Season points: predictions, prices and closeness to the group, on revealed wines.", g_boardEmpty: "No wine revealed yet: the ranking starts with the first reveal.",
+      g_n_generoso: "The generous one", g_n_spietato: "The ruthless one", g_n_bastian: "The contrarian", g_n_naso: "Golden nose", g_twin: "Palate twin: {name}",
+      ax_corpo: "Body", ax_acidita: "Acidity", ax_tannino: "Tannin", ax_morbidezza: "Softness", ax_frutto: "Fruit", ax_legno: "Oak",
+      ax_intensita: "Intensity", ax_persistenza: "Length", ax_dolcezza: "Sweetness", ax_freschezza: "Freshness",
+      lo_corpo: "light", hi_corpo: "full", lo_acidita: "flat", hi_acidita: "sharp", lo_tannino: "silky", hi_tannino: "rough", lo_morbidezza: "dry", hi_morbidezza: "round",
+      lo_frutto: "little", hi_frutto: "lots", lo_legno: "none", hi_legno: "lots", lo_intensita: "faint", hi_intensita: "powerful", lo_persistenza: "short", hi_persistenza: "endless",
+      lo_dolcezza: "dry", hi_dolcezza: "sweet", lo_freschezza: "tired", hi_freschezza: "lively",
+      e_game_off: "The game is not active in this circle.", e_revealed: "This wine has been revealed: moves can't change any more.", e_invalid_move: "Put your face on the field, or make a prediction.",
+      e_invalid_price: "Invalid price.", e_not_revealed: "Reactions open after the reveal."
+    }
+  };
+  Object.keys(TXT_GAME).forEach(function (l) { Object.keys(TXT_GAME[l]).forEach(function (k) { if (TXT[l][k] == null) TXT[l][k] = TXT_GAME[l][k]; }); });
+
+  function gameOn() { return !!(S.circle && S.config && S.config.game); }
+  var gameSeq = 0, lastGame = "";
+  function loadGame(tid) {
+    if (!gameOn() || !tid) { S.game = null; return Promise.resolve(); }
+    var my = ++gameSeq;
+    /* se non è cambiato nulla non si ridisegna: un ridisegno a metà di un tocco lo farebbe perdere */
+    return api({ op: "game.state", tasting: tid }).then(function (g) { if (my !== gameSeq) return; var j = JSON.stringify(g); if (j === lastGame && S.game) return; lastGame = j; S.game = g; render(); }, function () { if (my !== gameSeq) return; lastGame = ""; S.game = null; render(); });
+  }
+  function loadBoard() {
+    if (!gameOn()) return Promise.resolve();
+    return api({ op: "game.board" }).then(function (b) { S.board = b; render(); }, function () { S.board = null; render(); });
+  }
+  function hashN(s) { var h = 0; for (var i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) | 0; return Math.abs(h); }
+  function initials(n) { var p = String(n || "?").trim().split(/\s+/); return ((p[0] || "?")[0] + (p.length > 1 ? p[p.length - 1][0] : "")).toUpperCase(); }
+  function faceHtml(who, extra) {
+    var p = (S.game && S.game.people[who]) || (S.board && S.board.people && S.board.people[who]) || { name: "?" };
+    return '<span class="face c' + (hashN(who) % 8) + (extra ? " " + extra : "") + '" aria-hidden="true">' + (p.pic ? '<img src="' + esc(p.pic) + '" alt="" referrerpolicy="no-referrer" loading="lazy">' : esc(initials(p.name))) + '</span>';
+  }
+  function personName(who) { var p = S.game && S.game.people[who]; return p ? (p.me ? p.name + " (" + t("g_you") + ")" : p.name) : "?"; }
+  function mePk() { var g = S.game; if (!g) return ""; for (var k in g.people) if (g.people[k].me) return k; return ""; }
+  function axesOf(gw) { var a = S.game.axes[gw.axes] || ["corpo", "acidita"]; return { x: a[0], y: a[1] }; }
+  function draftOf(wid) {
+    var gw = S.game.wines[wid];
+    if (!S.gdraft[wid]) { var m = gw.mine || {}; S.gdraft[wid] = { x: m.x != null ? m.x : null, y: m.y != null ? m.y : null, p: m.p != null ? m.p : null, e: m.e != null ? String(m.e).replace(".", S.lang === "it" ? "," : ".") : "" }; }
+    return S.gdraft[wid];
+  }
+  function ptsText(n) { return n === 1 ? t("g_ptsOne") : t("g_pts", { n: n }); }
+
+  /* il campo: le facce si posizionano dopo il disegno (data-gx/gy → left/top), perché la pagina non accetta stili in linea */
+  function fieldHtml(wid, ax, dots, center, editable) {
+    var lab = t("ax_" + ax.x) + " / " + t("ax_" + ax.y);
+    var h = '<div class="g-field' + (editable ? " edit" : "") + '" data-field="' + esc(wid) + '" role="group" aria-label="' + esc(t("g_field") + ": " + lab) + '">' +
+      '<span class="g-grid" aria-hidden="true"></span>' +
+      '<span class="g-ax g-ax-y" aria-hidden="true">' + esc(t("ax_" + ax.y)) + ' ↑</span><span class="g-ax g-ax-x" aria-hidden="true">' + esc(t("ax_" + ax.x)) + ' →</span>' +
+      '<span class="g-lo g-lo-x" aria-hidden="true">' + esc(t("lo_" + ax.x)) + '</span><span class="g-hi g-hi-x" aria-hidden="true">' + esc(t("hi_" + ax.x)) + '</span>' +
+      '<span class="g-lo g-lo-y" aria-hidden="true">' + esc(t("lo_" + ax.y)) + '</span><span class="g-hi g-hi-y" aria-hidden="true">' + esc(t("hi_" + ax.y)) + '</span>';
+    if (center) h += '<span class="g-center" data-gx="' + center.x + '" data-gy="' + center.y + '" title="' + esc(t("g_center")) + '" aria-hidden="true"></span>';
+    dots.forEach(function (d) {
+      if (d.x == null) return;
+      var lbl = personName(d.who) + ": " + t("ax_" + ax.x) + " " + d.x + ", " + t("ax_" + ax.y) + " " + d.y;
+      if (editable && d.me) h += '<button type="button" class="g-dot me" data-act="g-face" data-w="' + esc(wid) + '" data-gx="' + d.x + '" data-gy="' + d.y + '" data-fk="gface-' + esc(wid) + '" aria-label="' + esc(lbl) + '">' + faceHtml(d.who) + '</button>';
+      else h += '<span class="g-dot' + (d.me ? " me" : "") + '" data-gx="' + d.x + '" data-gy="' + d.y + '" role="img" aria-label="' + esc(lbl) + '">' + faceHtml(d.who) + '</span>';
+    });
+    if (editable && !dots.some(function (d) { return d.me && d.x != null; })) h += '<span class="g-empty" aria-hidden="true">' + esc(t("g_fieldEmpty")) + '</span>';
+    return h + '</div>';
+  }
+
+  function gameHtml(w) {
+    if (!gameOn() || !S.game || !S.game.wines[w.id]) return "";
+    var g = S.game, gw = g.wines[w.id], ax = axesOf(gw), me = mePk(), busy = !!S.pending["g-" + w.id];
+    var h = '<section class="game" aria-labelledby="gt-' + esc(w.id) + '"><div class="g-head"><h4 class="grp" id="gt-' + esc(w.id) + '">' + esc(t("g_title")) + '</h4>' +
+      '<span class="badge' + (gw.revealed ? " open" : "") + '">' + esc(gw.revealed ? t("g_revealed") : t("g_secret")) + '</span></div>';
+    if (!gw.revealed) {
+      var d = draftOf(w.id);
+      h += fieldHtml(w.id, ax, [{ who: me, x: d.x, y: d.y, me: true }], null, true) + '<p class="small muted">' + esc(t("g_fieldHint")) + '</p>';
+      var pv = d.p != null ? d.p : 68;
+      h += '<label class="f" for="gp-' + esc(w.id) + '">' + esc(t("g_pron")) + '</label><div class="g-pron"><input type="range" min="50" max="100" step="1" id="gp-' + esc(w.id) + '" data-g="p" data-w="' + esc(w.id) + '" data-fk="gp-' + esc(w.id) + '" value="' + pv + '"' + (d.p == null ? ' class="untouched"' : "") + '><output id="gpo-' + esc(w.id) + '">' + (d.p != null ? d.p : "—") + '</output></div>';
+      h += '<label class="f" for="ge-' + esc(w.id) + '">' + esc(t("g_price")) + '</label><input type="text" inputmode="decimal" maxlength="8" id="ge-' + esc(w.id) + '" data-g="e" data-w="' + esc(w.id) + '" data-fk="ge-' + esc(w.id) + '" placeholder="' + esc(t("g_pricePh")) + '" value="' + esc(d.e) + '">';
+      if (S.gerr && S.gerr.wine === w.id) h += '<p class="field-error" role="alert">' + esc(S.gerr.text) + '</p>';
+      h += '<div class="row">' + btn("g-play", busy ? t("g_playing") : t(gw.mine ? "g_update" : "g_play"), { id: w.id, cls: "primary", disabled: busy || readonly(), fk: "gplay-" + w.id }) + '</div>';
+      if (S.saved === "gm-" + w.id) h += '<p class="saved-note">✓ ' + esc(t("g_saved")) + '</p>';
+      /* chi ha già giocato o votato: le facce si accendono */
+      var ppl = Object.keys(g.people), lit = {};
+      gw.played.concat(gw.voted).forEach(function (k) { lit[k] = true; });
+      var missing = ppl.filter(function (k) { return gw.voted.indexOf(k) < 0; }).length;
+      h += '<div class="g-who"><span class="small muted">' + esc(t("g_played")) + '</span><span class="g-faces">' + ppl.map(function (k) { return '<span class="g-wf' + (lit[k] ? " on" : "") + '" title="' + esc(personName(k)) + '">' + faceHtml(k) + '</span>'; }).join("") + '</span>' +
+        '<span class="small muted">' + esc(missing === 0 ? t("g_allVoted") : missing === 1 ? t("g_missingOne") : t("g_missing", { n: missing })) + '</span></div>';
+      if (isOrg()) {
+        h += '<div class="g-org"><h4 class="grp">' + esc(t("g_orgTitle")) + '</h4><label class="f" for="gr-' + esc(w.id) + '">' + esc(t("g_realPrice")) + '</label>' +
+          '<div class="row"><input type="text" inputmode="decimal" maxlength="8" id="gr-' + esc(w.id) + '" data-fk="gr-' + esc(w.id) + '" value="' + esc(gw.price != null ? String(gw.price).replace(".", S.lang === "it" ? "," : ".") : "") + '" class="g-price-in">' +
+          btn("g-price", t("g_savePrice"), { id: w.id, cls: "small ghost", disabled: readonly(), fk: "gprice-" + w.id }) + '</div>' +
+          (S.saved === "gp-" + w.id ? '<p class="saved-note">✓ ' + esc(t("g_priceSaved")) + '</p>' : "") +
+          '<div class="row">' + (S.gconfirm === w.id ? '<p class="small">' + esc(t("g_revealAsk")) + '</p>' + btn("g-reveal-do", t("g_reveal"), { id: w.id, cls: "primary", fk: "greveal-" + w.id }) + btn("g-reveal-no", t("cancel"), { cls: "ghost", fk: "greveal-no" })
+            : btn("g-reveal", "🎉 " + t("g_reveal"), { id: w.id, cls: "primary", disabled: readonly(), fk: "greveal-" + w.id })) + '</div></div>';
+      }
+      return h + '</section>';
+    }
+    /* svelato: tutti vedono tutto */
+    var res = gw.results || [];
+    h += fieldHtml(w.id, ax, res.filter(function (r) { return r.x != null; }).map(function (r) { return { who: r.who, x: r.x, y: r.y, me: g.people[r.who] && g.people[r.who].me }; }), gw.center, false);
+    var line = [];
+    if (gw.avg != null) line.push(t("g_avg", { n: dec(gw.avg) }));
+    if (gw.price != null) line.push(t("g_realPriceIs", { p: String(gw.price).replace(".", S.lang === "it" ? "," : ".") }));
+    if (line.length) h += '<p class="small"><b>' + esc(line.join(" · ")) + '</b></p>';
+    h += '<ol class="g-res">' + res.map(function (r, i) {
+      var p = g.people[r.who] || { name: "?" }, mine = !!p.me;
+      var nums = [];
+      nums.push('<span><em>' + esc(t("g_vote")) + '</em><b>' + (r.vote != null ? r.vote : "—") + '</b></span>');
+      nums.push('<span><em>' + esc(t("g_pronShort")) + '</em><b>' + (r.p != null ? r.p : "—") + '</b>' + (r.pts.pron != null ? '<i>+' + r.pts.pron + '</i>' : "") + '</span>');
+      nums.push('<span><em>' + esc(t("g_priceShort")) + '</em><b>' + (r.e != null ? String(r.e).replace(".", S.lang === "it" ? "," : ".") + " €" : "—") + '</b>' + (r.pts.price != null ? '<i>+' + r.pts.price + '</i>' : "") + '</span>');
+      nums.push('<span><em>' + esc(t("g_fieldShort")) + '</em><b>' + (r.x != null ? "✓" : "—") + '</b>' + (r.pts.field != null ? '<i>+' + r.pts.field + '</i>' : "") + '</span>');
+      var badges = r.badges.map(function (b) { return '<span class="chip g-badge g-b-' + esc(b) + '">' + esc(t("g_b_" + b)) + '</span>'; }).join("");
+      /* reazioni ricevute: emoji raggruppate, frecciatine per esteso con chi le ha mandate */
+      var em = {}, fr = [];
+      r.reactions.forEach(function (x) { if (x.e) em[x.e] = (em[x.e] || 0) + 1; if (x.f) fr.push('<span class="g-jab">«' + esc(t(x.f)) + '» <span class="muted">— ' + esc(x.from && g.people[x.from] ? g.people[x.from].name : "?") + '</span></span>'); });
+      var recv = Object.keys(em).map(function (k) { return '<span class="g-em">' + k + (em[k] > 1 ? " " + em[k] : "") + '</span>'; }).join("") + fr.join("");
+      var ctl = "";
+      if (!mine) {
+        var myR = r.reactions.filter(function (x) { return x.from === me; })[0] || { e: "", f: "" };
+        ctl = '<div class="g-react" role="group" aria-label="' + esc(t("g_react", { name: p.name })) + '">' + g.emoji.map(function (e) {
+          return '<button type="button" class="g-emb' + (myR.e === e ? " on" : "") + '" data-act="g-react" data-to="' + esc(r.who) + '" data-w="' + esc(w.id) + '" data-e="' + e + '" aria-pressed="' + (myR.e === e) + '" data-fk="gr-' + esc(w.id + r.who + e) + '">' + e + '</button>';
+        }).join("") + '<select class="g-jabsel" data-g="f" data-to="' + esc(r.who) + '" data-w="' + esc(w.id) + '" aria-label="' + esc(t("g_phrase")) + '" data-fk="gf-' + esc(w.id + r.who) + '"><option value="">' + esc(myR.f ? t("g_noPhrase") : t("g_phrase")) + '</option>' +
+          Array.apply(null, Array(g.phrases)).map(function (_, j) { var k = "f" + (j + 1); return '<option value="' + k + '"' + (myR.f === k ? " selected" : "") + '>' + esc(t(k)) + '</option>'; }).join("") + '</select></div>';
+      }
+      return '<li class="g-row' + (mine ? " me" : "") + '"><div class="g-top"><span class="g-pos">' + (i + 1) + '</span>' + faceHtml(r.who, "lg") + '<span class="g-nm"><b dir="auto">' + esc(personName(r.who)) + '</b>' + badges + '</span><span class="g-tot"><b>' + r.pts.total + '</b><em>' + esc(t("g_pts", { n: "" }).trim()) + '</em></span></div>' +
+        '<div class="g-nums">' + nums.join("") + '</div>' + (recv ? '<div class="g-recv">' + recv + '</div>' : "") + ctl + '</li>';
+    }).join("") + '</ol>';
+    return h + '</section>';
+  }
+
+  function boardHtml() {
+    if (!gameOn()) return "";
+    var b = S.board;
+    var h = '<section class="card g-board"><h3 class="section">🏆 ' + esc(t("g_board")) + '</h3><p class="small muted">' + esc(t("g_boardHint")) + '</p>';
+    if (!b) return h + '<p class="muted" aria-busy="true">' + esc(t("loading")) + '</p></section>';
+    var any = b.rows.some(function (r) { return r.pts.total > 0 || r.pts.played > 0; });
+    if (!any) return h + '<p class="muted">' + esc(t("g_boardEmpty")) + '</p></section>';
+    S.board.people = {}; b.rows.forEach(function (r) { S.board.people[r.who] = { name: r.name, pic: r.pic, me: r.me }; });
+    return h + '<ol class="toplist g-boardlist">' + b.rows.map(function (r, i) {
+      var nick = r.nick.map(function (n) { return '<span class="chip g-nick">' + esc(t("g_n_" + n)) + '</span>'; }).join("") + (r.twin ? '<span class="chip g-nick">' + esc(t("g_twin", { name: r.twin })) + '</span>' : "");
+      return '<li' + (r.me ? ' class="me"' : "") + '><span class="pos">' + (i + 1) + '</span>' + faceHtml(r.who) + '<span class="nm"><b dir="auto">' + esc(r.name) + (r.me ? " (" + esc(t("g_you")) + ")" : "") + '</b>' + (nick ? '<span class="g-nicks">' + nick + '</span>' : "") + '</span><span class="av">' + r.pts.total + '</span></li>';
+    }).join("") + '</ol></section>';
+  }
+
+  /* posizioni del campo, dopo ogni disegno; allo svelamento le facce partono dal centro e volano al loro posto */
+  var gSeen = {};
+  function placeDots() {
+    var reduce = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
+    app.querySelectorAll(".g-field").forEach(function (f) {
+      var wid = f.getAttribute("data-field"), gw = S.game && S.game.wines[wid], animate = gw && gw.revealed && !gSeen[wid] && !reduce && !f.classList.contains("edit");
+      var c = f.querySelector(".g-center");
+      f.querySelectorAll("[data-gx]").forEach(function (el) {
+        var x = Number(el.getAttribute("data-gx")), y = Number(el.getAttribute("data-gy"));
+        if (animate && el !== c && c) { el.style.left = Number(c.getAttribute("data-gx")) * 10 + "%"; el.style.top = (100 - Number(c.getAttribute("data-gy")) * 10) + "%"; el.classList.add("fly"); }
+        else { el.style.left = x * 10 + "%"; el.style.top = (100 - y * 10) + "%"; }
+      });
+      if (animate) {
+        void f.offsetWidth;
+        requestAnimationFrame(function () { f.querySelectorAll(".g-dot.fly").forEach(function (el) { el.style.left = Number(el.getAttribute("data-gx")) * 10 + "%"; el.style.top = (100 - Number(el.getAttribute("data-gy")) * 10) + "%"; }); });
+      }
+      if (gw && gw.revealed) gSeen[wid] = true;
+    });
+  }
+
+  /* trascinare la propria faccia (dito, mouse, penna) */
+  var gDrag = null;
+  function fieldPos(f, ev) {
+    var r = f.getBoundingClientRect();
+    var x = Math.max(0, Math.min(10, (ev.clientX - r.left) / r.width * 10)), y = Math.max(0, Math.min(10, (1 - (ev.clientY - r.top) / r.height) * 10));
+    return { x: Math.round(x * 2) / 2, y: Math.round(y * 2) / 2 };
+  }
+  function moveFace(wid, p, rerender) {
+    var d = draftOf(wid); d.x = p.x; d.y = p.y; S.saved = null;
+    var dot = app.querySelector('.g-field[data-field="' + wid + '"] .g-dot.me');
+    if (!dot || rerender) { render(); focusAfter("gface-" + wid); return; }
+    dot.setAttribute("data-gx", p.x); dot.setAttribute("data-gy", p.y); dot.style.left = p.x * 10 + "%"; dot.style.top = (100 - p.y * 10) + "%";
+  }
+  app.addEventListener("pointerdown", function (e) {
+    var f = e.target.closest && e.target.closest(".g-field.edit"); if (!f || readonly()) return;
+    e.preventDefault();
+    var wid = f.getAttribute("data-field"), had = !!app.querySelector('.g-field[data-field="' + wid + '"] .g-dot.me');
+    gDrag = { f: f, wid: wid, id: e.pointerId };
+    try { f.setPointerCapture(e.pointerId); } catch (x) { /* ok */ }
+    moveFace(wid, fieldPos(f, e), !had);
+    if (!had) gDrag = null;
+  });
+  app.addEventListener("pointermove", function (e) { if (gDrag && e.pointerId === gDrag.id) moveFace(gDrag.wid, fieldPos(gDrag.f, e)); });
+  app.addEventListener("pointerup", function (e) { if (gDrag && e.pointerId === gDrag.id) { var wid = gDrag.wid; gDrag = null; var d = draftOf(wid); announce(t("ax_" + axesOf(S.game.wines[wid]).x) + " " + d.x + ", " + t("ax_" + axesOf(S.game.wines[wid]).y) + " " + d.y); } });
+  app.addEventListener("keydown", function (e) {
+    var el = e.target; if (!el.classList || !el.classList.contains("g-dot") || !el.classList.contains("me")) return;
+    var k = e.key, st = e.shiftKey ? 1 : 0.5, wid = el.getAttribute("data-w"), d = draftOf(wid);
+    var dx = k === "ArrowRight" ? st : k === "ArrowLeft" ? -st : 0, dy = k === "ArrowUp" ? st : k === "ArrowDown" ? -st : 0;
+    if (!dx && !dy) return;
+    e.preventDefault();
+    moveFace(wid, { x: Math.max(0, Math.min(10, (d.x || 5) + dx)), y: Math.max(0, Math.min(10, (d.y || 5) + dy)) });
+    el.setAttribute("aria-label", personName(mePk()) + ": " + t("ax_" + axesOf(S.game.wines[wid]).x) + " " + d.x + ", " + t("ax_" + axesOf(S.game.wines[wid]).y) + " " + d.y);
+  });
+  app.addEventListener("input", function (e) {
+    var el = e.target, k = el.getAttribute && el.getAttribute("data-g"), wid = el.getAttribute && el.getAttribute("data-w");
+    if (!k || !wid || !S.game) return;
+    var d = draftOf(wid); S.saved = null; S.gerr = null;
+    if (k === "p") { d.p = Number(el.value); el.classList.remove("untouched"); var o = app.querySelector("#gpo-" + wid); if (o) o.textContent = d.p; }
+    if (k === "e") d.e = el.value;
+  });
+  app.addEventListener("change", function (e) {
+    var el = e.target; if (!el.getAttribute || el.getAttribute("data-g") !== "f") return;
+    var wid = el.getAttribute("data-w"), to = el.getAttribute("data-to"), r = (S.game.wines[wid].results || []).filter(function (x) { return x.who === to; })[0];
+    var cur = r ? (r.reactions.filter(function (x) { return x.from === mePk(); })[0] || {}) : {};
+    gameReact(wid, to, cur.e || "", el.value);
+  });
+  function gNum(s) { s = String(s || "").trim().replace(",", "."); return s === "" ? null : Number(s); }
+  function gamePlay(wid) {
+    var d = draftOf(wid), e = gNum(d.e);
+    if (e != null && !(e >= 0 && e <= 10000)) { S.gerr = { wine: wid, text: t("e_invalid_price") }; return render(); }
+    if (d.x == null && d.p == null && e == null) { S.gerr = { wine: wid, text: t("e_invalid_move") }; return render(); }
+    S.gerr = null;
+    return run("g-" + wid, function () {
+      return api({ op: "game.play", tasting: S.tasting.id, wine: wid, x: d.x, y: d.y, p: d.p, e: e }).then(function () {
+        S.saved = "gm-" + wid; announce(t("g_saved")); focusAfter("gplay-" + wid); return loadGame(S.tasting.id);
+      }, function (err) { S.gerr = { wine: wid, text: errText(err) }; render(); if (err.code === "revealed") return loadGame(S.tasting.id); });
+    });
+  }
+  function gameReact(wid, to, e, f) {
+    return api({ op: "game.react", tasting: S.tasting.id, wine: wid, to: to, e: e, f: f }).then(function () { return loadGame(S.tasting.id); }, function (err) { announce(errText(err), true); });
+  }
+  function gamePrice(wid) {
+    var el = app.querySelector("#gr-" + wid), v = el ? gNum(el.value) : null;
+    return api({ op: "game.price", tasting: S.tasting.id, wine: wid, price: v }).then(function () { S.saved = "gp-" + wid; return loadGame(S.tasting.id); }, function (err) { announce(errText(err), true); });
+  }
+  function gameReveal(wid) {
+    S.gconfirm = null;
+    return api({ op: "game.reveal", tasting: S.tasting.id, wine: wid }).then(function () { return loadGame(S.tasting.id); }, function (err) { announce(errText(err), true); });
+  }
+  app.addEventListener("click", function (e) {
+    var b = e.target.closest && e.target.closest("[data-act]"); if (!b || b.disabled) return;
+    var act = b.getAttribute("data-act"), id = b.getAttribute("data-id");
+    if (act === "g-play") return gamePlay(id);
+    if (act === "g-price") return gamePrice(id);
+    if (act === "g-reveal") { S.gconfirm = id; focusAfter("greveal-" + id); return render(); }
+    if (act === "g-reveal-no") { var w0 = S.gconfirm; S.gconfirm = null; focusAfter("greveal-" + w0); return render(); }
+    if (act === "g-reveal-do") return gameReveal(id);
+    if (act === "g-react") {
+      var wid = b.getAttribute("data-w"), to = b.getAttribute("data-to"), em = b.getAttribute("data-e");
+      var r = (S.game.wines[wid].results || []).filter(function (x) { return x.who === to; })[0], cur = r ? (r.reactions.filter(function (x) { return x.from === mePk(); })[0] || {}) : {};
+      focusAfter(b.getAttribute("data-fk"));
+      return gameReact(wid, to, cur.e === em ? "" : em, cur.f || "");
+    }
+  });
 
   /* ---------------- modulo di voto ---------------- */
   var SMART = [["occhio", "eye", "eyeH", "eyeW"], ["naso", "nose", "noseH", "noseW"], ["bocca", "mouth", "mouthH", "mouthW"]];
@@ -920,6 +1208,7 @@
       target = app.querySelector('[data-fk="' + fk + '"]');
       if (target) { try { target.focus({ preventScroll: true }); if (selStart != null && target.setSelectionRange) target.setSelectionRange(selStart, selEnd); } catch (e) { /* ok */ } }
     }
+    if (S.game) placeDots();
     reportHeight();
   }
   function focusAfter(fk, scroll) { pendingFocus = { fk: fk, scroll: scroll || null, ttl: 4 }; }
@@ -1067,9 +1356,9 @@
       case "retry-login": return login();
       case "reauth": S.fatal.asked = true; askReauth("user"); render(); return;
       case "retry-load": return loadState(S.loadError && S.loadError.tasting);
-      case "tab": S.tab = b.getAttribute("data-tab"); S.notice = null; S.form = null; focusAfter("tab-" + S.tab); render(); if (S.tab === "notebook") return loadNotebook(); if (S.tab !== "tastings") return loadStats(); return loadState("", true);
+      case "tab": S.tab = b.getAttribute("data-tab"); S.notice = null; S.form = null; focusAfter("tab-" + S.tab); render(); if (S.tab === "notebook") return loadNotebook(); if (S.tab === "ranking") loadBoard(); if (S.tab !== "tastings") return loadStats(); return loadState("", true);
       case "refresh-nb": return loadNotebook();
-      case "refresh-stats": return loadStats();
+      case "refresh-stats": if (S.tab === "ranking") loadBoard(); return loadStats();
       case "wine-status": return wineStatus(id);
       case "guess": { var gw = S.wines.filter(function (x) { return x.id === id; })[0]; if (!gw) return; var g0 = gw.guess || {}; stashGuess(); S.gform = { wine: id, vals: S.gdrafts[id] || { type: g0.type || "", grape: g0.grape || "", year: g0.year || "" }, error: "" }; delete S.gdrafts[id]; S.notice = null; S.saved = null; focusAfter("g-type"); return render(); }
       case "cancel-guess": { var gw2 = S.gform && S.gform.wine; S.gform = null; focusAfter("guess-" + gw2); return render(); }
@@ -1142,7 +1431,7 @@
   function openTasting(id, push) {
     stashSheet(); stashGuess();
     S.view = "tasting"; S.sheet = null; S.form = null; S.gform = null; S.confirm = null; S.notice = null; S.saved = null;
-    S.tasting = null; S.wines = [];
+    S.tasting = null; S.wines = []; S.game = null; S.gdraft = {}; S.gerr = null; S.gconfirm = null;
     if (push) pushHistory(id);
     focusSel("#h-main");
     return loadState(id);

@@ -2841,6 +2841,11 @@ const I18N = {
     "circ.serate":"Serate e degustazioni", "circ.serateTitle":"Serate della cerchia {circle}",
     "circ.data":"I voti e i dati", "circ.dataHint":"I voti sono anonimi: nella cerchia si vedono solo medie e conteggi. Puoi cancellare i tuoi voti di questa cerchia; Proprietario e amministratori possono scaricare le medie di tutte le serate.",
     "circ.exportCsv":"Scarica CSV", "circ.exportJson":"Scarica JSON", "circ.exported":"File scaricato.", "circ.exportFailed":"Non riesco a scaricare il file.",
+ "circ.game":"Modalità gioco", "circ.gameOn":"attiva", "circ.gameOff":"spenta", "circ.gameStart":"Attiva il gioco", "circ.gameStop":"Spegni il gioco",
+    "circ.gameHint":"Per ogni vino: metti la tua faccia sul campo, fai il pronostico della media e indovina il prezzo. Allo svelamento punti, cartellini, reazioni e frecciatine; nella Classifica i punti della stagione e i soprannomi.",
+    "circ.gamePrivacy":"Con il gioco attivo, dopo lo svelamento tutti i membri vedono nomi, facce (la foto di Google) e voti di tutti. Le altre cerchie e il widget restano anonimi.",
+    "circ.gameMember":"In questa cerchia il gioco è attivo: dopo lo svelamento di ogni vino tutti vedono nomi, facce e voti di tutti.",
+    "circ.gameAsk":"Attivare il gioco? Dopo lo svelamento di ogni vino tutti i membri vedranno nomi, facce e voti di tutti.", "circ.gameStarted":"Gioco attivato: lo trovi in ogni vino delle serate.", "circ.gameStopped":"Gioco spento: le serate tornano anonime.",
     "circ.myVotes":"Cancella i miei voti", "circ.myVotesAsk":"Cancellare tutti i tuoi voti e le tue ipotesi nelle serate di «{circle}»? Le medie si ricalcolano e non si torna indietro.", "circ.myVotesDone":"Voti cancellati: {n}.",
     "circ.oldEvent":"Evento della versione precedente", "circ.oldEventNote":"L'Evento sarà sostituito dalle serate delle cerchie.",
     "circ.inviteBanner":"Invito a «{circle}»", "circ.wrongAccount":"Questo invito è per {email}: esci e accedi con quell'account Google.",
@@ -3433,6 +3438,11 @@ const I18N = {
     "circ.serate":"Evenings and tastings", "circ.serateTitle":"Evenings of the circle {circle}",
     "circ.data":"Votes and data", "circ.dataHint":"Votes are anonymous: the circle only sees averages and counts. You can delete your votes in this circle; the Owner and admins can download the averages of every evening.",
     "circ.exportCsv":"Download CSV", "circ.exportJson":"Download JSON", "circ.exported":"File downloaded.", "circ.exportFailed":"I can't download the file.",
+ "circ.game":"Game mode", "circ.gameOn":"on", "circ.gameOff":"off", "circ.gameStart":"Turn the game on", "circ.gameStop":"Turn the game off",
+    "circ.gameHint":"For each wine: put your face on the field, predict the group average and guess the price. At the reveal: points, badges, reactions and friendly jabs; in the Ranking, season points and nicknames.",
+    "circ.gamePrivacy":"With the game on, after the reveal every member sees everyone's names, faces (their Google photo) and scores. Other circles and the widget stay anonymous.",
+    "circ.gameMember":"The game is on in this circle: after each wine is revealed, everyone sees everyone's names, faces and scores.",
+    "circ.gameAsk":"Turn the game on? After each wine is revealed, every member will see everyone's names, faces and scores.", "circ.gameStarted":"Game on: you'll find it in every wine of the evenings.", "circ.gameStopped":"Game off: the evenings are anonymous again.",
     "circ.myVotes":"Delete my votes", "circ.myVotesAsk":"Delete all your votes and guesses in the evenings of “{circle}”? Averages are recalculated and it can't be undone.", "circ.myVotesDone":"Votes deleted: {n}.",
     "circ.oldEvent":"Event from the previous version", "circ.oldEventNote":"Event will be replaced by the circles' evenings.",
     "circ.inviteBanner":"Invitation to “{circle}”", "circ.wrongAccount":"This invitation is for {email}: sign out and sign in with that Google account.",
@@ -7355,6 +7365,14 @@ function circMoreHTML(){
     h += d.invites.map(i => '<div class="circ-row"><div class="circ-main"><div class="circ-name">'+esc(i.email)+'<span class="role-badge '+esc(i.role)+'">'+esc(circRole(i.role))+'</span></div><div class="circ-sub">'+esc(tf("circ.expires",{d:circDate(i.exp)}))+'</div></div>'+
       '<div class="circ-actions"><button type="button" class="pill-solid" data-circ="copy" data-t="'+esc(i.token)+'"'+circAria(t("circ.copyLink"), i.email)+'>'+esc(t("circ.copyLink"))+'</button>'+'<a class="pill-ghost" href="'+esc(circMailto(i, d.circle.name))+'"'+circAria(t("circ.writeMail"), i.email)+'>'+esc(t("circ.writeMail"))+'</a>'+(navigator.share ? '<button type="button" class="pill-ghost" data-circ="share" data-t="'+esc(i.token)+'"'+circAria(t("circ.share"), i.email)+'>'+esc(t("circ.share"))+'</button>' : "")+(d.mail ? '<button type="button" class="pill-ghost" data-circ="resend" data-i="'+esc(i.id)+'"'+circAria(t("circ.resend"), i.email)+'>'+esc(t("circ.resend"))+'</button>' : "")+'<button type="button" class="pill-ghost" data-circ="revoke" data-i="'+esc(i.id)+'"'+circAria(t("circ.revoke"), i.email)+'>'+esc(t("circ.revoke"))+'</button></div></div>').join("")+'</div>';
   }
+  /* modalità gioco: la accendono Proprietario e amministratori; chi è membro sa se è attiva */
+  if(admin){
+    h += '<div class="card circ-card-gap circ-game"><div class="card-head"><span class="eyebrow">🎲 '+esc(t("circ.game"))+'</span><span class="fill"></span><span class="status">'+esc(t(c.game ? "circ.gameOn" : "circ.gameOff"))+'</span></div>'+
+      '<p class="note-line">'+esc(t("circ.gameHint"))+'</p><p class="note-line">'+esc(t("circ.gamePrivacy"))+'</p><div class="backup-actions">'+
+      '<button type="button" class="'+(c.game ? "pill-ghost" : "pill-solid")+'" data-circ="game" aria-pressed="'+(!!c.game)+'">'+esc(t(c.game ? "circ.gameStop" : "circ.gameStart"))+'</button></div></div>';
+  }else if(c.game){
+    h += '<div class="card circ-card-gap circ-game"><div class="card-head"><span class="eyebrow">🎲 '+esc(t("circ.game"))+'</span><span class="fill"></span><span class="status">'+esc(t("circ.gameOn"))+'</span></div><p class="note-line">'+esc(t("circ.gameMember"))+'</p></div>';
+  }
   /* i voti e i dati della cerchia */
   h += '<div class="card circ-card-gap"><div class="card-head"><span class="eyebrow">'+esc(t("circ.data"))+'</span><span class="fill"></span></div>'+
     '<p class="note-line">'+esc(t("circ.dataHint"))+'</p><div class="backup-actions">'+
@@ -7402,6 +7420,13 @@ document.addEventListener("click", (e) => {
     if(a === "wdg-copy"){
       try{ await navigator.clipboard.writeText($("wdgCode").value); circSay("wdg.copied", null, false); }
       catch(err){ try{ $("wdgCode").select(); }catch(e2){} circSay("wdg.copyFailed", null, true); }
+      renderCircles(); return;
+    }
+    if(a === "game"){
+      const on = !CIRC.detail.circle.game;
+      if(on && !confirm(t("circ.gameAsk"))) return;
+      try{ const r = await circApi({op:"game.set", circle:c, on}); CIRC.detail.circle.game = !!r.circle.game; circSay(on ? "circ.gameStarted" : "circ.gameStopped", null, false); const f = $("circFrame"); if(f) f.src = f.src; }
+      catch(err){ circSayErr(err); }
       renderCircles(); return;
     }
     if(a === "myvotes"){

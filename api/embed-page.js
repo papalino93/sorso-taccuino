@@ -58,7 +58,7 @@ module.exports = async (req, res) => {
      Chi entra e con che ruolo lo decide l'API a ogni richiesta (sessione Sorso + ruolo nella cerchia). */
   if (/^[0-9a-f]{10}$/.test(cid)) {
     const nonce = crypto.randomBytes(16).toString("base64");
-    res.setHeader("Content-Security-Policy", ["default-src 'none'", "script-src 'self'", "style-src 'self' 'nonce-" + nonce + "'", "img-src 'self' data:", "connect-src 'self'", "base-uri 'none'", "form-action 'none'", "frame-ancestors 'self'"].join("; "));
+    res.setHeader("Content-Security-Policy", ["default-src 'none'", "script-src 'self'", "style-src 'self' 'nonce-" + nonce + "'", "img-src 'self' data: https://*.googleusercontent.com", "connect-src 'self'", "base-uri 'none'", "form-action 'none'", "frame-ancestors 'self'"].join("; "));
     res.status(200).send(SHELL(nonce)("")("it"));
     return;
   }

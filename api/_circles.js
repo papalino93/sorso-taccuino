@@ -91,13 +91,18 @@ async function getUser(redis, username) {
     email: normEmail(u.email || ""), verified: u.emailVerified !== false   // i profili più vecchi non hanno il campo: Google dà sempre mail verificate
   };
 }
+/* foto del profilo: solo quelle servite da Google (https), mai un indirizzo qualunque */
+function safePic(u) {
+  if (typeof u !== "string" || u.length > 400) return "";
+  try { const x = new URL(u); return x.protocol === "https:" && /(^|\.)googleusercontent\.com$/.test(x.hostname) ? x.href : ""; } catch (e) { return ""; }
+}
 async function getUsers(redis, usernames) {
   if (!usernames.length) return {};
   const raws = await redis.mget(...usernames.map(u => "user:" + u));
   const out = {};
   usernames.forEach((u, i) => {
     const o = parse(raws[i]) || {};
-    out[u] = { name: cleanText(o.name, 60) || "Utente", email: normEmail(o.email || "") };
+    out[u] = { name: cleanText(o.name, 60) || "Utente", email: normEmail(o.email || ""), pic: safePic(o.picture) };
   });
   return out;
 }
@@ -194,7 +199,7 @@ async function get(redis, user, body) {
   const users = await getUsers(redis, usernames);
   const members = usernames.map(u => parse(hm[u]) && Object.assign(pickMember(u, parse(hm[u]), users, me.role), { you: u === user.username })).filter(Boolean)
     .sort((a, b) => ROLES.indexOf(a.role) - ROLES.indexOf(b.role) || a.name.localeCompare(b.name, "it"));
-  const out = { circle: { id: circle.id, name: circle.name, role: me.role, createdAt: circle.createdAt, members: members.length }, members };
+  const out = { circle: { id: circle.id, name: circle.name, role: me.role, createdAt: circle.createdAt, members: members.length, game: !!circle.game }, members };
   if (me.role !== "member") {
     out.mail = mail.enabled();
     const hv = asObject(await redis.hgetall(K.cv(circle.id)));
@@ -225,6 +230,14 @@ const rename = (redis, user, body) => locked(redis, body.circle, async () => {
   circle.name = name;
   await redis.set(K.ci(circle.id), JSON.stringify(circle));
   return { circle: { id: circle.id, name } };
+});
+
+/* Modalità gioco: in questa cerchia, dopo lo svelamento, tutti vedono voti, nomi e facce di tutti (api/_game.js) */
+const setGame = (redis, user, body) => locked(redis, body.circle, async () => {
+  const { circle } = await requireRole(redis, user, body.circle, "admin");
+  circle.game = body.on === true;
+  await redis.set(K.ci(circle.id), JSON.stringify(circle));
+  return { circle: { id: circle.id, game: circle.game } };
 });
 
 const remove = (redis, user, body) => locked(redis, body.circle, async () => {
@@ -449,11 +462,11 @@ const transfer = (redis, user, body) => locked(redis, body.circle, async () => {
   return { owner: body.member };
 });
 
-const WRITES = new Set(["widget.create", "widget.revoke", "votes.delete", "create", "rename", "delete", "invite", "invite.resend", "invite.revoke", "invite.accept", "invite.decline", "member.role", "member.remove", "leave", "transfer"]);
+const WRITES = new Set(["game.set", "widget.create", "widget.revoke", "votes.delete", "create", "rename", "delete", "invite", "invite.resend", "invite.revoke", "invite.accept", "invite.decline", "member.role", "member.remove", "leave", "transfer"]);
 const OPS = {
   list, create, get, rename, delete: remove, invite, "invite.revoke": revokeInvite, "invite.resend": resendInvite, "invite.peek": peekInvite, "invite.preview": previewInvite,
   "invite.accept": acceptInvite, "invite.decline": declineInvite, "member.role": setRole, "member.remove": removeMember, leave, transfer,
-  "votes.delete": deleteMyVotes, export: exportCircle, "widget.create": widgetCreate, "widget.revoke": widgetRevoke
+  "votes.delete": deleteMyVotes, export: exportCircle, "widget.create": widgetCreate, "widget.revoke": widgetRevoke, "game.set": setGame
 };
 
 /* ---- serate della cerchia: lo stesso motore dello spazio di team (api/_team.js) ----
@@ -472,7 +485,7 @@ async function embedContext(redis, token, cid) {
   if (!m || !c) throw notFound("Cerchia");
   return {
     partner: CIRCLE_PARTNER, circle: c, username: String(username),
-    ctx: { uid: String(username), name: "", team: cid, role: m.role === "member" ? "member" : "organizer", circleRole: m.role, lang: null, mode: null }
+    ctx: { uid: String(username), name: "", team: cid, role: m.role === "member" ? "member" : "organizer", circleRole: m.role, lang: null, mode: null, game: !!c.game }
   };
 }
 
@@ -481,7 +494,8 @@ async function deleteMyVotes(redis, user, body) {
   const { circle } = await requireRole(redis, user, body.circle, "member");
   if (body.confirm !== true) throw bad("confirm_required", "Conferma la cancellazione.");
   const r = await Team.deleteUser(redis, CIRCLE_PARTNER.id, user.username, circle.id);
-  return { votesRemoved: r.votesRemoved, guessesRemoved: r.guessesRemoved };
+  const moves = await require("./_game").deleteUser(redis, circle.id, user.username);      // qui: _game richiede _circles
+  return { votesRemoved: r.votesRemoved, guessesRemoved: r.guessesRemoved, movesRemoved: moves };
 }
 
 /* Esportazione per Proprietario e Amministratori: medie per vino di ogni serata, anonime
@@ -534,4 +548,4 @@ async function widgetCircle(redis, token) {
 /* operazioni che non chiedono l'accesso */
 const PUBLIC = new Set(["invite.preview"]);
 
-module.exports = { OPS, WRITES, PUBLIC, CIRCLE_PARTNER, embedContext, widgetCircle, getUser, normEmail, emailHash, MAX_MEMBERS, MAX_OWNED, MAX_JOINED, INVITE_DAYS, K };
+module.exports = { OPS, WRITES, PUBLIC, CIRCLE_PARTNER, embedContext, widgetCircle, getUser, getUsers, normEmail, emailHash, MAX_MEMBERS, MAX_OWNED, MAX_JOINED, INVITE_DAYS, K };

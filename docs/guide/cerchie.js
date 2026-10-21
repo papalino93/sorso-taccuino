@@ -92,7 +92,7 @@ function build() {
     <div class="two">
       <div>
         <h3 class="k">Privacy</h3>
-        ${ul(["I <b>nomi</b> delle persone li vedono tutti i membri; le <b>mail</b> solo il Proprietario e gli amministratori.", "Il tuo <b>Taccuino personale resta privato</b>: nella cerchia non finisce niente se non lo scegli tu.", "Nelle serate i voti sono <b>anonimi</b>: solo medie e conteggi, mai chi ha dato quale voto.", "Chi esce lascia i propri voti nelle medie senza il nome; prima può usare <b>Cancella i miei voti</b>."])}
+        ${ul(["I <b>nomi</b> delle persone li vedono tutti i membri; le <b>mail</b> solo il Proprietario e gli amministratori.", "Il tuo <b>Taccuino personale resta privato</b>: nella cerchia non finisce niente se non lo scegli tu.", "Nelle serate i voti sono <b>anonimi</b>: solo medie e conteggi, mai chi ha dato quale voto. Fa eccezione <b>il gioco</b>, se la cerchia lo accende.", "Chi esce lascia i propri voti nelle medie senza il nome; prima può usare <b>Cancella i miei voti</b>."])}
       </div>
       <div>
         <h3 class="k">Limiti</h3>
@@ -134,8 +134,24 @@ function build() {
     ${ul(["Mostra solo <b>medie anonime</b> delle serate chiuse (dal secondo voto in su); i vini alla cieca restano nascosti finché non li sveli.", "<b>Revoca</b> lo spegne su tutti i siti; <b>Rinnova il link</b> ne crea uno nuovo e spegne il vecchio. Il sito si aggiorna da solo entro un paio di minuti."])}
   `));
 
+  P.push(pg("paper", "Il gioco", `
+    ${eyebrow("11", "Il gioco")}
+    <h1 class="d">Degustare, <em>e sfidarsi</em></h1>
+    <div class="two">
+      <div>
+        <p class="lead">Il Proprietario o un amministratore accende <b>Il gioco</b> in fondo alla cerchia. Da quel momento, sotto ogni vino delle serate:</p>
+        ${ul(["Trascini <b>la tua faccia</b> (foto di Google o iniziali) su un campo con due assi, come corpo e acidità.", "Fai un <b>pronostico</b>: quanto darà il gruppo?", "Se vuoi, indovini il <b>prezzo</b>.", "Le mosse restano segrete fino allo <b>svelamento</b>: quando hanno votato tutti, quando si chiude il vino o con «Svela!» dell'organizzatore."])}
+        ${fig("cerchie-gioco-campo.png", 1, "Prima dello svelamento: la tua faccia sul campo, pronostico e prezzo.")}
+      </div>
+      <div>
+        ${ul(["Dopo lo svelamento <b>tutti vedono tutto</b>: facce sul campo, voti, punti e titoli come «Fuori dal coro» o «Naso da sommelier».", "Fino a 10 punti per pronostico, prezzo e vicinanza al gruppo; la <b>classifica del gioco</b> somma la stagione.", "Reazioni e <b>frecciatine</b> bonarie tra colleghi.", "A gioco spento i voti restano <b>anonimi</b> come sempre; il widget per i siti resta anonimo anche a gioco acceso."])}
+        ${fig("cerchie-gioco-svelato.png", 2, "Dopo lo svelamento: chi ha votato cosa, punti e titoli.")}
+      </div>
+    </div>
+  `));
+
   P.push(pg("paper", "Per cominciare", `
-    ${eyebrow("11", "Per cominciare")}
+    ${eyebrow("12", "Per cominciare")}
     <h1 class="d">In pratica, <em>tre passi</em></h1>
     ${ul(["Gli <b>eventi</b> della versione precedente restano consultabili in fondo a Cerchie; i nuovi si fanno come serate."])}
     ${check(["Apro Cerchie e creo la mia prima cerchia.", "Invito le persone con le loro mail e, se serve, mando il link.", "Nomino un amministratore di fiducia.", "Creo la prima serata (o «Un solo vino») e faccio votare tutti.", "Se il club ha un sito, ci incollo il widget."])}

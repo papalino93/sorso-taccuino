@@ -6,6 +6,7 @@ const Team = require("./_team");
 const Quota = require("./_quota");
 const limit = require("./_limit");
 const Circles = require("./_circles");
+const Game = require("./_game");
 
 /* API interna dell'embed: la usa solo la pagina /embed dentro l'iframe.
    POST con un corpo JSON { op, ... }. L'unica operazione senza sessione è
@@ -47,7 +48,7 @@ module.exports = async (req, res) => {
         const mode = body.mode === "full" || body.mode === "smart" ? body.mode : "smart";
         sendJson(res, 200, {
           session: "circle", user: { name: u.name, role: ctx.role, team: ctx.team, circleRole: ctx.circleRole },
-          config: { modes: partner.modes, defaultMode: mode, lang: body.lang === "en" ? "en" : "it", title: cleanText(c.circle.name, 60), logo: "", circle: true },
+          config: { modes: partner.modes, defaultMode: mode, lang: body.lang === "en" ? "en" : "it", title: cleanText(c.circle.name, 60), logo: "", circle: true, game: !!ctx.game },
           quota: Quota.level() === "readonly" ? "readonly" : "ok"
         });
         return;
@@ -79,6 +80,12 @@ module.exports = async (req, res) => {
     const rl = await limit.hit(redis, "u:" + partner.id + ":" + ctx.uid, OPS_PER_USER, 60);
     if (!rl.ok) { res.setHeader("Retry-After", String(rl.retryAfter)); throw new HttpError(429, "rate_limited", "Troppe richieste: riprova fra poco."); }
     if (WRITES[op]) Quota.assertWritable();
+    /* il gioco delle cerchie (api/_game.js) */
+    if (Object.prototype.hasOwnProperty.call(Game.OPS, op)) {
+      if (Game.WRITES.has(op)) Quota.assertWritable();
+      sendJson(res, 200, await Game.OPS[op](redis, partner, ctx, body));
+      return;
+    }
 
     switch (op) {
       case "state": {
