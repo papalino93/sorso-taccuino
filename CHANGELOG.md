@@ -3,6 +3,9 @@
 La versione e la data dell'ultimo aggiornamento sono mostrate in fondo all'app e dello spazio di team
 (fonte: `public/js/version.js`, da tenere uguale a `package.json`).
 
+## 2.9.1 — 21 ottobre 2026
+- **Scritta «SORSO» rifinita**: le O che sorridono occupano esattamente lo spazio di una O vera (stessa distanza tra le lettere, misurata al pixel) e hanno lo stesso spessore delle altre lettere.
+
 ## 2.9.0 — 21 ottobre 2026
 - **Logo definitivo**: niente punto e sorriso un po' più basso; nella scritta «SORSO» le due O sono il cerchio che sorride (in alto, nell'accesso e nell'anteprima del nome). Nuove favicon e icone dell'app.
 - **Nuovo aspetto, tappa 2**: le serate delle cerchie e lo spazio di team nei siti dei partner (riquadri bianchi con bordo sottile, pulsanti e segmenti come nell'app; colori predefiniti lavanda su perla, antracite di notte; i partner con i propri colori li tengono), il widget per i siti (riquadri con bordo) e la mail degli inviti (testata «SORSO», riquadro bianco, pulsante lavanda).
