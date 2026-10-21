@@ -1,6 +1,6 @@
 # Sorso — cosa devi fare tu per il partner
 
-Aggiornata il 21 ottobre 2026 · **Taste 2.11.0**.
+Aggiornata il 21 ottobre 2026 · **Taste 2.12.0**.
 
 **Dove siamo.** Il sito, l'app personale (con la vista da PC) e lo spazio di team per il partner sono pronti e online. Test automatici: tutti verdi. Le quattro guide PDF sono aggiornate (l'ultima è la guida all'uso dentro il profilo). **La prova sul database vero è stata fatta l'8 ottobre 2026 e non ha trovato difetti** (vedi il punto 2). **Per completare l'API mancano solo le cose che dipendono dal partner (punti 1, 4, 5, 6, 7, 8): il codice è finito.**
 
@@ -30,7 +30,7 @@ Fatta sul sito e sul database di produzione con un partner di prova, poi cancell
 
 **Controlli su Vercel (fatti l'8 ottobre 2026):** il piano è Hobby (solo uso non commerciale, vedi il punto 1); Deployment Protection è «Standard» e la produzione si apre senza accedere. Il partner deve usare sempre https://sorso-taccuino.vercel.app, mai gli indirizzi dei singoli deploy.
 
-### 3. Guarda Taste 2.11.0 con i tuoi occhi  ☐  *(10 minuti)*
+### 3. Guarda Taste 2.12.0 con i tuoi occhi  ☐  *(10 minuti)*
 Aprilo su telefono e su PC, con il browser che usi di solito: https://sorso-taccuino.vercel.app/
 - **Telefono:** provi un Voto rapido e una Scheda completa, salvi, li ritrovi nel Taccuino? L'ingranaggio in alto apre le Impostazioni?
 - **PC:** barra in alto (sezioni a sinistra; Aspetto, tema, lingua, impostazioni e utente a destra), Taccuino con elenco e dettaglio, Statistiche: tutto in vista senza scorrere troppo?

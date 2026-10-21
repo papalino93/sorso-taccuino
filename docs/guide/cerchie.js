@@ -131,7 +131,7 @@ function build() {
     <h1 class="d">La classifica <em>sul vostro sito</em></h1>
     <p class="lead">In fondo alla cerchia, <b>Widget per un sito</b> (Proprietario e amministratori): <b>Crea il widget</b>, scegli lingua, tema e cosa mostrare, poi <b>Copia il codice</b> e incollalo nella pagina del sito.</p>
     ${wide("cerchie-widget-sito.png", 1, "Il widget incollato nel sito di un club: sfondo trasparente e il colore del sito.")}
-    ${ul(["Mostra solo <b>medie anonime</b> delle serate chiuse (dal secondo voto in su); i vini alla cieca restano nascosti finché non li sveli.", "<b>Revoca</b> lo spegne su tutti i siti; <b>Rinnova il link</b> ne crea uno nuovo e spegne il vecchio. Il sito si aggiorna da solo entro un paio di minuti."])}
+    ${ul(["Mostra solo <b>medie anonime</b> delle serate chiuse (dal secondo voto in su); i vini alla cieca restano nascosti finché non li sveli.", "Sei tipi: <b>Classifica</b>, <b>Il palato del team</b>, <b>Striscia</b> e, con il gioco, <b>La sfida</b>, <b>Il campo</b> e <b>Podio e premi</b>. I nomi compaiono solo se accendi «Mostra i nomi sul sito».", "<b>Revoca</b> lo spegne su tutti i siti; <b>Rinnova il link</b> ne crea uno nuovo e spegne il vecchio. Il sito si aggiorna da solo entro un paio di minuti."])}
   `));
 
   P.push(pg("paper", "Il gioco", `

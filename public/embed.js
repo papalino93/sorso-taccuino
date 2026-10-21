@@ -112,7 +112,7 @@
       revealedNote: "Vini svelati: ecco chi erano. Le ipotesi sono definitive.",
       revealIt: "Svela i vini", revealWorking: "Svelo…",
       revealAsk: "Svelare i vini? La degustazione si chiude per sempre: tutti vedono i nomi e come sono andate le ipotesi. Non si può annullare.",
-      wineType: "Tipologia (facoltativa)", wineGrape: "Vitigno (facoltativo)", typeNone: "—",
+      wineType: "Tipologia (facoltativa)", wineGrape: "Vitigno (facoltativo)", wineRegion: "Regione (facoltativa)", typeNone: "—",
       tp_Rosso: "Rosso", tp_Bianco: "Bianco", tp_Rosato: "Rosato", tp_Spumante: "Spumante", tp_Passito: "Passito",
       guessTitle: "Cosa pensi sia?", guessHint: "Facoltativo: tipologia, vitigno, annata. Ti basta indicarne una.",
       gType: "Tipologia", gGrape: "Vitigno", gYear: "Annata (es. 2018 o NV)",
@@ -220,7 +220,7 @@
       revealedNote: "Wines revealed: here is who they were. Guesses are final.",
       revealIt: "Reveal the wines", revealWorking: "Revealing…",
       revealAsk: "Reveal the wines? The tasting closes for good: everyone sees the names and how the guesses went. This cannot be undone.",
-      wineType: "Type (optional)", wineGrape: "Grape (optional)", typeNone: "—",
+      wineType: "Type (optional)", wineGrape: "Grape (optional)", wineRegion: "Region (optional)", typeNone: "—",
       tp_Rosso: "Red", tp_Bianco: "White", tp_Rosato: "Rosé", tp_Spumante: "Sparkling", tp_Passito: "Dessert",
       guessTitle: "What do you think it is?", guessHint: "Optional: type, grape, vintage. One is enough.",
       gType: "Type", gGrape: "Grape", gYear: "Vintage (e.g. 2018 or NV)",
@@ -275,7 +275,7 @@
   /* la media del team ha sempre un decimale, arrotondato alla regola classica (79,45 → 79,5) */
   function dec(n) { return Scoring.roundHalfUp(n, 1).toFixed(1).replace(".", S.lang === "it" ? "," : "."); }
   function plural(n, one, many) { return t(n === 1 ? one : many, { n: n }); }
-  function wineLine(w) { return [w.producer, w.vintage, w.type ? t("tp_" + w.type) : "", w.grape].filter(Boolean).map(esc).join(" · "); }
+  function wineLine(w) { return [w.producer, w.vintage, w.type ? t("tp_" + w.type) : "", w.grape, w.region].filter(Boolean).map(esc).join(" · "); }
   /* un vino alla cieca non svelato non ha nome: si chiama "Vino 1", "Vino 2"… */
   function wineTitle(w) { return w.name || t("blindLabel", { n: w.index || 1 }); }
   function nameOf(x) { return x.hidden || !x.name ? t("blindLabel", { n: x.index || 1 }) : x.name; }
@@ -525,7 +525,8 @@
       h += '<label class="f" for="f-prod">' + esc(t("producer")) + '</label><input type="text" id="f-prod" name="producer" data-fk="f-prod" maxlength="80" autocomplete="off" dir="auto" value="' + esc(v.producer) + '">' +
         '<label class="f" for="f-vint">' + esc(t("vintage")) + '</label><input type="text" id="f-vint" name="vintage" data-fk="f-vint" maxlength="4" inputmode="text" autocomplete="off" value="' + esc(v.vintage) + '">' +
         '<label class="f" for="f-type">' + esc(t("wineType")) + '</label><select id="f-type" name="type" data-fk="f-type">' + typeOptions(v.type) + '</select>' +
-        '<label class="f" for="f-grape">' + esc(t("wineGrape")) + '</label><input type="text" id="f-grape" name="grape" data-fk="f-grape" maxlength="40" autocomplete="off" dir="auto" value="' + esc(v.grape) + '">';
+        '<label class="f" for="f-grape">' + esc(t("wineGrape")) + '</label><input type="text" id="f-grape" name="grape" data-fk="f-grape" maxlength="40" autocomplete="off" dir="auto" value="' + esc(v.grape) + '">' +
+        '<label class="f" for="f-region">' + esc(t("wineRegion")) + '</label><input type="text" id="f-region" name="region" data-fk="f-region" maxlength="40" autocomplete="off" dir="auto" value="' + esc(v.region || "") + '">';
     } else {
       h += '<label class="check"><input type="checkbox" name="blind" data-fk="f-blind"' + (v.blind ? " checked" : "") + '> <span>' + esc(t("blindCreate")) + '</span></label>';
     }
@@ -1294,7 +1295,7 @@
     if (!name) { S.form.error = t("e_invalid_name"); focusAfter("f-name"); announce(S.form.error, true); return render(); }
     var titolo = (name + (v.vintage && v.vintage.trim() ? " " + v.vintage.trim() : "")).slice(0, 80);
     return run("single", function () {
-      return api({ op: "tasting.create", name: titolo, wine: { name: name, producer: v.producer, vintage: v.vintage, type: v.type, grape: v.grape } }).then(function (r) {
+      return api({ op: "tasting.create", name: titolo, wine: { name: name, producer: v.producer, vintage: v.vintage, type: v.type, grape: v.grape, region: v.region } }).then(function (r) {
         S.form = null; S.view = "tasting"; pushHistory(r.tasting.id);
         announce(t("create") + ": " + r.tasting.name);
         focusSel("#h-main");
@@ -1321,8 +1322,8 @@
     var v = S.form.vals;
     if (!v.name.trim()) { S.form.error = t("e_invalid_name"); focusAfter("f-name"); announce(S.form.error, true); return render(); }
     return run("wine", function () {
-      return api({ op: "wine.add", tasting: S.tasting.id, wine: { name: v.name, producer: v.producer, vintage: v.vintage, type: v.type, grape: v.grape } }).then(function (r) {
-        S.form = { kind: "wine", vals: { name: "", producer: "", vintage: "", type: v.type, grape: "" }, error: "" };
+      return api({ op: "wine.add", tasting: S.tasting.id, wine: { name: v.name, producer: v.producer, vintage: v.vintage, type: v.type, grape: v.grape, region: v.region } }).then(function (r) {
+        S.form = { kind: "wine", vals: { name: "", producer: "", vintage: "", type: v.type, grape: "", region: v.region || "" }, error: "" };
         announce(t("wineAdded", { name: r.wine.name }));
         S.notice = { kind: "ok", text: "✓ " + t("wineAdded", { name: r.wine.name }) };
         S.saved = null;

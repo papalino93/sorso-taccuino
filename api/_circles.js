@@ -208,7 +208,7 @@ async function get(redis, user, body) {
       .map(i => ({ id: i.id, email: i.email, role: i.role, exp: i.exp, token: i.token, by: (i.by === user.username ? "tu" : ((users[i.by] || {}).name || "")) }))
       .sort((a, b) => b.exp - a.exp);
     const w = parse(await redis.get(K.cw(circle.id)));
-    out.widget = w && TOKEN.test(w.token) ? { token: w.token, createdAt: w.at } : null;
+    out.widget = w && TOKEN.test(w.token) ? { token: w.token, createdAt: w.at, names: !!w.names } : null;
   }
   return out;
 }
@@ -237,6 +237,7 @@ const setGame = (redis, user, body) => locked(redis, body.circle, async () => {
   const { circle } = await requireRole(redis, user, body.circle, "admin");
   circle.game = body.on === true;
   await redis.set(K.ci(circle.id), JSON.stringify(circle));
+  await redis.del("gq:" + circle.id, "gb:" + circle.id).catch(() => {});     // i numeri del gioco per i widget si ricalcolano
   return { circle: { id: circle.id, game: circle.game } };
 });
 
@@ -462,11 +463,11 @@ const transfer = (redis, user, body) => locked(redis, body.circle, async () => {
   return { owner: body.member };
 });
 
-const WRITES = new Set(["game.set", "widget.create", "widget.revoke", "votes.delete", "create", "rename", "delete", "invite", "invite.resend", "invite.revoke", "invite.accept", "invite.decline", "member.role", "member.remove", "leave", "transfer"]);
+const WRITES = new Set(["game.set", "widget.create", "widget.revoke", "widget.names", "votes.delete", "create", "rename", "delete", "invite", "invite.resend", "invite.revoke", "invite.accept", "invite.decline", "member.role", "member.remove", "leave", "transfer"]);
 const OPS = {
   list, create, get, rename, delete: remove, invite, "invite.revoke": revokeInvite, "invite.resend": resendInvite, "invite.peek": peekInvite, "invite.preview": previewInvite,
   "invite.accept": acceptInvite, "invite.decline": declineInvite, "member.role": setRole, "member.remove": removeMember, leave, transfer,
-  "votes.delete": deleteMyVotes, export: exportCircle, "widget.create": widgetCreate, "widget.revoke": widgetRevoke, "game.set": setGame
+  "votes.delete": deleteMyVotes, export: exportCircle, "widget.create": widgetCreate, "widget.revoke": widgetRevoke, "widget.names": widgetNames, "game.set": setGame
 };
 
 /* ---- serate della cerchia: lo stesso motore dello spazio di team (api/_team.js) ----
@@ -519,13 +520,14 @@ async function exportCircle(redis, user, body) {
 function widgetCreate(redis, user, body) { return locked(redis, body.circle, async () => {
   const { circle } = await requireRole(redis, user, body.circle, "admin");
   const old = parse(await redis.get(K.cw(circle.id)));
-  if (old && TOKEN.test(old.token) && body.rotate !== true) return { widget: { token: old.token, createdAt: old.at } };
+  if (old && TOKEN.test(old.token) && body.rotate !== true) return { widget: { token: old.token, createdAt: old.at, names: !!old.names } };
   const token = crypto.randomBytes(24).toString("hex"), at = Date.now();
   const p = redis.pipeline();
   if (old && TOKEN.test(old.token)) p.del(K.wt(old.token));
-  p.set(K.wt(token), circle.id); p.set(K.cw(circle.id), JSON.stringify({ token, by: user.username, at }));
+  const names = !!(old && old.names);
+  p.set(K.wt(token), circle.id); p.set(K.cw(circle.id), JSON.stringify({ token, by: user.username, at, names }));
   await p.exec();
-  return { widget: { token, createdAt: at } };
+  return { widget: { token, createdAt: at, names } };
 }); }
 function widgetRevoke(redis, user, body) { return locked(redis, body.circle, async () => {
   const { circle } = await requireRole(redis, user, body.circle, "admin");
@@ -536,13 +538,22 @@ function widgetRevoke(redis, user, body) { return locked(redis, body.circle, asy
   await p.exec();
   return { revoked: !!old };
 }); }
+/* i nomi nel podio del gioco sul sito: li accendono Proprietario e amministratori, mai un parametro dell'indirizzo */
+function widgetNames(redis, user, body) { return locked(redis, body.circle, async () => {
+  const { circle } = await requireRole(redis, user, body.circle, "admin");
+  const old = parse(await redis.get(K.cw(circle.id)));
+  if (!old || !TOKEN.test(old.token)) throw new HttpError(409, "no_widget", "Prima crea il widget.");
+  old.names = body.on === true;
+  await redis.set(K.cw(circle.id), JSON.stringify(old));
+  return { widget: { token: old.token, createdAt: old.at, names: old.names } };
+}); }
 /* per la pagina pubblica del widget: dal token alla cerchia (null se revocato o inesistente) */
 async function widgetCircle(redis, token) {
   if (typeof token !== "string" || !TOKEN.test(token)) return null;
   const cid = await redis.get(K.wt(token));
   if (!cid || !ID.test(String(cid))) return null;
-  const c = parse(await redis.get(K.ci(String(cid))));
-  return c ? { id: c.id, name: c.name } : null;
+  const [c, w] = await Promise.all([redis.get(K.ci(String(cid))), redis.get(K.cw(String(cid)))]).then(r => r.map(parse));
+  return c ? { id: c.id, name: c.name, game: !!c.game, names: !!(c.game && w && w.token === token && w.names) } : null;
 }
 
 /* operazioni che non chiedono l'accesso */
