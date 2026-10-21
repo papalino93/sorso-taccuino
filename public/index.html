@@ -2020,7 +2020,7 @@ const S = {
     const d = window.localStorage.getItem("sorso-modo-predefinito");
     if(d === "smart" || d === "completa") return d;
     return window.localStorage.getItem("sorso-modalita") === "smart" ? "smart" : "completa"; }catch(e){ return "completa"; } })(),
-  smart:{occhio:70, naso:70, bocca:70},
+  smart:{occhio:68, naso:68, bocca:68},
   desc:[], note:"", abbinamento:"",
   saved:[], query:"", filter:"Tutti", sortBy:"score-desc", picked:[], expanded:null,
   editingId:null, editThumb:null, editTimestamp:null, editEvento:"",
@@ -5273,7 +5273,7 @@ function apriInModifica(id){
   });
   S.v = vi0.v; S.o = vi0.o; S.g = vi0.g; S.f = vi0.f;
   S.modalita = w.modalita === "smart" ? "smart" : "completa";
-  S.smart = Object.assign({occhio:70, naso:70, bocca:70}, w.modalita === "smart" ? w.giudizi : {});
+  S.smart = Object.assign({occhio:68, naso:68, bocca:68}, w.modalita === "smart" ? w.giudizi : {});
   /* i giudizi singoli ricostruiti devono dare il punteggio salvato: se no (schede vecchie con solo i
      punti di fase, o con voci di altri tempi) ci si ferma e si tiene l'originale */
   if(!S.editFrozen && S.modalita === "completa" && scoresOf(S).total !== w.score){
@@ -5302,7 +5302,7 @@ function resetForm(notify){
   S.zuccheri = "Secco"; S.stato = "Pronto";
   const di = descInit(); S.durezze = di.durezze; S.morbidezze = di.morbidezze; S.intensita = 3; S.corpo = 3;
   const vi = valInit(); S.v = vi.v; S.o = vi.o; S.g = vi.g; S.f = vi.f;
-  S.smart = {occhio:70, naso:70, bocca:70};
+  S.smart = {occhio:68, naso:68, bocca:68};
   S.desc = []; S.note = ""; S.abbinamento = "";
   S.editingId = null; S.editThumb = null; S.editTimestamp = null;
   if(S.modeDefault) S.modalita = S.modeDefault;      // una nuova scheda parte dalla modalità del profilo
@@ -6774,7 +6774,7 @@ function modulosporco(){
     String(w.prezzo).trim() || w.affinamento.trim() || w.uvaggi.length || S.desc.length || S.note.trim() ||
     S.abbinamento.trim() || S.photo ||
     JSON.stringify([S.v,S.o,S.g,S.f]) !== JSON.stringify([vi.v,vi.o,vi.g,vi.f]) ||
-    S.smart.occhio !== 70 || S.smart.naso !== 70 || S.smart.bocca !== 70 ||
+    S.smart.occhio !== 68 || S.smart.naso !== 68 || S.smart.bocca !== 68 ||
     w.tipologia !== "Rosso" || S.modalita !== "completa" || descCambiati(S));
 }
 /* limpidezza, colore, livelli e select descrittivi: diversi dai valori iniziali? */

@@ -822,7 +822,7 @@
   function newSheet(w) {
     var modes = S.config.modes, mine = w.mine;
     var mode = mine && modes.indexOf(mine.mode) > -1 ? mine.mode : (modes.indexOf(S.config.defaultMode) > -1 ? S.config.defaultMode : modes[0]);
-    var giudizi = { occhio: 70, naso: 70, bocca: 70 }, voti = {}, touched = {};
+    var giudizi = { occhio: 68, naso: 68, bocca: 68 }, voti = {}, touched = {};
     Object.keys(Scoring.ITEMS).forEach(function (g) { voti[g] = {}; Scoring.ITEMS[g].forEach(function (d) { voti[g][d[0]] = 6; }); });
     /* chi modifica un voto già dato ha già "toccato" tutti i cursori di quella modalità */
     if (mine && mine.mode === "smart" && mine.data && mine.data.giudizi) { Object.assign(giudizi, mine.data.giudizi); SMART.forEach(function (s) { touched["sm-" + s[0]] = true; }); }
