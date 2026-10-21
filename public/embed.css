@@ -302,3 +302,41 @@ button.g-dot.me:focus-visible { outline: none; } button.g-dot.me:focus-visible .
 .g-res > li, .g-top > *, .g-who, .g-react { min-width: 0; }
 .g-jabsel { width: 100%; max-width: 100%; min-width: 0; text-overflow: ellipsis; }
 @media (max-width: 360px) { .tabs { grid-template-columns: repeat(2, 1fr); } .tab { font-size: 13.5px; } }
+/* 2.13: il gioco cresce — classifica del mese, livelli, traguardi, scommessa della serata, coriandoli */
+.g-bmodes { margin: 4px 0 12px; }
+.g-lv { font-size: 11.5px; padding: 3px 9px; background: color-mix(in srgb, var(--accent) 14%, var(--surface)); color: var(--ink); }
+.g-streak { font-size: 11.5px; padding: 3px 9px; background: color-mix(in srgb, var(--warn) 18%, var(--surface)); color: var(--ink); }
+.g-rival { background: color-mix(in srgb, var(--danger, #c0392b) 12%, var(--surface)); }
+.g-career { margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--line); }
+.g-lvbig { display: flex; gap: 12px; align-items: center; margin: 6px 0 8px; }
+.g-lvbig b { display: block; font-size: 18px; font-weight: 800; letter-spacing: -.01em; }
+.g-lvico { width: 48px; height: 48px; border-radius: 14px; display: inline-flex; align-items: center; justify-content: center; font-size: 26px; background: color-mix(in srgb, var(--accent) 14%, var(--surface)); flex: none; }
+.g-prog { width: 100%; height: 10px; appearance: none; -webkit-appearance: none; border: 0; border-radius: 10px; background: var(--line); overflow: hidden; margin-bottom: 12px; }
+.g-prog::-webkit-progress-bar { background: var(--line); border-radius: 10px; }
+.g-prog::-webkit-progress-value { background: var(--accent); border-radius: 10px; }
+.g-prog::-moz-progress-bar { background: var(--accent); border-radius: 10px; }
+.g-ach { list-style: none; margin: 8px 0 0; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+@media (min-width: 560px) { .g-ach { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+.g-ach li { display: grid; grid-template-columns: auto minmax(0, 1fr); grid-template-rows: auto 1fr; gap: 2px 8px; align-items: start; align-content: start; padding: 9px 10px; border-radius: var(--r-md, 12px); border: 1px solid var(--line); background: var(--surface); }
+.g-ach .g-achico { grid-row: span 2; font-size: 22px; line-height: 1.1; }
+.g-ach b { font-size: 13px; font-weight: 750; line-height: 1.25; }
+.g-ach li > span:last-child { font-size: 11.5px; color: var(--muted); line-height: 1.35; }
+.g-ach li.off { opacity: .55; }
+.g-ach li.on { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
+.g-fav h3.section { margin-top: 0; }
+.g-favlist { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 200px), 1fr)); gap: 8px; margin: 10px 0; }
+.g-favb { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; min-height: 52px; padding: 10px 12px; text-align: left; border-radius: var(--r-md, 12px); border: 1px solid var(--line); background: var(--surface); color: var(--ink); cursor: pointer; }
+.g-favb b { font-weight: 700; overflow-wrap: anywhere; }
+.g-favb span { font-size: 12px; color: var(--muted); }
+.g-favb.on { border-color: var(--accent); box-shadow: inset 0 0 0 1.5px var(--accent); background: color-mix(in srgb, var(--accent) 10%, var(--surface)); }
+.g-favb.on span { color: var(--accent); font-weight: 700; }
+.g-favres { font-weight: 700; padding: 10px 12px; border-radius: var(--r-md, 12px); background: var(--surface); }
+.g-favres.ok { background: color-mix(in srgb, var(--ok) 16%, var(--surface)); }
+.g-favwin { display: flex; flex-wrap: wrap; gap: 6px 10px; align-items: center; margin-top: 8px; }
+.g-favwin b { font-weight: 750; overflow-wrap: anywhere; }
+.game { position: relative; }
+.g-confetti { position: absolute; inset: 0; pointer-events: none; overflow: hidden; z-index: 5; }
+.g-confetti i { position: absolute; top: -12px; width: 8px; height: 12px; border-radius: 2px; animation: g-fall 1.6s cubic-bezier(.2,.6,.4,1) forwards; }
+.g-confetti i.c0 { background: #5b4bd5; } .g-confetti i.c1 { background: #1f8a4c; } .g-confetti i.c2 { background: #f2b84b; } .g-confetti i.c3 { background: #2b6cb0; }
+.g-confetti i.c4 { background: #e27a98; } .g-confetti i.c5 { background: #9a8cff; } .g-confetti i.c6 { background: #0f9a8a; } .g-confetti i.c7 { background: #ff6b5e; }
+@keyframes g-fall { 0% { transform: translate(0, 0) rotate(0); opacity: 1; } 100% { transform: translate(var(--dx, 0), 520px) rotate(var(--rot, 360deg)); opacity: 0; } }

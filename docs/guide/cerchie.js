@@ -144,7 +144,7 @@ function build() {
         ${fig("cerchie-gioco-campo.png", 1, "Prima dello svelamento: la tua faccia sul campo, pronostico e prezzo.")}
       </div>
       <div>
-        ${ul(["Dopo lo svelamento <b>tutti vedono tutto</b>: facce sul campo, voti, punti e titoli come «Fuori dal coro» o «Naso da sommelier».", "Fino a 10 punti per pronostico, prezzo e vicinanza al gruppo; la <b>classifica del gioco</b> somma la stagione.", "Reazioni e <b>frecciatine</b> bonarie tra colleghi.", "A gioco spento i voti restano <b>anonimi</b> come sempre; il widget per i siti resta anonimo anche a gioco acceso."])}
+        ${ul(["Dopo lo svelamento <b>tutti vedono tutto</b>: facce sul campo, voti, punti e titoli come «Fuori dal coro» o «Naso da sommelier».", "Fino a 10 punti per pronostico, prezzo e vicinanza al gruppo; la <b>classifica del gioco</b> somma la stagione.", "Reazioni e <b>frecciatine</b> bonarie tra colleghi.", "La <b>scommessa della serata</b> (chi vince?), livelli, dieci traguardi, serie di pronostici e la classifica del mese.", "A gioco spento i voti restano <b>anonimi</b> come sempre; il widget per i siti resta anonimo anche a gioco acceso."])}
         ${fig("cerchie-gioco-svelato.png", 2, "Dopo lo svelamento: chi ha votato cosa, punti e titoli.")}
       </div>
     </div>

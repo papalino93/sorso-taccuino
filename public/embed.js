@@ -810,6 +810,7 @@
         return '<li><span class="pos">' + w.rank + '</span><span class="nm" dir="auto"><b>' + esc(wineTitle(w)) + '</b>' + (ties ? ' <span class="small muted">(' + esc(t("rankTie")) + ')</span>' : "") + '<br><span class="small muted">' + esc(plural(w.team.count, "voteSingle", "votePlural")) + '</span></span><span class="av">' + dec(w.team.avg) + '</span></li>';
       }).join("") + '</ol>';
     }
+    h += favHtml();
     h += '<h3 class="section">' + esc(t("wines")) + '</h3>';
     if (org && open && !(S.tasting && S.tasting.single)) h += S.form && S.form.kind === "wine" ? formHtml("wine") : '<p>' + btn("new-wine", t("addWine"), { disabled: readonly(), fk: "new-wine" }) + '</p>';
     if (S.loading && !S.wines.length) h += '<p class="muted" aria-busy="true">' + esc(t("loading")) + '</p>';
@@ -845,7 +846,22 @@
       lo_frutto: "poco", hi_frutto: "tanto", lo_legno: "niente", hi_legno: "tanto", lo_intensita: "lieve", hi_intensita: "potente", lo_persistenza: "corto", hi_persistenza: "lunghissimo",
       lo_dolcezza: "secco", hi_dolcezza: "dolce", lo_freschezza: "stanco", hi_freschezza: "vivace",
       e_game_off: "In questa cerchia il gioco non è attivo.", e_revealed: "Questo vino è già svelato: le mosse non si cambiano più.", e_invalid_move: "Metti la tua faccia sul campo, oppure fai un pronostico.",
-      e_invalid_price: "Prezzo non valido.", e_not_revealed: "Le reazioni si lasciano dopo lo svelamento."
+      e_invalid_price: "Prezzo non valido.", e_not_revealed: "Le reazioni si lasciano dopo lo svelamento.",
+      fav_title: "La scommessa della serata", fav_q: "Chi vince stasera? Scegli il vino che avrà la media più alta: se indovini, 10 punti.",
+      fav_secret: "Le scommesse restano segrete fino alla chiusura della serata.", fav_mine: "Hai scommesso su questo", fav_pick: "Punta su questo vino",
+      fav_who1: "1 persona ha scommesso", fav_whoN: "{n} persone hanno scommesso", fav_none: "Ancora nessuna scommessa",
+      fav_won: "Hai indovinato il vincitore: +10 punti! 🎯", fav_lost: "Questa volta no: il vincitore era un altro.", fav_winner: "Ha vinto", fav_who: "Ci avevano puntato:", fav_nobody: "Nessuno ci aveva puntato.",
+      fav_closed: "Serata chiusa: le scommesse sono chiuse.", fav_saved: "Scommessa salvata.", e_too_few: "Per scommettere servono almeno due vini.",
+      bd_season: "Stagione", bd_month: "Questo mese", bd_streak: "{n} pronostici centrati di fila", bd_rival: "Nemesi: {name}", bd_monthEmpty: "Questo mese ancora nessun punto: il primo vino svelato apre la gara.",
+      car_title: "La tua carriera", car_next: "{n} punti al livello {lv}", car_max: "Livello massimo: sei una leggenda!", car_best: "Record di serie: {n}",
+      ach_title: "I tuoi traguardi", ach_count: "{n} su {m}", ach_locked: "da sbloccare",
+      lv_0: "Apprendista", lv_1: "Assaggiatore", lv_2: "Cantiniere", lv_3: "Sommelier", lv_4: "Maestro", lv_5: "Leggenda",
+      a_primo: "Primo sorso", ad_primo: "Hai fatto la tua prima mossa.", a_cecchino: "Cecchino", ad_cecchino: "Un pronostico a mezzo punto dalla media.",
+      a_portafoglio: "Occhio al portafoglio", ad_portafoglio: "Un prezzo indovinato entro il 5%.", a_serie3: "In serie", ad_serie3: "Tre pronostici centrati di fila.",
+      a_favorito: "Fiuto del vincitore", ad_favorito: "Hai indovinato il vino che vince la serata.", a_tris: "Tris", ad_tris: "Almeno 7 punti in pronostico, prezzo e campo sullo stesso vino.",
+      a_diapason: "Diapason", ad_diapason: "Tre volte il più vicino al gruppo.", a_coro: "Voce fuori dal coro", ad_coro: "Tre volte il più lontano dal gruppo.",
+      a_veterano: "Veterano", ad_veterano: "Dieci vini giocati.", a_re: "Re della cerchia", ad_re: "Primo in classifica, con almeno tre vini giocati.",
+      g_youWon: "Il vino è tuo: primo in classifica! 🎉"
     },
     en: {
       g_title: "The game", g_secret: "Moves stay secret until the reveal", g_revealed: "Revealed",
@@ -870,12 +886,30 @@
       lo_frutto: "little", hi_frutto: "lots", lo_legno: "none", hi_legno: "lots", lo_intensita: "faint", hi_intensita: "powerful", lo_persistenza: "short", hi_persistenza: "endless",
       lo_dolcezza: "dry", hi_dolcezza: "sweet", lo_freschezza: "tired", hi_freschezza: "lively",
       e_game_off: "The game is not active in this circle.", e_revealed: "This wine has been revealed: moves can't change any more.", e_invalid_move: "Put your face on the field, or make a prediction.",
-      e_invalid_price: "Invalid price.", e_not_revealed: "Reactions open after the reveal."
+      e_invalid_price: "Invalid price.", e_not_revealed: "Reactions open after the reveal.",
+      fav_title: "Tonight's bet", fav_q: "Who wins tonight? Pick the wine that will get the highest average: guess right for 10 points.",
+      fav_secret: "Bets stay secret until the evening is closed.", fav_mine: "Your bet", fav_pick: "Bet on this wine",
+      fav_who1: "1 person has placed a bet", fav_whoN: "{n} people have placed a bet", fav_none: "No bets yet",
+      fav_won: "You picked the winner: +10 points! 🎯", fav_lost: "Not this time: another wine won.", fav_winner: "Winner", fav_who: "Bet on it:", fav_nobody: "Nobody bet on it.",
+      fav_closed: "Evening closed: bets are closed.", fav_saved: "Bet saved.", e_too_few: "You need at least two wines to bet.",
+      bd_season: "Season", bd_month: "This month", bd_streak: "{n} predictions on target in a row", bd_rival: "Nemesis: {name}", bd_monthEmpty: "No points this month yet: the first revealed wine starts the race.",
+      car_title: "Your career", car_next: "{n} points to {lv}", car_max: "Top level: you're a legend!", car_best: "Best streak: {n}",
+      ach_title: "Your achievements", ach_count: "{n} of {m}", ach_locked: "locked",
+      lv_0: "Apprentice", lv_1: "Taster", lv_2: "Cellar hand", lv_3: "Sommelier", lv_4: "Master", lv_5: "Legend",
+      a_primo: "First sip", ad_primo: "You made your first move.", a_cecchino: "Sharpshooter", ad_cecchino: "A prediction within half a point of the average.",
+      a_portafoglio: "Price wise", ad_portafoglio: "A price guessed within 5%.", a_serie3: "On a roll", ad_serie3: "Three predictions on target in a row.",
+      a_favorito: "Winner's nose", ad_favorito: "You picked the evening's winning wine.", a_tris: "Hat trick", ad_tris: "At least 7 points in prediction, price and field on the same wine.",
+      a_diapason: "Tuning fork", ad_diapason: "Closest to the group three times.", a_coro: "Odd one out", ad_coro: "Farthest from the group three times.",
+      a_veterano: "Veteran", ad_veterano: "Ten wines played.", a_re: "King of the circle", ad_re: "First in the ranking, with at least three wines played.",
+      g_youWon: "This wine is yours: first in the ranking! 🎉"
     }
   };
   Object.keys(TXT_GAME).forEach(function (l) { Object.keys(TXT_GAME[l]).forEach(function (k) { if (TXT[l][k] == null) TXT[l][k] = TXT_GAME[l][k]; }); });
 
   function gameOn() { return !!(S.circle && S.config && S.config.game); }
+  var LEVELS = [0, 40, 100, 200, 350, 600], LV_ICON = ["🍇", "🥂", "🍷", "🎓", "👑", "🏆"];
+  var ACH_ICON = { primo: "🍇", cecchino: "🎯", portafoglio: "💶", serie3: "🔥", favorito: "🔮", tris: "🎲", diapason: "🎼", coro: "📣", veterano: "🛡️", re: "👑" };
+  function levelOf(p) { var i = 0; while (i + 1 < LEVELS.length && p >= LEVELS[i + 1]) i++; return i; }
   var gameSeq = 0, lastGame = "";
   function loadGame(tid) {
     if (!gameOn() || !tid) { S.game = null; return Promise.resolve(); }
@@ -987,16 +1021,88 @@
 
   function boardHtml() {
     if (!gameOn()) return "";
-    var b = S.board;
+    var b = S.board, mode = S.boardMode === "month" ? "month" : "season";
     var h = '<section class="card g-board"><h3 class="section">🏆 ' + esc(t("g_board")) + '</h3><p class="small muted">' + esc(t("g_boardHint")) + '</p>';
     if (!b) return h + '<p class="muted" aria-busy="true">' + esc(t("loading")) + '</p></section>';
     var any = b.rows.some(function (r) { return r.pts.total > 0 || r.pts.played > 0; });
     if (!any) return h + '<p class="muted">' + esc(t("g_boardEmpty")) + '</p></section>';
     S.board.people = {}; b.rows.forEach(function (r) { S.board.people[r.who] = { name: r.name, pic: r.pic, me: r.me }; });
-    return h + '<ol class="toplist g-boardlist">' + b.rows.map(function (r, i) {
-      var nick = r.nick.map(function (n) { return '<span class="chip g-nick">' + esc(t("g_n_" + n)) + '</span>'; }).join("") + (r.twin ? '<span class="chip g-nick">' + esc(t("g_twin", { name: r.twin })) + '</span>' : "");
-      return '<li' + (r.me ? ' class="me"' : "") + '><span class="pos">' + (i + 1) + '</span>' + faceHtml(r.who) + '<span class="nm"><b dir="auto">' + esc(r.name) + (r.me ? " (" + esc(t("g_you")) + ")" : "") + '</b>' + (nick ? '<span class="g-nicks">' + nick + '</span>' : "") + '</span><span class="av">' + r.pts.total + '</span></li>';
-    }).join("") + '</ol></section>';
+    h += '<div class="modes g-bmodes" role="group" aria-label="' + esc(t("g_board")) + '">' + ["season", "month"].map(function (m) {
+      return '<button type="button" data-act="g-bmode" data-v="' + m + '" aria-pressed="' + (mode === m) + '"' + (mode === m ? ' class="on"' : "") + ' data-fk="gbm-' + m + '">' + esc(t(m === "month" ? "bd_month" : "bd_season")) + '</button>';
+    }).join("") + '</div>';
+    var rows = b.rows.slice();
+    if (mode === "month") rows = rows.filter(function (r) { return r.month > 0; }).sort(function (x, y) { return y.month - x.month || x.name.localeCompare(y.name); });
+    if (!rows.length) h += '<p class="muted">' + esc(t("bd_monthEmpty")) + '</p>';
+    else h += '<ol class="toplist g-boardlist">' + rows.map(function (r, i) {
+      var lv = levelOf(r.pts.total);
+      var chips = '<span class="chip g-lv">' + LV_ICON[lv] + " " + esc(t("lv_" + lv)) + '</span>' +
+        (r.streak && r.streak.cur >= 2 ? '<span class="chip g-streak" title="' + esc(t("bd_streak", { n: r.streak.cur })) + '">🔥 ' + r.streak.cur + '</span>' : "") +
+        r.nick.map(function (n) { return '<span class="chip g-nick">' + esc(t("g_n_" + n)) + '</span>'; }).join("") +
+        (r.twin ? '<span class="chip g-nick">' + esc(t("g_twin", { name: r.twin })) + '</span>' : "") +
+        (r.rival ? '<span class="chip g-nick g-rival">⚔️ ' + esc(t("bd_rival", { name: r.rival })) + '</span>' : "");
+      return '<li' + (r.me ? ' class="me"' : "") + '><span class="pos">' + (i + 1) + '</span>' + faceHtml(r.who) + '<span class="nm"><b dir="auto">' + esc(r.name) + (r.me ? " (" + esc(t("g_you")) + ")" : "") + '</b><span class="g-nicks">' + chips + '</span></span><span class="av">' + (mode === "month" ? r.month : r.pts.total) + '</span></li>';
+    }).join("") + '</ol>';
+    /* la mia carriera: livello, quanto manca al prossimo, i traguardi */
+    var me = b.rows.filter(function (r) { return r.me; })[0];
+    if (me) {
+      var lv = levelOf(me.pts.total), nx = LEVELS[lv + 1];
+      h += '<div class="g-career"><h4 class="grp">' + esc(t("car_title")) + '</h4><div class="g-lvbig"><span class="g-lvico" aria-hidden="true">' + LV_ICON[lv] + '</span><span><b>' + esc(t("lv_" + lv)) + '</b><span class="small muted">' +
+        esc(nx != null ? t("car_next", { n: nx - me.pts.total, lv: t("lv_" + (lv + 1)) }) : t("car_max")) + (me.streak && me.streak.best ? " · " + esc(t("car_best", { n: me.streak.best })) : "") + '</span></span></div>' +
+        (nx != null ? '<progress class="g-prog" max="' + (nx - LEVELS[lv]) + '" value="' + (me.pts.total - LEVELS[lv]) + '" aria-label="' + esc(t("car_next", { n: nx - me.pts.total, lv: t("lv_" + (lv + 1)) })) + '"></progress>' : "");
+      var all = b.ach || [], got = me.feats || [];
+      h += '<h4 class="grp">' + esc(t("ach_title")) + ' <span class="muted small">' + esc(t("ach_count", { n: got.length, m: all.length })) + '</span></h4><ul class="g-ach">' + all.map(function (k) {
+        var on = got.indexOf(k) > -1;
+        return '<li class="' + (on ? "on" : "off") + '"><span class="g-achico" aria-hidden="true">' + (on ? ACH_ICON[k] : "🔒") + '</span><b>' + esc(t("a_" + k)) + '</b><span>' + esc(t("ad_" + k)) + (on ? "" : '<span class="sr-only"> · ' + esc(t("ach_locked")) + '</span>') + '</span></li>';
+      }).join("") + '</ul></div>';
+    }
+    return h + '</section>';
+  }
+
+  /* la scommessa della serata: prima della chiusura si sceglie il vincitore, dopo si vede chi aveva indovinato */
+  function favHtml() {
+    if (!gameOn() || !S.game || !S.game.fav || !S.game.fav.eligible) return "";
+    var f = S.game.fav, wines = S.wines || [], h = '<section class="card g-fav"><h3 class="section">🔮 ' + esc(t("fav_title")) + '</h3>';
+    var nameOf = function (wid) { var w = wines.filter(function (x) { return x.id === wid; })[0]; return w ? (w.hidden ? t("blindLabel", { n: w.index }) : w.name) : "?"; };
+    if (f.open) {
+      h += '<p class="small">' + esc(t("fav_q")) + '</p><div class="g-favlist" role="group" aria-label="' + esc(t("fav_title")) + '">' + wines.map(function (w) {
+        var on = f.mine === w.id;
+        return '<button type="button" class="g-favb' + (on ? " on" : "") + '" data-act="g-fav" data-id="' + esc(w.id) + '" aria-pressed="' + on + '" data-fk="gfav-' + esc(w.id) + '"' + (readonly() ? " disabled" : "") + '><b dir="auto">' + esc(nameOf(w.id)) + '</b><span>' + esc(on ? t("fav_mine") : t("fav_pick")) + '</span></button>';
+      }).join("") + '</div>';
+      h += '<div class="g-who"><span class="small muted">' + esc(f.pickers.length ? (f.pickers.length === 1 ? t("fav_who1") : t("fav_whoN", { n: f.pickers.length })) : t("fav_none")) + '</span><span class="g-faces">' + f.pickers.map(function (k) { return '<span class="g-wf on">' + faceHtml(k) + '</span>'; }).join("") + '</span></div>';
+      h += '<p class="small muted">' + esc(t("fav_secret")) + '</p>';
+      if (S.saved === "fav") h += '<p class="saved-note">✓ ' + esc(t("fav_saved")) + '</p>';
+      return h + '</section>';
+    }
+    var res = f.results || [], mine = res.filter(function (r) { return S.game.people[r.who] && S.game.people[r.who].me; })[0];
+    if (mine) h += '<p class="g-favres' + (mine.ok ? " ok" : "") + '">' + esc(mine.ok ? t("fav_won") : t("fav_lost")) + '</p>';
+    (f.winners || []).forEach(function (wid) {
+      var who = res.filter(function (r) { return r.wine === wid; }).map(function (r) { return r.who; });
+      h += '<div class="g-favwin"><span class="small muted">' + esc(t("fav_winner")) + '</span><b dir="auto">🏆 ' + esc(nameOf(wid)) + '</b><span class="small">' + esc(who.length ? t("fav_who") : t("fav_nobody")) + '</span>' +
+        (who.length ? '<span class="g-faces">' + who.map(function (k) { return '<span class="g-wf on" title="' + esc(personName(k)) + '">' + faceHtml(k) + '</span>'; }).join("") + '</span>' : "") + '</div>';
+    });
+    return h + '</section>';
+  }
+  function gameFav(wid) {
+    var cur = S.game && S.game.fav && S.game.fav.mine;
+    return run("fav", function () {
+      return api({ op: "game.fav", tasting: S.tasting.id, wine: cur === wid ? "" : wid }).then(function () { S.saved = "fav"; announce(t("fav_saved")); focusAfter("gfav-" + wid); return loadGame(S.tasting.id); }, function (err) { announce(errText(err), true); });
+    });
+  }
+
+  /* coriandoli quando un vino si svela e sei il primo: solo una volta per vino, mai con «riduci animazioni» */
+  var confettiDone = {};
+  function confetti(anchor) {
+    var reduce = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (reduce || !anchor) return;
+    var box = document.createElement("div"); box.className = "g-confetti"; box.setAttribute("aria-hidden", "true");
+    for (var i = 0; i < 36; i++) {
+      var c = document.createElement("i"); c.className = "c" + (i % 8);
+      c.style.left = (5 + Math.random() * 90) + "%"; c.style.animationDelay = (Math.random() * 0.35) + "s"; c.style.animationDuration = (1.1 + Math.random() * 0.9) + "s";
+      c.style.setProperty("--dx", ((Math.random() - 0.5) * 140) + "px"); c.style.setProperty("--rot", (Math.random() * 720 - 360) + "deg");
+      box.appendChild(c);
+    }
+    anchor.appendChild(box);
+    setTimeout(function () { if (box.parentNode) box.parentNode.removeChild(box); }, 2600);
   }
 
   /* posizioni del campo, dopo ogni disegno; allo svelamento le facce partono dal centro e volano al loro posto */
@@ -1014,6 +1120,9 @@
       if (animate) {
         void f.offsetWidth;
         requestAnimationFrame(function () { f.querySelectorAll(".g-dot.fly").forEach(function (el) { el.style.left = Number(el.getAttribute("data-gx")) * 10 + "%"; el.style.top = (100 - Number(el.getAttribute("data-gy")) * 10) + "%"; }); });
+      }
+      if (animate && !confettiDone[wid] && gw.results && gw.results.length > 1 && S.game.people[gw.results[0].who] && S.game.people[gw.results[0].who].me) {
+        confettiDone[wid] = true; confetti(f.closest(".game")); announce(t("g_youWon"));
       }
       if (gw && gw.revealed) gSeen[wid] = true;
     });
@@ -1092,6 +1201,8 @@
     var b = e.target.closest && e.target.closest("[data-act]"); if (!b || b.disabled) return;
     var act = b.getAttribute("data-act"), id = b.getAttribute("data-id");
     if (act === "g-play") return gamePlay(id);
+    if (act === "g-fav") return gameFav(id);
+    if (act === "g-bmode") { S.boardMode = b.getAttribute("data-v"); focusAfter("gbm-" + S.boardMode); return render(); }
     if (act === "g-price") return gamePrice(id);
     if (act === "g-reveal") { S.gconfirm = id; focusAfter("greveal-" + id); return render(); }
     if (act === "g-reveal-no") { var w0 = S.gconfirm; S.gconfirm = null; focusAfter("greveal-" + w0); return render(); }
