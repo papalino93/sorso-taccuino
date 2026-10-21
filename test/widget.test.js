@@ -113,3 +113,54 @@ test("intestazioni: incorporabile ovunque, in cache, niente script esterni; colo
   assert.deepEqual([...o.show].sort(), ["events", "top", "totals"]);
   assert.equal((await call(widget, { method: "POST", url: "/widget?t=" + w.token, headers: {} })).statusCode, 405);
 });
+
+test("2.12: viste nuove: palato (regione, vitigno, fascia solo da 5 voti), striscia, sfida e campo senza nomi", async () => {
+  const cid = await scena("Team");
+  const { widget: w } = await ok(C, "anna", { op: "widget.create", circle: cid });
+  const t = (await ok(E, "anna", { op: "tasting.create", circle: cid, name: "Campioni" })).tasting;
+  const v1 = (await ok(E, "anna", { op: "wine.add", circle: cid, tasting: t.id, wine: { name: "Etna", producer: "Benanti", type: "Rosso", grape: "Nerello", region: "Sicilia" } })).wine;
+  assert.equal(v1.region, "Sicilia");
+  for (const [who, n] of [["anna", 70], ["carla", 90], ["bea", 80]]) await ok(E, who, { op: "vote", circle: cid, tasting: t.id, wine: v1.id, ...smart(n) });
+  await ok(E, "anna", { op: "tasting.status", circle: cid, tasting: t.id, status: "closed" });
+  let r = await W("t=" + w.token + "&view=palato");
+  assert.equal(r.statusCode, 200);
+  assert.match(r.body, /Il palato del team/); assert.match(r.body, /Rossi/); assert.match(r.body, /Sicilia/); assert.match(r.body, /Nerello/); assert.match(r.body, /I più votati/);
+  assert.doesNotMatch(r.body, /Il più divisivo<\/span>/, "con tre voti niente fascia: direbbe chi ha dato quale voto");
+  assert.match(r.body, /dai vini con almeno 5 voti/);
+  r = await W("t=" + w.token + "&view=striscia");
+  assert.match(r.body, /class="strip"/); assert.match(r.body, /Etna/);
+  r = await W("t=" + w.token + "&view=sfida");
+  assert.match(r.body, /Il gioco non è attivo in questa cerchia/);
+  r = await W("t=" + w.token + "&view=campo");
+  assert.match(r.body, /Il gioco non è attivo/);
+  for (const name of ["Anna Rossi", "Carla Rossi", "Bea Rossi"]) assert.doesNotMatch((await W("t=" + w.token + "&view=palato")).body, new RegExp(name));
+});
+
+test("2.12: il podio con i nomi solo se il gioco è acceso E un amministratore lo permette; mai da un parametro", async () => {
+  const cid = await scena("Team");
+  const { widget: w } = await ok(C, "anna", { op: "widget.create", circle: cid });
+  assert.equal((await C("carla", { op: "widget.names", circle: cid, on: true })).statusCode, 403, "il Membro non può");
+  let r = await W("t=" + w.token + "&view=podio&names=1");
+  assert.match(r.body, /Il podio con i nomi non è attivo/);
+  await ok(C, "anna", { op: "widget.names", circle: cid, on: true });
+  r = await W("t=" + w.token + "&view=podio", "5.5.5.6");
+  assert.match(r.body, /non è attivo/, "senza gioco i nomi restano spenti");
+  await ok(C, "anna", { op: "game.set", circle: cid, on: true });
+  const t = (await ok(E, "anna", { op: "tasting.create", circle: cid, name: "Gioco" })).tasting;
+  const v = (await ok(E, "anna", { op: "wine.add", circle: cid, tasting: t.id, wine: { name: "Etna" } })).wine;
+  for (const [who, x, n] of [["anna", 2, 70], ["carla", 8, 90], ["bea", 5, 80]]) {
+    await ok(E, who, { op: "game.play", circle: cid, tasting: t.id, wine: v.id, x, y: x, p: 80 });
+    await ok(E, who, { op: "vote", circle: cid, tasting: t.id, wine: v.id, ...smart(n) });
+  }
+  r = await W("t=" + w.token + "&view=podio", "5.5.5.7");
+  assert.match(r.body, /Carla Rossi/); assert.match(r.body, /Anna Rossi/);
+  r = await W("t=" + w.token + "&view=campo", "5.5.5.8");
+  assert.match(r.body.slice(r.body.indexOf("<main")), /class="d l/); assert.match(r.body, />CR</, "con il permesso: le iniziali sul campo");
+  r = await W("t=" + w.token + "&view=sfida", "5.5.5.9");
+  assert.match(r.body, /Mosse/); assert.doesNotMatch(r.body, /Carla Rossi/, "la sfida resta senza nomi");
+  await ok(C, "anna", { op: "widget.names", circle: cid, on: false });
+  await redis.del("gq:" + cid);
+  r = await W("t=" + w.token + "&view=campo", "5.5.5.10");
+  assert.doesNotMatch(r.body, />CR</, "spenti i nomi: punti anonimi");
+  assert.match((await W("t=" + w.token + "&view=podio", "5.5.5.11")).body, /non è attivo/);
+});

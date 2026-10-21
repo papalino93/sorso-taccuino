@@ -24,7 +24,7 @@ const Scoring = require("../public/js/scoring.js");
    Chi gioca si riconosce da un'impronta per cerchia (mai l'account Google). */
 
 const PID = Circles.CIRCLE_PARTNER.id;
-const K = { gp: (t, w) => "gp:" + t + ":" + w, gx: (t, w) => "gx:" + t + ":" + w, gw: t => "gw:" + t, gb: c => "gb:" + c };
+const K = { gp: (t, w) => "gp:" + t + ":" + w, gx: (t, w) => "gx:" + t + ":" + w, gw: t => "gw:" + t, gb: c => "gb:" + c, gq: c => "gq:" + c };
 const AXES = [["corpo", "acidita"], ["tannino", "morbidezza"], ["frutto", "legno"], ["intensita", "persistenza"], ["dolcezza", "freschezza"]];
 const EMOJI = ["🍷", "😂", "🙈", "🧐", "🔥"];
 const PHRASES = 10;                      // f1…f10: i testi sono nell'interfaccia (italiano e inglese)
@@ -255,9 +255,85 @@ async function board(redis, partner, ctx) {
     });
     if (best && bd <= 3) twins[a] = best;
   });
-  const rows = Object.keys(ppl).map(k => ({ who: k, name: ppl[k].name, pic: ppl[k].pic, me: ppl[k].me, pts: base.pts[k] || { total: 0, pron: 0, price: 0, field: 0, played: 0 }, nick: nick[k] || [], twin: twins[k] && ppl[twins[k]] ? ppl[twins[k]].name : "" }))
+  const rows = Object.keys(ppl).map(k => ({ who: k, name: ppl[k].name, pic: ppl[k].pic, me: ppl[k].me, pts: base.pts[k] || { total: 0, pron: 0, price: 0, field: 0, played: 0 }, nick: nick[k] || [], wins: (base.wins || {})[k] || {}, twin: twins[k] && ppl[twins[k]] ? ppl[twins[k]].name : "" }))
     .sort((a, b) => b.pts.total - a.pts.total || a.name.localeCompare(b.name, "it"));
   return { rows };
+}
+
+/* per i widget dei siti (api/widget.js): il gioco della cerchia in numeri, senza nomi; la classifica con i
+   nomi solo se Proprietario o amministratori l'hanno accesa per il widget (names). In cache due minuti. */
+async function widgetStats(redis, cid, names) {
+  const cached = parse(await redis.get(K.gq(cid)));
+  let base = cached;
+  if (!base) {
+    const ctx = { team: cid, uid: "", role: "member", game: true };
+    const partner = { id: PID };
+    const tl = Object.values(Team.asObject(await redis.hgetall(Team.K.tl(PID, cid)))).map(parse).filter(Boolean).sort((a, b) => b.createdAt - a.createdAt).slice(0, BOARD_TASTINGS);
+    let moves = 0, wines = 0, pron = 0, pronHit = 0, priceN = 0, priceErr = 0, biasN = 0, bias = 0;
+    const comp = AXES.map(() => ({ x: 0, y: 0, n: 0 }));
+    let split = null, tight = null, surprise = null, last = null;
+    for (const t of tl) {
+      const st = await state(redis, partner, ctx, { tasting: t.id });
+      const wl = Object.values(Team.asObject(await redis.hgetall(Team.K.wn(PID, t.id)))).map(parse).filter(Boolean).sort((a, b) => b.createdAt - a.createdAt);
+      const hide = !!t.blind && !t.revealed;
+      wl.forEach(wn => {
+        const w = st.wines[wn.id];
+        if (!w || !w.revealed || !w.results) return;
+        const res = w.results.filter(r => r.x != null || r.p != null || r.e != null);
+        if (!res.length) return;
+        const label = { name: hide ? "" : wn.name || "", producer: hide ? "" : wn.producer || "", tastingName: t.name, at: t.createdAt };
+        wines++; moves += res.length;
+        const guesses = [];
+        res.forEach(r => {
+          if (r.p != null && w.avg != null) { pron++; if (Math.abs(r.p - w.avg) <= 2) pronHit++; biasN++; bias += r.p - w.avg; }
+          if (r.e != null && w.price) { priceN++; priceErr += Math.min(1, Math.abs(r.e - w.price) / w.price); guesses.push(r.e); }
+        });
+        /* il prezzo che vi ha spiazzato: la media delle ipotesi più lontana dal prezzo vero (almeno due ipotesi) */
+        if (guesses.length >= 2) {
+          const g = guesses.reduce((a, b) => a + b, 0) / guesses.length, gap = Math.abs(g - w.price) / w.price;
+          if (gap >= 0.25 && (!surprise || gap > surprise.gap)) surprise = Object.assign({ guess: r0(g), price: w.price, gap: r1(gap), n: guesses.length }, label);
+        }
+        if (w.center) { const c = comp[w.axes]; c.x += w.center.x; c.y += w.center.y; c.n++; }
+        const pos = res.filter(r => r.x != null);
+        if (pos.length >= 3 && w.center) {
+          const d = pos.reduce((a, r) => a + Math.hypot(r.x - w.center.x, r.y - w.center.y), 0) / pos.length;
+          const row = Object.assign({ spread: r1(d), players: pos.length, axes: w.axes }, label);
+          if (!split || d > split.spread) split = row;
+          if (!tight || d < tight.spread) tight = row;
+        }
+        /* il campo dell'ultimo vino svelato con almeno due facce (le serate sono in ordine dalla più recente) */
+        if (!last && pos.length >= 2) {
+          last = Object.assign({ axes: w.axes, avg: w.avg, center: w.center,
+            dots: pos.slice(0, 40).map(r => ({ who: r.who, x: r.x, y: r.y, initials: initials((st.people[r.who] || {}).name), vote: r.vote })) }, label);
+        }
+      });
+    }
+    base = { moves, wines, pron, pronHit, priceN, priceErr: priceN ? r1(100 * priceErr / priceN) : null, bias: biasN >= 3 ? r1(bias / biasN) : null,
+      compass: comp.map((c, i) => c.n ? { axes: i, x: r1(c.x / c.n), y: r1(c.y / c.n), wines: c.n } : null).filter(Boolean),
+      split, tight: tight && split && tight.spread < split.spread ? tight : null, surprise, last };
+    await redis.set(K.gq(cid), JSON.stringify(base), { ex: BOARD_TTL });
+  }
+  const out = Object.assign({}, base, { pronRate: base.pron ? r0(100 * base.pronHit / base.pron) : null });
+  /* senza il permesso dei nomi: le facce del campo restano punti anonimi */
+  if (out.last) out.last = Object.assign({}, out.last, { dots: out.last.dots.map(d => names ? { x: d.x, y: d.y, initials: d.initials } : { x: d.x, y: d.y }) });
+  if (names) {
+    const b = await board(redis, { id: PID }, { team: cid, uid: "", role: "member", game: true });
+    const rows = b.rows.filter(r => r.pts.played > 0);
+    out.board = rows.slice(0, 10).map(r => ({ name: r.name, initials: initials(r.name), total: r.pts.total, played: r.pts.played, nick: r.nick, twin: r.twin }));
+    /* i premi della stagione: a chi ha fatto più punti in ciascuna specialità (almeno 2 vini giocati) */
+    const award = (key, fn) => { let best = null; rows.forEach(r => { if (r.pts.played < 2) return; const v = fn(r); if (v > 0 && (!best || v > best.v)) best = { name: r.name, initials: initials(r.name), v }; }); return best ? { key, name: best.name, initials: best.initials, value: best.v } : null; };
+    out.awards = [
+      award("pron", r => r.pts.pron), award("price", r => r.pts.price), award("field", r => r.pts.field),
+      award("fuori", r => (r.wins || {}).fuori || 0), award("sintonia", r => (r.wins || {}).sintonia || 0), award("played", r => r.pts.played)
+    ].filter(Boolean);
+    const seen = new Set();
+    out.twins = rows.filter(r => r.twin).map(r => [r.name, r.twin].sort()).filter(p => { const k = p.join("|"); if (seen.has(k)) return false; seen.add(k); return true; }).slice(0, 3);
+  }
+  return out;
+}
+function initials(name) {
+  const p = String(name || "").trim().split(/\s+/).filter(Boolean);
+  return ((p[0] || "?")[0] + (p.length > 1 ? p[p.length - 1][0] : "")).toUpperCase();
 }
 
 /* «Cancella i miei voti»: anche le mosse del gioco e le reazioni date o ricevute in questa cerchia */
@@ -280,4 +356,4 @@ async function deleteUser(redis, cid, uid) {
 const OPS = { "game.state": state, "game.play": play, "game.react": react, "game.reveal": reveal, "game.price": setPrice, "game.board": board };
 const WRITES = new Set(["game.play", "game.react", "game.reveal", "game.price"]);
 
-module.exports = { OPS, WRITES, AXES, EMOJI, K, score, pk, deleteUser };
+module.exports = { OPS, WRITES, AXES, EMOJI, K, score, pk, deleteUser, widgetStats };

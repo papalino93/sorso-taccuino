@@ -685,6 +685,17 @@
   .wdg-check{display:flex;gap:8px;align-items:center;font-size:13.5px;margin:8px 0;color:var(--ink-2);}
   .wdg-check input{width:20px;height:20px;accent-color:var(--sel-bg);}
   .wdg-code{font:12px/1.4 ui-monospace,Menlo,Consolas,monospace;min-height:110px;}
+  .wdg-kinds{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:6px 0 10px;}
+  @media (max-width:620px){ .wdg-kinds{grid-template-columns:1fr 1fr;} }
+  .wdg-kind{position:relative;display:flex;flex-direction:column;gap:3px;padding:10px 12px;border:1px solid var(--line);border-radius:var(--r-md,12px);background:var(--card);cursor:pointer;min-height:44px;}
+  .wdg-kind input{position:absolute;opacity:0;pointer-events:none;}
+  .wdg-kind.on{border-color:var(--sel-bg);box-shadow:inset 0 0 0 1px var(--sel-bg);background:var(--accent-tint,var(--card));}
+  .wdg-kind:focus-within{outline:2px solid var(--focus,var(--sel-bg));outline-offset:2px;}
+  .wdg-k-ico{font-size:18px;line-height:1;}
+  .wdg-rows[hidden],.wdg-showbox[hidden],.wdg-names[hidden],.wdg-gamenote[hidden]{display:none !important;}
+  .wdg-kind b{font-size:13.5px;font-weight:700;color:var(--ink);}
+  .wdg-kind b em{font-style:normal;font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--accent-text);margin-left:4px;}
+  .wdg-kind > span:last-child{font-size:12px;color:var(--ink-3);line-height:1.35;}
   .wdg-prev{display:block;width:100%;max-width:640px;height:320px;border:1px dashed var(--line-strong);border-radius:12px;margin-top:6px;background:transparent;}
   .circ-frame{display:block;width:100%;height:420px;border:0;background:transparent;color-scheme:normal;}
   .circ-serate-head{margin-top:14px;margin-bottom:4px;}
@@ -2845,7 +2856,16 @@ const I18N = {
     "wdg.transparent":"Sfondo trasparente (prende quello del sito)", "wdg.accent":"Usa il mio colore d'accento", "wdg.code":"Codice da incollare nel sito",
     "wdg.copy":"Copia il codice", "wdg.open":"Apri il widget", "wdg.rotate":"Rinnova il link", "wdg.revoke":"Revoca", "wdg.preview":"Anteprima",
     "wdg.created":"Widget creato: copia il codice e incollalo nel sito.", "wdg.rotated":"Link rinnovato: il vecchio codice non funziona più, incolla quello nuovo.", "wdg.revoked":"Widget revocato: sui siti non si vede più (entro un paio di minuti).",
-    "wdg.copied":"Codice copiato.", "wdg.copyFailed":"Non riesco a copiare: seleziona il testo e copialo a mano.",
+    "wdg.copied":"Codice copiato.", "wdg.kind":"Che widget vuoi", "wdg.gameTag":"gioco",
+    "wdg.v.classifica":"Classifica", "wdg.vd.classifica":"I vini migliori, i numeri e le ultime serate.",
+    "wdg.v.palato":"Il palato del team", "wdg.vd.palato":"Cosa aprite, regioni e vitigni preferiti, il più divisivo e i più votati.",
+    "wdg.v.striscia":"Striscia", "wdg.vd.striscia":"Una riga sottile da mettere in cima a una pagina.",
+    "wdg.v.sfida":"La sfida", "wdg.vd.sfida":"Il gioco in numeri, senza nomi: pronostici, prezzi, la bussola del gruppo.",
+    "wdg.v.campo":"Il campo", "wdg.vd.campo":"Le facce dell'ultimo vino svelato sul piano cartesiano.",
+    "wdg.v.podio":"Podio e premi", "wdg.vd.podio":"La classifica del gioco con i nomi, i premi della stagione e i gemelli di palato.",
+    "wdg.needGame":"Questo widget usa il gioco: accendilo qui sopra, nella scheda «Il gioco».",
+    "wdg.names":"Mostra i nomi sul sito (podio, premi e iniziali sul campo)", "wdg.namesHint":"Spento, il podio non compare e il campo mostra punti anonimi. Acceso, chiunque veda il sito legge i nomi e i punti del gioco.",
+    "wdg.namesAsk":"Mostrare sul sito i nomi e i punti del gioco? Chiunque visiti la pagina li vedrà. Avvisa prima le persone della cerchia.", "wdg.namesOn":"Nomi accesi nel widget.", "wdg.namesOff":"Nomi spenti nel widget.", "wdg.copyFailed":"Non riesco a copiare: seleziona il testo e copialo a mano.",
     "wdg.rotateAsk":"Rinnovare il link? Il codice già incollato nei siti smetterà di funzionare.", "wdg.revokeAsk":"Revocare il widget? Sui siti non si vedrà più.",
     "circ.serate":"Serate e degustazioni", "circ.serateTitle":"Serate della cerchia {circle}",
     "circ.data":"I voti e i dati", "circ.dataHint":"I voti sono anonimi: nella cerchia si vedono solo medie e conteggi. Puoi cancellare i tuoi voti di questa cerchia; Proprietario e amministratori possono scaricare le medie di tutte le serate.",
@@ -3442,7 +3462,16 @@ const I18N = {
     "wdg.transparent":"Transparent background (takes the site's)", "wdg.accent":"Use my accent colour", "wdg.code":"Code to paste into the site",
     "wdg.copy":"Copy the code", "wdg.open":"Open the widget", "wdg.rotate":"Renew the link", "wdg.revoke":"Revoke", "wdg.preview":"Preview",
     "wdg.created":"Widget created: copy the code and paste it into the site.", "wdg.rotated":"Link renewed: the old code no longer works, paste the new one.", "wdg.revoked":"Widget revoked: it no longer shows on websites (within a couple of minutes).",
-    "wdg.copied":"Code copied.", "wdg.copyFailed":"I can't copy: select the text and copy it by hand.",
+    "wdg.copied":"Code copied.", "wdg.kind":"Which widget", "wdg.gameTag":"game",
+    "wdg.v.classifica":"Ranking", "wdg.vd.classifica":"Best wines, the numbers and the latest evenings.",
+    "wdg.v.palato":"The team's palate", "wdg.vd.palato":"What you open, favourite regions and grapes, the most divisive and the top rated.",
+    "wdg.v.striscia":"Strip", "wdg.vd.striscia":"A thin line to put at the top of a page.",
+    "wdg.v.sfida":"The challenge", "wdg.vd.sfida":"The game in numbers, no names: predictions, prices, the group's compass.",
+    "wdg.v.campo":"The field", "wdg.vd.campo":"The faces of the last revealed wine on the Cartesian plane.",
+    "wdg.v.podio":"Podium and awards", "wdg.vd.podio":"The game ranking with names, season awards and palate twins.",
+    "wdg.needGame":"This widget uses the game: turn it on above, in the «Game» card.",
+    "wdg.names":"Show names on the site (podium, awards and initials on the field)", "wdg.namesHint":"Off, the podium doesn't show and the field shows anonymous dots. On, anyone seeing the site reads the game's names and points.",
+    "wdg.namesAsk":"Show the game's names and points on the site? Anyone visiting the page will see them. Let the circle's members know first.", "wdg.namesOn":"Names on in the widget.", "wdg.namesOff":"Names off in the widget.", "wdg.copyFailed":"I can't copy: select the text and copy it by hand.",
     "wdg.rotateAsk":"Renew the link? The code already pasted into websites will stop working.", "wdg.revokeAsk":"Revoke the widget? It will no longer show on websites.",
     "circ.serate":"Evenings and tastings", "circ.serateTitle":"Evenings of the circle {circle}",
     "circ.data":"Votes and data", "circ.dataHint":"Votes are anonymous: the circle only sees averages and counts. You can delete your votes in this circle; the Owner and admins can download the averages of every evening.",
@@ -7282,18 +7311,20 @@ function circDetailHTML(){
   return h;
 }
 /* Widget per un sito: link di sola lettura, colori e lingua a scelta, codice da incollare */
+const WDG_VIEWS = [["classifica","🏆",false],["palato","👅",false],["striscia","➖",false],["sfida","🎯",true],["campo","🗺️",true],["podio","🥇",true]];
 function circWidgetOpts(){
-  if(!CIRC.wopt) CIRC.wopt = {lang:S.lang === "en" ? "en" : "it", theme:"auto", transparent:false, accent:true, rows:"5", top:true, events:true, totals:true};
+  if(!CIRC.wopt) CIRC.wopt = {view:"classifica", lang:S.lang === "en" ? "en" : "it", theme:"auto", transparent:false, accent:true, rows:"5", top:true, events:true, totals:true};
   return CIRC.wopt;
 }
 function circWidgetUrl(token){
   const o = circWidgetOpts(), q = new URLSearchParams({t:token});
+  if(o.view !== "classifica") q.set("view", o.view);
   if(o.lang === "en") q.set("lang", "en");
   if(o.theme !== "auto") q.set("theme", o.theme);
   if(o.transparent) q.set("bg", "none");
   if(o.rows !== "5") q.set("rows", o.rows);
   const show = ["top","events","totals"].filter(k => o[k]);
-  if(show.length && show.length < 3) q.set("show", show.join(","));
+  if(o.view === "classifica" && show.length && show.length < 3) q.set("show", show.join(","));
   const acc = (S.look && S.look.accent) || "";
   if(o.accent && /^#[0-9a-f]{6}$/i.test(acc)) q.set("accent", acc.slice(1).toLowerCase());
   return location.origin + "/widget?" + q.toString();
@@ -7309,12 +7340,18 @@ function circWidgetHTML(d){
     '<p class="note-line">'+esc(t("wdg.hint"))+'</p>';
   if(!w) return h + '<div class="backup-actions"><button type="button" class="pill-solid" data-circ="wdg-create">'+esc(t("wdg.create"))+'</button></div></div>';
   const sel = (id, cur, opts) => '<span class="sel-wrap"><select class="sel" id="'+id+'" data-wopt="'+id+'">'+opts.map(x => '<option value="'+x[0]+'"'+(cur === x[0] ? " selected" : "")+'>'+esc(x[1])+'</option>').join("")+'</select></span>';
+  const game = !!(d.circle && d.circle.game);
+  h += '<p class="fld-lab wdg-show-lab">'+esc(t("wdg.kind"))+'</p><div class="wdg-kinds" role="radiogroup" aria-label="'+esc(t("wdg.kind"))+'">'+
+    WDG_VIEWS.map(v => '<label class="wdg-kind'+(o.view === v[0] ? " on" : "")+'"><input type="radio" name="wdgView" value="'+v[0]+'" data-wopt="wdgView"'+(o.view === v[0] ? " checked" : "")+'>'+
+      '<span class="wdg-k-ico" aria-hidden="true">'+v[1]+'</span><b>'+esc(t("wdg.v."+v[0]))+(v[2] ? ' <em>'+esc(t("wdg.gameTag"))+'</em>' : "")+'</b><span>'+esc(t("wdg.vd."+v[0]))+'</span></label>').join("")+'</div>'+
+    '<p class="note-line wdg-gamenote"'+((["sfida","campo","podio"].indexOf(o.view) >= 0 && !game) ? "" : " hidden")+'>'+esc(t("wdg.needGame"))+'</p>'+
+    '<div class="wdg-names"'+(o.view === "podio" ? "" : " hidden")+'><label class="wdg-check"><input type="checkbox" id="wdgNames" data-circ-chk="wdg-names"'+(w.names ? " checked" : "")+(game ? "" : " disabled")+'> '+esc(t("wdg.names"))+'</label><p class="note-line">'+esc(t("wdg.namesHint"))+'</p></div>';
   h += '<div class="wdg-opts">'+
     '<label class="fld"><span class="fld-lab">'+esc(t("wdg.lang"))+'</span>'+sel("wdgLang", o.lang, [["it","Italiano"],["en","English"]])+'</label>'+
     '<label class="fld"><span class="fld-lab">'+esc(t("wdg.theme"))+'</span>'+sel("wdgTheme", o.theme, [["auto",t("wdg.th.auto")],["light",t("wdg.th.light")],["dark",t("wdg.th.dark")]])+'</label>'+
-    '<label class="fld"><span class="fld-lab">'+esc(t("wdg.rows"))+'</span>'+sel("wdgRows", o.rows, [["3","3"],["5","5"],["10","10"]])+'</label></div>'+
-    '<p class="fld-lab wdg-show-lab">'+esc(t("wdg.show"))+'</p><div class="wdg-show">'+
-    ["totals","top","events"].map(k => '<label class="wdg-check"><input type="checkbox" data-wopt="wdgShow_'+k+'"'+(o[k] ? " checked" : "")+'> '+esc(t("wdg.s."+k))+'</label>').join("")+'</div>'+
+    '<label class="fld wdg-rows"'+(["classifica","palato","podio"].indexOf(o.view) >= 0 ? "" : " hidden")+'><span class="fld-lab">'+esc(t("wdg.rows"))+'</span>'+sel("wdgRows", o.rows, [["3","3"],["5","5"],["10","10"]])+'</label></div>'+
+    '<div class="wdg-showbox"'+(o.view === "classifica" ? "" : " hidden")+'><p class="fld-lab wdg-show-lab">'+esc(t("wdg.show"))+'</p><div class="wdg-show">'+
+    ["totals","top","events"].map(k => '<label class="wdg-check"><input type="checkbox" data-wopt="wdgShow_'+k+'"'+(o[k] ? " checked" : "")+'> '+esc(t("wdg.s."+k))+'</label>').join("")+'</div></div>'+
     '<label class="wdg-check"><input type="checkbox" id="wdgTransparent" data-wopt="wdgTransparent"'+(o.transparent ? " checked" : "")+'> '+esc(t("wdg.transparent"))+'</label>'+
     '<label class="wdg-check"><input type="checkbox" id="wdgAccent" data-wopt="wdgAccent"'+(o.accent ? " checked" : "")+'> '+esc(t("wdg.accent"))+'</label>'+
     '<label class="fld"><span class="fld-lab">'+esc(t("wdg.code"))+'</span><textarea class="ta wdg-code" id="wdgCode" readonly rows="5">'+esc(circWidgetCode(w.token, d.circle.name))+'</textarea></label>'+
@@ -7332,12 +7369,31 @@ document.addEventListener("change", e => {
   if(k === "wdgLang") o.lang = e.target.value; if(k === "wdgTheme") o.theme = e.target.value;
   if(k === "wdgTransparent") o.transparent = e.target.checked; if(k === "wdgAccent") o.accent = e.target.checked;
   if(k === "wdgRows") o.rows = e.target.value;
+  if(k === "wdgView"){
+    o.view = e.target.value;
+    document.querySelectorAll(".wdg-kind").forEach(l => l.classList.toggle("on", l.querySelector("input").checked));
+    const game = !!(CIRC.detail.circle && CIRC.detail.circle.game);
+    const gn = document.querySelector(".wdg-gamenote"); if(gn) gn.hidden = !(["sfida","campo","podio"].indexOf(o.view) >= 0 && !game);
+    const nm = document.querySelector(".wdg-names"); if(nm) nm.hidden = o.view !== "podio";
+    const sb = document.querySelector(".wdg-showbox"); if(sb) sb.hidden = o.view !== "classifica";
+    const rw = document.querySelector(".wdg-rows"); if(rw) rw.hidden = ["classifica","palato","podio"].indexOf(o.view) < 0;
+  }
   if(k.indexOf("wdgShow_") === 0){
     const key = k.slice(8); o[key] = e.target.checked;
     if(!o.top && !o.events && !o.totals){ o[key] = true; e.target.checked = true; }   // almeno un blocco
   }
   const w = CIRC.detail.widget, url = circWidgetUrl(w.token);
   $("wdgCode").value = circWidgetCode(w.token, CIRC.detail.circle.name); $("wdgOpen").href = url; $("wdgPreview").src = url;
+});
+document.addEventListener("change", async e => {
+  if(!e.target || e.target.dataset.circChk !== "wdg-names" || !CIRC.detail || !CIRC.detail.widget) return;
+  const on = e.target.checked;
+  if(on && !confirm(t("wdg.namesAsk"))){ e.target.checked = false; return; }
+  try{
+    const r = await circApi({op:"widget.names", circle:CIRC.detail.circle.id, on});
+    CIRC.detail.widget = r.widget; circSay(on ? "wdg.namesOn" : "wdg.namesOff", null, false);
+  }catch(err){ circSayErr(err); }
+  renderCircles();
 });
 window.addEventListener("message", e => {
   const f = $("wdgPreview");

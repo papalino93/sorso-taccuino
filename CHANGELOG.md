@@ -3,6 +3,17 @@
 La versione e la data dell'ultimo aggiornamento sono mostrate in fondo all'app e dello spazio di team
 (fonte: `public/js/version.js`, da tenere uguale a `package.json`).
 
+## 2.12.0 — 21 ottobre 2026
+- **Sei widget per i siti** (cerchia → Widget per un sito → «Che widget vuoi»):
+  - **Classifica**: come prima.
+  - **Il palato del team**: cosa aprite (rossi, bianchi, bollicine…), regioni e vitigni preferiti, il vino più divisivo e quello su cui siete tutti d'accordo (con la fascia dal voto più basso al più alto, solo per i vini con almeno 5 voti), e i più votati.
+  - **Striscia**: una riga sottile da mettere in cima a una pagina.
+  - **La sfida** (gioco, senza nomi): mosse, pronostici centrati, errore medio sul prezzo, la bussola del gruppo (dove mettete in media le facce, asse per asse), il termometro dei pronostici, il prezzo che vi ha spiazzato, il vino che vi ha diviso e quello su cui eravate tutti nello stesso punto.
+  - **Il campo** (gioco): le facce dell'ultimo vino svelato sul piano cartesiano, con il centro del gruppo.
+  - **Podio e premi** (gioco, con i nomi): podio, soprannomi, premi della stagione (Re del pronostico, Naso per i prezzi, Bussola d'oro, Fuori dal coro, Sempre in sintonia, Instancabile) e gemelli di palato.
+- **I nomi sul sito solo se lo decidete voi**: il podio e le iniziali sul campo compaiono solo con il gioco acceso e l'interruttore «Mostra i nomi sul sito», che possono toccare il Proprietario e gli amministratori. Spento, il podio non c'è e il campo mostra punti anonimi.
+- Nei vini delle serate c'è anche la **regione** (facoltativa), per il palato del team.
+
 ## 2.11.0 — 21 ottobre 2026
 - **Sorso diventa Taste.** Il nuovo nome compare ovunque si veda: app, accesso, titolo nel browser e sul telefono, serate delle cerchie, spazio di team, widget, mail degli inviti e guide PDF. Il logo è la scritta **«taste» in minuscolo**, con la **a** tonda che sorride (lo stesso sorriso del vecchio logo); l'icona dell'app resta il cerchio che sorride. Il sottotitolo segue la lingua: «taccuino di degustazione» / «tasting notebook».
 - Non cambia niente di tecnico: stesso indirizzo, stessi dati salvati, stessi codici dei widget già incollati. Chi aveva lasciato il nome predefinito vede «taste»; chi aveva scelto un nome suo lo tiene.

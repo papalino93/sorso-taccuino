@@ -32,6 +32,7 @@ const MAX_TEAMS = 2000;
 const MAX_WINES = 100;
 const MIN_VOTES_API = 2;     // sotto questa soglia l'API non dà la media (sarebbe il voto di una persona)
 const STATUSES = ["open", "closed"];
+const SPREAD_MIN = 5;                 // la fascia dei voti di un vino si mostra solo da 5 voti in su
 const WINE_TYPES = ["Rosso", "Bianco", "Rosato", "Spumante", "Passito"];
 const STATS_TTL = 120;        // secondi: le statistiche del team si ricalcolano al massimo ogni due minuti
 const STATS_WINDOW = 30;      // le ultime degustazioni chiuse che entrano nelle statistiche
@@ -216,6 +217,7 @@ async function addWine(redis, pid, ctx, tid, body) {
   const type = body.type == null || body.type === "" ? "" : String(body.type);
   if (type && WINE_TYPES.indexOf(type) < 0) throw bad("invalid_type", "Tipologia non valida: " + WINE_TYPES.join(", ") + ".");
   const grape = cleanText(body.grape, 40);
+  const region = cleanText(body.region, 40);
   const campo = "w:" + t.id;
   const n = await redis.hincrby(K.cn(pid), campo, 1);
   if (n > MAX_WINES) {
@@ -225,6 +227,7 @@ async function addWine(redis, pid, ctx, tid, body) {
   const w = { id: rid(), producer, name, vintage, createdAt: Date.now() };
   if (type) w.type = type;
   if (grape) w.grape = grape;
+  if (region) w.region = region;
   try { await redis.hset(K.wn(pid, t.id), { [w.id]: JSON.stringify(w) }); }
   catch (e) { await redis.hincrby(K.cn(pid), campo, -1).catch(() => {}); throw e; }
   return w;
@@ -498,7 +501,7 @@ async function getState(redis, partner, ctx, tid) {
     const count = Math.max(0, Number(cts[w.id]) || 0), sum = Number(sms[w.id]) || 0;
     const out = hide
       ? { id: w.id, index: i + 1, producer: "", name: "", vintage: "", type: "", grape: "" }
-      : { id: w.id, index: i + 1, producer: w.producer, name: w.name, vintage: w.vintage, type: w.type || "", grape: w.grape || "" };
+      : { id: w.id, index: i + 1, producer: w.producer, name: w.name, vintage: w.vintage, type: w.type || "", grape: w.grape || "", region: w.region || "" };
     out.mine = m ? { score: m.s, mode: m.m, data: m.d, note: m.n } : null;
     /* la media si vede dopo aver votato; a degustazione chiusa la vedono tutti, ma solo dal secondo voto
        (con un voto solo coinciderebbe con quello di una persona). L'organizzatore vede sempre
@@ -548,7 +551,7 @@ async function getNotebook(redis, partner, ctx) {
         rows.push({
           tasting: { id: t.id, name: t.name, createdAt: t.createdAt, status: t.status, single: !!t.single, blind: !!t.blind },
           wine: hide ? { id: w.id, index: j + 1, hidden: true, name: "", producer: "", vintage: "", type: "", grape: "" }
-                     : { id: w.id, index: j + 1, hidden: false, name: w.name, producer: w.producer, vintage: w.vintage, type: w.type || "", grape: w.grape || "" },
+                     : { id: w.id, index: j + 1, hidden: false, name: w.name, producer: w.producer, vintage: w.vintage, type: w.type || "", grape: w.grape || "", region: w.region || "" },
           mine: m && Number.isFinite(m.s) ? m.s : null, team, count: team != null ? count : null, closed: chiuso
         });
       });
@@ -787,7 +790,7 @@ async function computeTeamStats(redis, pid, team) {
   })() : [];
   let wineN = 0, voteN = 0, sumAll = 0, cntAll = 0;
   const dist = {}; BUCKETS.forEach(b => { dist[b[0]] = 0; });
-  const rated = [], types = Object.create(null), grapes = Object.create(null), events = [], wm = {}, tids = [];
+  const rated = [], types = Object.create(null), grapes = Object.create(null), regions = Object.create(null), events = [], wm = {}, tids = [], wide = [];
   win.forEach((t, i) => {
     tids.push(t.id);
     const hide = !!t.blind && !t.revealed;
@@ -811,6 +814,11 @@ async function computeTeamStats(redis, pid, team) {
       if (w.type && !hide) { const e = types[w.type] || (types[w.type] = { sum: 0, count: 0, wines: 0 }); e.sum += sum; e.count += count; e.wines++; }
       const gk = !hide && w.grape ? String(w.grape).trim().toLowerCase() : "";
       if (gk) { const e = grapes[gk] || (grapes[gk] = { name: String(w.grape).trim(), sum: 0, count: 0, wines: 0 }); e.sum += sum; e.count += count; e.wines++; }
+      const rk = !hide && w.region ? String(w.region).trim().toLowerCase() : "";
+      if (rk) { const e = regions[rk] || (regions[rk] = { name: String(w.region).trim(), sum: 0, count: 0, wines: 0 }); e.sum += sum; e.count += count; e.wines++; }
+      /* la fascia dei voti (dal più basso al più alto) solo con almeno SPREAD_MIN voti: in un gruppo piccolo
+         il minimo e il massimo direbbero chi ha dato quale voto */
+      if (!hide && count >= SPREAD_MIN && wide.length < 60) wide.push({ row, tid: t.id, wid: w.id });
     });
     events.push({
       id: t.id, name: t.name, createdAt: t.createdAt, blind: !!t.blind, revealed: !!t.revealed, wines: wines.length, votes: tVotes,
@@ -819,8 +827,25 @@ async function computeTeamStats(redis, pid, team) {
     });
   });
   rated.sort((a, b) => b.avg - a.avg || b.votes - a.votes);
+  const spreads = [];
+  if (wide.length) {
+    const p1 = redis.pipeline(); wide.forEach(x => p1.smembers(K.vs(pid, x.tid, x.wid)));
+    const voters = await p1.exec();
+    const p2 = redis.pipeline(); let any = false;
+    wide.forEach((x, i) => { const us = (voters[i] || []).map(String).slice(0, 200); x.us = us; if (us.length) { any = true; p2.mget(...us.map(u => K.vt(pid, x.tid, x.wid, u))); } });
+    const vals = any ? await p2.exec() : [];
+    let j = 0;
+    wide.forEach(x => {
+      if (!x.us.length) return;
+      const sc = (vals[j++] || []).map(v => { const o = parse(v); return o && Number.isFinite(o.s) ? o.s : null; }).filter(v => v != null);
+      if (sc.length < SPREAD_MIN) return;
+      const r = x.row;
+      spreads.push({ name: r.name, producer: r.producer, vintage: r.vintage, tastingName: r.tastingName, avg: r.avg, votes: sc.length, min: Math.min(...sc), max: Math.max(...sc) });
+    });
+  }
+  spreads.sort((a, b) => (b.max - b.min) - (a.max - a.min) || b.votes - a.votes);
   return {
-    v: 2, at: Date.now(),
+    v: 3, at: Date.now(),
     window: { tastings: win.length, closedTotal: closed.length, open },
     totals: { tastings: closed.length + open, open, closed: closed.length, wines: wineN, votes: voteN },
     average: cntAll ? round1(sumAll / cntAll) : null,
@@ -828,6 +853,9 @@ async function computeTeamStats(redis, pid, team) {
     top: rated.slice(0, 5),
     byType: Object.keys(types).map(k => ({ type: k, wines: types[k].wines, average: round1(types[k].sum / types[k].count) })).sort((a, b) => b.average - a.average),
     byGrape: Object.keys(grapes).map(k => ({ grape: grapes[k].name, wines: grapes[k].wines, average: round1(grapes[k].sum / grapes[k].count) })).sort((a, b) => b.average - a.average || b.wines - a.wines).slice(0, 12),
+    byRegion: Object.keys(regions).map(k => ({ region: regions[k].name, wines: regions[k].wines, average: round1(regions[k].sum / regions[k].count) })).sort((a, b) => b.average - a.average || b.wines - a.wines).slice(0, 12),
+    divisive: spreads.length && spreads[0].max - spreads[0].min >= 8 ? spreads[0] : null,
+    agreed: spreads.length ? spreads.slice().sort((a, b) => (a.max - a.min) - (b.max - b.min) || b.votes - a.votes)[0] : null,
     events, tids, wm
   };
 }
@@ -836,13 +864,13 @@ const wn_ok = wm => Object.keys(wm).length < 1500;       // tetto di sicurezza s
 async function teamStats(redis, pid, team) {
   const raw = await redis.get(K.st(pid, team));
   const hit = raw ? parse(raw) : null;
-  if (hit && hit.v === 2) return hit;
+  if (hit && hit.v === 3) return hit;
   const st = await computeTeamStats(redis, pid, team);
   await redis.set(K.st(pid, team), JSON.stringify(st), { ex: STATS_TTL }).catch(() => {});
   return st;
 }
 
-const publicStats = st => ({ at: st.at, window: st.window, totals: st.totals, average: st.average, distribution: st.distribution, top: st.top, byType: st.byType, byGrape: st.byGrape || [], events: st.events });
+const publicStats = st => ({ at: st.at, window: st.window, totals: st.totals, average: st.average, distribution: st.distribution, top: st.top, byType: st.byType, byGrape: st.byGrape || [], byRegion: st.byRegion || [], divisive: st.divisive || null, agreed: st.agreed || null, events: st.events });
 
 /* statistiche personali: solo i voti di chi le chiede, nelle degustazioni chiuse delle statistiche del team */
 async function myStats(redis, pid, uid, st) {
