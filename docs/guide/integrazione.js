@@ -217,7 +217,7 @@ function build() {
       ["<code>bg</code> · <code>ink</code>", "colori <code>#rrggbb</code>", "Sfondo e testo."],
       ["<code>font</code>", "sistema, serif, arrotondato, mono", "Carattere (solo tra quelli di sistema)."],
       ["lingua · modalità", "it/en · rapido/completa/entrambe", "Lingua predefinita e modalità consentite."]], [2])}
-    ${call("<b>Leggibilità garantita.</b> Se i colori scelti non assicurano un testo leggibile (contrasto almeno 4,5 a 1), Sorso li corregge o torna a quelli predefiniti, anche sui riquadri e sui bordi dei campi. Imposta sempre insieme sfondo e testo. Se non imposti nulla, lo spazio usa i colori del vino: crema e bordeaux, e nero con ciliegia quando il dispositivo è in tema scuro.")}
+    ${call("<b>Leggibilità garantita.</b> Se i colori scelti non assicurano un testo leggibile (contrasto almeno 4,5 a 1), Sorso li corregge o torna a quelli predefiniti, anche sui riquadri e sui bordi dei campi. Imposta sempre insieme sfondo e testo. Se non imposti nulla, lo spazio usa i colori di Sorso: lavanda su perla, e lavanda su antracite quando il dispositivo è in tema scuro.")}
   `));
 
   /* 10 API */
