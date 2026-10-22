@@ -38,11 +38,11 @@ const TXT = {
     sBias: "Il termometro dei pronostici", sBiasUp: "Vi aspettate {n} punti in più di quelli che date davvero", sBiasDown: "Siete più generosi dei vostri pronostici: {n} punti in più", sBiasEven: "Pronostici in perfetta sintonia con i voti",
     sNose: "Il naso del gruppo", sWord: "La parola del team", sSurprise: "Il prezzo che vi ha spiazzato", sSurpriseTxt: "Pensavate {g} €, costava {p} €", cEyebrow: "Il campo dell'ultimo vino", cAvg: "Media del gruppo", cCenter: "il centro del gruppo", cEmpty: "Il campo compare dopo il primo vino svelato con almeno due facce.",
     cFoot: "Le facce del gioco sul campo", aTitle: "I premi della stagione", tTwins: "Gemelli di palato",
-    a_pron: "Re del pronostico", a_price: "Naso per i prezzi", a_field: "Bussola d'oro", a_fuori: "Fuori dal coro", a_sintonia: "Sempre in sintonia", a_played: "Instancabile",
-    u_pron: "{n} punti di pronostico", u_price: "{n} punti sui prezzi", u_field: "{n} punti sul campo", u_fuori: "{n} volte il più lontano", u_sintonia: "{n} volte il più vicino", u_played: "{n} vini giocati",
+    a_pron: "Re del pronostico", a_price: "Naso per i prezzi", a_field: "Bussola d'oro", a_fuori: "Fuori dal coro", a_sintonia: "Sempre in sintonia", a_played: "Instancabile", a_mese: "In testa alla sfida del mese", a_duel: "Pistolero",
+    u_pron: "{n} punti di pronostico", u_price: "{n} punti sui prezzi", u_field: "{n} punti sul campo", u_fuori: "{n} volte il più lontano", u_sintonia: "{n} volte il più vicino", u_played: "{n} vini giocati", u_mese: "{n} punti nella sfida del mese", u_duel: "{n} duelli vinti",
     ax_corpo: "Corpo", ax_acidita: "Acidità", ax_tannino: "Tannino", ax_morbidezza: "Morbidezza", ax_frutto: "Frutto", ax_legno: "Legno", ax_intensita: "Intensità", ax_persistenza: "Persistenza", ax_dolcezza: "Dolcezza", ax_freschezza: "Freschezza",
     lo_corpo: "esile", hi_corpo: "pieno", lo_acidita: "piatta", hi_acidita: "tagliente", lo_tannino: "vellutato", hi_tannino: "ruvido", lo_morbidezza: "secco", hi_morbidezza: "rotondo", lo_frutto: "poco", hi_frutto: "tanto", lo_legno: "niente", hi_legno: "tanto", lo_intensita: "lieve", hi_intensita: "potente", lo_persistenza: "corto", hi_persistenza: "lunghissimo", lo_dolcezza: "secco", hi_dolcezza: "dolce", lo_freschezza: "stanco", hi_freschezza: "vivace",
-    n_generoso: "Il generoso", n_spietato: "Lo spietato", n_bastian: "Il bastian contrario", n_naso: "Naso d'oro",
+    n_generoso: "Il generoso", n_spietato: "Lo spietato", n_bastian: "Il bastian contrario", n_naso: "Naso d'oro", n_fifone: "Il fifone 🐔", n_pistolero: "Il pistolero",
     ty_Rosso: "Rossi", ty_Bianco: "Bianchi", ty_Rosato: "Rosati", ty_Spumante: "Bollicine", ty_Passito: "Passiti"
   },
   en: {
@@ -64,11 +64,11 @@ const TXT = {
     sBias: "Prediction thermometer", sBiasUp: "You expect {n} points more than you actually give", sBiasDown: "You're more generous than your predictions: {n} points more", sBiasEven: "Predictions perfectly in tune with the scores",
     sNose: "The group's nose", sWord: "The team's word", sSurprise: "The price that caught you out", sSurpriseTxt: "You guessed €{g}, it cost €{p}", cEyebrow: "The last wine's field", cAvg: "Group average", cCenter: "the group's centre", cEmpty: "The field appears after the first wine revealed with at least two faces.",
     cFoot: "The game's faces on the field", aTitle: "Season awards", tTwins: "Palate twins",
-    a_pron: "Prediction king", a_price: "Nose for prices", a_field: "Golden compass", a_fuori: "Odd one out", a_sintonia: "Always in tune", a_played: "Tireless",
-    u_pron: "{n} prediction points", u_price: "{n} price points", u_field: "{n} field points", u_fuori: "farthest {n} times", u_sintonia: "closest {n} times", u_played: "{n} wines played",
+    a_pron: "Prediction king", a_price: "Nose for prices", a_field: "Golden compass", a_fuori: "Odd one out", a_sintonia: "Always in tune", a_played: "Tireless", a_mese: "Leading the monthly challenge", a_duel: "Gunslinger",
+    u_pron: "{n} prediction points", u_price: "{n} price points", u_field: "{n} field points", u_fuori: "farthest {n} times", u_sintonia: "closest {n} times", u_played: "{n} wines played", u_mese: "{n} points in the monthly challenge", u_duel: "{n} duels won",
     ax_corpo: "Body", ax_acidita: "Acidity", ax_tannino: "Tannin", ax_morbidezza: "Softness", ax_frutto: "Fruit", ax_legno: "Oak", ax_intensita: "Intensity", ax_persistenza: "Length", ax_dolcezza: "Sweetness", ax_freschezza: "Freshness",
     lo_corpo: "light", hi_corpo: "full", lo_acidita: "flat", hi_acidita: "sharp", lo_tannino: "silky", hi_tannino: "rough", lo_morbidezza: "dry", hi_morbidezza: "round", lo_frutto: "little", hi_frutto: "lots", lo_legno: "none", hi_legno: "lots", lo_intensita: "faint", hi_intensita: "powerful", lo_persistenza: "short", hi_persistenza: "endless", lo_dolcezza: "dry", hi_dolcezza: "sweet", lo_freschezza: "tired", hi_freschezza: "lively",
-    n_generoso: "The generous one", n_spietato: "The ruthless one", n_bastian: "The contrarian", n_naso: "Golden nose",
+    n_generoso: "The generous one", n_spietato: "The ruthless one", n_bastian: "The contrarian", n_naso: "Golden nose", n_fifone: "The chicken 🐔", n_pistolero: "The gunslinger",
     ty_Rosso: "Reds", ty_Bianco: "Whites", ty_Rosato: "Rosés", ty_Spumante: "Sparkling", ty_Passito: "Sweet wines"
   }
 };

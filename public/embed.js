@@ -408,7 +408,7 @@
       if (S.sheet && !S.wines.some(function (w) { return w.id === S.sheet.wine; })) S.sheet = null;
       if (S.gform && (!S.wines.some(function (w) { return w.id === S.gform.wine; }) || (S.tasting && S.tasting.revealed))) S.gform = null;
       render();
-      if (S.tasting && gameOn()) loadGame(S.tasting.id); else S.game = null;
+      if (S.tasting && gameOn()) { loadGame(S.tasting.id); if (!S.board) loadBoard(); } else S.game = null;
     }).catch(function (e) {
       if (my !== loadSeq) return;
       S.loading = false;
@@ -810,7 +810,7 @@
         return '<li><span class="pos">' + w.rank + '</span><span class="nm" dir="auto"><b>' + esc(wineTitle(w)) + '</b>' + (ties ? ' <span class="small muted">(' + esc(t("rankTie")) + ')</span>' : "") + '<br><span class="small muted">' + esc(plural(w.team.count, "voteSingle", "votePlural")) + '</span></span><span class="av">' + dec(w.team.avg) + '</span></li>';
       }).join("") + '</ol>';
     }
-    h += novitaHtml() + helpHtml() + favHtml();
+    h += novitaHtml() + helpHtml() + planciaHtml();
     h += '<h3 class="section">' + esc(t("wines")) + '</h3>';
     if (org && open && !(S.tasting && S.tasting.single)) h += S.form && S.form.kind === "wine" ? formHtml("wine") : '<p>' + btn("new-wine", t("addWine"), { disabled: readonly(), fk: "new-wine" }) + '</p>';
     if (S.loading && !S.wines.length) h += '<p class="muted" aria-busy="true">' + esc(t("loading")) + '</p>';
@@ -838,6 +838,39 @@
       g_react: "Reagisci a {name}", g_phrase: "Una frecciatina…", g_noPhrase: "Nessuna frecciatina",
       f1: "Hai annusato il tappo?", f2: "Palato da bollicine al discount", f3: "Sommelier in incognito", f4: "Questo l'hai bevuto con gli occhi", f5: "Generoso come a Natale",
       f6: "Severo come un professore", f7: "Hai sbagliato bicchiere?", f8: "Naso da segugio", f9: "Ma era lo stesso vino?", f10: "Applausi, palato d'oro",
+      f11: "Il tuo naso è in ferie?", f12: "Hai bevuto con il naso tappato?", f13: "Questo vino ti ha fatto la corte", f14: "Palato da mensa aziendale", f15: "Il sommelier dei poveri",
+      f16: "Hai votato a occhi chiusi?", f17: "Ti regalo un corso da sommelier", f18: "Critico gastronomico in incognito", f19: "Hai confuso il rosso con il bianco?", f20: "Più generoso di Babbo Natale",
+      pl_title: "La plancia della serata",
+      sm_title: "Sfida di {m}", sm_days: "Mancano {n} giorni", sm_day1: "Ultimo giorno!", sm_you: "Sei {pos}º con {n} punti", sm_noyou: "Nessun punto questo mese: il primo vino svelato apre la gara.", sm_lead: "In testa: {name} con {n}",
+      th_naso: "Il mese del naso", thd_naso: "I punti della caccia agli aromi valgono doppio.", th_portafoglio: "Il mese del portafoglio", thd_portafoglio: "I punti di «Quanto costa?» valgono doppio.",
+      th_pronostico: "Il mese del pronostico", thd_pronostico: "I punti del pronostico valgono doppio.", th_campo: "Il mese del campo", thd_campo: "I punti del campo valgono doppio.",
+      th_cuore: "Il mese del cuore", thd_cuore: "Il vino in una parola e il fan numero uno valgono doppio.", th_duelli: "Il mese dei duelli", thd_duelli: "I duelli vinti valgono doppio.",
+      du_title: "Duelli", du_rule: "Sfida un collega su un vino: chi fa più punti di gioco su quel vino vince il duello e 5 punti. Chi perde paga la posta (una penitenza bonaria, mai soldi).",
+      du_new: "⚔️ Lancia un duello", du_who: "Chi sfidi?", du_wine: "Su quale vino?", du_stake: "La posta: chi perde…", du_go: "Sfida!", du_cancelForm: "Annulla",
+      du_incoming: "{name} ti sfida su «{wine}»!", du_accept: "Accetto la sfida", du_decline: "Rifiuto 🐔", du_pending: "in attesa di risposta", du_accepted: "accettato: si decide allo svelamento",
+      du_declined: "rifiutato 🐔", du_expired: "nessuna risposta in tempo", du_won: "vince {name}", du_tie: "pareggio", du_cancel: "Ritira", du_none: "Nessun duello stasera. Chi ha il coraggio?",
+      du_vs: "{a} sfida {b}", du_stakeIs: "Chi perde {stake}.", du_taunt: "Gongola con una frase…", du_noTaunt: "Nessuna frase", du_rematch: "Rivincita", du_sent: "Sfida lanciata!", du_gongola: "{name} gongola:",
+      du_pickAll: "Scegli avversario, vino e posta.", du_noWines: "Tutti i vini sono già svelati: i duelli si lanciano prima.",
+      e_too_many: "Hai già lanciato tre duelli in questa serata.", e_duel_exists: "Tra voi due c'è già un duello su questo vino.", e_invalid_stake: "Scegli la posta.", e_invalid_target: "Scegli un avversario.", e_answered: "Hai già risposto.",
+      st_vino: "porta il vino la prossima volta", st_versa: "versa il vino a tutti", st_caffe: "offre il caffè", st_recensione: "scrive la recensione più poetica della serata",
+      st_brindisi: "fa un brindisi in rima", st_peggiore: "assaggia per primo il vino più strano della prossima serata", st_cantina: "riordina il frigo dell'ufficio", st_sommelier: "fa il sommelier per tutta la prossima serata",
+      t1: "Torna al succo di frutta 🧃", t2: "Il palato non si compra al supermercato 🛒", t3: "Ci vediamo alla rivincita… se hai coraggio 😏", t4: "Prendi appunti, ti servono 📝",
+      t5: "Il vino si annusa, non si indovina 👃", t6: "Anche stasera il migliore sono io 👑", t7: "Ti presto il mio naso quando vuoi 🐽", t8: "Brindo alla tua sconfitta 🥂",
+      pg_title: "La pagella della serata", pg_mvp: "MVP della serata", pg_nera: "Maglia nera 🐌", pg_generoso: "Il più generoso", pg_spietato: "Lo spietato", pg_duelli: "Re dei duelli",
+      pgv_mvp: "{n} punti", pgv_nera: "{n} punti: c'è margine", pgv_generoso: "voti in media {n}", pgv_spietato: "voti in media {n}", pgv_duelli: "{n} duelli vinti", pgv_duelli1: "1 duello vinto",
+      tc_title: "La telecronaca", tc_win: "{n} si prende il vino con {p} punti 🏆", tc_exact: "{n} ha centrato il pronostico: chiamatelo Nostradamus 🔮", tc_far: "{n} ha sbagliato il pronostico di {d} punti: serve un nuovo oroscopo 🙃",
+      tc_cheap: "{n} pensava costasse {g} €, ne costa {p}: abituato al vino in brick? 🧃", tc_pricey: "{n} lo valutava {g} €: al ristorante lo fregano sempre 💸", tc_priceok: "{n} ha indovinato il prezzo: lavora in enoteca e non ce l'ha detto 🕵️",
+      tc_fuori: "{n} era dall'altra parte del campo: ha bevuto un altro vino? 🧭", tc_sintonia: "{n} era al centro del gruppo: il diapason della serata 🎼", tc_twins: "{a} e {b} sullo stesso punto: gemelli separati alla nascita 👯",
+      tc_selfok: "{n} si è scelto come fan numero uno, e aveva ragione: autostima a mille 😎", tc_selfko: "{n} si credeva il fan numero uno: non lo era 🙈",
+      tc_love: "{n} gli ha dato {v}: o è innamorato o è il produttore 😍", tc_hate: "{n} gli ha dato {v}: spietato come un critico francese 🥖", tc_aroma: "{n} ha fatto tris di aromi: naso da segugio 🐕",
+      tc_odd: "Per quasi tutti è «{w}», per {n} è «{w2}»: originale 🦄",
+      hl_title: "Albo d'oro", hl_row: "{names}, {n} punti", bd_challenge: "Sfida del mese", du_chip: "⚔️ duelli {w}–{l}",
+      g_n_fifone: "Il fifone 🐔", g_n_pistolero: "Il pistolero",
+      a_duellante: "Duellante", ad_duellante: "Tre duelli vinti.", a_campione: "Campione del mese", ad_campione: "Hai vinto una sfida del mese.",
+      h11t_: "I duelli", h11d: "Sfida un collega su un vino e scegli la posta: chi perde porta il vino, versa a tutti, fa un brindisi in rima…", h11p: "5 a chi fa più punti su quel vino.", h11t: "Rifiuti? Ti becchi il 🐔 e, dopo due rifiuti, il soprannome «Il fifone».",
+      h12t_: "La sfida del mese", h12d: "Ogni mese un tema: il mese del naso, del portafoglio, dei duelli… Il gioco del tema vale doppio nella classifica del mese.", h12p: "Il primo del mese entra nell'albo d'oro e diventa «Campione del mese».", h12t: "Controlla il tema in cima alla serata.",
+      h13t_: "Telecronaca e pagella", h13d: "Allo svelamento la telecronaca racconta il vino con qualche presa in giro; a serata chiusa arriva la pagella: MVP, maglia nera 🐌, il più generoso, lo spietato.", h13p: "Non danno punti: danno argomenti per la prossima serata.", h13t: "Il podio del vino ha le medaglie 🥇🥈🥉.",
+      nv2_title: "Il gioco si è fatto serio!", nv2_text: "Duelli uno contro uno con la posta, la sfida del mese con l'albo d'oro, la telecronaca allo svelamento e la pagella della serata.",
       g_board: "Classifica del gioco", g_boardHint: "Punti della stagione su tutti i giochi dei vini svelati, più la scommessa della serata.", g_boardEmpty: "Ancora nessun vino svelato: la classifica parte dal primo svelamento.",
       g_n_generoso: "Il generoso", g_n_spietato: "Lo spietato", g_n_bastian: "Il bastian contrario", g_n_naso: "Naso d'oro", g_twin: "Gemello di palato: {name}",
       ax_corpo: "Corpo", ax_acidita: "Acidità", ax_tannino: "Tannino", ax_morbidezza: "Morbidezza", ax_frutto: "Frutto", ax_legno: "Legno",
@@ -871,7 +904,7 @@
       ar_spezie: "Spezie", ar_vaniglia: "Vaniglia", ar_tostato: "Tostato", ar_miele: "Miele", ar_burro: "Burro", ar_minerale: "Minerale", ar_cuoio: "Cuoio e tabacco", ar_terra: "Terra e sottobosco",
       pw_elegante: "Elegante", pw_potente: "Potente", pw_allegro: "Allegro", pw_timido: "Timido", pw_ruffiano: "Ruffiano", pw_austero: "Austero", pw_seducente: "Seducente", pw_rustico: "Rustico",
       pw_fresco: "Fresco", pw_morbido: "Morbido", pw_spigoloso: "Spigoloso", pw_meditazione: "Da meditazione",
-      h_btn: "Come si gioca", h_close: "Chiudi le regole", h_title: "Come si gioca", h_intro: "Sei giochi per ogni vino, una scommessa per la serata. Fai solo quelli che vuoi: ognuno dà punti per la classifica.",
+      h_btn: "Come si gioca", h_close: "Chiudi le regole", h_title: "Come si gioca", h_intro: "Sei giochi per ogni vino, una scommessa e i duelli per la serata, una sfida al mese. Fai solo quelli che vuoi: ognuno dà punti per la classifica.",
       h_do: "Cosa fai", h_pts: "Punti", h_tip: "Il trucco",
       h1d: "Trascina la tua faccia sul piano: due assi, come corpo e acidità, che cambiano a ogni vino.", h1p: "Fino a 10, più sei vicino al centro del gruppo.", h1t: "Fidati del primo sorso.",
       h2d: "Indovina la media che darà il gruppo, da 50 a 100.", h2p: "10 se la centri, uno in meno per ogni punto di distanza.", h2t: "Pensa a chi c'è stasera: i generosi alzano la media.",
@@ -900,6 +933,39 @@
       g_react: "React to {name}", g_phrase: "A friendly jab…", g_noPhrase: "No jab",
       f1: "Did you sniff the cork?", f2: "Discount-bubbles palate", f3: "Sommelier undercover", f4: "You drank this one with your eyes", f5: "Generous as Christmas",
       f6: "Strict as a schoolteacher", f7: "Wrong glass?", f8: "Bloodhound nose", f9: "Was it even the same wine?", f10: "Applause, golden palate",
+      f11: "Is your nose on holiday?", f12: "Did you drink with a blocked nose?", f13: "This wine charmed you", f14: "Office-canteen palate", f15: "Budget sommelier",
+      f16: "Did you score with your eyes shut?", f17: "I'll gift you a sommelier course", f18: "Food critic undercover", f19: "Did you mix up red and white?", f20: "More generous than Santa",
+      pl_title: "Tonight's game board",
+      sm_title: "{m} challenge", sm_days: "{n} days left", sm_day1: "Last day!", sm_you: "You're {pos}th with {n} points", sm_noyou: "No points this month: the first revealed wine starts the race.", sm_lead: "Leading: {name} with {n}",
+      th_naso: "Nose month", thd_naso: "Aroma hunt points count double.", th_portafoglio: "Wallet month", thd_portafoglio: "«How much is it?» points count double.",
+      th_pronostico: "Prediction month", thd_pronostico: "Prediction points count double.", th_campo: "Field month", thd_campo: "Field points count double.",
+      th_cuore: "Heart month", thd_cuore: "The wine in one word and number one fan count double.", th_duelli: "Duel month", thd_duelli: "Duels won count double.",
+      du_title: "Duels", du_rule: "Challenge a colleague on a wine: whoever scores more game points on it wins the duel and 5 points. The loser pays the stake (a friendly forfeit, never money).",
+      du_new: "⚔️ Start a duel", du_who: "Who do you challenge?", du_wine: "On which wine?", du_stake: "The stake: the loser…", du_go: "Challenge!", du_cancelForm: "Cancel",
+      du_incoming: "{name} challenges you on «{wine}»!", du_accept: "I accept", du_decline: "Decline 🐔", du_pending: "waiting for an answer", du_accepted: "accepted: decided at the reveal",
+      du_declined: "declined 🐔", du_expired: "no answer in time", du_won: "{name} wins", du_tie: "draw", du_cancel: "Withdraw", du_none: "No duels tonight. Who dares?",
+      du_vs: "{a} challenges {b}", du_stakeIs: "The loser {stake}.", du_taunt: "Gloat with a line…", du_noTaunt: "No line", du_rematch: "Rematch", du_sent: "Challenge sent!", du_gongola: "{name} gloats:",
+      du_pickAll: "Pick an opponent, a wine and a stake.", du_noWines: "All wines are revealed: duels start before.",
+      e_too_many: "You've already started three duels tonight.", e_duel_exists: "You two already have a duel on this wine.", e_invalid_stake: "Pick the stake.", e_invalid_target: "Pick an opponent.", e_answered: "You've already answered.",
+      st_vino: "brings the wine next time", st_versa: "pours for everyone", st_caffe: "buys the coffee", st_recensione: "writes the evening's most poetic review",
+      st_brindisi: "makes a rhyming toast", st_peggiore: "tastes the strangest wine first next time", st_cantina: "tidies the office fridge", st_sommelier: "plays sommelier all next evening",
+      t1: "Back to fruit juice 🧃", t2: "A palate isn't sold at the supermarket 🛒", t3: "See you at the rematch… if you dare 😏", t4: "Take notes, you need them 📝",
+      t5: "Wine is smelled, not guessed 👃", t6: "Best again tonight: me 👑", t7: "I'll lend you my nose anytime 🐽", t8: "Cheers to your defeat 🥂",
+      pg_title: "Tonight's report card", pg_mvp: "MVP of the night", pg_nera: "Wooden spoon 🐌", pg_generoso: "Most generous", pg_spietato: "Ruthless", pg_duelli: "Duel king",
+      pgv_mvp: "{n} points", pgv_nera: "{n} points: room to improve", pgv_generoso: "average score {n}", pgv_spietato: "average score {n}", pgv_duelli: "{n} duels won", pgv_duelli1: "1 duel won",
+      tc_title: "The commentary", tc_win: "{n} takes the wine with {p} points 🏆", tc_exact: "{n} nailed the prediction: call them Nostradamus 🔮", tc_far: "{n} missed the prediction by {d} points: time for a new horoscope 🙃",
+      tc_cheap: "{n} thought it cost €{g}, it's €{p}: used to boxed wine? 🧃", tc_pricey: "{n} valued it at €{g}: restaurants must love them 💸", tc_priceok: "{n} guessed the price: works in a wine shop and never told us 🕵️",
+      tc_fuori: "{n} was across the field: did they drink another wine? 🧭", tc_sintonia: "{n} was right at the group's centre: tonight's tuning fork 🎼", tc_twins: "{a} and {b} on the same spot: separated at birth 👯",
+      tc_selfok: "{n} picked themselves as number one fan, and was right: confidence at max 😎", tc_selfko: "{n} thought they were the number one fan: they weren't 🙈",
+      tc_love: "{n} gave it {v}: either in love or the producer 😍", tc_hate: "{n} gave it {v}: ruthless as a French critic 🥖", tc_aroma: "{n} hit an aroma hat trick: bloodhound nose 🐕",
+      tc_odd: "For almost everyone it's «{w}», for {n} it's «{w2}»: original 🦄",
+      hl_title: "Hall of fame", hl_row: "{names}, {n} points", bd_challenge: "Monthly challenge", du_chip: "⚔️ duels {w}–{l}",
+      g_n_fifone: "The chicken 🐔", g_n_pistolero: "The gunslinger",
+      a_duellante: "Duellist", ad_duellante: "Three duels won.", a_campione: "Monthly champion", ad_campione: "You won a monthly challenge.",
+      h11t_: "Duels", h11d: "Challenge a colleague on a wine and pick the stake: the loser brings the wine, pours for everyone, makes a rhyming toast…", h11p: "5 to whoever scores more on that wine.", h11t: "Decline? You get the 🐔 and, after two, the nickname «The chicken».",
+      h12t_: "The monthly challenge", h12d: "Each month a theme: nose month, wallet month, duel month… The theme's game counts double in the monthly ranking.", h12p: "The month's winner enters the hall of fame as «Monthly champion».", h12t: "Check the theme at the top of the evening.",
+      h13t_: "Commentary and report card", h13d: "At the reveal the commentary tells the wine's story with some teasing; when the evening closes, the report card: MVP, wooden spoon 🐌, most generous, ruthless.", h13p: "No points: just talking points for next time.", h13t: "The wine's podium has medals 🥇🥈🥉.",
+      nv2_title: "The game got serious!", nv2_text: "One-on-one duels with stakes, the monthly challenge with a hall of fame, live commentary at the reveal and the evening's report card.",
       g_board: "Game ranking", g_boardHint: "Season points from every game on revealed wines, plus tonight\u2019s bet.", g_boardEmpty: "No wine revealed yet: the ranking starts with the first reveal.",
       g_n_generoso: "The generous one", g_n_spietato: "The ruthless one", g_n_bastian: "The contrarian", g_n_naso: "Golden nose", g_twin: "Palate twin: {name}",
       ax_corpo: "Body", ax_acidita: "Acidity", ax_tannino: "Tannin", ax_morbidezza: "Softness", ax_frutto: "Fruit", ax_legno: "Oak",
@@ -933,7 +999,7 @@
       ar_spezie: "Spice", ar_vaniglia: "Vanilla", ar_tostato: "Toasty", ar_miele: "Honey", ar_burro: "Butter", ar_minerale: "Mineral", ar_cuoio: "Leather & tobacco", ar_terra: "Earth & undergrowth",
       pw_elegante: "Elegant", pw_potente: "Powerful", pw_allegro: "Cheerful", pw_timido: "Shy", pw_ruffiano: "Crowd-pleaser", pw_austero: "Austere", pw_seducente: "Seductive", pw_rustico: "Rustic",
       pw_fresco: "Fresh", pw_morbido: "Soft", pw_spigoloso: "Angular", pw_meditazione: "For meditation",
-      h_btn: "How to play", h_close: "Close the rules", h_title: "How to play", h_intro: "Six games for each wine, one bet for the evening. Play only the ones you like: each one scores points for the ranking.",
+      h_btn: "How to play", h_close: "Close the rules", h_title: "How to play", h_intro: "Six games for each wine, a bet and duels for the evening, a challenge each month. Play only the ones you like: each one scores points for the ranking.",
       h_do: "What you do", h_pts: "Points", h_tip: "The trick",
       h1d: "Drag your face onto the plane: two axes, like body and acidity, that change with each wine.", h1p: "Up to 10, the closer you are to the group's centre.", h1t: "Trust your first sip.",
       h2d: "Guess the average the group will give, from 50 to 100.", h2p: "10 if you hit it, one less for each point away.", h2t: "Think of who's here tonight: generous people raise the average.",
@@ -952,7 +1018,9 @@
 
   function gameOn() { return !!(S.circle && S.config && S.config.game); }
   var LEVELS = [0, 40, 100, 200, 350, 600], LV_ICON = ["🍇", "🥂", "🍷", "🎓", "👑", "🏆"];
-  var ACH_ICON = { primo: "🍇", cecchino: "🎯", portafoglio: "💶", serie3: "🔥", favorito: "🔮", tris: "🎲", diapason: "🎼", coro: "📣", veterano: "🛡️", re: "👑" };
+  var ACH_ICON = { primo: "🍇", cecchino: "🎯", portafoglio: "💶", serie3: "🔥", favorito: "🔮", tris: "🎲", diapason: "🎼", coro: "📣", veterano: "🛡️", re: "👑", duellante: "⚔️", campione: "🏅" };
+  var THEME_ICON = { naso: "👃", portafoglio: "💶", pronostico: "🎯", campo: "🗺️", cuore: "💘", duelli: "⚔️" };
+  var PAG_ICON = { mvp: "🏆", nera: "🐌", generoso: "🎁", spietato: "🪓", duelli: "⚔️" };
   var AR_ICON = { rossi: "🍓", neri: "🫐", agrumi: "🍋", mela: "🍏", pesca: "🍑", tropicale: "🍍", fiori: "🌸", erbe: "🌿", spezie: "🌶️", vaniglia: "🍦", tostato: "☕", miele: "🍯", burro: "🧈", minerale: "🪨", cuoio: "🚬", terra: "🍄" };
   var PW_ICON = { elegante: "🎩", potente: "💪", allegro: "🎉", timido: "🙈", ruffiano: "😏", austero: "🧐", seducente: "💋", rustico: "🌾", fresco: "🧊", morbido: "☁️", spigoloso: "🔺", meditazione: "🧘" };
   function levelOf(p) { var i = 0; while (i + 1 < LEVELS.length && p >= LEVELS[i + 1]) i++; return i; }
@@ -1076,6 +1144,8 @@
       groupCards += '<div class="g-gcard"><span class="g-gk">💘 ' + esc(t("g_fanGroup")) + '</span><p class="g-fanwin">' + gw.fanTop.map(function (k) { var r = res.filter(function (x) { return x.who === k; })[0]; return faceHtml(k) + ' <b dir="auto">' + esc(personName(k)) + '</b>' + (r && r.vote != null ? ' <span class="chip">' + r.vote + '</span>' : ""); }).join(" ") + '</p>' +
         '<p class="small">' + esc(guessed.length ? t("g_fanGuess") : t("g_fanNobody")) + (guessed.length ? ' <span class="g-faces">' + guessed.map(function (k) { return '<span class="g-wf on" title="' + esc(personName(k)) + '">' + faceHtml(k) + '</span>'; }).join("") + '</span>' : "") + '</p></div>';
     }
+    var tc = tcLines(w.id, gw);
+    if (tc.length) h += '<section class="g-tc" aria-label="' + esc(t("tc_title")) + '"><span class="g-gk">🎙️ ' + esc(t("tc_title")) + '</span><ul>' + tc.map(function (x) { return '<li>' + esc(x) + '</li>'; }).join("") + '</ul></section>';
     if (groupCards) h += '<div class="g-groups">' + groupCards + '</div>';
     h += '<ol class="g-res">' + res.map(function (r, i) {
       var p = g.people[r.who] || { name: "?" }, mine = !!p.me;
@@ -1100,7 +1170,7 @@
         }).join("") + '<select class="g-jabsel" data-g="f" data-to="' + esc(r.who) + '" data-w="' + esc(w.id) + '" aria-label="' + esc(t("g_phrase")) + '" data-fk="gf-' + esc(w.id + r.who) + '"><option value="">' + esc(myR.f ? t("g_noPhrase") : t("g_phrase")) + '</option>' +
           Array.apply(null, Array(g.phrases)).map(function (_, j) { var k = "f" + (j + 1); return '<option value="' + k + '"' + (myR.f === k ? " selected" : "") + '>' + esc(t(k)) + '</option>'; }).join("") + '</select></div>';
       }
-      return '<li class="g-row' + (mine ? " me" : "") + '"><div class="g-top"><span class="g-pos">' + (i + 1) + '</span>' + faceHtml(r.who, "lg") + '<span class="g-nm"><b dir="auto">' + esc(personName(r.who)) + '</b>' + badges + '</span><span class="g-tot"><b>' + r.pts.total + '</b><em>' + esc(t("g_pts", { n: "" }).trim()) + '</em></span></div>' +
+      return '<li class="g-row' + (mine ? " me" : "") + '"><div class="g-top"><span class="g-pos' + (i < 3 && r.pts.total > 0 ? " medal" : "") + '">' + (i < 3 && r.pts.total > 0 ? ["🥇", "🥈", "🥉"][i] : i + 1) + '</span>'+ faceHtml(r.who, "lg") + '<span class="g-nm"><b dir="auto">' + esc(personName(r.who)) + '</b>' + badges + '</span><span class="g-tot"><b>' + r.pts.total + '</b><em>' + esc(t("g_pts", { n: "" }).trim()) + '</em></span></div>' +
         '<div class="g-nums">' + nums.join("") + '</div>' + (recv ? '<div class="g-recv">' + recv + '</div>' : "") + ctl + '</li>';
     }).join("") + '</ol>';
     return h + '</section>';
@@ -1108,17 +1178,21 @@
 
   function boardHtml() {
     if (!gameOn()) return "";
-    var b = S.board, mode = S.boardMode === "month" ? "month" : "season";
+    var b = S.board, mode = S.boardMode === "challenge" ? "challenge" : "season";
     var h = helpHtml() + '<section class="card g-board"><div class="row spread"><h3 class="section">🏆 ' + esc(t("g_board")) + '</h3>' + btn("g-help", "❓ " + t("h_btn"), { cls: "small ghost", fk: "ghelp-board" }) + '</div><p class="small muted">' + esc(t("g_boardHint")) + '</p>';
     if (!b) return h + '<p class="muted" aria-busy="true">' + esc(t("loading")) + '</p></section>';
     var any = b.rows.some(function (r) { return r.pts.total > 0 || r.pts.played > 0; });
     if (!any) return h + '<p class="muted">' + esc(t("g_boardEmpty")) + '</p></section>';
     S.board.people = {}; b.rows.forEach(function (r) { S.board.people[r.who] = { name: r.name, pic: r.pic, me: r.me }; });
-    h += '<div class="modes g-bmodes" role="group" aria-label="' + esc(t("g_board")) + '">' + ["season", "month"].map(function (m) {
-      return '<button type="button" data-act="g-bmode" data-v="' + m + '" aria-pressed="' + (mode === m) + '"' + (mode === m ? ' class="on"' : "") + ' data-fk="gbm-' + m + '">' + esc(t(m === "month" ? "bd_month" : "bd_season")) + '</button>';
+    h += '<div class="modes g-bmodes" role="group" aria-label="' + esc(t("g_board")) + '">' + ["season", "challenge"].map(function (m) {
+      return '<button type="button" data-act="g-bmode" data-v="' + m + '" aria-pressed="' + (mode === m) + '"' + (mode === m ? ' class="on"' : "") + ' data-fk="gbm-' + m + '">' + esc(t(m === "challenge" ? "bd_challenge" : "bd_season")) + '</button>';
     }).join("") + '</div>';
     var rows = b.rows.slice();
-    if (mode === "month") rows = rows.filter(function (r) { return r.month > 0; }).sort(function (x, y) { return y.month - x.month || x.name.localeCompare(y.name); });
+    if (mode === "challenge") {
+      var c = b.challenge || { rows: [] }, days = Math.max(1, Math.ceil((c.endsAt - Date.now()) / 86400000));
+      h += '<div class="g-mhead g-mhead-b"><span class="g-mico" aria-hidden="true">' + (THEME_ICON[c.theme] || "🗓️") + '</span><span><span class="g-gk">🗓️ ' + esc(t("sm_title", { m: monthName(c.month) })) + '</span><b>' + esc(t("th_" + c.theme)) + '</b><span class="small">' + esc(t("thd_" + c.theme)) + ' · ' + esc(days === 1 ? t("sm_day1") : t("sm_days", { n: days })) + '</span></span></div>';
+      rows = rows.filter(function (r) { return r.month > 0; }).sort(function (x, y) { return y.month - x.month || x.name.localeCompare(y.name); });
+    }
     if (!rows.length) h += '<p class="muted">' + esc(t("bd_monthEmpty")) + '</p>';
     else h += '<ol class="toplist g-boardlist">' + rows.map(function (r, i) {
       var lv = levelOf(r.pts.total);
@@ -1126,9 +1200,16 @@
         (r.streak && r.streak.cur >= 2 ? '<span class="chip g-streak" title="' + esc(t("bd_streak", { n: r.streak.cur })) + '">🔥 ' + r.streak.cur + '</span>' : "") +
         r.nick.map(function (n) { return '<span class="chip g-nick">' + esc(t("g_n_" + n)) + '</span>'; }).join("") +
         (r.twin ? '<span class="chip g-nick">' + esc(t("g_twin", { name: r.twin })) + '</span>' : "") +
-        (r.rival ? '<span class="chip g-nick g-rival">⚔️ ' + esc(t("bd_rival", { name: r.rival })) + '</span>' : "");
-      return '<li' + (r.me ? ' class="me"' : "") + '><span class="pos">' + (i + 1) + '</span>' + faceHtml(r.who) + '<span class="nm"><b dir="auto">' + esc(r.name) + (r.me ? " (" + esc(t("g_you")) + ")" : "") + '</b><span class="g-nicks">' + chips + '</span></span><span class="av">' + (mode === "month" ? r.month : r.pts.total) + '</span></li>';
+        (r.rival ? '<span class="chip g-nick g-rival">⚔️ ' + esc(t("bd_rival", { name: r.rival })) + '</span>' : "") +
+        (r.duels && r.duels.w + r.duels.l > 0 ? '<span class="chip g-nick">' + esc(t("du_chip", { w: r.duels.w, l: r.duels.l })) + '</span>' : "") +
+        (r.titles || []).map(function (m) { return '<span class="chip g-lv">🏅 ' + esc(monthName(m)) + '</span>'; }).join("");
+      return '<li' + (r.me ? ' class="me"' : "") + '><span class="pos">' + (i + 1) + '</span>' + faceHtml(r.who) + '<span class="nm"><b dir="auto">' + esc(r.name) + (r.me ? " (" + esc(t("g_you")) + ")" : "") + '</b><span class="g-nicks">' + chips + '</span></span><span class="av">' + (mode === "challenge" ? r.month : r.pts.total) + '</span></li>';
     }).join("") + '</ol>';
+    /* l'albo d'oro: i campioni dei mesi passati */
+    if (mode === "challenge" && (b.hall || []).length) h += '<h4 class="grp">🏅 ' + esc(t("hl_title")) + '</h4><ul class="g-hall">' + b.hall.map(function (x) {
+      var names = x.winners.map(function (k) { return S.board.people[k] ? S.board.people[k].name : "?"; }).join(", ");
+      return '<li><span class="g-hmo">' + (THEME_ICON[x.theme] || "🗓️") + ' <b>' + esc(monthName(x.month)) + '</b></span><span dir="auto">' + esc(t("hl_row", { names: names, n: x.pts })) + '</span></li>';
+    }).join("") + '</ul>';
     /* la mia carriera: livello, quanto manca al prossimo, i traguardi */
     var me = b.rows.filter(function (r) { return r.me; })[0];
     if (me) {
@@ -1146,9 +1227,9 @@
   }
 
   /* «Come si gioca»: una scheda per gioco, con cosa fai, i punti e un trucco */
-  var NOVITA_KEY = "taste-gioco-novita-214";
+  var NOVITA_KEY = "taste-gioco-novita-215";
   var HELP = [["🗺️", "g_s1", "h1"], ["🎯", "g_s2", "h2"], ["💶", "g_s3", "h3"], ["👃", "g_s4", "h4"], ["💬", "g_s5", "h5"], ["💘", "g_s6", "h6"],
-    ["🔮", "h7t_", "h7"], ["🎉", "h8t_", "h8"], ["😂", "h9t_", "h9"], ["🏆", "h10t_", "h10"]];
+    ["🔮", "h7t_", "h7"], ["⚔️", "h11t_", "h11"], ["🗓️", "h12t_", "h12"], ["🎉", "h8t_", "h8"], ["🎙️", "h13t_", "h13"], ["😂", "h9t_", "h9"], ["🏆", "h10t_", "h10"]];
   function helpHtml() {
     if (!gameOn() || !S.ghelp) return "";
     return '<section class="card g-help" aria-labelledby="h-help"><div class="row spread"><h3 class="section" id="h-help" tabindex="-1">❓ ' + esc(t("h_title")) + '</h3>' + btn("g-help", t("h_close"), { cls: "small ghost", fk: "ghelp-close" }) + '</div>' +
@@ -1160,8 +1241,111 @@
   function novitaHtml() {
     if (!gameOn() || S.novitaOff || S.ghelp) return "";
     try { if (localStorage.getItem(NOVITA_KEY)) { S.novitaOff = true; return ""; } } catch (e) { /* niente memoria */ }
-    return '<section class="card g-novita" role="status"><span class="g-nvico" aria-hidden="true">🎉</span><div><b>' + esc(t("nv_title")) + '</b><p class="small">' + esc(t("nv_text")) + '</p><div class="row">' +
+    return '<section class="card g-novita" role="status"><span class="g-nvico" aria-hidden="true">🎉</span><div><b>' + esc(t("nv2_title")) + '</b><p class="small">' + esc(t("nv2_text")) + '</p><div class="row">' +
       btn("g-help", "❓ " + t("h_btn"), { cls: "small primary", fk: "ghelp-nv" }) + btn("g-novita", t("nv_ok"), { cls: "small ghost", fk: "gnv-ok" }) + '</div></div></section>';
+  }
+
+  /* ---- la plancia della serata: sfida del mese, duelli, scommessa, pagella ---- */
+  function monthName(mk) { var p = String(mk || "").split("-"); try { return new Date(Date.UTC(+p[0], +p[1] - 1, 15)).toLocaleDateString(S.lang === "en" ? "en-GB" : "it-IT", { month: "long" }); } catch (e) { return mk; } }
+  function wineLabel(wid) { var w = (S.wines || []).filter(function (x) { return x.id === wid; })[0]; return w ? (w.hidden ? t("blindLabel", { n: w.index }) : w.name) : "?"; }
+  function shortName(k) { var p = S.game && S.game.people[k]; return p ? String(p.name).split(" ")[0] + (p.me ? " (" + t("g_you") + ")" : "") : "?"; }
+  function planciaHtml() {
+    if (!gameOn() || !S.game) return "";
+    return '<div class="g-plancia"><h3 class="section g-pltitle">🎮 ' + esc(t("pl_title")) + '</h3>' + incomingHtml() +
+      '<div class="g-plgrid">' + monthHtml() + duelsHtml() + '</div>' + favHtml() + pagellaHtml() + '</div>';
+  }
+  function monthHtml() {
+    var c = S.board && S.board.challenge;
+    var h = '<section class="card g-month">';
+    if (!c) return h + '<p class="muted small" aria-busy="true">' + esc(t("loading")) + '</p></section>';
+    var days = Math.max(1, Math.ceil((c.endsAt - Date.now()) / 86400000)), mine = null, pos = 0;
+    c.rows.forEach(function (r, i) { if (S.board.people && S.board.people[r.who] && S.board.people[r.who].me) { mine = r; pos = i + 1; } });
+    var lead = c.rows[0], leadName = lead && S.board.people && S.board.people[lead.who] ? S.board.people[lead.who].name : "";
+    h += '<div class="g-mhead"><span class="g-mico" aria-hidden="true">' + (THEME_ICON[c.theme] || "🗓️") + '</span><span><span class="g-gk">🗓️ ' + esc(t("sm_title", { m: monthName(c.month) })) + '</span><b>' + esc(t("th_" + c.theme)) + '</b><span class="small">' + esc(t("thd_" + c.theme)) + '</span></span></div>';
+    h += '<p class="small g-mline"><span class="chip">' + esc(days === 1 ? t("sm_day1") : t("sm_days", { n: days })) + '</span> ' + esc(mine ? t("sm_you", { pos: pos, n: mine.pts }) : t("sm_noyou")) + '</p>';
+    if (lead && (!mine || lead.who !== mine.who)) h += '<p class="small muted">👑 ' + esc(t("sm_lead", { name: leadName, n: lead.pts })) + '</p>';
+    return h + '</section>';
+  }
+  function incomingHtml() {
+    var me = mePk(), list = (S.game.duels || []).filter(function (d) { return d.to === me && d.status === "pending"; });
+    return list.map(function (d) {
+      return '<section class="card g-incoming" role="status"><span class="g-inico" aria-hidden="true">⚔️</span><div><b>' + esc(t("du_incoming", { name: personName(d.from), wine: wineLabel(d.wine) })) + '</b>' +
+        '<p class="small">' + esc(t("du_stakeIs", { stake: t("st_" + d.stake) })) + '</p><div class="row">' +
+        btn("du-accept", t("du_accept"), { id: d.id, cls: "primary", disabled: readonly(), fk: "dua-" + d.id }) + btn("du-decline", t("du_decline"), { id: d.id, cls: "ghost", disabled: readonly(), fk: "dud-" + d.id }) + '</div></div></section>';
+    }).join("");
+  }
+  function duelsHtml() {
+    var g = S.game, me = mePk(), list = g.duels || [], open = S.tasting && S.tasting.status === "open";
+    var h = '<section class="card g-duels"><h4 class="grp">⚔️ ' + esc(t("du_title")) + '</h4><p class="small muted">' + esc(t("du_rule")) + '</p>';
+    if (!list.length) h += '<p class="small">' + esc(t("du_none")) + '</p>';
+    h += '<ul class="g-duellist">' + list.map(function (d) {
+      var st = d.status, pill = "", extra = "";
+      if (st === "pending") pill = t("du_pending"); else if (st === "accepted") pill = t("du_accepted"); else if (st === "declined") pill = t("du_declined"); else if (st === "expired") pill = t("du_expired");
+      else pill = d.winner ? t("du_won", { name: shortName(d.winner) }) + " " + d.score[0] + "–" + d.score[1] : t("du_tie") + " " + d.score[0] + "–" + d.score[1];
+      if (st === "done" && d.taunt) extra += '<p class="g-taunt">💬 <b>' + esc(t("du_gongola", { name: shortName(d.winner) })) + '</b> «' + esc(t(d.taunt)) + '»</p>';
+      if (st === "done" && d.winner === me) extra += '<select class="g-tauntsel" data-g="dt" data-id="' + esc(d.id) + '" aria-label="' + esc(t("du_taunt")) + '" data-fk="dt-' + esc(d.id) + '"><option value="">' + esc(d.taunt ? t("du_noTaunt") : t("du_taunt")) + '</option>' +
+        Array.apply(null, Array(g.taunts || 8)).map(function (_, j) { var k = "t" + (j + 1); return '<option value="' + k + '"' + (d.taunt === k ? " selected" : "") + '>' + esc(t(k)) + '</option>'; }).join("") + '</select>';
+      var ctl = "";
+      if (st === "pending" && d.from === me) ctl += btn("du-cancel", t("du_cancel"), { id: d.id, cls: "small ghost", disabled: readonly(), fk: "duc-" + d.id });
+      if ((st === "done" || st === "declined") && open && (d.from === me || d.to === me)) ctl += btn("du-rematch", "🔁 " + t("du_rematch"), { id: d.id, cls: "small ghost", disabled: readonly(), fk: "dur-" + d.id });
+      return '<li class="g-duel ' + st + (d.winner === me && st === "done" ? " won" : "") + '"><div class="g-dvs">' + faceHtml(d.from, d.winner === d.from ? "win" : "") + '<span class="g-dx" aria-hidden="true">⚔️</span>' + faceHtml(d.to, d.winner === d.to ? "win" : "") +
+        '<span class="g-dtxt"><b dir="auto">' + esc(t("du_vs", { a: shortName(d.from), b: shortName(d.to) })) + '</b><span class="small muted" dir="auto">🍷 ' + esc(wineLabel(d.wine)) + ' · ' + esc(t("du_stakeIs", { stake: t("st_" + d.stake) })) + '</span></span></div>' +
+        '<span class="chip g-dpill">' + esc(pill) + '</span>' + extra + (ctl ? '<div class="row">' + ctl + '</div>' : "") + '</li>';
+    }).join("") + '</ul>';
+    if (!open) return h + '</section>';
+    var free = (S.wines || []).filter(function (w) { var gw = g.wines[w.id]; return gw && !gw.revealed; });
+    if (!S.dform) return h + (free.length ? '<p>' + btn("du-new", t("du_new"), { cls: "primary", disabled: readonly(), fk: "du-new" }) + '</p>' : '<p class="small muted">' + esc(t("du_noWines")) + '</p>') + '</section>';
+    var f = S.dform;
+    h += '<div class="g-dform"><p class="f">' + esc(t("du_who")) + '</p><div class="g-chips" role="radiogroup" aria-label="' + esc(t("du_who")) + '">' + Object.keys(g.people).filter(function (k) { return k !== me; }).map(function (k) {
+      return '<button type="button" class="g-chip g-fanb' + (f.to === k ? " on" : "") + '" data-act="du-to" data-k="' + esc(k) + '" role="radio" aria-checked="' + (f.to === k) + '" data-fk="dto-' + esc(k) + '">' + faceHtml(k) + '<span dir="auto">' + esc(g.people[k].name) + '</span></button>';
+    }).join("") + '</div><p class="f">' + esc(t("du_wine")) + '</p><div class="g-chips" role="radiogroup" aria-label="' + esc(t("du_wine")) + '">' + free.map(function (w) {
+      return '<button type="button" class="g-chip' + (f.wine === w.id ? " on" : "") + '" data-act="du-wine" data-k="' + esc(w.id) + '" role="radio" aria-checked="' + (f.wine === w.id) + '" data-fk="dwi-' + esc(w.id) + '">🍷 <span dir="auto">' + esc(wineLabel(w.id)) + '</span></button>';
+    }).join("") + '</div><p class="f">' + esc(t("du_stake")) + '</p><div class="g-chips" role="radiogroup" aria-label="' + esc(t("du_stake")) + '">' + (g.stakes || []).map(function (k) {
+      return '<button type="button" class="g-chip' + (f.stake === k ? " on" : "") + '" data-act="du-stake" data-k="' + k + '" role="radio" aria-checked="' + (f.stake === k) + '" data-fk="dst-' + k + '">' + esc(t("st_" + k)) + '</button>';
+    }).join("") + '</div>' + (f.err ? '<p class="field-error" role="alert">' + esc(f.err) + '</p>' : "") +
+      '<div class="row">' + btn("du-go", "⚔️ " + t("du_go"), { cls: "primary", disabled: readonly() || !!S.pending.duel, fk: "du-go" }) + btn("du-cancelform", t("du_cancelForm"), { cls: "ghost", fk: "du-cancelform" }) + '</div></div>';
+    return h + '</section>';
+  }
+  function pagellaHtml() {
+    var pg = S.game && S.game.pagella;
+    if (!pg || !pg.length) return "";
+    return '<section class="card g-pagella"><h4 class="grp">📋 ' + esc(t("pg_title")) + '</h4><ul class="g-pglist">' + pg.map(function (x) {
+      return '<li class="pg-' + esc(x.k) + '"><span class="g-pgico" aria-hidden="true">' + (PAG_ICON[x.k] || "⭐") + '</span>' + faceHtml(x.who) + '<span><span class="g-gk">' + esc(t("pg_" + x.k)) + '</span><b dir="auto">' + esc(personName(x.who)) + '</b><span class="small muted">' + esc(t(x.k === "duelli" && x.v === 1 ? "pgv_duelli1" : "pgv_" + x.k, { n: x.k === "generoso" || x.k === "spietato" ? dec(x.v) : x.v })) + '</span></span></li>';
+    }).join("") + '</ul></section>';
+  }
+  function duelAct(op, body, fk, ok) {
+    return run("duel", function () {
+      return api(Object.assign({ op: op, tasting: S.tasting.id }, body)).then(function () { if (ok) announce(ok); if (fk) focusAfter(fk); lastGame = ""; loadBoard(); return loadGame(S.tasting.id); }, function (err) { if (S.dform && op === "game.duel") { S.dform.err = errText(err); render(); } else announce(errText(err), true); });
+    });
+  }
+
+  /* la telecronaca dello svelamento: qualche riga che racconta il vino, con le prese in giro */
+  function tcLines(wid, gw) {
+    var res = gw.results || [], out = [], cand = [], avg = gw.avg, price = gw.price;
+    if (res[0] && res[0].pts.total > 0) out.push(t("tc_win", { n: S.game.people[res[0].who] ? S.game.people[res[0].who].name : "?", p: res[0].pts.total }));
+    var topW = gw.words && gw.words[0] && gw.words[0].n >= 2 ? gw.words[0] : null, wN = {};
+    (gw.words || []).forEach(function (x) { wN[x.k] = x.n; });
+    var nm = function (k) { var p = S.game.people[k]; return p ? p.name : "?"; };
+    res.forEach(function (r) {
+      var n = nm(r.who), mark = cand.length;
+      if (r.p != null && avg != null) { var e = Math.abs(r.p - avg); if (e <= 0.5) cand.push(t("tc_exact", { n: n })); else if (e >= 10) cand.push(t("tc_far", { n: n, d: Math.round(e) })); }
+      if (r.e != null && price) { var q = r.e / price; if (Math.abs(r.e - price) / price <= 0.05) cand.push(t("tc_priceok", { n: n })); else if (q <= 0.55) cand.push(t("tc_cheap", { n: n, g: r.e, p: price })); else if (q >= 1.8) cand.push(t("tc_pricey", { n: n, g: r.e })); }
+      if (r.badges.indexOf("fuori") > -1) cand.push(t("tc_fuori", { n: n }));
+      if (r.badges.indexOf("sintonia") > -1) cand.push(t("tc_sintonia", { n: n }));
+      if (r.fan && r.fan === r.who) cand.push(t((gw.fanTop || []).indexOf(r.who) > -1 ? "tc_selfok" : "tc_selfko", { n: n }));
+      if (r.vote != null && avg != null) { if (r.vote - avg >= 8) cand.push(t("tc_love", { n: n, v: r.vote })); else if (avg - r.vote >= 8) cand.push(t("tc_hate", { n: n, v: r.vote })); }
+      if ((r.pts.aroma || 0) >= 9) cand.push(t("tc_aroma", { n: n }));
+      if (topW && r.wd && r.wd !== topW.k && wN[r.wd] === 1) cand.push(t("tc_odd", { n: n, w: t("pw_" + topW.k), w2: t("pw_" + r.wd) }));
+      /* una sola frase a testa: si sceglie a caso (ma uguale per tutti) tra le sue */
+      var mine = cand.splice(mark); if (mine.length) cand.push(mine[hashN(wid + r.who) % mine.length]);
+    });
+    var pos = res.filter(function (r) { return r.x != null; });
+    for (var i = 0; i < pos.length && !twin; i++) for (var j = i + 1; j < pos.length; j++) { if (Math.hypot(pos[i].x - pos[j].x, pos[i].y - pos[j].y) < 0.8) { var twin = t("tc_twins", { a: nm(pos[i].who), b: nm(pos[j].who) }); break; } }
+    if (twin) cand.push(twin);
+    /* l'ordine cambia da vino a vino, ma resta lo stesso per tutti */
+    var k = cand.length ? hashN(wid) % cand.length : 0;
+    cand = cand.slice(k).concat(cand.slice(0, k));
+    return out.concat(cand.slice(0, 4));
   }
 
   /* la scommessa della serata: prima della chiusura si sceglie il vincitore, dopo si vede chi aveva indovinato */
@@ -1275,6 +1459,10 @@
     if (k === "e") d.e = el.value;
   });
   app.addEventListener("change", function (e) {
+    var el = e.target; if (!el.getAttribute || el.getAttribute("data-g") !== "dt") return;
+    duelAct("game.duel.taunt", { id: el.getAttribute("data-id"), taunt: el.value }, el.getAttribute("data-fk"), null);
+  });
+  app.addEventListener("change", function (e) {
     var el = e.target; if (!el.getAttribute || el.getAttribute("data-g") !== "f") return;
     var wid = el.getAttribute("data-w"), to = el.getAttribute("data-to"), r = (S.game.wines[wid].results || []).filter(function (x) { return x.who === to; })[0];
     var cur = r ? (r.reactions.filter(function (x) { return x.from === mePk(); })[0] || {}) : {};
@@ -1308,6 +1496,19 @@
     var act = b.getAttribute("data-act"), id = b.getAttribute("data-id");
     if (act === "g-play") return gamePlay(id);
     if (act === "g-fav") return gameFav(id);
+    if (act === "du-new") { S.dform = { to: "", wine: "", stake: "", err: "" }; focusAfter("du-go"); return render(); }
+    if (act === "du-cancelform") { S.dform = null; focusAfter("du-new"); return render(); }
+    if (act === "du-to" || act === "du-wine" || act === "du-stake") { var key = act.slice(3); S.dform[key] = S.dform[key] === b.getAttribute("data-k") ? "" : b.getAttribute("data-k"); S.dform.err = ""; focusAfter(b.getAttribute("data-fk")); return render(); }
+    if (act === "du-go") {
+      var df = S.dform; if (!df.to || !df.wine || !df.stake) { df.err = t("du_pickAll"); return render(); }
+      return duelAct("game.duel", { wine: df.wine, to: df.to, stake: df.stake }, "du-new", t("du_sent")).then(function () { if (S.dform && !S.dform.err) { S.dform = null; render(); } });
+    }
+    if (act === "du-accept" || act === "du-decline") return duelAct("game.duel.answer", { id: id, accept: act === "du-accept" }, null, null);
+    if (act === "du-cancel") return duelAct("game.duel.cancel", { id: id }, "du-new", null);
+    if (act === "du-rematch") {
+      var od = (S.game.duels || []).filter(function (x) { return x.id === id; })[0], meK = mePk();
+      S.dform = { to: od ? (od.from === meK ? od.to : od.from) : "", wine: "", stake: od ? od.stake : "", err: "" }; focusAfter("du-go"); return render();
+    }
     if (act === "g-aroma" || act === "g-word" || act === "g-fan") {
       var dw = b.getAttribute("data-w"), k = b.getAttribute("data-k"), dd = draftOf(dw);
       if (act === "g-aroma") { var ix = dd.a.indexOf(k); if (ix > -1) dd.a.splice(ix, 1); else if (dd.a.length < 3) dd.a.push(k); }

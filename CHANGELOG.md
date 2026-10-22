@@ -3,6 +3,15 @@
 La versione e la data dell'ultimo aggiornamento sono mostrate in fondo all'app e dello spazio di team
 (fonte: `public/js/version.js`, da tenere uguale a `package.json`).
 
+## 2.15.0 — 22 ottobre 2026
+- **Il gioco ripensato: la plancia della serata.** In cima a ogni serata c'è tutto il gioco in un posto: la sfida del mese, i duelli, la scommessa e, a fine serata, la pagella.
+- **⚔️ Duelli uno contro uno.** Sfidi un collega su un vino e scegli la posta: chi perde porta il vino la prossima volta, versa a tutti, offre il caffè, fa un brindisi in rima… (mai soldi). L'altro accetta o rifiuta (e si becca il 🐔: dopo due rifiuti diventa «Il fifone»). Allo svelamento vince chi ha fatto più punti di gioco su quel vino: +5 punti e una frase per gongolare («Torna al succo di frutta 🧃»). C'è anche la rivincita.
+- **🗓️ La sfida del mese.** Ogni mese un tema (il mese del naso, del portafoglio, del pronostico, del campo, del cuore, dei duelli) che fa valere doppio un gioco nella classifica del mese; i giorni che mancano e la tua posizione sono in cima alla serata. Chi vince entra nell'**albo d'oro** e prende il traguardo «Campione del mese».
+- **🎙️ La telecronaca** allo svelamento: frasi che raccontano il vino prendendo in giro i risultati («gli ha dato 70: spietato come un critico francese 🥖», «pensava costasse 8 €, ne costa 40: abituato al vino in brick? 🧃»), una a testa; e il **podio del vino** con le medaglie 🥇🥈🥉.
+- **📋 La pagella della serata** a serata chiusa: MVP, maglia nera 🐌, il più generoso, lo spietato, il re dei duelli.
+- **Più prese in giro**: 20 frecciatine invece di 10, due emoji nuove (🐌 👑), soprannomi «Il fifone» e «Il pistolero», due traguardi nuovi (Duellante, Campione del mese). «Come si gioca» ha tredici schede.
+- Widget «Podio e premi»: anche chi è in testa alla sfida del mese e il premio Pistolero.
+
 ## 2.14.0 — 21 ottobre 2026
 - **Sei giochi per ogni vino**, non solo il campo. Si fanno quelli che si vogliono, con la barra «3 giochi su 6»:
   - 🗺️ **Il campo**, 🎯 **Il pronostico**, 💶 **Quanto costa?** (come prima);

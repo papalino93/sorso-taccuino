@@ -65,7 +65,7 @@ const SHOTS = process.env.SHOTS || "";
   ok(await B.frame.locator(".game").first().locator(".g-aromi .g-chip").count() === 16 && await B.frame.locator(".game").first().locator(".g-parole .g-chip").count() === 12 && await B.frame.locator(".game").first().locator(".g-fans .g-chip").count() === 3, "2.14: caccia agli aromi, il vino in una parola e il fan numero uno");
   ok(await B.frame.locator(".g-novita").count() === 1, "2.14: l'avviso delle novità");
   { const hb = B.frame.locator(".g-novita [data-act=g-help]"); await hb.scrollIntoViewIfNeeded(); await B.page.evaluate(() => scrollBy(0, -200)); await hb.click(); await B.page.waitForTimeout(300); }
-  ok(await B.frame.locator(".g-hcard").count() === 10, "2.14: «Come si gioca» con dieci schede");
+  ok(await B.frame.locator(".g-hcard").count() === 13, "2.15: «Come si gioca» con tredici schede");
   { const hb = B.frame.locator(".g-help [data-act=g-help]"); await hb.scrollIntoViewIfNeeded(); await B.page.evaluate(() => scrollBy(0, -200)); await hb.click(); await B.page.waitForTimeout(300); }
   await field.scrollIntoViewIfNeeded(); await B.page.waitForTimeout(150);
   const box = await field.boundingBox();
@@ -129,10 +129,10 @@ const SHOTS = process.env.SHOTS || "";
   await B.frame.locator('[data-act="tab"][data-tab="ranking"]').click();
   await B.frame.locator(".g-board .g-boardlist").waitFor({ timeout: 8000 }).then(() => ok(true, "nella Classifica c'è la classifica del gioco"), () => ok(false, "niente classifica del gioco"));
   ok(await B.frame.locator(".g-boardlist li").count() === 3, "con tutti e tre");
-  ok(await B.frame.locator(".g-career .g-prog").count() === 1 && await B.frame.locator(".g-ach li").count() === 10, "2.13: la mia carriera con il livello e i dieci traguardi");
+  ok(await B.frame.locator(".g-career .g-prog").count() === 1 && await B.frame.locator(".g-ach li").count() === 12, "la mia carriera con il livello e i dodici traguardi");
   ok(await B.frame.locator(".g-ach li.on").count() >= 1, "almeno «Primo sorso» sbloccato");
-  await B.frame.locator('[data-act="g-bmode"][data-v="month"]').click(); await B.page.waitForTimeout(300);
-  ok(await B.frame.locator('[data-act="g-bmode"][data-v="month"][aria-pressed="true"]').count() === 1, "si passa alla classifica del mese");
+  await B.frame.locator('[data-act="g-bmode"][data-v="challenge"]').click(); await B.page.waitForTimeout(300);
+  ok(await B.frame.locator('[data-act="g-bmode"][data-v="challenge"][aria-pressed="true"]').count() === 1, "si passa alla sfida del mese");
   if (SHOTS) await B.frame.locator(".g-board").screenshot({ path: SHOTS + "/gioco-classifica.png" });
 
   /* --- tema scuro: il campo si legge --- */
