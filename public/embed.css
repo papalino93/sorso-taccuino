@@ -389,3 +389,53 @@ button.g-chip:hover { border-color: var(--accent); }
 .g-novita { display: flex; gap: 12px; align-items: flex-start; border-color: var(--accent); background: color-mix(in srgb, var(--accent) 8%, var(--card, var(--bg))); }
 .g-nvico { font-size: 28px; line-height: 1; }
 .g-novita p { margin: 4px 0 8px; }
+/* 2.15: la plancia della serata, duelli, sfida del mese, pagella, telecronaca */
+.g-plancia { margin: 4px 0 16px; }
+.g-pltitle { margin: 6px 0 10px; }
+.g-plgrid { display: grid; gap: 12px; }
+@media (min-width: 720px) { .g-plgrid { grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr); align-items: start; } }
+.g-plgrid .card { margin: 0; }
+.g-mhead { display: flex; gap: 12px; align-items: flex-start; }
+.g-mhead > span:last-child { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.g-mhead b { font-size: 18px; font-weight: 800; letter-spacing: -.01em; }
+.g-mico { flex: none; width: 52px; height: 52px; border-radius: 16px; display: inline-flex; align-items: center; justify-content: center; font-size: 28px; background: color-mix(in srgb, var(--accent) 16%, var(--surface)); }
+.g-mhead-b { margin: 2px 0 12px; padding: 12px; border-radius: var(--r-md, 12px); background: var(--surface); border: 1px solid var(--line); }
+.g-mline { margin: 10px 0 2px; display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.g-incoming { display: flex; gap: 12px; align-items: flex-start; border: 2px solid var(--accent); background: color-mix(in srgb, var(--accent) 10%, var(--card, var(--bg))); margin-bottom: 12px; animation: g-shake .6s ease-in-out 1; }
+.g-incoming b { font-size: 16px; }
+.g-incoming p { margin: 4px 0 8px; }
+.g-inico { font-size: 30px; line-height: 1; }
+@keyframes g-shake { 0%, 100% { transform: none; } 20% { transform: rotate(-1.2deg); } 40% { transform: rotate(1.2deg); } 60% { transform: rotate(-.8deg); } 80% { transform: rotate(.8deg); } }
+@media (prefers-reduced-motion: reduce) { .g-incoming { animation: none; } }
+.g-duels h4.grp { margin-top: 0; }
+.g-duellist { list-style: none; margin: 8px 0; padding: 0; display: grid; gap: 8px; }
+.g-duel { border: 1px solid var(--line); border-radius: var(--r-md, 12px); background: var(--surface); padding: 10px 12px; display: grid; gap: 6px; }
+.g-duel.won { border-color: var(--ok); box-shadow: inset 0 0 0 1px var(--ok); }
+.g-duel.declined, .g-duel.expired { opacity: .75; }
+.g-dvs { display: flex; align-items: center; gap: 6px; min-width: 0; }
+.g-dvs .face { width: 34px; height: 34px; font-size: 12px; }
+.g-dvs .face.win { box-shadow: 0 0 0 3px var(--ok); }
+.g-dx { font-size: 16px; }
+.g-dtxt { display: flex; flex-direction: column; min-width: 0; margin-left: 4px; }
+.g-dtxt b { font-weight: 750; overflow-wrap: anywhere; }
+.g-dpill { justify-self: start; font-size: 12px; padding: 3px 10px; }
+.g-duel.done .g-dpill { background: color-mix(in srgb, var(--ok) 16%, var(--surface)); color: var(--ink); font-weight: 750; }
+.g-taunt { margin: 0; font-size: 13.5px; padding: 8px 10px; border-radius: 10px; background: color-mix(in srgb, var(--warn) 12%, var(--surface)); }
+.g-tauntsel { min-height: 40px; }
+.g-dform { border-top: 1px solid var(--line); margin-top: 10px; padding-top: 6px; }
+.g-dform .f { margin-top: 10px; }
+.g-pagella h4.grp { margin-top: 0; }
+.g-pglist { list-style: none; margin: 8px 0 0; padding: 0; display: grid; gap: 8px; grid-template-columns: repeat(auto-fill, minmax(min(100%, 200px), 1fr)); }
+.g-pglist li { display: flex; gap: 8px; align-items: center; padding: 10px 12px; border-radius: var(--r-md, 12px); border: 1px solid var(--line); background: var(--surface); }
+.g-pglist li > span:last-child { display: flex; flex-direction: column; min-width: 0; }
+.g-pglist b { font-weight: 750; overflow-wrap: anywhere; }
+.g-pgico { font-size: 22px; }
+.g-pglist .pg-mvp { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
+.g-pglist .pg-nera { background: color-mix(in srgb, var(--muted) 10%, var(--surface)); }
+.g-tc { margin: 10px 0; padding: 10px 12px; border-radius: var(--r-md, 12px); border-left: 4px solid var(--accent); background: color-mix(in srgb, var(--accent) 7%, var(--surface)); }
+.g-tc ul { margin: 4px 0 0; padding-left: 18px; display: grid; gap: 4px; }
+.g-tc li { font-size: 14px; line-height: 1.45; }
+.g-pos.medal { font-size: 20px; }
+.g-hall { list-style: none; margin: 6px 0 0; padding: 0; display: grid; gap: 6px; }
+.g-hall li { display: flex; flex-wrap: wrap; gap: 4px 12px; align-items: baseline; padding: 8px 12px; border-radius: 10px; background: var(--surface); border: 1px solid var(--line); }
+.g-hmo { text-transform: capitalize; }

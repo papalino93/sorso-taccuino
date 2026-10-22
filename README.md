@@ -1,6 +1,6 @@
 # Taste — Taccuino di degustazione
 
-Versione corrente: **2.14.0** — ultimo aggiornamento: 21 ottobre 2026 (cronologia in `CHANGELOG.md`). Fino alla 2.10 si chiamava **Sorso**: indirizzo, repository, chiavi dei dati salvati, intestazioni `X-Sorso-*` e messaggi `sorso:*` restano con il vecchio nome, così niente si rompe. La versione e la data si leggono anche in fondo all'app e dello spazio di team.
+Versione corrente: **2.15.0** — ultimo aggiornamento: 22 ottobre 2026 (cronologia in `CHANGELOG.md`). Fino alla 2.10 si chiamava **Sorso**: indirizzo, repository, chiavi dei dati salvati, intestazioni `X-Sorso-*` e messaggi `sorso:*` restano con il vecchio nome, così niente si rompe. La versione e la data si leggono anche in fondo all'app e dello spazio di team.
 
 App per registrare degustazioni di vino con scheda di valutazione, statistiche personali, degustazioni alla cieca ed eventi condivisi.
 
@@ -72,6 +72,8 @@ Interruttore per cerchia (`game.set`, solo Proprietario e amministratori; `circl
 Dalla 2.13.0: **scommessa della serata** (`game.fav`, `gf:<serata>`: chi indovina il vino con la media più alta prende 10 punti; scelte segrete fino alla chiusura), **classifica del mese** accanto a quella della stagione, **livelli** (Apprendista 0, Assaggiatore 40, Cantiniere 100, Sommelier 200, Maestro 350, Leggenda 600 punti), **dieci traguardi** (Primo sorso, Cecchino, Occhio al portafoglio, In serie, Fiuto del vincitore, Tris, Diapason, Voce fuori dal coro, Veterano, Re della cerchia), **serie** di pronostici centrati (entro 2 punti), **nemesi** (il palato più lontano, almeno 6 punti in media su 2 vini comuni) e coriandoli quando sei primo su un vino svelato.
 
 Dalla 2.14.0 ogni vino ha sei giochi (tutti facoltativi, nelle stesse mosse di `game.play`): campo, pronostico, prezzo, **caccia agli aromi** (`a`, fino a 3 chiavi da `AROMI`: 3 punti per aroma tra i primi tre del gruppo scelti da almeno due), **il vino in una parola** (`wd` da `PAROLE`: 5 punti se è la più scelta, da almeno due) e **il fan numero uno** (`fan`, l'impronta di un membro: 5 punti se ha dato il voto più alto). Nella serata: «❓ Come si gioca» con una scheda per gioco e l'avviso delle novità (si chiude una volta, `localStorage`). Il widget «La sfida» mostra anche il naso e la parola del gruppo.
+
+Dalla 2.15.0: **duelli** (`game.duel`, `game.duel.answer`, `game.duel.cancel`, `game.duel.taunt`; `gd:<serata>`): uno sfida un altro membro su un vino non ancora svelato con una posta presa da `STAKES` (penitenze bonarie, mai soldi), al massimo 3 duelli lanciati a testa per serata e uno per coppia e vino; chi fa più punti di gioco su quel vino vince e prende +5, poi può gongolare con una frase; rifiutare due volte vale il soprannome «Il fifone». **Sfida del mese**: un tema a rotazione (`THEMES`: naso, portafoglio, pronostico, campo, cuore, duelli) raddoppia i punti di un gioco nella classifica del mese; i primi dei mesi passati vanno nell'albo d'oro e prendono il traguardo «Campione del mese». A serata chiusa `game.state` restituisce la **pagella** (MVP, maglia nera, il più generoso, lo spietato, re dei duelli); la **telecronaca** dello svelamento la scrive l'interfaccia dai risultati, una frase a testa.
 
 ## Widget per i siti
 

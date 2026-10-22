@@ -24,15 +24,24 @@ const Scoring = require("../public/js/scoring.js");
    Chi gioca si riconosce da un'impronta per cerchia (mai l'account Google). */
 
 const PID = Circles.CIRCLE_PARTNER.id;
-const K = { gp: (t, w) => "gp:" + t + ":" + w, gx: (t, w) => "gx:" + t + ":" + w, gw: t => "gw:" + t, gb: c => "gb:" + c, gq: c => "gq:" + c, gf: t => "gf:" + t };
+const K = { gp: (t, w) => "gp:" + t + ":" + w, gx: (t, w) => "gx:" + t + ":" + w, gw: t => "gw:" + t, gb: c => "gb:" + c, gq: c => "gq:" + c, gf: t => "gf:" + t, gd: t => "gd:" + t };
 const AXES = [["corpo", "acidita"], ["tannino", "morbidezza"], ["frutto", "legno"], ["intensita", "persistenza"], ["dolcezza", "freschezza"]];
-const EMOJI = ["🍷", "😂", "🙈", "🧐", "🔥"];
+const EMOJI = ["🍷", "😂", "🙈", "🧐", "🔥", "🐌", "👑"];
 /* caccia agli aromi (fino a 3) e il vino in una parola: le chiavi; i testi e le icone sono nell'interfaccia */
 const AROMI = ["rossi", "neri", "agrumi", "mela", "pesca", "tropicale", "fiori", "erbe", "spezie", "vaniglia", "tostato", "miele", "burro", "minerale", "cuoio", "terra"];
 const PAROLE = ["elegante", "potente", "allegro", "timido", "ruffiano", "austero", "seducente", "rustico", "fresco", "morbido", "spigoloso", "meditazione"];
-const PHRASES = 10;                      // f1…f10: i testi sono nell'interfaccia (italiano e inglese)
+const PHRASES = 20;                      // f1…f20: i testi sono nell'interfaccia (italiano e inglese)
+/* duelli: la posta (una penitenza bonaria) e le frasi per gongolare; i testi sono nell'interfaccia */
+const STAKES = ["vino", "versa", "caffe", "recensione", "brindisi", "peggiore", "cantina", "sommelier"];
+const TAUNTS = 8;
+const DUEL_BONUS = 5, MAX_DUELS = 3;
+/* la sfida del mese: un tema a rotazione che raddoppia i punti di un gioco nella classifica del mese */
+const THEMES = [{ k: "naso", mult: { aroma: 2 } }, { k: "portafoglio", mult: { price: 2 } }, { k: "pronostico", mult: { pron: 2 } }, { k: "campo", mult: { field: 2 } }, { k: "cuore", mult: { word: 2, fan: 2 } }, { k: "duelli", mult: { duel: 2 } }];
+const monthKey = ms => { const d = new Date(ms); return d.getUTCFullYear() + "-" + String(d.getUTCMonth() + 1).padStart(2, "0"); };
+const themeOf = mk => { const [y, m] = mk.split("-").map(Number); return THEMES[(y * 12 + m - 1) % THEMES.length]; };
+const monthEnd = mk => { const [y, m] = mk.split("-").map(Number); return Date.UTC(y, m, 1); };
 const BOARD_TTL = 120, BOARD_TASTINGS = 30;
-const ACH = ["primo", "cecchino", "portafoglio", "serie3", "favorito", "tris", "diapason", "coro", "veterano", "re"];
+const ACH = ["primo", "cecchino", "portafoglio", "serie3", "favorito", "tris", "diapason", "coro", "veterano", "re", "duellante", "campione"];
 const ID_RE = /^[0-9a-f]{10}$/;
 
 const parse = s => { try { return typeof s === "string" ? JSON.parse(s) : (s && typeof s === "object" ? s : null); } catch (e) { return null; } };
@@ -120,7 +129,7 @@ async function state(redis, partner, ctx, body) {
   const ppl = await people(redis, ctx);
   const byUid = {}; Object.keys(ppl).forEach(k => { byUid[ppl[k].uid] = k; });
   const meta = Team.asObject(await redis.hgetall(K.gw(t.id)));
-  const out = { axes: AXES, emoji: EMOJI, phrases: PHRASES, aromi: AROMI, parole: PAROLE, people: {}, wines: {} };
+  const out = { axes: AXES, emoji: EMOJI, phrases: PHRASES, aromi: AROMI, parole: PAROLE, stakes: STAKES, taunts: TAUNTS, people: {}, wines: {} };
   Object.keys(ppl).forEach(k => { out.people[k] = { name: ppl[k].name, pic: ppl[k].pic, me: ppl[k].me }; });
   const members = Object.keys(ppl).length;
   for (let i = 0; i < wines.length; i++) {
@@ -164,7 +173,102 @@ async function state(redis, partner, ctx, body) {
     fav.results = Object.keys(picks).map(u => ({ who: byUid[u], wine: picks[u], ok: fav.winners.indexOf(picks[u]) > -1 }));
   }
   out.fav = fav;
+  /* i duelli della serata: li vedono tutti (è il bello); il risultato arriva quando il vino si svela */
+  const gd = Team.asObject(await redis.hgetall(K.gd(t.id)));
+  out.duels = Object.values(gd).map(parse).filter(d => d && byUid[d.from] && byUid[d.to] && out.wines[d.wine]).sort((a, b) => a.at - b.at).map(d => {
+    const w = out.wines[d.wine], o = { id: d.id, from: byUid[d.from], to: byUid[d.to], wine: d.wine, stake: d.stake, status: d.status, taunt: d.taunt || "" };
+    if (w.revealed && d.status === "pending") o.status = "expired";
+    if (w.revealed && d.status === "accepted") {
+      const pf = (w.results.find(r => r.who === o.from) || { pts: { total: 0 } }).pts.total, pt = (w.results.find(r => r.who === o.to) || { pts: { total: 0 } }).pts.total;
+      o.score = [pf, pt]; o.winner = pf === pt ? "" : (pf > pt ? o.from : o.to); o.status = "done";
+    }
+    return o;
+  });
+  /* la pagella della serata, a serata chiusa: MVP, maglia nera, il più generoso, lo spietato, il re dei duelli */
+  if (t.status === "closed") {
+    const tot = {}, votes = {}, played = {};
+    Object.values(out.wines).forEach(w => (w.results || []).forEach(r => {
+      tot[r.who] = (tot[r.who] || 0) + r.pts.total;
+      if (r.x != null || r.p != null || r.e != null || (r.a && r.a.length) || r.wd || r.fan) played[r.who] = (played[r.who] || 0) + 1;
+      if (r.vote != null) (votes[r.who] = votes[r.who] || []).push(r.vote);
+    }));
+    (fav.results || []).forEach(r => { if (r.ok) tot[r.who] = (tot[r.who] || 0) + 10; });
+    out.duels.forEach(d => { if (d.winner) tot[d.winner] = (tot[d.winner] || 0) + DUEL_BONUS; });
+    const players = Object.keys(played), pag = [];
+    const best = (list, fn, cmp) => { let k = null, v = null; list.forEach(x => { const y = fn(x); if (y != null && (v == null || cmp(y, v))) { v = y; k = x; } }); return k == null ? null : { who: k, v }; };
+    const mvp = best(players, k => tot[k] || 0, (a, b) => a > b);
+    if (mvp && mvp.v > 0) pag.push({ k: "mvp", who: mvp.who, v: mvp.v });
+    if (players.length >= 3) { const nera = best(players, k => tot[k] || 0, (a, b) => a < b); if (nera && (!mvp || nera.who !== mvp.who)) pag.push({ k: "nera", who: nera.who, v: nera.v }); }
+    const avgV = k => votes[k] && votes[k].length ? votes[k].reduce((a, b) => a + b, 0) / votes[k].length : null;
+    const vk = Object.keys(votes);
+    if (vk.length >= 3) {
+      const gen = best(vk, avgV, (a, b) => a > b), spi = best(vk, avgV, (a, b) => a < b);
+      if (gen && spi && gen.v - spi.v >= 2) { pag.push({ k: "generoso", who: gen.who, v: r1(gen.v) }); pag.push({ k: "spietato", who: spi.who, v: r1(spi.v) }); }
+    }
+    const dw = {}; out.duels.forEach(d => { if (d.winner) dw[d.winner] = (dw[d.winner] || 0) + 1; });
+    const duel = best(Object.keys(dw), k => dw[k], (a, b) => a > b);
+    if (duel) pag.push({ k: "duelli", who: duel.who, v: duel.v });
+    out.pagella = pag;
+  }
   return out;
+}
+
+/* ---- duelli: uno sfida un altro su un vino; chi fa più punti di gioco su quel vino vince (+5) ---- */
+async function duelCreate(redis, partner, ctx, body) {
+  requireGame(partner, ctx);
+  const { t, w } = await wineOf(redis, ctx, body.tasting, body.wine);
+  if (t.status !== "open" || w.closed) throw new HttpError(409, "closed", "Questo vino è chiuso: niente duelli.");
+  const m = parse(await redis.hget(K.gw(t.id), w.id)) || {};
+  if (await isRevealed(redis, ctx, t, w, m)) throw new HttpError(409, "revealed", "Questo vino è già svelato.");
+  const ppl = await people(redis, ctx), to = ppl[body.to];
+  if (!to || to.uid === ctx.uid) throw bad("invalid_target", "Scegli un avversario della cerchia.");
+  if (STAKES.indexOf(body.stake) < 0) throw bad("invalid_stake", "Scegli la posta.");
+  const all = Object.values(Team.asObject(await redis.hgetall(K.gd(t.id)))).map(parse).filter(Boolean).filter(d => d.status === "pending" || d.status === "accepted");
+  if (all.filter(d => d.from === ctx.uid).length >= MAX_DUELS) throw new HttpError(409, "too_many", "Hai già lanciato tre duelli in questa serata.");
+  if (all.some(d => d.wine === w.id && ((d.from === ctx.uid && d.to === to.uid) || (d.from === to.uid && d.to === ctx.uid)))) throw new HttpError(409, "duel_exists", "Tra voi due c'è già un duello su questo vino.");
+  const d = { id: crypto.randomBytes(5).toString("hex"), from: ctx.uid, to: to.uid, wine: w.id, stake: body.stake, status: "pending", at: Date.now() };
+  await redis.hset(K.gd(t.id), { [d.id]: JSON.stringify(d) });
+  return { ok: true, id: d.id };
+}
+async function duelGet(redis, ctx, body) {
+  const t = await Team.getTasting(redis, PID, body.tasting, ctx.team);
+  if (typeof body.id !== "string" || !ID_RE.test(body.id)) throw new HttpError(404, "not_found", "Duello non trovato.");
+  const d = parse(await redis.hget(K.gd(t.id), body.id));
+  if (!d) throw new HttpError(404, "not_found", "Duello non trovato.");
+  return { t, d };
+}
+async function duelAnswer(redis, partner, ctx, body) {
+  requireGame(partner, ctx);
+  const { t, d } = await duelGet(redis, ctx, body);
+  if (d.to !== ctx.uid) throw new HttpError(403, "forbidden", "Il duello non è rivolto a te.");
+  if (d.status !== "pending") throw new HttpError(409, "answered", "Hai già risposto.");
+  const st = await state(redis, partner, ctx, { tasting: t.id });
+  if (!st.wines[d.wine] || st.wines[d.wine].revealed) throw new HttpError(409, "revealed", "Il vino è già svelato.");
+  d.status = body.accept === true ? "accepted" : "declined";
+  await redis.hset(K.gd(t.id), { [d.id]: JSON.stringify(d) });
+  await redis.del(K.gb(ctx.team));
+  return { ok: true, status: d.status };
+}
+async function duelCancel(redis, partner, ctx, body) {
+  requireGame(partner, ctx);
+  const { t, d } = await duelGet(redis, ctx, body);
+  if (d.from !== ctx.uid) throw new HttpError(403, "forbidden", "Solo chi ha lanciato il duello può ritirarlo.");
+  if (d.status !== "pending") throw new HttpError(409, "answered", "Il duello è già stato accettato o rifiutato.");
+  await redis.hdel(K.gd(t.id), d.id);
+  return { ok: true };
+}
+/* chi vince può gongolare con una frase (una sola, si può cambiare) */
+async function duelTaunt(redis, partner, ctx, body) {
+  requireGame(partner, ctx);
+  const { t, d } = await duelGet(redis, ctx, body);
+  const st = await state(redis, partner, ctx, { tasting: t.id });
+  const o = st.duels.find(x => x.id === d.id), me = Object.keys(st.people).find(k => st.people[k].me);
+  if (!o || o.status !== "done" || o.winner !== me) throw new HttpError(403, "forbidden", "Gongola solo chi ha vinto il duello.");
+  const tk = body.taunt === "" || body.taunt == null ? "" : String(body.taunt);
+  if (tk && !new RegExp("^t([1-" + TAUNTS + "])$").test(tk)) throw bad("invalid_taunt", "Frase non valida.");
+  d.taunt = tk;
+  await redis.hset(K.gd(t.id), { [d.id]: JSON.stringify(d) });
+  return { ok: true };
 }
 
 async function pickFav(redis, partner, ctx, body) {
@@ -220,7 +324,7 @@ async function react(redis, partner, ctx, body) {
   const to = ppl[body.to];
   if (!to || to.uid === ctx.uid) throw bad("invalid_target", "Persona non valida.");
   const e = body.e === "" || body.e == null ? "" : (EMOJI.indexOf(body.e) > -1 ? body.e : null);
-  const f = body.f === "" || body.f == null ? "" : (/^f([1-9]|10)$/.test(String(body.f)) ? String(body.f) : null);
+  const f = body.f === "" || body.f == null ? "" : (/^f([1-9]|1[0-9]|20)$/.test(String(body.f)) ? String(body.f) : null);
   if (e === null || f === null) throw bad("invalid_reaction", "Reazione non valida.");
   const key = ctx.uid + "|" + to.uid;
   if (!e && !f) await redis.hdel(K.gx(body.tasting, body.wine), key);
@@ -262,29 +366,40 @@ async function board(redis, partner, ctx) {
   let base = cached;
   if (!base) {
     const tl = Object.values(Team.asObject(await redis.hgetall(Team.K.tl(PID, ctx.team)))).map(parse).filter(Boolean).sort((a, b) => b.createdAt - a.createdAt).slice(0, BOARD_TASTINGS);
-    const pts = {}, diffs = {}, votesBy = {}, wins = {}, month = {}, feats = {}, hist = {};
-    const m0 = new Date(); m0.setUTCDate(1); m0.setUTCHours(0, 0, 0, 0);
+    const pts = {}, diffs = {}, votesBy = {}, wins = {}, feats = {}, hist = {}, months = {}, duels = {};
     const feat = (k, f) => { (feats[k] = feats[k] || {})[f] = true; };
+    const P = k => (pts[k] = pts[k] || { total: 0, pron: 0, price: 0, field: 0, played: 0 });
+    const D = k => (duels[k] = duels[k] || { w: 0, l: 0, t: 0, dec: 0 });
     for (const t of tl.slice().reverse()) {
       const st = await state(redis, partner, Object.assign({}, ctx, { role: "member" }), { tasting: t.id });
-      const inMonth = t.createdAt >= m0.getTime();
+      /* la sfida del mese: i punti del mese, con il gioco del tema che vale doppio */
+      const mk = monthKey(t.createdAt), mult = themeOf(mk).mult, mm = months[mk] = months[mk] || {};
+      const addM = (k, n) => { mm[k] = (mm[k] || 0) + n; };
       /* la scommessa della serata: 10 punti a chi ha indovinato il vincitore */
       (st.fav && st.fav.results || []).forEach(r => {
         if (!r.ok) return;
-        const p = pts[r.who] = pts[r.who] || { total: 0, pron: 0, price: 0, field: 0, played: 0 };
-        p.total += 10; p.fav = (p.fav || 0) + 10; feat(r.who, "favorito");
-        if (inMonth) month[r.who] = (month[r.who] || 0) + 10;
+        const p = P(r.who); p.total += 10; p.fav = (p.fav || 0) + 10; feat(r.who, "favorito"); addM(r.who, 10);
+      });
+      /* i duelli: +5 a chi vince; si contano vittorie, sconfitte, pareggi e duelli rifiutati */
+      (st.duels || []).forEach(d => {
+        if (d.status === "declined") D(d.to).dec++;
+        if (d.status !== "done") return;
+        if (!d.winner) { D(d.from).t++; D(d.to).t++; return; }
+        const lo = d.winner === d.from ? d.to : d.from;
+        D(d.winner).w++; D(lo).l++;
+        const p = P(d.winner); p.total += DUEL_BONUS; p.duel = (p.duel || 0) + DUEL_BONUS; addM(d.winner, DUEL_BONUS * (mult.duel || 1));
+        if (D(d.winner).w >= 3) feat(d.winner, "duellante");
       });
       Object.keys(st.wines).forEach(wid => {
         const w = st.wines[wid];
         if (!w.revealed || !w.results) return;
         const vs = w.results.filter(r => r.vote != null);
         w.results.forEach(r => {
-          const p = pts[r.who] = pts[r.who] || { total: 0, pron: 0, price: 0, field: 0, played: 0 };
+          const p = P(r.who);
           p.total += r.pts.total; p.pron += r.pts.pron || 0; p.price += r.pts.price || 0; p.field += r.pts.field || 0; p.aroma = (p.aroma || 0) + (r.pts.aroma || 0); p.word = (p.word || 0) + (r.pts.word || 0); p.fan = (p.fan || 0) + (r.pts.fan || 0);
           const played = r.x != null || r.p != null || r.e != null || (r.a && r.a.length) || r.wd || r.fan;
           if (played) { p.played++; feat(r.who, "primo"); }
-          if (inMonth) month[r.who] = (month[r.who] || 0) + r.pts.total;
+          addM(r.who, ["pron", "price", "field", "aroma", "word", "fan"].reduce((a, k) => a + (r.pts[k] || 0) * (mult[k] || 1), 0));
           /* traguardi e serie: il pronostico «centrato» è entro 2 punti dalla media */
           if (r.p != null && w.avg != null) { const err = Math.abs(r.p - w.avg); (hist[r.who] = hist[r.who] || []).push(err <= 2); if (err <= 0.5) feat(r.who, "cecchino"); }
           if (r.e != null && w.price && Math.abs(r.e - w.price) / w.price <= 0.05) feat(r.who, "portafoglio");
@@ -300,7 +415,7 @@ async function board(redis, partner, ctx) {
     /* serie: quanti pronostici centrati di fila adesso, e il record */
     const streak = {};
     Object.keys(hist).forEach(k => { let cur = 0, best = 0, run = 0; hist[k].forEach(ok => { run = ok ? run + 1 : 0; if (run > best) best = run; }); for (let i = hist[k].length - 1; i >= 0 && hist[k][i]; i--) cur++; streak[k] = { cur, best }; if (best >= 3) feat(k, "serie3"); });
-    base = { pts, diffs, votesBy, wins, month, feats, streak };
+    base = { pts, diffs, votesBy, wins, feats, streak, months, duels };
     await redis.set(K.gb(ctx.team), JSON.stringify(base), { ex: BOARD_TTL });
   }
   /* soprannomi: dal palato (scarti dalla media del gruppo) e dai cartellini vinti */
@@ -314,6 +429,17 @@ async function board(redis, partner, ctx) {
     if (abs >= 6) (nick[k] = nick[k] || []).push("bastian");
   });
   Object.keys(base.wins || {}).forEach(k => { const w = base.wins[k]; if ((w.prezzo || 0) + (w.pronostico || 0) >= 2) (nick[k] = nick[k] || []).push("naso"); });
+  Object.keys(base.duels || {}).forEach(k => { if (base.duels[k].dec >= 2) (nick[k] = nick[k] || []).push("fifone"); if (base.duels[k].w >= 3 && base.duels[k].w > base.duels[k].l) (nick[k] = nick[k] || []).push("pistolero"); });
+  /* la sfida del mese e l'albo d'oro dei mesi passati */
+  const cur = monthKey(Date.now()), months = base.months || {};
+  const challenge = { month: cur, theme: themeOf(cur).k, endsAt: monthEnd(cur), rows: Object.keys(months[cur] || {}).filter(k => ppl[k] && months[cur][k] > 0).map(k => ({ who: k, pts: months[cur][k] })).sort((a, b) => b.pts - a.pts) };
+  const hall = Object.keys(months).filter(mk => mk < cur).sort().reverse().map(mk => {
+    const mm = months[mk], ks = Object.keys(mm).filter(k => ppl[k] && mm[k] > 0);
+    if (!ks.length) return null;
+    const top = Math.max(...ks.map(k => mm[k]));
+    return { month: mk, theme: themeOf(mk).k, winners: ks.filter(k => mm[k] === top), pts: top };
+  }).filter(Boolean).slice(0, 12);
+  const champs = new Set([].concat(...hall.map(h => h.winners)));
   /* il gemello: chi ha votato più vicino a te, su almeno due vini in comune */
   const twins = {};
   const keys = Object.keys(base.votesBy);
@@ -342,8 +468,9 @@ async function board(redis, partner, ctx) {
     if (far && fd >= 6) rivals[a] = far;
   });
   const rows = Object.keys(ppl).map(k => ({ who: k, name: ppl[k].name, pic: ppl[k].pic, me: ppl[k].me, pts: base.pts[k] || { total: 0, pron: 0, price: 0, field: 0, played: 0 }, nick: nick[k] || [], wins: (base.wins || {})[k] || {}, twin: twins[k] && ppl[twins[k]] ? ppl[twins[k]].name : "",
-    rival: rivals[k] && ppl[rivals[k]] ? ppl[rivals[k]].name : "", month: (base.month || {})[k] || 0, streak: (base.streak || {})[k] || { cur: 0, best: 0 },
-    feats: Object.keys((base.feats || {})[k] || {}) }))
+    rival: rivals[k] && ppl[rivals[k]] ? ppl[rivals[k]].name : "", month: (months[cur] || {})[k] || 0, streak: (base.streak || {})[k] || { cur: 0, best: 0 },
+    duels: (base.duels || {})[k] || { w: 0, l: 0, t: 0, dec: 0 }, titles: hall.filter(h => h.winners.indexOf(k) > -1).map(h => h.month),
+    feats: Object.keys((base.feats || {})[k] || {}).concat(champs.has(k) ? ["campione"] : []) }))
     .sort((a, b) => b.pts.total - a.pts.total || a.name.localeCompare(b.name, "it"));
   /* traguardi che dipendono da tutti: chi è in testa, chi ha giocato tanto, voce fuori dal coro e diapason */
   rows.forEach((r, i) => {
@@ -354,7 +481,7 @@ async function board(redis, partner, ctx) {
     if ((r.wins.sintonia || 0) >= 3) f.add("diapason");
     r.feats = ACH.filter(a => f.has(a));
   });
-  return { rows, ach: ACH };
+  return { rows, ach: ACH, challenge, hall, themes: THEMES.map(x => x.k) };
 }
 
 /* per i widget dei siti (api/widget.js): il gioco della cerchia in numeri, senza nomi; la classifica con i
@@ -426,8 +553,12 @@ async function widgetStats(redis, cid, names) {
     const award = (key, fn) => { let best = null; rows.forEach(r => { if (r.pts.played < 2) return; const v = fn(r); if (v > 0 && (!best || v > best.v)) best = { name: r.name, initials: initials(r.name), v }; }); return best ? { key, name: best.name, initials: best.initials, value: best.v } : null; };
     out.awards = [
       award("pron", r => r.pts.pron), award("price", r => r.pts.price), award("field", r => r.pts.field),
-      award("fuori", r => (r.wins || {}).fuori || 0), award("sintonia", r => (r.wins || {}).sintonia || 0), award("played", r => r.pts.played)
+      award("fuori", r => (r.wins || {}).fuori || 0), award("sintonia", r => (r.wins || {}).sintonia || 0), award("played", r => r.pts.played),
+      award("duel", r => (r.duels || {}).w || 0)
     ].filter(Boolean);
+    const lead = (b.challenge.rows || [])[0];
+    if (lead) { const r = b.rows.find(x => x.who === lead.who); if (r) out.awards.unshift({ key: "mese", name: r.name, initials: initials(r.name), value: lead.pts }); }
+    out.challenge = { theme: b.challenge.theme, month: b.challenge.month };
     const seen = new Set();
     out.twins = rows.filter(r => r.twin).map(r => [r.name, r.twin].sort()).filter(p => { const k = p.join("|"); if (seen.has(k)) return false; seen.add(k); return true; }).slice(0, 3);
   }
@@ -444,6 +575,9 @@ async function deleteUser(redis, cid, uid) {
   let n = 0;
   for (const t of tids) {
     n += Number(await redis.hdel(K.gf(t), uid)) || 0;
+    const gd = Team.asObject(await redis.hgetall(K.gd(t)));
+    const dk = Object.keys(gd).filter(k => { const d = parse(gd[k]); return d && (d.from === uid || d.to === uid); });
+    if (dk.length) await redis.hdel(K.gd(t), ...dk);
     const wids = Object.keys(Team.asObject(await redis.hgetall(Team.K.wn(PID, t))));
     for (const w of wids) {
       n += Number(await redis.hdel(K.gp(t, w), uid)) || 0;
@@ -456,7 +590,7 @@ async function deleteUser(redis, cid, uid) {
   return n;
 }
 
-const OPS = { "game.fav": pickFav, "game.state": state, "game.play": play, "game.react": react, "game.reveal": reveal, "game.price": setPrice, "game.board": board };
-const WRITES = new Set(["game.fav", "game.play", "game.react", "game.reveal", "game.price"]);
+const OPS = { "game.duel": duelCreate, "game.duel.answer": duelAnswer, "game.duel.cancel": duelCancel, "game.duel.taunt": duelTaunt, "game.fav": pickFav, "game.state": state, "game.play": play, "game.react": react, "game.reveal": reveal, "game.price": setPrice, "game.board": board };
+const WRITES = new Set(["game.duel", "game.duel.answer", "game.duel.cancel", "game.duel.taunt", "game.fav", "game.play", "game.react", "game.reveal", "game.price"]);
 
-module.exports = { OPS, WRITES, AXES, EMOJI, AROMI, PAROLE, K, score, pk, deleteUser, widgetStats };
+module.exports = { OPS, WRITES, AXES, EMOJI, AROMI, PAROLE, STAKES, THEMES, themeOf, monthKey, K, score, pk, deleteUser, widgetStats };

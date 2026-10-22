@@ -152,7 +152,7 @@ function build() {
 
   P.push(pg("ink", "I giochi", `
     ${eyebrow("12", "I giochi, uno per uno")}
-    <h1 class="d">Sei giochi per vino, <em>una scommessa</em></h1>
+    <h1 class="d">Sei giochi per vino, <em>duelli e sfide</em></h1>
     <p class="lead">Ognuno fa solo quelli che vuole; nella serata il pulsante <b>❓ Come si gioca</b> li spiega con un esempio.</p>
     ${table(["Gioco", "Cosa fai", "Punti"], [
       ["🗺️ <b>Il campo</b>", "Trascini la tua faccia su due assi che cambiano a ogni vino.", "Fino a 10, vicino al centro del gruppo"],
@@ -161,8 +161,10 @@ function build() {
       ["👃 <b>Caccia agli aromi</b>", "Scegli fino a 3 profumi su 16.", "3 per aroma tra i preferiti del gruppo"],
       ["💬 <b>Il vino in una parola</b>", "Elegante, ruffiano, spigoloso, da meditazione…", "5 se è la parola più scelta"],
       ["💘 <b>Il fan numero uno</b>", "Chi gli darà il voto più alto?", "5 se indovini"],
-      ["🔮 <b>La scommessa della serata</b>", "Chi vince la serata? Segreta fino alla chiusura.", "10 se indovini"]], [0, 1, 2])}
-    ${ul(["<b>Svelamento</b>: quando hanno votato tutti, si chiude il vino o con «Svela!». Poi tutti vedono tutto, con reazioni e frecciatine.", "<b>Classifica</b> della stagione e del mese, livelli da Apprendista a Leggenda, dieci traguardi, serie 🔥, gemello di palato e nemesi ⚔️."])}
+      ["🔮 <b>La scommessa della serata</b>", "Chi vince la serata? Segreta fino alla chiusura.", "10 se indovini"],
+      ["⚔️ <b>I duelli</b>", "Sfidi un collega su un vino, con una posta bonaria («chi perde porta il vino»).", "5 a chi fa più punti"],
+      ["🗓️ <b>La sfida del mese</b>", "Ogni mese un tema: il gioco del tema vale doppio.", "Il primo entra nell'albo d'oro"]], [0, 1, 2])}
+    ${ul(["<b>Svelamento</b>: quando hanno votato tutti, si chiude il vino o con «Svela!». Poi la <b>telecronaca</b> prende in giro i risultati e a serata chiusa arriva la <b>pagella</b> (MVP, maglia nera 🐌).", "<b>Classifica</b> della stagione e del mese, livelli da Apprendista a Leggenda, dieci traguardi, serie 🔥, gemello di palato e nemesi ⚔️."])}
   `));
 
   P.push(pg("paper", "Per cominciare", `
